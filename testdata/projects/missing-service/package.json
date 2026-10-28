@@ -1,0 +1,14 @@
+{
+  "name": "missing-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: the integration suite reads translations from the compose service minio, which the Run does not start (unknown family), and the unit suite only needs the Valkey service redis.",
+  "scripts": {
+    "test": "npm run test:integration && npm run test:unit",
+    "test:integration": "mocha --exit test/integration",
+    "test:unit": "mocha --exit test/unit"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

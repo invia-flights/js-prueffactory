@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/item.schema.json",
+  "type": "object",
+  "properties": {
+    "sku": { "type": "string" },
+    "quantity": { "type": "integer", "minimum": 1 }
+  }
+}

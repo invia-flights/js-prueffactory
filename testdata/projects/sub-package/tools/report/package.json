@@ -1,0 +1,10 @@
+{
+  "name": "report-tool",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nested package of the sub-package project: it tests itself with node:test and has no dependencies.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test 'test/*.test.js'"
+  }
+}

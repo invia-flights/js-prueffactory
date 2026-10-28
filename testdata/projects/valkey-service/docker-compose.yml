@@ -1,0 +1,14 @@
+services:
+  nodejs:
+    image: registry.example.invalid/team/valkey-service:${IMAGE_VERSION:-latest}
+    volumes:
+      - ./:/usr/src/app
+    ports:
+      - "80:80"
+    depends_on:
+      - redis
+
+  redis:
+    image: valkey/valkey:8.1-alpine
+    ports:
+      - "6379:6379"

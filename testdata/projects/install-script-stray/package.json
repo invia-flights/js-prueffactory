@@ -1,0 +1,9 @@
+{
+  "name": "install-script-stray",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: no dependencies, but its postinstall script leaves a package in node_modules that package.json does not declare, so npm ls reports it as extraneous.",
+  "scripts": {
+    "postinstall": "node scripts/stray.js"
+  }
+}

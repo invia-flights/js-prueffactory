@@ -1,0 +1,5 @@
+apiVersion: v2
+name: web
+description: A chart whose Deployment template renders an invalid Deployment with every values file
+version: 0.1.0
+appVersion: "1.0.0"

@@ -1,0 +1,7 @@
+{
+  "name": "security-patterns-html-comment",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a valid file with a regex literal that holds an HTML comment opener and a later ?? operator, which the semgrep engine in njsscan cannot parse, and a weak hash call after it.",
+  "main": "src/regex.js"
+}

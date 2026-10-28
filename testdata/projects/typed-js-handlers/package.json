@@ -1,0 +1,7 @@
+{
+  "name": "typed-js-handlers",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: promise chains that end in a rejection handler whose type is any or Function, next to chains that handle nothing. For lint.typed.",
+  "main": "src/handler.js"
+}

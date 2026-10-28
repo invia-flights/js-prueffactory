@@ -1,0 +1,12 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
+  "files": { "includes": ["**/*.js"] },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "suspicious": { "noConsole": "warn" }
+    }
+  },
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true, "defaultBranch": "main" }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "ci-files",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: CI, Kubernetes, compose and GitHub Actions files, some of them broken on purpose."
+}

@@ -1,0 +1,10 @@
+{
+  "name": "vulnerable-dependency",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: its lockfile pins one package version with a known advisory.",
+  "main": "src/index.js",
+  "dependencies": {
+    "minimist": "1.2.5"
+  }
+}

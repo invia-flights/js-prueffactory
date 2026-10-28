@@ -1,0 +1,27 @@
+# A large data file in Source code: it counts in the Source code class and in the
+# .yaml extension, but not in the JavaScript and TypeScript line indicator.
+regions:
+  north:
+    zone: n1
+    capacity: 10
+  south:
+    zone: s1
+    capacity: 20
+  east:
+    zone: e1
+    capacity: 30
+  west:
+    zone: w1
+    capacity: 40
+  centre:
+    zone: c1
+    capacity: 50
+  islands:
+    zone: i1
+    capacity: 60
+  alps:
+    zone: a1
+    capacity: 70
+  coast:
+    zone: k1
+    capacity: 80

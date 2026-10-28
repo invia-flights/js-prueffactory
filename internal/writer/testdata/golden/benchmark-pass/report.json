@@ -1,0 +1,2026 @@
+{
+  "format": "js-prueffactory.report",
+  "schema_version": "0.4.0",
+  "producer": {
+    "name": "js-prueffactory",
+    "version": "test",
+    "vcs_revision": null
+  },
+  "run": {
+    "id": "20261025T101500Z-demo-aaaa",
+    "command": "benchmark",
+    "started_at": "2026-10-25T10:15:00Z",
+    "finished_at": "2026-10-25T10:15:01Z",
+    "duration_ms": 1000,
+    "budget_seconds": 1800,
+    "budget_source": "default",
+    "status": "completed",
+    "registry_data_date": null,
+    "exit_code": 0,
+    "host": {
+      "os": "linux",
+      "arch": "amd64"
+    },
+    "docker": {
+      "server_version": "29.4.0",
+      "api_version": "1.56",
+      "cpus": 4,
+      "memory_bytes": 8589934592
+    }
+  },
+  "source": {
+    "original_path": "/work/demo",
+    "snapshot_algorithm": "sorted-path-sha256-v1",
+    "snapshot_hash": "abababababababababababababababababababababababababababababababab",
+    "file_count": 2,
+    "git": null,
+    "original_unchanged": true,
+    "changed_paths": [],
+    "excluded_paths": []
+  },
+  "profiles": {
+    "catalog_version": "1",
+    "execution_profile": "execution-v0",
+    "benchmark_profile": "benchmark-v1-uncalibrated",
+    "toolset_version": "abc"
+  },
+  "selection": {
+    "only": [],
+    "exclude": [],
+    "effective_checks": [
+      "api.lint",
+      "artifacts.structured",
+      "deps.engines",
+      "deps.tree",
+      "lint.correctness",
+      "lint.existing",
+      "modules.cycles",
+      "package.install",
+      "package.install-scripts",
+      "package.manifest",
+      "quality.clones",
+      "quality.metrics",
+      "quality.size",
+      "quality.suppressions",
+      "quality.unused",
+      "repository.compose",
+      "repository.dockerfile",
+      "repository.github-actions",
+      "repository.gitlab-ci",
+      "repository.helm",
+      "repository.kubernetes",
+      "repository.shell",
+      "runtime.unhandled-rejections",
+      "schema.compile",
+      "schema.drift",
+      "security.dependencies",
+      "security.integrity",
+      "security.licenses",
+      "security.patterns",
+      "security.secrets",
+      "syntax.parse",
+      "tests.existing",
+      "tests.flaky",
+      "tests.smells",
+      "types.javascript"
+    ],
+    "deselected_checks": [],
+    "prerequisites_run": [],
+    "is_standard_scope": true,
+    "fast": false
+  },
+  "contexts": [
+    {
+      "id": "C-0001",
+      "kind": "project",
+      "path": ".",
+      "node": null,
+      "npm_version": null,
+      "tools": [],
+      "limits": {
+        "cpus": 0,
+        "memory_mb": 0
+      }
+    },
+    {
+      "id": "C-0002",
+      "kind": "package",
+      "path": ".",
+      "node": {
+        "version": "24.1.0",
+        "source": "default",
+        "image": "node:24.1.0-bookworm-slim",
+        "image_digest": "sha256:abababababababababababababababababababababababababababababababab",
+        "variant": "debian",
+        "not_checked_versions": []
+      },
+      "npm_version": "11.1.0",
+      "tools": [
+        {
+          "name": "eslint-config",
+          "version": "abababababab",
+          "digest": "abababababababababababababababababababababababababababababababab"
+        },
+        {
+          "name": "osv-advisory-database",
+          "version": "2026-10-26T03:00:00Z",
+          "digest": null
+        },
+        {
+          "name": "prueffactory-security-rules",
+          "version": "cdcdcdcdcdcd",
+          "digest": "cdababababababababababababababababababababababababababababababab"
+        }
+      ],
+      "limits": {
+        "cpus": 0,
+        "memory_mb": 0
+      }
+    }
+  ],
+  "services": [],
+  "summary": {
+    "findings_by_severity": {
+      "error": 0,
+      "warning": 7,
+      "note": 0
+    },
+    "gates": 0,
+    "test_cases": {
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "todo": 0,
+      "never_run": 0
+    },
+    "scope_completeness": {
+      "required": 24,
+      "completed": 24,
+      "ratio": 1
+    },
+    "standard_completeness": {
+      "required": 24,
+      "completed": 24,
+      "ratio": 1
+    },
+    "network_isolation": "not_probed"
+  },
+  "benchmark": {
+    "status": "computed",
+    "profile_id": "benchmark-v1-uncalibrated",
+    "score": 80.6,
+    "range": {
+      "low": 80.6,
+      "high": 80.6
+    },
+    "verdict": "pass",
+    "areas": [
+      {
+        "id": "tests",
+        "weight": 40,
+        "exists": true,
+        "score": 87.5,
+        "range": {
+          "low": 87.5,
+          "high": 87.5
+        },
+        "fully_measured": true,
+        "contribution": 35,
+        "parts": [
+          {
+            "id": "pass_rate",
+            "label": "Pass rate",
+            "raw_value": 87.5,
+            "raw_unit": "percent",
+            "n_eff": null,
+            "x50": null,
+            "score": 87.5,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "tests.existing"
+            ]
+          },
+          {
+            "id": "smells",
+            "label": "Test smells",
+            "raw_value": 0,
+            "raw_unit": "hits",
+            "n_eff": 0,
+            "x50": 5,
+            "score": 100,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "tests.smells"
+            ]
+          },
+          {
+            "id": "flaky_tests",
+            "label": "Flaky tests",
+            "raw_value": 0,
+            "raw_unit": "tests",
+            "n_eff": null,
+            "x50": 3,
+            "score": 100,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "tests.flaky"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "validity",
+        "weight": 20,
+        "exists": true,
+        "score": 100,
+        "range": {
+          "low": 100,
+          "high": 100
+        },
+        "fully_measured": true,
+        "contribution": 20,
+        "parts": [
+          {
+            "id": "manifest",
+            "label": "Manifest",
+            "raw_value": 0,
+            "raw_unit": "problems",
+            "n_eff": null,
+            "x50": null,
+            "score": 100,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "package.manifest"
+            ]
+          },
+          {
+            "id": "install",
+            "label": "Install",
+            "raw_value": 0,
+            "raw_unit": "failures",
+            "n_eff": null,
+            "x50": null,
+            "score": 100,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "package.install"
+            ]
+          },
+          {
+            "id": "syntax",
+            "label": "Syntax",
+            "raw_value": 0,
+            "raw_unit": "files",
+            "n_eff": null,
+            "x50": 1,
+            "score": 100,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "syntax.parse"
+            ]
+          },
+          {
+            "id": "structured_files",
+            "label": "Structured files",
+            "raw_value": 0,
+            "raw_unit": "files",
+            "n_eff": null,
+            "x50": 1,
+            "score": 100,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "artifacts.structured"
+            ]
+          },
+          {
+            "id": "openapi",
+            "label": "OpenAPI",
+            "raw_value": null,
+            "raw_unit": "hits",
+            "n_eff": null,
+            "x50": 2,
+            "score": null,
+            "state": "not_applicable",
+            "reason": null,
+            "source_checks": [
+              "api.lint"
+            ]
+          },
+          {
+            "id": "json_schema",
+            "label": "JSON Schema",
+            "raw_value": null,
+            "raw_unit": "schemas",
+            "n_eff": null,
+            "x50": 2,
+            "score": null,
+            "state": "not_applicable",
+            "reason": null,
+            "source_checks": [
+              "schema.compile"
+            ]
+          },
+          {
+            "id": "helm",
+            "label": "Helm",
+            "raw_value": null,
+            "raw_unit": "charts",
+            "n_eff": null,
+            "x50": 1,
+            "score": null,
+            "state": "not_applicable",
+            "reason": null,
+            "source_checks": [
+              "repository.helm"
+            ]
+          },
+          {
+            "id": "gitlab_ci",
+            "label": "GitLab CI",
+            "raw_value": null,
+            "raw_unit": "problems",
+            "n_eff": null,
+            "x50": 1,
+            "score": null,
+            "state": "not_applicable",
+            "reason": null,
+            "source_checks": [
+              "repository.gitlab-ci"
+            ]
+          },
+          {
+            "id": "kubernetes",
+            "label": "Kubernetes",
+            "raw_value": null,
+            "raw_unit": "resources",
+            "n_eff": null,
+            "x50": 1,
+            "score": null,
+            "state": "not_applicable",
+            "reason": null,
+            "source_checks": [
+              "repository.kubernetes"
+            ]
+          },
+          {
+            "id": "compose",
+            "label": "Compose",
+            "raw_value": null,
+            "raw_unit": "sets",
+            "n_eff": null,
+            "x50": 1,
+            "score": null,
+            "state": "not_applicable",
+            "reason": null,
+            "source_checks": [
+              "repository.compose"
+            ]
+          },
+          {
+            "id": "github_actions",
+            "label": "GitHub Actions",
+            "raw_value": null,
+            "raw_unit": "hits",
+            "n_eff": null,
+            "x50": 3,
+            "score": null,
+            "state": "not_applicable",
+            "reason": null,
+            "source_checks": [
+              "repository.github-actions"
+            ]
+          },
+          {
+            "id": "schema_drift",
+            "label": "Schema drift",
+            "raw_value": null,
+            "raw_unit": "files",
+            "n_eff": null,
+            "x50": 2,
+            "score": null,
+            "state": "not_applicable",
+            "reason": null,
+            "source_checks": [
+              "schema.drift"
+            ]
+          },
+          {
+            "id": "dependency_tree",
+            "label": "Dependency tree",
+            "raw_value": 0,
+            "raw_unit": "hits",
+            "n_eff": 0,
+            "x50": 3,
+            "score": 100,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "deps.tree"
+            ]
+          },
+          {
+            "id": "dockerfile_shell",
+            "label": "Dockerfile and shell",
+            "raw_value": null,
+            "raw_unit": "hits",
+            "n_eff": null,
+            "x50": 3,
+            "score": null,
+            "state": "not_applicable",
+            "reason": null,
+            "source_checks": [
+              "repository.dockerfile",
+              "repository.shell"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "security",
+        "weight": 25,
+        "exists": true,
+        "score": 53.6,
+        "range": {
+          "low": 53.6,
+          "high": 53.6
+        },
+        "fully_measured": true,
+        "contribution": 13.4,
+        "parts": [
+          {
+            "id": "secrets",
+            "label": "Secrets",
+            "raw_value": 0,
+            "raw_unit": "secrets",
+            "n_eff": null,
+            "x50": null,
+            "score": 100,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "security.secrets"
+            ]
+          },
+          {
+            "id": "vulnerabilities",
+            "label": "Vulnerabilities",
+            "raw_value": 9,
+            "raw_unit": "weighted advisories",
+            "n_eff": null,
+            "x50": 10,
+            "score": 53.6,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "security.dependencies"
+            ]
+          },
+          {
+            "id": "lockfile_integrity",
+            "label": "Lockfile integrity",
+            "raw_value": 0,
+            "raw_unit": "hits",
+            "n_eff": 0,
+            "x50": 5,
+            "score": 100,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "security.integrity"
+            ]
+          },
+          {
+            "id": "code_patterns",
+            "label": "Code patterns",
+            "raw_value": 0,
+            "raw_unit": "hits",
+            "n_eff": 0,
+            "x50": 5,
+            "score": 100,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "security.patterns"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "code_correctness",
+        "weight": 15,
+        "exists": true,
+        "score": 81.2,
+        "range": {
+          "low": 81.2,
+          "high": 81.2
+        },
+        "fully_measured": true,
+        "contribution": 12.2,
+        "parts": [
+          {
+            "id": "correctness_lint",
+            "label": "Correctness lint",
+            "raw_value": 4,
+            "raw_unit": "hits",
+            "n_eff": 3,
+            "x50": 10,
+            "score": 81.2,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "lint.correctness"
+            ]
+          },
+          {
+            "id": "project_linter",
+            "label": "Project linter",
+            "raw_value": null,
+            "raw_unit": "hits",
+            "n_eff": null,
+            "x50": 5,
+            "score": null,
+            "state": "not_applicable",
+            "reason": null,
+            "source_checks": [
+              "lint.existing"
+            ]
+          },
+          {
+            "id": "node_compatibility",
+            "label": "Node compatibility",
+            "raw_value": 0,
+            "raw_unit": "hits",
+            "n_eff": 0,
+            "x50": 3,
+            "score": 100,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "deps.engines"
+            ]
+          },
+          {
+            "id": "suppressions",
+            "label": "Suppressions",
+            "raw_value": 0,
+            "raw_unit": "comments",
+            "n_eff": null,
+            "x50": 20,
+            "score": 100,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "quality.suppressions"
+            ]
+          },
+          {
+            "id": "unhandled_rejections",
+            "label": "Unhandled rejections",
+            "raw_value": 0,
+            "raw_unit": "tests",
+            "n_eff": null,
+            "x50": 2,
+            "score": 100,
+            "state": "measured",
+            "reason": null,
+            "source_checks": [
+              "runtime.unhandled-rejections"
+            ]
+          },
+          {
+            "id": "type_coverage",
+            "label": "Type coverage",
+            "raw_value": null,
+            "raw_unit": "percent",
+            "n_eff": null,
+            "x50": null,
+            "score": null,
+            "state": "not_applicable",
+            "reason": null,
+            "source_checks": [
+              "types.strictness"
+            ]
+          },
+          {
+            "id": "typed_lint",
+            "label": "Typed lint",
+            "raw_value": null,
+            "raw_unit": "hits",
+            "n_eff": null,
+            "x50": 5,
+            "score": null,
+            "state": "not_applicable",
+            "reason": null,
+            "source_checks": [
+              "lint.typed"
+            ]
+          }
+        ]
+      }
+    ],
+    "gate_finding_ids": [],
+    "side_indicators": [
+      {
+        "id": "coverage",
+        "label": "Coverage",
+        "value": null,
+        "unit": "",
+        "state": "unknown",
+        "reason": "not_available",
+        "source_checks": [
+          "tests.coverage"
+        ]
+      },
+      {
+        "id": "complexity",
+        "label": "Functions above complexity threshold",
+        "value": null,
+        "unit": "",
+        "state": "measured",
+        "reason": null,
+        "source_checks": [
+          "quality.metrics"
+        ]
+      },
+      {
+        "id": "duplication",
+        "label": "Duplicated code",
+        "value": null,
+        "unit": "",
+        "state": "measured",
+        "reason": null,
+        "source_checks": [
+          "quality.clones"
+        ]
+      },
+      {
+        "id": "import_cycles",
+        "label": "Import cycles",
+        "value": 0,
+        "unit": "cycles",
+        "state": "measured",
+        "reason": null,
+        "source_checks": [
+          "modules.cycles"
+        ]
+      },
+      {
+        "id": "unused_files",
+        "label": "Unused files",
+        "value": 0,
+        "unit": "files",
+        "state": "measured",
+        "reason": null,
+        "source_checks": [
+          "quality.unused"
+        ]
+      },
+      {
+        "id": "unused_exports",
+        "label": "Unused exports",
+        "value": 0,
+        "unit": "exports",
+        "state": "measured",
+        "reason": null,
+        "source_checks": [
+          "quality.unused"
+        ]
+      },
+      {
+        "id": "unused_dependencies",
+        "label": "Unused dependencies",
+        "value": 0,
+        "unit": "dependencies",
+        "state": "measured",
+        "reason": null,
+        "source_checks": [
+          "quality.unused"
+        ]
+      },
+      {
+        "id": "jsdoc_type_errors",
+        "label": "JSDoc type errors",
+        "value": 0,
+        "unit": "errors",
+        "state": "measured",
+        "reason": null,
+        "source_checks": [
+          "types.javascript"
+        ]
+      },
+      {
+        "id": "strict_gap_errors",
+        "label": "Errors that only strict mode reports",
+        "value": null,
+        "unit": "errors",
+        "state": "unknown",
+        "reason": "not_available",
+        "source_checks": [
+          "types.strictness"
+        ]
+      },
+      {
+        "id": "runtime_warnings",
+        "label": "Runtime warnings and open resources",
+        "value": null,
+        "unit": "findings",
+        "state": "unknown",
+        "reason": "not_available",
+        "source_checks": [
+          "runtime.warnings"
+        ]
+      },
+      {
+        "id": "unknown_licenses",
+        "label": "Packages without a license in the lockfile",
+        "value": 0,
+        "unit": "packages",
+        "state": "measured",
+        "reason": null,
+        "source_checks": [
+          "security.licenses"
+        ]
+      },
+      {
+        "id": "copyleft_licenses",
+        "label": "Packages with a copyleft license",
+        "value": 0,
+        "unit": "packages",
+        "state": "measured",
+        "reason": null,
+        "source_checks": [
+          "security.licenses"
+        ]
+      },
+      {
+        "id": "install_scripts",
+        "label": "Packages with install scripts",
+        "value": 0,
+        "unit": "packages",
+        "state": "measured",
+        "reason": null,
+        "source_checks": [
+          "package.install-scripts"
+        ]
+      },
+      {
+        "id": "source_code_lines",
+        "label": "Lines of JavaScript and TypeScript in Source code",
+        "value": 1200,
+        "unit": "lines",
+        "state": "measured",
+        "reason": null,
+        "source_checks": [
+          "quality.size"
+        ]
+      },
+      {
+        "id": "deprecated_prod",
+        "label": "Locked versions marked deprecated, production",
+        "value": null,
+        "unit": "versions",
+        "state": "unknown",
+        "reason": "not_available",
+        "source_checks": [
+          "deps.deprecated"
+        ]
+      },
+      {
+        "id": "deprecated_dev",
+        "label": "Locked versions marked deprecated, development",
+        "value": null,
+        "unit": "versions",
+        "state": "unknown",
+        "reason": "not_available",
+        "source_checks": [
+          "deps.deprecated"
+        ]
+      },
+      {
+        "id": "libyears_total",
+        "label": "Libyears of direct dependencies",
+        "value": null,
+        "unit": "years",
+        "state": "unknown",
+        "reason": "not_available",
+        "source_checks": [
+          "deps.outdated"
+        ]
+      },
+      {
+        "id": "majors_behind",
+        "label": "Direct dependencies a major version or more behind",
+        "value": null,
+        "unit": "dependencies",
+        "state": "unknown",
+        "reason": "not_available",
+        "source_checks": [
+          "deps.outdated"
+        ]
+      }
+    ],
+    "fingerprint": {
+      "hash": "469be09e3925",
+      "fields": {
+        "profile_id": "benchmark-v1-uncalibrated",
+        "catalog_version": "1",
+        "toolset_version": "abc",
+        "image_digests": [
+          "sha256:abababababababababababababababababababababababababababababababab"
+        ],
+        "eslint_config_hashes": [
+          "abababababababababababababababababababababababababababababababab"
+        ],
+        "security_rule_hashes": [
+          "cdababababababababababababababababababababababababababababababab"
+        ],
+        "advisory_database_date": "2026-10-26T03:00:00Z",
+        "typescript6_version": null,
+        "gitlab_ci_schema_hash": null,
+        "kubernetes_schema_version": null,
+        "typed_lint_rules_hash": null,
+        "runtimes": [
+          {
+            "node_version": "24.1.0",
+            "npm_version": "11.1.0"
+          }
+        ]
+      }
+    }
+  },
+  "checks": [
+    {
+      "id": "E-0001",
+      "check_id": "api.lint",
+      "family": "api",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "not_applicable",
+      "status": "not_started",
+      "outcome": "unknown",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0002",
+      "check_id": "artifacts.structured",
+      "family": "artifacts",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0003",
+      "check_id": "deps.engines",
+      "family": "deps",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0004",
+      "check_id": "deps.tree",
+      "family": "deps",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0005",
+      "check_id": "lint.correctness",
+      "family": "lint",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "observations_only",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [
+        "F-0001",
+        "F-0002",
+        "F-0003",
+        "F-0004"
+      ],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0006",
+      "check_id": "lint.existing",
+      "family": "lint",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "not_applicable",
+      "status": "not_started",
+      "outcome": "unknown",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0007",
+      "check_id": "modules.cycles",
+      "family": "modules",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0008",
+      "check_id": "package.install",
+      "family": "package",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0009",
+      "check_id": "package.install-scripts",
+      "family": "package",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0010",
+      "check_id": "package.manifest",
+      "family": "package",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0011",
+      "check_id": "quality.clones",
+      "family": "quality",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0012",
+      "check_id": "quality.metrics",
+      "family": "quality",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0013",
+      "check_id": "quality.size",
+      "family": "quality",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "observations_only",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0014",
+      "check_id": "quality.suppressions",
+      "family": "quality",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0015",
+      "check_id": "quality.unused",
+      "family": "quality",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0016",
+      "check_id": "repository.compose",
+      "family": "repository",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "not_applicable",
+      "status": "not_started",
+      "outcome": "unknown",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0017",
+      "check_id": "repository.dockerfile",
+      "family": "repository",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "not_applicable",
+      "status": "not_started",
+      "outcome": "unknown",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0018",
+      "check_id": "repository.github-actions",
+      "family": "repository",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "not_applicable",
+      "status": "not_started",
+      "outcome": "unknown",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0019",
+      "check_id": "repository.gitlab-ci",
+      "family": "repository",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "not_applicable",
+      "status": "not_started",
+      "outcome": "unknown",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0020",
+      "check_id": "repository.helm",
+      "family": "repository",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "not_applicable",
+      "status": "not_started",
+      "outcome": "unknown",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0021",
+      "check_id": "repository.kubernetes",
+      "family": "repository",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "not_applicable",
+      "status": "not_started",
+      "outcome": "unknown",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0022",
+      "check_id": "repository.shell",
+      "family": "repository",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "not_applicable",
+      "status": "not_started",
+      "outcome": "unknown",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0023",
+      "check_id": "runtime.unhandled-rejections",
+      "family": "runtime",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0024",
+      "check_id": "schema.compile",
+      "family": "schema",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "not_applicable",
+      "status": "not_started",
+      "outcome": "unknown",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0025",
+      "check_id": "schema.drift",
+      "family": "schema",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "not_applicable",
+      "status": "not_started",
+      "outcome": "unknown",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0026",
+      "check_id": "security.dependencies",
+      "family": "security",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "observations_only",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [
+        "F-0005",
+        "F-0006",
+        "F-0007"
+      ],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0027",
+      "check_id": "security.integrity",
+      "family": "security",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0028",
+      "check_id": "security.licenses",
+      "family": "security",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0029",
+      "check_id": "security.patterns",
+      "family": "security",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0030",
+      "check_id": "security.secrets",
+      "family": "security",
+      "context_id": "C-0001",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0031",
+      "check_id": "syntax.parse",
+      "family": "syntax",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0032",
+      "check_id": "tests.existing",
+      "family": "tests",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0033",
+      "check_id": "tests.flaky",
+      "family": "tests",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0034",
+      "check_id": "tests.smells",
+      "family": "tests",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0035",
+      "check_id": "types.javascript",
+      "family": "types",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    }
+  ],
+  "test_cases": [],
+  "findings": [
+    {
+      "id": "F-0001",
+      "check_id": "lint.correctness",
+      "execution_id": "E-0005",
+      "context_id": "C-0002",
+      "rule_id": "no-undef",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "e66bbef01f108f4e463c380ffbe2730097061315ea88b255b15d0175c4d00a1f"
+      },
+      "kind": "defect",
+      "severity": "warning",
+      "confidence": "likely",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "no-undef hit 4",
+      "message": "no-undef hit 4",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/a.js",
+          "start": {
+            "line": 4,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "benchmark",
+          "/work/demo",
+          "--only",
+          "lint.correctness"
+        ],
+        "test": null,
+        "verified_by": [
+          "lint.correctness"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0002",
+      "check_id": "lint.correctness",
+      "execution_id": "E-0005",
+      "context_id": "C-0002",
+      "rule_id": "no-undef",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "6159b54fd96478b0b3da030de03c095cda2788fad2138a1659200b7471d61dad"
+      },
+      "kind": "defect",
+      "severity": "warning",
+      "confidence": "likely",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "no-undef hit 5",
+      "message": "no-undef hit 5",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/a.js",
+          "start": {
+            "line": 5,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "benchmark",
+          "/work/demo",
+          "--only",
+          "lint.correctness"
+        ],
+        "test": null,
+        "verified_by": [
+          "lint.correctness"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0003",
+      "check_id": "lint.correctness",
+      "execution_id": "E-0005",
+      "context_id": "C-0002",
+      "rule_id": "no-undef",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "bdb25e5f2cf8aef2b778f17940d452c1e0ebfe3c2e41a34e62faf59c518517ea"
+      },
+      "kind": "defect",
+      "severity": "warning",
+      "confidence": "likely",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "no-undef hit 6",
+      "message": "no-undef hit 6",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/a.js",
+          "start": {
+            "line": 6,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "benchmark",
+          "/work/demo",
+          "--only",
+          "lint.correctness"
+        ],
+        "test": null,
+        "verified_by": [
+          "lint.correctness"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0004",
+      "check_id": "lint.correctness",
+      "execution_id": "E-0005",
+      "context_id": "C-0002",
+      "rule_id": "no-undef",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "948aec0bb1381becaa07093b12b055e5c1dac5c5f345b0aba2dee79ad68a32ad"
+      },
+      "kind": "defect",
+      "severity": "warning",
+      "confidence": "likely",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "no-undef hit 7",
+      "message": "no-undef hit 7",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/a.js",
+          "start": {
+            "line": 7,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "benchmark",
+          "/work/demo",
+          "--only",
+          "lint.correctness"
+        ],
+        "test": null,
+        "verified_by": [
+          "lint.correctness"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0005",
+      "check_id": "security.dependencies",
+      "execution_id": "E-0026",
+      "context_id": "C-0002",
+      "rule_id": "GHSA-high",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "05e96784333521614400005c1d5d55dd8116dcefd65e876f00ee843ed44c7eaf"
+      },
+      "kind": "defect",
+      "severity": "warning",
+      "confidence": "likely",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "GHSA-high hit 1",
+      "message": "GHSA-high hit 1",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/a.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [
+        {
+          "kind": "advisory_severity",
+          "text": "high",
+          "origin": "test",
+          "trust": "untrusted_data",
+          "original_size": null,
+          "artifact_id": null
+        },
+        {
+          "kind": "dependency_scope",
+          "text": "prod",
+          "origin": "test",
+          "trust": "untrusted_data",
+          "original_size": null,
+          "artifact_id": null
+        }
+      ],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "benchmark",
+          "/work/demo",
+          "--only",
+          "security.dependencies"
+        ],
+        "test": null,
+        "verified_by": [
+          "security.dependencies"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0006",
+      "check_id": "security.dependencies",
+      "execution_id": "E-0026",
+      "context_id": "C-0002",
+      "rule_id": "GHSA-mod-1",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "2806dd9be485b1a6eac205020548e607907b75bc300a3d6449581667bb10fe5b"
+      },
+      "kind": "defect",
+      "severity": "warning",
+      "confidence": "likely",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "GHSA-mod-1 hit 2",
+      "message": "GHSA-mod-1 hit 2",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/a.js",
+          "start": {
+            "line": 2,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [
+        {
+          "kind": "advisory_severity",
+          "text": "moderate",
+          "origin": "test",
+          "trust": "untrusted_data",
+          "original_size": null,
+          "artifact_id": null
+        },
+        {
+          "kind": "dependency_scope",
+          "text": "prod",
+          "origin": "test",
+          "trust": "untrusted_data",
+          "original_size": null,
+          "artifact_id": null
+        }
+      ],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "benchmark",
+          "/work/demo",
+          "--only",
+          "security.dependencies"
+        ],
+        "test": null,
+        "verified_by": [
+          "security.dependencies"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0007",
+      "check_id": "security.dependencies",
+      "execution_id": "E-0026",
+      "context_id": "C-0002",
+      "rule_id": "GHSA-mod-2",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "116815828e9ed607e002366a1d0fef828adbbd76ec69ecc08b81950689cf01f0"
+      },
+      "kind": "defect",
+      "severity": "warning",
+      "confidence": "likely",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "GHSA-mod-2 hit 3",
+      "message": "GHSA-mod-2 hit 3",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/a.js",
+          "start": {
+            "line": 3,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [
+        {
+          "kind": "advisory_severity",
+          "text": "moderate",
+          "origin": "test",
+          "trust": "untrusted_data",
+          "original_size": null,
+          "artifact_id": null
+        },
+        {
+          "kind": "dependency_scope",
+          "text": "prod",
+          "origin": "test",
+          "trust": "untrusted_data",
+          "original_size": null,
+          "artifact_id": null
+        }
+      ],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "benchmark",
+          "/work/demo",
+          "--only",
+          "security.dependencies"
+        ],
+        "test": null,
+        "verified_by": [
+          "security.dependencies"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    }
+  ],
+  "metrics": [
+    {
+      "id": "M-0001",
+      "check_id": "quality.size",
+      "context_id": "C-0001",
+      "name": "lines.source_code:javascript_typescript",
+      "value": 1200,
+      "reason": null,
+      "unit": "lines"
+    }
+  ],
+  "inventory": {
+    "tests": [
+      {
+        "context_id": "C-0002",
+        "found": 8,
+        "run": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0,
+        "todo": 0,
+        "focused": 0,
+        "never_run": 0
+      }
+    ],
+    "test_suites": [
+      {
+        "context_id": "C-0002",
+        "suite": "scripts.test",
+        "found": 8,
+        "run": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0,
+        "todo": 0,
+        "focused": 0,
+        "never_run": 0
+      }
+    ],
+    "test_files": [
+      {
+        "context_id": "C-0002",
+        "suite": "scripts.test",
+        "file": "test/a.test.js",
+        "found": 4,
+        "passed": 4,
+        "passed_focused": 0
+      },
+      {
+        "context_id": "C-0002",
+        "suite": "scripts.test",
+        "file": "test/b.test.js",
+        "found": 4,
+        "passed": 3,
+        "passed_focused": 0
+      }
+    ],
+    "suppressions": [],
+    "file_hashes": [],
+    "size": [
+      {
+        "group": "file_class",
+        "name": "source",
+        "lines": 1200,
+        "non_blank_lines": 1000
+      }
+    ],
+    "moved_test_files": []
+  },
+  "limitations": [],
+  "artifacts": [],
+  "report_completeness": {
+    "all_findings_included": true,
+    "truncated_evidence_items": 0,
+    "missing_artifacts": [],
+    "redaction": {
+      "applied": false,
+      "count": 0,
+      "reason": "secrets scan not available"
+    }
+  }
+}

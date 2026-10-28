@@ -1,0 +1,12 @@
+{
+  "name": "valkey-service-second",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: its tests need an empty Valkey under the compose service name redis.",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

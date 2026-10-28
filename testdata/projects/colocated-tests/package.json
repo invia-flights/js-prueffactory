@@ -1,0 +1,13 @@
+{
+  "name": "colocated-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: the specs sit next to the code and are selected by a Mocha config written in JavaScript. The spec files and the setup file the config requires are Test code because the runner loads them; src/ab-test.js has a test-like name but the runner does not load it, so it stays Source code.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

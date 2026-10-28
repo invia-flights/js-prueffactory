@@ -1,0 +1,24 @@
+{
+  "name": "lockfile-problems",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a hand-written package-lock.json that holds every integrity problem, a missing license and install scripts. It is never installed.",
+  "main": "src/index.js",
+  "dependencies": {
+    "@corp/ok": "^1.0.0",
+    "clean": "^1.0.0",
+    "file-dep": "file:vendor/file-dep-1.0.0.tgz",
+    "foreign-host": "^1.0.0",
+    "git-dep": "git+ssh://git@github.com/acme/git-dep.git#0123456789abcdef0123456789abcdef01234567",
+    "http-dep": "http://downloads.example.org/http-dep-1.0.0.tgz",
+    "linked": "file:../linked",
+    "no-integrity": "^1.0.0",
+    "plain-http": "^1.0.0",
+    "url-dep": "https://downloads.example.org/url-dep-1.0.0.tgz",
+    "weak-sha1": "^1.0.0",
+    "weak-sha384": "^1.0.0"
+  },
+  "bundleDependencies": [
+    "bundled"
+  ]
+}

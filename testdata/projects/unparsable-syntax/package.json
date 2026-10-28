@@ -1,0 +1,10 @@
+{
+  "name": "unparsable-syntax",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: plain JavaScript next to files with Flow and JSX syntax that the toolset's ESLint cannot parse, in Source code and in Test code. The checks that read the ESLint run must not report 0 hits for them as a measurement.",
+  "main": "src/ok.js",
+  "scripts": {
+    "test": "mocha"
+  }
+}

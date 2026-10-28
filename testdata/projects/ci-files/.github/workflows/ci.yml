@@ -1,0 +1,21 @@
+name: ci
+on:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # zizmor: the action is not pinned to a commit hash.
+      - uses: actions/checkout@v4
+      # actionlint's embedded ShellCheck: the unquoted variable.
+      - name: List files
+        run: |
+          FILES=$(ls)
+          echo $FILES
+  deploy:
+    runs-on: ubuntu-latest
+    # actionlint: "biuld" is a job that does not exist.
+    needs: [biuld]
+    steps:
+      - run: echo deploy

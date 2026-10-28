@@ -1,0 +1,7 @@
+{
+  "name": "typescript-source",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a JavaScript package whose Source code also has a TypeScript file without a type error and no tsconfig.json, so types.javascript checks it.",
+  "main": "src/index.js"
+}

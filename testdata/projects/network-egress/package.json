@@ -1,0 +1,12 @@
+{
+  "name": "network-egress",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: its test expects every outbound request to fail, so it passes only on a network without outbound access.",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

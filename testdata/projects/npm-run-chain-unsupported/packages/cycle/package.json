@@ -1,0 +1,14 @@
+{
+  "name": "cycle",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:all",
+    "test:all": "npm run test:unit && npm run test:again",
+    "test:unit": "mocha test/unit",
+    "test:again": "npm run test:all"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

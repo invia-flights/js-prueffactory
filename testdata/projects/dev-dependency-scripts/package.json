@@ -1,0 +1,13 @@
+{
+  "name": "dev-dependency-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: the service started from index.js loads the devDependency mocha, once at the top of a file and once lazily inside a function, and a generator that only an npm script runs loads it too.",
+  "main": "index.js",
+  "scripts": {
+    "generate": "node dev/generate.js"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

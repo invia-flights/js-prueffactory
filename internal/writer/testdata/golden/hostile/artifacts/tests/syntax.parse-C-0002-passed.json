@@ -1,0 +1,42 @@
+{
+  "check_id": "syntax.parse",
+  "context_id": "C-0002",
+  "counts": {
+    "passed": 2,
+    "flaky": 0
+  },
+  "passed": [
+    {
+      "file": "test/a.js",
+      "suite": "scripts.test",
+      "full_title": "a one",
+      "suite_path": [
+        "a"
+      ],
+      "flaky": false,
+      "attempts": [
+        {
+          "outcome": "passed",
+          "duration_ms": 4,
+          "error": null
+        }
+      ]
+    },
+    {
+      "file": "test/a.js",
+      "suite": "scripts.test",
+      "full_title": "a two",
+      "suite_path": [
+        "a"
+      ],
+      "flaky": false,
+      "attempts": [
+        {
+          "outcome": "passed",
+          "duration_ms": 4,
+          "error": null
+        }
+      ]
+    }
+  ]
+}

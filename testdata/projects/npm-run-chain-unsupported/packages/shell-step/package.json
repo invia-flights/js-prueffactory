@@ -1,0 +1,12 @@
+{
+  "name": "shell-step",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:unit && ./scripts/integration.sh",
+    "test:unit": "mocha test/unit"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

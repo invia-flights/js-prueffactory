@@ -1,0 +1,27 @@
+{
+  "name": "js-prueffactory-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The pinned npm tools of js-prueffactory. Installed once per toolset version with npm ci.",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@types/mocha": "10.0.10",
+    "@types/node": "24.19.2",
+    "@typescript/typescript6": "6.0.2",
+    "ajv": "8.20.0",
+    "ajv-draft-04": "1.0.0",
+    "ajv-formats": "3.0.1",
+    "c8": "12.0.0",
+    "dependency-cruiser": "18.7.0",
+    "eslint": "10.13.0",
+    "eslint-plugin-mocha": "12.0.2",
+    "eslint-plugin-n": "18.5.0",
+    "eslint-plugin-sonarjs": "4.2.2",
+    "globals": "17.13.0",
+    "jscpd": "5.4.2",
+    "knip": "6.43.0",
+    "type-coverage": "2.30.4",
+    "typescript-eslint": "8.72.0",
+    "typescript7": "npm:typescript@7.0.2"
+  }
+}

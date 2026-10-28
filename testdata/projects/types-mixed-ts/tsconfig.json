@@ -1,0 +1,5 @@
+{
+  // Editor settings only: nothing is built from this.
+  "compilerOptions": { "allowJs": true, "checkJs": true, "noEmit": true, "strict": true },
+  "include": ["src"],
+}

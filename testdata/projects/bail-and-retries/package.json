@@ -1,0 +1,13 @@
+{
+  "name": "bail-and-retries",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: Mocha is configured to stop at the first failure, two tests fail, one test fails after its retries and one passes only on its second attempt.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

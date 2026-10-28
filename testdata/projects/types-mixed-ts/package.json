@@ -1,0 +1,7 @@
+{
+  "name": "types-mixed-ts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: mostly JavaScript with one JSDoc type mismatch, and one TypeScript file with a type error. Its tsconfig.json is only for an editor, so the package needs no build step.",
+  "main": "src/index.js"
+}

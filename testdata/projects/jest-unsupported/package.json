@@ -1,0 +1,10 @@
+{
+  "name": "jest-unsupported",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: its tests run with Jest, which is not supported, so tests.existing is unsupported.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest --ci"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "eslint-problems",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: one ESLint problem rule hit, an unused name with and one without an underscore, the same hit under an eslint-disable comment, and copies in Test data and Build output that must not be linted.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  }
+}

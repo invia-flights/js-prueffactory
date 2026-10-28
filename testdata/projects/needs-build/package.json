@@ -1,0 +1,9 @@
+{
+  "name": "needs-build",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a Babel config means the JavaScript needs a build step before it can run.",
+  "scripts": {
+    "build": "babel src -d dist"
+  }
+}

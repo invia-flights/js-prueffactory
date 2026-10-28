@@ -1,0 +1,456 @@
+{
+  "format": "js-prueffactory.report",
+  "schema_version": "0.4.0",
+  "producer": {
+    "name": "js-prueffactory",
+    "version": "test",
+    "vcs_revision": null
+  },
+  "run": {
+    "id": "20261025T101500Z-demo-aaaa",
+    "command": "test",
+    "started_at": "2026-10-25T10:15:00Z",
+    "finished_at": "2026-10-25T10:15:01Z",
+    "duration_ms": 1000,
+    "budget_seconds": 1800,
+    "budget_source": "default",
+    "status": "incomplete",
+    "registry_data_date": null,
+    "exit_code": 1,
+    "host": {
+      "os": "linux",
+      "arch": "amd64"
+    },
+    "docker": {
+      "server_version": "29.4.0",
+      "api_version": "1.56",
+      "cpus": 4,
+      "memory_bytes": 8589934592
+    }
+  },
+  "source": {
+    "original_path": "/work/demo",
+    "snapshot_algorithm": "sorted-path-sha256-v1",
+    "snapshot_hash": "abababababababababababababababababababababababababababababababab",
+    "file_count": 2,
+    "git": null,
+    "original_unchanged": true,
+    "changed_paths": [],
+    "excluded_paths": []
+  },
+  "profiles": {
+    "catalog_version": "1",
+    "execution_profile": "execution-v0",
+    "benchmark_profile": null,
+    "toolset_version": "abc"
+  },
+  "selection": {
+    "only": [],
+    "exclude": [],
+    "effective_checks": [
+      "syntax.parse"
+    ],
+    "deselected_checks": [
+      "quality.size"
+    ],
+    "prerequisites_run": [],
+    "is_standard_scope": true,
+    "fast": false
+  },
+  "contexts": [
+    {
+      "id": "C-0001",
+      "kind": "project",
+      "path": ".",
+      "node": null,
+      "npm_version": null,
+      "tools": [],
+      "limits": {
+        "cpus": 0,
+        "memory_mb": 0
+      }
+    },
+    {
+      "id": "C-0002",
+      "kind": "package",
+      "path": ".",
+      "node": null,
+      "npm_version": null,
+      "tools": [],
+      "limits": {
+        "cpus": 0,
+        "memory_mb": 0
+      }
+    }
+  ],
+  "services": [],
+  "summary": {
+    "findings_by_severity": {
+      "error": 1,
+      "warning": 0,
+      "note": 1
+    },
+    "gates": 1,
+    "test_cases": {
+      "passed": 2,
+      "failed": 1,
+      "skipped": 0,
+      "todo": 0,
+      "never_run": 1
+    },
+    "scope_completeness": {
+      "required": 2,
+      "completed": 1,
+      "ratio": 0.5
+    },
+    "standard_completeness": {
+      "required": 3,
+      "completed": 1,
+      "ratio": 0.3333333333333333
+    },
+    "network_isolation": "not_probed"
+  },
+  "benchmark": {
+    "status": "not_requested",
+    "profile_id": null,
+    "score": null,
+    "range": null,
+    "verdict": null
+  },
+  "checks": [
+    {
+      "id": "E-0001",
+      "check_id": "quality.size",
+      "family": "quality",
+      "context_id": "C-0001",
+      "selected": false,
+      "applicability": "applicable",
+      "status": "not_started",
+      "outcome": "unknown",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    },
+    {
+      "id": "E-0002",
+      "check_id": "syntax.parse",
+      "family": "syntax",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "failed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 1,
+      "finding_ids": [
+        "F-0001",
+        "F-0002"
+      ],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": [
+        "A-0003",
+        "A-0002",
+        "A-0001",
+        "A-0004"
+      ]
+    },
+    {
+      "id": "E-0003",
+      "check_id": "tests.existing",
+      "family": "tests",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "blocked",
+      "outcome": "unknown",
+      "reason_code": "missing_registry_credentials",
+      "reason": "registry said 401 line1\r\nline2\ttabbed | pipe <script>alert(1)</script> ``` fence ```` \u0007bell 😀\n# not a heading\n- not a list\n[link](http://example.invalid)",
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    }
+  ],
+  "test_cases": [
+    {
+      "id": "T-0001",
+      "execution_id": "E-0002",
+      "file": "test/a.js",
+      "suite": "scripts.test",
+      "full_title": "a three | fails",
+      "suite_path": [
+        "a"
+      ],
+      "outcome": "failed",
+      "never_run_reason": null,
+      "flaky": false,
+      "attempts": [
+        {
+          "outcome": "failed",
+          "duration_ms": 9,
+          "error": "AssertionError\nline1\r\nline2\ttabbed | pipe <script>alert(1)</script> ``` fence ```` \u0007bell 😀\n# not a heading\n- not a list\n[link](http://example.invalid)"
+        }
+      ],
+      "finding_ids": []
+    },
+    {
+      "id": "T-0002",
+      "execution_id": "E-0002",
+      "file": "test/b.js",
+      "suite": "scripts.test",
+      "full_title": "b never ran",
+      "suite_path": [
+        "b"
+      ],
+      "outcome": "never_run",
+      "never_run_reason": "a root hook failed",
+      "flaky": false,
+      "attempts": [],
+      "finding_ids": []
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-0001",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0002",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "a2939851f5256aed48d0ec32454c96647635debc026be3665919c59198f716d0"
+      },
+      "kind": "defect",
+      "severity": "error",
+      "confidence": "confirmed",
+      "gate": true,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Title with | pipe and <b>html</b>",
+      "message": "line1\r\nline2\ttabbed | pipe <script>alert(1)</script> ``` fence ```` \u0007bell 😀\n# not a heading\n- not a list\n[link](http://example.invalid)",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/a|b.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": "line1\r\nline2\ttabbed | pipe <script>alert(1)</script> ``` fence ```` \u0007bell 😀\n# not a heading\n- not a list\n[link](http://example.invalid)",
+      "actual": "`tick` and ``double`` and\ttab",
+      "evidence": [
+        {
+          "kind": "tool_output",
+          "text": "line1\r\nline2\ttabbed | pipe <script>alert(1)</script> ``` fence ```` \u0007bell 😀\n# not a heading\n- not a list\n[link](http://example.invalid)",
+          "origin": "node --check",
+          "trust": "untrusted_data",
+          "original_size": null,
+          "artifact_id": null
+        },
+        {
+          "kind": "tool_output",
+          "text": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "origin": "node --check",
+          "trust": "untrusted_data",
+          "original_size": 9600,
+          "artifact_id": "A-0003"
+        },
+        {
+          "kind": "stack_trace",
+          "text": "Error: boom\n    at fn0 (/app/src/f0.js:1:1)\n    at fn1 (/app/src/f1.js:2:1)\n    at fn2 (/app/src/f2.js:3:1)\n    at fn3 (/app/src/f3.js:4:1)\n    at fn4 (/app/src/f4.js:5:1)\n    at fn5 (/app/src/f5.js:6:1)\n    at fn6 (/app/src/f6.js:7:1)\n    at fn7 (/app/src/f7.js:8:1)\n    at fn8 (/app/src/f8.js:9:1)\n    at fn9 (/app/src/f9.js:10:1)\n    at fn10 (/app/src/f10.js:11:1)\n    at fn11 (/app/src/f11.js:12:1)\n    at fn12 (/app/src/f12.js:13:1)\n    at fn13 (/app/src/f13.js:14:1)\n    at fn14 (/app/src/f14.js:15:1)\n    at fn15 (/app/src/f15.js:16:1)\n    at fn16 (/app/src/f16.js:17:1)\n    at fn17 (/app/src/f17.js:18:1)\n    at fn18 (/app/src/f18.js:19:1)\n    at fn19 (/app/src/f19.js:20:1)\n    at fn20 (/app/src/f20.js:21:1)\n    at fn21 (/app/src/f21.js:22:1)\n    at fn22 (/app/src/f22.js:23:1)\n    at fn23 (/app/src/f23.js:24:1)\n    at fn24 (/app/src/f24.js:25:1)\n    at fn25 (/app/src/f25.js:26:1)\n    at fn26 (/app/src/f26.js:27:1)\n    at fn27 (/app/src/f27.js:28:1)\n    at fn28 (/app/src/f28.js:29:1)\n    at fn29 (/app/src/f29.js:30:1)",
+          "origin": "mocha",
+          "trust": "untrusted_data",
+          "original_size": 1383,
+          "artifact_id": "A-0002"
+        }
+      ],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0002",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0002",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "3c7ade02b040f3159b4b2b258764f127ec7aa220cf983740f00af6990751cca8"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": true,
+      "in_test_code": false,
+      "title": "Note in test data",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "test/fixtures/bad.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [
+        {
+          "kind": "tool_output",
+          "text": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+          "origin": "node --check",
+          "trust": "untrusted_data",
+          "original_size": 6000,
+          "artifact_id": "A-0001"
+        }
+      ],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    }
+  ],
+  "metrics": [
+    {
+      "id": "M-0001",
+      "check_id": "syntax.parse",
+      "context_id": "C-0002",
+      "name": "files checked",
+      "value": 7,
+      "reason": null,
+      "unit": "files"
+    }
+  ],
+  "inventory": {
+    "tests": [],
+    "test_suites": [],
+    "test_files": [],
+    "suppressions": [],
+    "file_hashes": [],
+    "size": [],
+    "moved_test_files": [
+      {
+        "context_id": "C-0002",
+        "path": "src/a|b.spec.js",
+        "suite": "test:unit",
+        "kind": "spec"
+      },
+      {
+        "context_id": "C-0002",
+        "path": "src/setup `x`.js",
+        "suite": "test:unit",
+        "kind": "require"
+      }
+    ]
+  },
+  "limitations": [
+    {
+      "reason_code": "build_output_skipped",
+      "message": "3 files skipped line1\r\nline2\ttabbed | pipe <script>alert(1)</script> ``` fence ```` \u0007bell 😀\n# not a heading\n- not a list\n[link](http://example.invalid)",
+      "check_id": "syntax.parse",
+      "path": "dist"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "A-0001",
+      "path": "artifacts/evidence/0ecfe12fb21c14c5.txt",
+      "media_type": "text/plain; charset=utf-8",
+      "sha256": "0ecfe12fb21c14c5fb26a97bcba31b7f8006728896040adaea7c858010e7cd24",
+      "size": 6000,
+      "check_id": "syntax.parse",
+      "redacted": false,
+      "truncated": false
+    },
+    {
+      "id": "A-0002",
+      "path": "artifacts/evidence/7bd5fba4120a737f.txt",
+      "media_type": "text/plain; charset=utf-8",
+      "sha256": "7bd5fba4120a737f15139829e2a8488d452568efcf718d7688481882ee6ac383",
+      "size": 1383,
+      "check_id": "syntax.parse",
+      "redacted": false,
+      "truncated": false
+    },
+    {
+      "id": "A-0003",
+      "path": "artifacts/evidence/f48e09796d08b5a6.txt",
+      "media_type": "text/plain; charset=utf-8",
+      "sha256": "f48e09796d08b5a636390ce7aa35a16a283ac5c5d1d1be208bf2dc04151cab0e",
+      "size": 9600,
+      "check_id": "syntax.parse",
+      "redacted": false,
+      "truncated": false
+    },
+    {
+      "id": "A-0004",
+      "path": "artifacts/tests/syntax.parse-C-0002-passed.json",
+      "media_type": "application/json",
+      "sha256": "9ba4802bdb2d3bfb9a44295e1f2d7a40172f9a742b9ba33bd52e3fa4ca085faa",
+      "size": 720,
+      "check_id": "syntax.parse",
+      "redacted": false,
+      "truncated": false
+    }
+  ],
+  "report_completeness": {
+    "all_findings_included": true,
+    "truncated_evidence_items": 3,
+    "missing_artifacts": [],
+    "redaction": {
+      "applied": false,
+      "count": 0,
+      "reason": "secrets scan not available"
+    }
+  }
+}

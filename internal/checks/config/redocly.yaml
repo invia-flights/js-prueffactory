@@ -1,0 +1,5 @@
+# Pinned configuration of api.lint: the structural-only "spec" ruleset. It is
+# the only configuration Redocly CLI reads: a redocly.yaml in the project is
+# ignored.
+extends:
+  - spec

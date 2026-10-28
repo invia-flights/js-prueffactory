@@ -1,0 +1,9 @@
+{
+  "name": "legacy-schemas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nested package of the schema-drift project: its generator downloads the schema, which a Run without network cannot do.",
+  "scripts": {
+    "generate": "node fetch-schema.js"
+  }
+}

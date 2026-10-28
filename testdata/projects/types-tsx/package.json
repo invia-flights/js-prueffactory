@@ -1,0 +1,7 @@
+{
+  "name": "types-tsx",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: JavaScript next to a .tsx file with JSX and one type error.",
+  "main": "src/index.js"
+}

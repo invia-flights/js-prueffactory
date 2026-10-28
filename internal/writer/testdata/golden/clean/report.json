@@ -1,0 +1,163 @@
+{
+  "format": "js-prueffactory.report",
+  "schema_version": "0.4.0",
+  "producer": {
+    "name": "js-prueffactory",
+    "version": "test",
+    "vcs_revision": null
+  },
+  "run": {
+    "id": "20261025T101500Z-demo-aaaa",
+    "command": "test",
+    "started_at": "2026-10-25T10:15:00Z",
+    "finished_at": "2026-10-25T10:15:01Z",
+    "duration_ms": 1000,
+    "budget_seconds": 1800,
+    "budget_source": "default",
+    "status": "completed",
+    "registry_data_date": null,
+    "exit_code": 0,
+    "host": {
+      "os": "linux",
+      "arch": "amd64"
+    },
+    "docker": {
+      "server_version": "29.4.0",
+      "api_version": "1.56",
+      "cpus": 4,
+      "memory_bytes": 8589934592
+    }
+  },
+  "source": {
+    "original_path": "/work/demo",
+    "snapshot_algorithm": "sorted-path-sha256-v1",
+    "snapshot_hash": "abababababababababababababababababababababababababababababababab",
+    "file_count": 2,
+    "git": null,
+    "original_unchanged": true,
+    "changed_paths": [],
+    "excluded_paths": []
+  },
+  "profiles": {
+    "catalog_version": "1",
+    "execution_profile": "execution-v0",
+    "benchmark_profile": null,
+    "toolset_version": "abc"
+  },
+  "selection": {
+    "only": [],
+    "exclude": [],
+    "effective_checks": [
+      "syntax.parse"
+    ],
+    "deselected_checks": [],
+    "prerequisites_run": [],
+    "is_standard_scope": true,
+    "fast": false
+  },
+  "contexts": [
+    {
+      "id": "C-0001",
+      "kind": "project",
+      "path": ".",
+      "node": null,
+      "npm_version": null,
+      "tools": [],
+      "limits": {
+        "cpus": 0,
+        "memory_mb": 0
+      }
+    },
+    {
+      "id": "C-0002",
+      "kind": "package",
+      "path": ".",
+      "node": null,
+      "npm_version": null,
+      "tools": [],
+      "limits": {
+        "cpus": 0,
+        "memory_mb": 0
+      }
+    }
+  ],
+  "services": [],
+  "summary": {
+    "findings_by_severity": {
+      "error": 0,
+      "warning": 0,
+      "note": 0
+    },
+    "gates": 0,
+    "test_cases": {
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "todo": 0,
+      "never_run": 0
+    },
+    "scope_completeness": {
+      "required": 1,
+      "completed": 1,
+      "ratio": 1
+    },
+    "standard_completeness": {
+      "required": 1,
+      "completed": 1,
+      "ratio": 1
+    },
+    "network_isolation": "not_probed"
+  },
+  "benchmark": {
+    "status": "not_requested",
+    "profile_id": null,
+    "score": null,
+    "range": null,
+    "verdict": null
+  },
+  "checks": [
+    {
+      "id": "E-0001",
+      "check_id": "syntax.parse",
+      "family": "syntax",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "passed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 0,
+      "finding_ids": [],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    }
+  ],
+  "test_cases": [],
+  "findings": [],
+  "metrics": [],
+  "inventory": {
+    "tests": [],
+    "test_suites": [],
+    "test_files": [],
+    "suppressions": [],
+    "file_hashes": [],
+    "size": [],
+    "moved_test_files": []
+  },
+  "limitations": [],
+  "artifacts": [],
+  "report_completeness": {
+    "all_findings_included": true,
+    "truncated_evidence_items": 0,
+    "missing_artifacts": [],
+    "redaction": {
+      "applied": false,
+      "count": 0,
+      "reason": "secrets scan not available"
+    }
+  }
+}

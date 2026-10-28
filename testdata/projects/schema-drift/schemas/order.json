@@ -1,0 +1,7 @@
+{
+    "title": "Order",
+    "required": ["id"],
+    "properties": { "total": { "type": "number" }, "id": { "type": "integer" } },
+    "type": "object",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+}

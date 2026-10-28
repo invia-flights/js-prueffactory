@@ -1,0 +1,3 @@
+services:
+  hello-store:
+    image: valkey/valkey:8.1-alpine

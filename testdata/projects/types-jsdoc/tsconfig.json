@@ -1,0 +1,5 @@
+{
+  "extends": "./does-not-exist.json",
+  "compilerOptions": { "strict": true, "noEmit": false, "outDir": "out" },
+  "include": ["nothing-here/**/*"]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "unhandled-rejection",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a test whose floating promise rejects passes normally and fails with --unhandled-rejections=strict. The root package runs Mocha 10, the nested package in mocha11 runs Mocha 11.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

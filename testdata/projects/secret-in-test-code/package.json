@@ -1,0 +1,13 @@
+{
+  "name": "secret-in-test-code",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: made-up tokens in Test code. One sits in a helper under test/, one in a spec next to the code that a Mocha config written in JavaScript selects. src/fare-ab-test.js has a test-like name but the runner does not load it, so it stays Source code. No value in this project opens anything.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

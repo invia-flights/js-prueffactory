@@ -1,0 +1,13 @@
+{
+  "name": "committed-only",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a committed .only that makes the suite skip a test, which tests.smells reports as a Gate, and a pending test, which it reports as a warning.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

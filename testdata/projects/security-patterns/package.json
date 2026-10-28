@@ -1,0 +1,7 @@
+{
+  "name": "security-patterns",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: an Express handler that passes a request value to exec and to eval, a redirect to request data and disabled TLS verification, with ignore comments that must not hide anything.",
+  "main": "src/app.js"
+}

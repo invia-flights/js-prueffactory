@@ -1,0 +1,5 @@
+# Pinned default configuration of repository.dockerfile. It is the only
+# configuration hadolint reads: a .hadolint.yaml in the project is ignored,
+# while inline "# hadolint ignore=" pragmas keep working.
+no-color: true
+failure-threshold: error

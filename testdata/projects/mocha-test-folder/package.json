@@ -1,0 +1,18 @@
+{
+  "name": "mocha-test-folder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: the test script names folders (mocha test/unit test/modules) and the Mocha config only says recursive, so the specs in test/modules/deep/nested are found by Mocha but not by Knip. The spec and the source file that only it imports must not be reported as unused, src/unused.js really is unused.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha 'test/unit' 'test/modules' --config test/mocha-opts.js"
+  },
+  "devDependencies": {
+    "c8": "10.1.3",
+    "mocha": "10.8.2",
+    "mocha-multi-reporters": "1.5.1"
+  },
+  "dependencies": {
+    "is-odd": "3.0.1"
+  }
+}

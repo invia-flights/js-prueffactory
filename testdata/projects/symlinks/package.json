@@ -1,0 +1,7 @@
+{
+  "name": "symlinks",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a link inside the project is kept, a link to a file outside is left out and listed as a Limitation.",
+  "main": "src/index.js"
+}

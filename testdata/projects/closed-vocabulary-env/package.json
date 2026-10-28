@@ -1,0 +1,7 @@
+{
+  "name": "closed-vocabulary-env",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a .env file whose secret-named variables hold ordinary words that are also words of the Report's own vocabulary (root, confirmed, primary, parse, syntax). Every value is invented and opens nothing.",
+  "main": "src/ok.js"
+}

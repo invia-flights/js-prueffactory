@@ -1,0 +1,12 @@
+{
+  "name": "alpine-missing-program",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: its Dockerfile uses Alpine, and a test spawns git, which the Alpine Node image does not have.",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

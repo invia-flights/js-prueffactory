@@ -1,0 +1,20 @@
+{
+  "name": "mocha-config-unused",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: Mocha configs under test/config built through a shared helper whose require paths are relative to the package root, setup files that import a helper only they use, mocha-multi-reporters as the reporter and c8 used only in a CI shell script. src/unused.js and the dependency is-odd are really unused, and must still be reported.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "npm run test:unit && npm run test:api",
+    "test:unit": "mocha --config test/config/mocha-unit.js",
+    "test:api": "mocha --config test/config/mocha-api.js"
+  },
+  "devDependencies": {
+    "c8": "10.1.3",
+    "mocha": "10.8.2",
+    "mocha-multi-reporters": "1.5.1"
+  },
+  "dependencies": {
+    "is-odd": "3.0.1"
+  }
+}

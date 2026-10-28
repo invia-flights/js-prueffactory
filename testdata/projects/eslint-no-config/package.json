@@ -1,0 +1,10 @@
+{
+  "name": "eslint-no-config",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: ESLint is a dependency, but there is no ESLint configuration of any kind, so the project has no linter setup that could fail.",
+  "main": "src/index.js",
+  "devDependencies": {
+    "eslint": "^10.0.0"
+  }
+}

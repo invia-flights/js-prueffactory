@@ -1,0 +1,7 @@
+{
+  "name": "fake-secret",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: one secret in Source code, one in Test data, and a registry token in .npmrc. Every value is invented and opens nothing.",
+  "main": "src/index.js"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "open-handles",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a Mocha suite without exit whose test leaves a server open, so the process stays alive after the tests have finished.",
+  "main": "src/server.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

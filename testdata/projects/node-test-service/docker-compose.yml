@@ -1,0 +1,5 @@
+services:
+  redis:
+    image: valkey/valkey:8.1-alpine
+    ports:
+      - "6379:6379"

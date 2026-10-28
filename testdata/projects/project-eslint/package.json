@@ -1,0 +1,10 @@
+{
+  "name": "project-eslint",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: ESLint 9 with its own flat configuration, one error-level rule hit, one warning, and a hit under an eslint-disable comment that must stay silenced.",
+  "main": "src/index.js",
+  "devDependencies": {
+    "eslint": "^9.39.0"
+  }
+}

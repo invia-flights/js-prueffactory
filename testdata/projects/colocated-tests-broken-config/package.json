@@ -1,0 +1,13 @@
+{
+  "name": "colocated-tests-broken-config",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: like colocated-tests, but the Mocha config throws when it is loaded, so the test file probe cannot answer and the classes stay what the folder names say.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

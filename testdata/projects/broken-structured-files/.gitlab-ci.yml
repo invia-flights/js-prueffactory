@@ -1,0 +1,12 @@
+stages:
+  - test
+
+.setup:
+  script:
+    - echo setup
+
+test:
+  stage: test
+  script:
+    - !reference [.setup, script]
+    - echo done

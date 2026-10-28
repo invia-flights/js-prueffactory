@@ -1,0 +1,13 @@
+{
+  "name": "placeholder-env-values",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a .env file with a placeholder under a secret name and a real-looking secret, and one failing test whose title contains the placeholder word. Every value is invented and opens nothing.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

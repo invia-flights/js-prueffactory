@@ -1,0 +1,3 @@
+# The Check ignores this file: the project cannot allow its own secrets.
+[allowlist]
+paths = ['''.*''']

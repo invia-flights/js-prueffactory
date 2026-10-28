@@ -1,0 +1,9 @@
+{
+  "name": "typed-js-node-test",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: node:test suites in CommonJS and ESM that register tests at the top level, and one promise nobody awaits. For lint.typed.",
+  "scripts": {
+    "test": "node --test 'test/**/*.test.*js'"
+  }
+}

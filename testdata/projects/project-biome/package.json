@@ -1,0 +1,10 @@
+{
+  "name": "project-biome",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: Biome with its own configuration, one error-level diagnostic and two warnings. The VCS integration asks for an ignore file that the project does not have.",
+  "main": "src/index.js",
+  "devDependencies": {
+    "@biomejs/biome": "2.1.2"
+  }
+}

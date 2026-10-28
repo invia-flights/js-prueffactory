@@ -1,0 +1,25 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "Shop", "version": "1.0.0" },
+  "paths": {},
+  "components": {
+    "schemas": {
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "total": { "type": "number" }
+        },
+        "required": ["id"]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "email": { "type": "string" }
+        },
+        "required": ["id", "email"]
+      }
+    }
+  }
+}

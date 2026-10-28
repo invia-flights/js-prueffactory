@@ -1,0 +1,7 @@
+{
+  // Comments and trailing commas are fine in a tsconfig.json.
+  "compilerOptions": {
+    "target": "es2022", /* inline comment */
+    "strict": true,
+  },
+}

@@ -1,0 +1,11 @@
+{
+  "name": "schema-drift",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a gen:schema script writes JSON Schemas from api/openapi.json. schemas/user.json is stale, schemas/order.json differs only in formatting, and the generator also writes a file that is not committed. A nested package has a generator that needs network.",
+  "main": "scripts/gen-schema.js",
+  "scripts": {
+    "gen:schema": "node scripts/gen-schema.js",
+    "gen:all": "node scripts/gen-schema.js && node scripts/gen-docs.js"
+  }
+}

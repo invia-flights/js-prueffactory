@@ -1,0 +1,13 @@
+{
+  "name": "deprecations",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: Source code that calls the deprecated new Buffer(), which deps.engines reports and which Node warns about when the tests run.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "typed-js",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: JavaScript with JSDoc types on some functions and none on others. Shared by types.strictness and lint.typed.",
+  "main": "src/typed.js",
+  "scripts": {
+    "test": "mocha"
+  }
+}

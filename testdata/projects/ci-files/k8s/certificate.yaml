@@ -1,0 +1,12 @@
+# A custom resource: no schema of the pinned Kubernetes version covers it, so
+# repository.kubernetes lists its kind as not validated.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: api-tls
+spec:
+  secretName: api-tls
+  dnsNames:
+    - api.example.com
+  issuerRef:
+    name: letsencrypt

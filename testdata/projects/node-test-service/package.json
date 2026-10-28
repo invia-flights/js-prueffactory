@@ -1,0 +1,9 @@
+{
+  "name": "node-test-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a node:test suite, with no dependencies, whose tests need an empty Valkey under the compose service name redis.",
+  "scripts": {
+    "test": "node --test 'test/**/*.test.js'"
+  }
+}

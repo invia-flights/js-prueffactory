@@ -1,0 +1,7 @@
+{
+  "name": "types-path-aliases",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: TypeScript imports through a path alias that only its own tsconfig.json knows, so the generated profile cannot resolve them.",
+  "main": "src/index.js"
+}

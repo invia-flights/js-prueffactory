@@ -1,0 +1,4 @@
+services:
+  web:
+    environment:
+      API_URL: ${CI_API_URL}

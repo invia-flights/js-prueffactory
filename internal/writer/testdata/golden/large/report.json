@@ -1,0 +1,2921 @@
+{
+  "format": "js-prueffactory.report",
+  "schema_version": "0.4.0",
+  "producer": {
+    "name": "js-prueffactory",
+    "version": "test",
+    "vcs_revision": null
+  },
+  "run": {
+    "id": "20261025T101500Z-demo-aaaa",
+    "command": "test",
+    "started_at": "2026-10-25T10:15:00Z",
+    "finished_at": "2026-10-25T10:15:01Z",
+    "duration_ms": 1000,
+    "budget_seconds": 1800,
+    "budget_source": "default",
+    "status": "completed",
+    "registry_data_date": null,
+    "exit_code": 1,
+    "host": {
+      "os": "linux",
+      "arch": "amd64"
+    },
+    "docker": {
+      "server_version": "29.4.0",
+      "api_version": "1.56",
+      "cpus": 4,
+      "memory_bytes": 8589934592
+    }
+  },
+  "source": {
+    "original_path": "/work/demo",
+    "snapshot_algorithm": "sorted-path-sha256-v1",
+    "snapshot_hash": "abababababababababababababababababababababababababababababababab",
+    "file_count": 2,
+    "git": null,
+    "original_unchanged": true,
+    "changed_paths": [],
+    "excluded_paths": []
+  },
+  "profiles": {
+    "catalog_version": "1",
+    "execution_profile": "execution-v0",
+    "benchmark_profile": null,
+    "toolset_version": "abc"
+  },
+  "selection": {
+    "only": [],
+    "exclude": [],
+    "effective_checks": [
+      "syntax.parse"
+    ],
+    "deselected_checks": [],
+    "prerequisites_run": [],
+    "is_standard_scope": true,
+    "fast": false
+  },
+  "contexts": [
+    {
+      "id": "C-0001",
+      "kind": "project",
+      "path": ".",
+      "node": null,
+      "npm_version": null,
+      "tools": [],
+      "limits": {
+        "cpus": 0,
+        "memory_mb": 0
+      }
+    },
+    {
+      "id": "C-0002",
+      "kind": "package",
+      "path": ".",
+      "node": null,
+      "npm_version": null,
+      "tools": [],
+      "limits": {
+        "cpus": 0,
+        "memory_mb": 0
+      }
+    }
+  ],
+  "services": [],
+  "summary": {
+    "findings_by_severity": {
+      "error": 2,
+      "warning": 0,
+      "note": 51
+    },
+    "gates": 2,
+    "test_cases": {
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "todo": 0,
+      "never_run": 0
+    },
+    "scope_completeness": {
+      "required": 1,
+      "completed": 1,
+      "ratio": 1
+    },
+    "standard_completeness": {
+      "required": 1,
+      "completed": 1,
+      "ratio": 1
+    },
+    "network_isolation": "not_probed"
+  },
+  "benchmark": {
+    "status": "not_requested",
+    "profile_id": null,
+    "score": null,
+    "range": null,
+    "verdict": null
+  },
+  "checks": [
+    {
+      "id": "E-0001",
+      "check_id": "syntax.parse",
+      "family": "syntax",
+      "context_id": "C-0002",
+      "selected": true,
+      "applicability": "applicable",
+      "status": "completed",
+      "outcome": "failed",
+      "reason_code": null,
+      "reason": null,
+      "gate": 2,
+      "finding_ids": [
+        "F-0001",
+        "F-0002",
+        "F-0003",
+        "F-0004",
+        "F-0005",
+        "F-0006",
+        "F-0007",
+        "F-0008",
+        "F-0009",
+        "F-0010",
+        "F-0011",
+        "F-0012",
+        "F-0013",
+        "F-0014",
+        "F-0015",
+        "F-0016",
+        "F-0017",
+        "F-0018",
+        "F-0019",
+        "F-0020",
+        "F-0021",
+        "F-0022",
+        "F-0023",
+        "F-0024",
+        "F-0025",
+        "F-0026",
+        "F-0027",
+        "F-0028",
+        "F-0029",
+        "F-0030",
+        "F-0031",
+        "F-0032",
+        "F-0033",
+        "F-0034",
+        "F-0035",
+        "F-0036",
+        "F-0037",
+        "F-0038",
+        "F-0039",
+        "F-0040",
+        "F-0041",
+        "F-0042",
+        "F-0043",
+        "F-0044",
+        "F-0045",
+        "F-0046",
+        "F-0047",
+        "F-0048",
+        "F-0049",
+        "F-0050",
+        "F-0051",
+        "F-0052",
+        "F-0053"
+      ],
+      "started_at": null,
+      "duration_ms": null,
+      "tool": null,
+      "command": [],
+      "artifact_ids": []
+    }
+  ],
+  "test_cases": [],
+  "findings": [
+    {
+      "id": "F-0001",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "a464e8120ac942e62c82573087d077e4d00a4f3111bc4eb684c11942844e2de9"
+      },
+      "kind": "defect",
+      "severity": "error",
+      "confidence": "confirmed",
+      "gate": true,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 0",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file000.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0002",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "dea70a51e6316832da6df1955d6fa43687620c34348a5824202206a6620e98b5"
+      },
+      "kind": "defect",
+      "severity": "error",
+      "confidence": "confirmed",
+      "gate": true,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 1",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file001.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0003",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "24ac53d6583ce14bd10d25e05683737f42fa7a537acb7d03b1260d784b1f07aa"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 2",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file002.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0004",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "cea546e509476434b6ccfdac9db6e430bfc6f07acc4f75bc53a980a23becc4e4"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 3",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file003.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0005",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "44ccba09b43153130f7de9a7c5944e5012af2af8833818cf4926a1e94d10deb1"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 4",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file004.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0006",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "b0e0ecd3cefb72ea40e03b3154997a6d4a91e91494e7bc588a07f096e4c7ef29"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 5",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file005.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0007",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "ce11eb055a834e0e24e75b9277cf97a6e3455a4cb7f271a9c42369ef3573e7f3"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 6",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file006.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0008",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "0f378a23182213a3e9ac6f59089a62df5d5d10443e1161a294c44e8119177f4d"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 7",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file007.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0009",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "e0e7ba40977d01b3d4773193472993085fac7429e97270ca1e06b7cbd1efd114"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 8",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file008.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0010",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "c0de4fc546fd6f82f78b2479ef65047d61b8f6ef6c5f7737f4583f829dfdcd88"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 9",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file009.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0011",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "bd62dca0f2fcfeb69651f2b2886c5eb6247859e2090f0414217156c559fad278"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 10",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file010.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0012",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "a8ec9bc5cec59990f8bc8498baad6d2d387fed924f8e93fc8e7fe85068923a5f"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 11",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file011.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0013",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "739df561fd33d01527d5c04cbdd0c3981988a5c55ad4195114f72e0fb9dc004e"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 12",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file012.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0014",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "71c3f38a3eb22cce3390c874cd4aa190de6ccdede92c3b4a67548220df7b3726"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 13",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file013.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0015",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "2137a6b3f39b60039a54b724c7bf2693149f97b35cb562bce33a2529fced0232"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 14",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file014.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0016",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "3e71dc257bb8e0f9fb7db7dc3a0814f27544174ec52b2b50123621328c4a77e4"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 15",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file015.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0017",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "1c16b1f7aef979bea36f8684faf226ee5113c26974609b820941e5ba901aaf6a"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 16",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file016.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0018",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "19150638cd31de36452fca81280810cb6529ebf2fce46539de984fbdfeac0ede"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 17",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file017.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0019",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "e02e5c83cd618cb3a1012b99260ee4ac11869719e80c23a9dca810a207e4cd92"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 18",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file018.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0020",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "e593691a8854d300bb38a56ace2c62e629f56b4a803705061112824a799f7034"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 19",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file019.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0021",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "0ce65a96cb3dcf81ab8553feda931a13f584e2027a26bdd2995b647f13e51172"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 20",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file020.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0022",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "21b3b533bc744ec97a2a025131baf8646eccc66df7c6c2e12849afdd3db62d34"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 21",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file021.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0023",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "1681a07b5eeeafd9ae7483d5b36066ccbc78a79bfda01f5fa8f5190aca2dbc27"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 22",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file022.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0024",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "1aee18959a2174dcf4a19e77d485aecb87e5f31a54579c69590ac32b23905662"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 23",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file023.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0025",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "6f178761a97caa5be1459fccb4fba586edda24f97dc8ea1589dc1d4224a285c2"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 24",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file024.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0026",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "ec0d4707abb080a926237c406a8319642a288370d7b9c667d6871f2e6903de43"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 25",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file025.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0027",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "8424cb02f59dd2aae22455a4dcd4602afdbbb8428fa592c7d9edf2936767dd2f"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 26",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file026.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0028",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "5f70ef52ccb2a2d3ea1b75cc64d76395761f8eb1f141d15fd7e8439a1df4488a"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 27",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file027.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0029",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "63213194e660872f700deb91ef624594bb7cfc45d59030edf2ddd658d83864d6"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 28",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file028.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0030",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "76a734e2d562c6e4832227ad55aad597b4006dd781b463692414c66e8a99f5b4"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 29",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file029.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0031",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "b899f6d40b4e646c9601efca9a7b0a5745048d93e5d9baf73cd338aa6fb42300"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 30",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file030.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0032",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "247d6f78bb3d7faa8a039c5de28fef1373a915bf84bbcad9d76830b7c23da06b"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 31",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file031.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0033",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "a241ea23b8c05278ac1d0a4b62cd576c57af9f53dcb3577fbbdc63b4f002ec0a"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 32",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file032.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0034",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "bf9c0be635693e0b96ff29d155914973cbc2dab9f84802dea6e13dbf1b12f08a"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 33",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file033.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0035",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "60feb435b4af58014ffad58b66a48924fa9fd5bbea8c7e3ec8ea3aeb93ed8794"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 34",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file034.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0036",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "d195a73d5cc64d1ea968edbc149ed0c1c53c0f6dbde47d6a20f77590344dea33"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 35",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file035.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0037",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "5a65b11807e6e9e8c942924dd6fb165ab5956e581beac7b6fb72bbd723d5a2e4"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 36",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file036.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0038",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "dfa2eeec916f14a673e306f0d33797d0580af9f97e1d5c5296a2dabd2d003d8e"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 37",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file037.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0039",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "95a99efc29274aac54b5f2e18d3af688c7b807624bb2f76c4a807e371c3bc77c"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 38",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file038.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0040",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "fa1b1ce35358f083ef08ff731165624f970670bf0a1135b9d401b0ae7f29d709"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 39",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file039.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0041",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "3121d09d72850adcbfb895773f4c6322a33bf4395595924d85a7c7a526dc75c7"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 40",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file040.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0042",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "b2132f92d96b60697e5cfa9c50fb4e5b37167a82006eadbd73ac1e7227d17a0d"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 41",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file041.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0043",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "f897c4362a67161508ae19f73ae23a8084ffaac246e84aa40a7f2cf1269ee6b2"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 42",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file042.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0044",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "618a418b1d10ccc56b1e9db71de18ec05627051ef6a0c5d0b97b9d88755efbaf"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 43",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file043.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0045",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "b1a9671faef07f305095e8cd3badc67962774b23ad52b4cb32241fabf1e8fcd7"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 44",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file044.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0046",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "f3b5574b17d8380db8cd295f04fc6778f03861105a2acdb54b7ee04871e7d829"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 45",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file045.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0047",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "2bdb6df5eee9729c2cb07d2a14dbf22914385fec6cc4dbaeb6fcbed7e5d72128"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 46",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file046.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0048",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "227d9b200ed8795d54b4b90ea3d3ac181a93bf5c9a9ef9a315f953a2ad2423a4"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 47",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file047.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0049",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "4947acd56463c53f69d9beace3c4e3526d6d300f027866ab2cd53cbb3b65f02b"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 48",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file048.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0050",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "1bcca6a18d8622ab3b9ce3639ee9eeabbc3d92c3c9c5b05608a921c99243a16e"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 49",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file049.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0051",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "22c7285df87b25cb0c1e6b71a83db731ad2371c179421fbb7f10888105566763"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 50",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file050.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0052",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "a97086f07b686267e0f83a1a5b5e81ba6223a0e67af4a764f4c2bc5c5e5a8e7d"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 51",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file051.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    },
+    {
+      "id": "F-0053",
+      "check_id": "syntax.parse",
+      "execution_id": "E-0001",
+      "context_id": "C-0002",
+      "rule_id": "SyntaxError",
+      "fingerprint": {
+        "algorithm": "v1",
+        "value": "60a219d4fb11e7c3ce736d3f4913a44c2b81c4595a3278c51bf056333db12a87"
+      },
+      "kind": "defect",
+      "severity": "note",
+      "confidence": "confirmed",
+      "gate": false,
+      "in_test_data": false,
+      "in_test_code": false,
+      "title": "Problem 52",
+      "message": "node --check reports a syntax error in this file.",
+      "locations": [
+        {
+          "role": "primary",
+          "path_base": "project_root",
+          "path": "src/file052.js",
+          "start": {
+            "line": 1,
+            "column": null
+          },
+          "end": null,
+          "file_sha256": "abababababababababababababababababababababababababababababababab",
+          "snippet": null
+        }
+      ],
+      "expected": null,
+      "actual": null,
+      "evidence": [],
+      "reproduction": {
+        "rerun_command": [
+          "js-prueffactory",
+          "test",
+          "/work/demo",
+          "--only",
+          "syntax.parse"
+        ],
+        "test": null,
+        "verified_by": [
+          "syntax.parse"
+        ]
+      },
+      "limitations": [],
+      "suite": null
+    }
+  ],
+  "metrics": [],
+  "inventory": {
+    "tests": [],
+    "test_suites": [],
+    "test_files": [],
+    "suppressions": [],
+    "file_hashes": [],
+    "size": [],
+    "moved_test_files": []
+  },
+  "limitations": [],
+  "artifacts": [],
+  "report_completeness": {
+    "all_findings_included": true,
+    "truncated_evidence_items": 0,
+    "missing_artifacts": [],
+    "redaction": {
+      "applied": false,
+      "count": 0,
+      "reason": "secrets scan not available"
+    }
+  }
+}

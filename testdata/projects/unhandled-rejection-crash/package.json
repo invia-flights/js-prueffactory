@@ -1,0 +1,12 @@
+{
+  "name": "unhandled-rejection-crash",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a promise rejects while the test file loads. The project logs it and every test passes normally; with --unhandled-rejections=strict the run ends early.",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

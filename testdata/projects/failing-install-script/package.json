@@ -1,0 +1,9 @@
+{
+  "name": "failing-install-script",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: no dependencies, but its preinstall script fails, so npm ci fails because of the project.",
+  "scripts": {
+    "preinstall": "node scripts/fail.js"
+  }
+}

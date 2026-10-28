@@ -1,0 +1,3 @@
+# The Check ignores this file too.
+/snapshot/src/index.js:github-pat:2
+/snapshot/test/fixtures/creds.json:stripe-access-token:1

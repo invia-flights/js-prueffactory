@@ -1,0 +1,5 @@
+{
+  "spec": ["test/**/*.test.js"],
+  "bail": true,
+  "exit": true
+}

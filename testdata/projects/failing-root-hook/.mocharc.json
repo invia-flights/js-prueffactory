@@ -1,0 +1,5 @@
+{
+  "spec": ["test/**/*.test.js"],
+  "file": ["test/setup.js"],
+  "exit": true
+}

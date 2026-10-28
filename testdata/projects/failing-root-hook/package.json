@@ -1,0 +1,13 @@
+{
+  "name": "failing-root-hook",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a root-level before hook throws, so no test runs and tests.existing reports one hook Finding.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

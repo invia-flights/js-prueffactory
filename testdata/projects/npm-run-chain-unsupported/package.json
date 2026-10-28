@@ -1,0 +1,6 @@
+{
+  "name": "npm-run-chain-unsupported",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: the packages under packages/ hold test scripts that look like chains but that the tool refuses, each for another reason. The root package has no tests."
+}

@@ -1,0 +1,15 @@
+{
+  "name": "registry-data",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: its lockfile pins versions their authors marked deprecated, direct dependencies a major version or more behind their latest version, and one package of a private scope.",
+  "main": "src/index.js",
+  "dependencies": {
+    "@acme-private/widgets": "2.1.0",
+    "left-pad": "1.3.0",
+    "rimraf": "3.0.2"
+  },
+  "devDependencies": {
+    "uuid": "3.4.0"
+  }
+}

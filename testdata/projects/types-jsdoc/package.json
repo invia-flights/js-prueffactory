@@ -1,0 +1,10 @@
+{
+  "name": "types-jsdoc",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: plain JavaScript whose JSDoc contract is broken by one call. Its tsconfig.json is only for an editor and must not change the type check.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  }
+}

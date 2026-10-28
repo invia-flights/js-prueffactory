@@ -1,0 +1,2 @@
+# Removes the whole service block, which the Service template needs.
+service: null

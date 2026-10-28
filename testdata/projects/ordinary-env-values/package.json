@@ -1,0 +1,7 @@
+{
+  "name": "ordinary-env-values",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a .env file with one secret-looking value and several ordinary ones, a source path and a Service name that contain the ordinary values. Every value is invented and opens nothing.",
+  "main": "src/billing/invoice.js"
+}

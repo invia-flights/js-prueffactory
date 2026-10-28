@@ -1,0 +1,14 @@
+{
+  "name": "lifecycle",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:unit && npm run test:api",
+    "pretest:unit": "node scripts/prepare.js",
+    "test:unit": "mocha test/unit",
+    "test:api": "mocha test/api"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

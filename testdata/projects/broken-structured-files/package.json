@@ -1,0 +1,6 @@
+{
+  "name": "broken-structured-files",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a broken JSON or YAML file is a Gate, a broken one in Test data is a note, JSONC comments and the !reference tag are accepted."
+}

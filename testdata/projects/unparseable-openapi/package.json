@@ -1,0 +1,13 @@
+{
+  "name": "unparseable-openapi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: an OpenAPI file with a character YAML forbids is a Gate of artifacts.structured, and api.lint leaves it to that Check.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

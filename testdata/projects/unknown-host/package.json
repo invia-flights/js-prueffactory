@@ -1,0 +1,12 @@
+{
+  "name": "unknown-host",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: its test requests a host that the Run does not provide, so it must fail with a lookup error long before its 5 s timeout.",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

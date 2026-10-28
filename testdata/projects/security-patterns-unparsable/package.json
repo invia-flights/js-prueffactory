@@ -1,0 +1,7 @@
+{
+  "name": "security-patterns-unparsable",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a file that is not valid JavaScript and holds an HTML comment opener, next to a valid file with a weak hash call.",
+  "main": "src/ok.js"
+}

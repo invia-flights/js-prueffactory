@@ -1,0 +1,13 @@
+{
+  "name": "yarn-unsupported",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: a Mocha project installed with yarn, whose only lockfile is a hand-written yarn.lock.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

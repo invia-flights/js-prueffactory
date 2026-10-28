@@ -1,0 +1,175 @@
+# The security rules js-prueffactory owns. security.patterns runs them with the
+# semgrep engine inside the njsscan image, next to njsscan's own rules. They are
+# embedded in the binary, and their hash is part of the Benchmark fingerprint.
+# Every rule is written here; no rule of the Semgrep registry is used.
+#
+# A call through the module is matched by its name (`child_process.exec(...)`),
+# which semgrep resolves for require, destructuring and import. The `node:`
+# prefix is not resolved that way, so those forms are spelled out.
+#
+# A matched text that is one quoted string, or one template without `${`, is a
+# literal. Anything else, such as a literal followed by `+ value`, is not. The
+# closing backtick of a template is not part of the text semgrep reports, so it
+# is optional in the expression; a backtick inside the text ends the template
+# and the rest must then be empty.
+rules:
+  - id: child-process-exec-non-literal
+    message: A shell command is built from a value that is not a literal. If any part comes from a request or another outside source, it can inject commands. Pass the arguments as an array to execFile or spawn instead.
+    severity: WARNING
+    languages: [javascript, typescript]
+    patterns:
+      - pattern-either:
+          - pattern: child_process.exec($CMD, ...)
+          - pattern: child_process.execSync($CMD, ...)
+          - patterns:
+              - pattern-either:
+                  - pattern: $CP.exec($CMD, ...)
+                  - pattern: $CP.execSync($CMD, ...)
+              - pattern-inside: |
+                  $CP = require("node:child_process");
+                  ...
+          - patterns:
+              - pattern-either:
+                  - pattern: exec($CMD, ...)
+                  - pattern: execSync($CMD, ...)
+              - pattern-inside: |
+                  import { $X } from "node:child_process";
+                  ...
+          - patterns:
+              - pattern-either:
+                  - pattern: $CP.exec($CMD, ...)
+                  - pattern: $CP.execSync($CMD, ...)
+              - pattern-inside: |
+                  import * as $CP from "node:child_process";
+                  ...
+      - metavariable-regex:
+          metavariable: $CMD
+          regex: ^(?!(?:"[^"]*"|'[^']*'|`[^`\x24]*(?:\x24(?!\{)[^`\x24]*)*`?)$)
+
+  - id: eval-non-literal
+    message: Code is evaluated from a value that is not a literal. If any part comes from a request or another outside source, it runs as code. Parse data with JSON.parse and do not evaluate text.
+    severity: WARNING
+    languages: [javascript, typescript]
+    patterns:
+      - pattern-either:
+          - pattern: eval($CODE)
+          - pattern: new Function(..., $CODE)
+          - pattern: Function(..., $CODE)
+          - pattern: vm.runInContext($CODE, ...)
+          - pattern: vm.runInNewContext($CODE, ...)
+          - pattern: vm.runInThisContext($CODE, ...)
+          - patterns:
+              - pattern-either:
+                  - pattern: $VM.runInContext($CODE, ...)
+                  - pattern: $VM.runInNewContext($CODE, ...)
+                  - pattern: $VM.runInThisContext($CODE, ...)
+              - pattern-inside: |
+                  $VM = require("node:vm");
+                  ...
+          - patterns:
+              - pattern-either:
+                  - pattern: runInContext($CODE, ...)
+                  - pattern: runInNewContext($CODE, ...)
+                  - pattern: runInThisContext($CODE, ...)
+              - pattern-inside: |
+                  import { $X } from "node:vm";
+                  ...
+          - patterns:
+              - pattern-either:
+                  - pattern: $VM.runInContext($CODE, ...)
+                  - pattern: $VM.runInNewContext($CODE, ...)
+                  - pattern: $VM.runInThisContext($CODE, ...)
+              - pattern-inside: |
+                  import * as $VM from "node:vm";
+                  ...
+      - metavariable-regex:
+          metavariable: $CODE
+          regex: ^(?!(?:"[^"]*"|'[^']*'|`[^`\x24]*(?:\x24(?!\{)[^`\x24]*)*`?)$)
+
+  - id: redirect-request-data
+    message: The redirect target comes from the request. An attacker can send a visitor to a site of their choice. Check the target against a list of allowed paths or hosts first.
+    severity: WARNING
+    languages: [javascript, typescript]
+    patterns:
+      - pattern: $RES.redirect(..., <... $REQ.$PART ...>, ...)
+      - metavariable-regex:
+          metavariable: $REQ
+          regex: ^(req|request|ctx\.request)$
+      - metavariable-regex:
+          metavariable: $PART
+          regex: ^(query|body|params|headers|cookies|originalUrl|url)$
+
+  - id: tls-reject-unauthorized-false
+    message: TLS certificate verification is switched off here, so a man in the middle can pass as the server. Trust the right certificate authority instead.
+    severity: WARNING
+    languages: [javascript, typescript]
+    pattern: "{..., rejectUnauthorized: false, ...}"
+
+  - id: tls-env-reject-unauthorized-zero
+    message: NODE_TLS_REJECT_UNAUTHORIZED is set to 0, which switches off TLS certificate verification for the whole process.
+    severity: WARNING
+    languages: [javascript, typescript]
+    pattern-either:
+      - pattern: process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+      - pattern: process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
+      - pattern: process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"
+      - pattern: process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0
+
+  - id: math-random-in-secret-function
+    message: Math.random is not a secure source of randomness, and the name of this function says that its result is a token, a secret, a password or an identifier. Use crypto.randomBytes or crypto.randomUUID.
+    severity: WARNING
+    languages: [javascript, typescript]
+    patterns:
+      - pattern: Math.random()
+      - pattern-either:
+          - pattern-inside: |
+              function $F(...) {
+                ...
+              }
+          - pattern-inside: |
+              $F = function (...) {
+                ...
+              }
+          - pattern-inside: |
+              $F = (...) => {
+                ...
+              }
+          - pattern-inside: |
+              $F = (...) => $BODY
+          - pattern-inside: |
+              $F(...) {
+                ...
+              }
+          - pattern-inside: |
+              $F: function (...) {
+                ...
+              }
+      - metavariable-regex:
+          metavariable: $F
+          regex: (?i).*(token|secret|password|id).*
+
+  - id: weak-hash-md5-sha1
+    message: MD5 and SHA-1 are broken as hash functions. Do not use them for anything that must resist an attacker, such as signatures, passwords or integrity checks. Use SHA-256 or better.
+    severity: WARNING
+    languages: [javascript, typescript]
+    patterns:
+      - pattern-either:
+          - pattern: crypto.createHash($ALG, ...)
+          - patterns:
+              - pattern: $C.createHash($ALG, ...)
+              - pattern-inside: |
+                  $C = require("node:crypto");
+                  ...
+          - patterns:
+              - pattern: createHash($ALG, ...)
+              - pattern-inside: |
+                  import { $X } from "node:crypto";
+                  ...
+          - patterns:
+              - pattern: $C.createHash($ALG, ...)
+              - pattern-inside: |
+                  import * as $C from "node:crypto";
+                  ...
+      - metavariable-regex:
+          metavariable: $ALG
+          regex: (?i)^["'`](md5|sha1)["'`]?$
