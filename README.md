@@ -954,8 +954,6 @@ docs/               ADRs, GitLab CI page, research notes
 .scratch/           specs and tickets
 ```
 
-`example_projects/` is gitignored. It holds private projects kept out of version control for manual end-to-end tries. The tool must never depend on them or contain knowledge about them, and their own scripts must not be run.
-
 ### The tool's own tests
 
 There are two test levels.
