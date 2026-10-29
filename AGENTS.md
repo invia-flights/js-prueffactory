@@ -1,6 +1,6 @@
 # js-prueffactory
 
-Go CLI that benchmarks a JavaScript project by running pinned linters, scanners and the project's own tests in Docker. User docs, the repository layout and the testdata project table are in `README.md` under "Working on js-prueffactory".
+Go CLI that benchmarks a JavaScript project by running pinned linters, scanners and the project's own tests in Docker. User docs and the repository layout are in `README.md`. Before adding or changing a test project, read `testdata/projects/README.md`: what each project proves.
 
 ## Commands
 
@@ -21,6 +21,7 @@ go run ./dev/toolsetupdate -dry-run        # after bumping a tag in internal/too
 - This repo is public (MIT, GitHub). Every project, host and secret in it is invented. Fake keys use prefixes like `sk_prod_`; GitHub push protection rejects `sk_live_`.
 - Nothing here creates, changes or triggers anything in a CI system.
 - Code, CLI text, report text and docs are in English.
+- `README.md` is the user guide: what the current build does and how to read its Report. Give each implemented Check one table row. Versions, part constants and the Catalog live in `internal/toolset/`, `internal/benchmark/profile.go` and `list-checks`; link there.
 
 ## Agent skills
 
