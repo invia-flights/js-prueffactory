@@ -353,7 +353,7 @@ Exit codes 1 and 2 are different on purpose. A CI job can allow incomplete Runs 
 
 ## What gets checked
 
-The Catalog has 42 implemented Checks: the 29 of milestone 1 and the 13 that the first part of milestone 2 added (`tests.flaky`, `runtime.unhandled-rejections`, `types.strictness`, `lint.typed`, `security.patterns`, `deps.outdated`, `deps.deprecated`, `repository.gitlab-ci`, `repository.kubernetes`, `repository.github-actions`, `repository.compose`, `schema.drift` and `sbom.generate`). "Gate" in the tables below means the Check can fail the Run. The Benchmark area says which part of the score the Check feeds. "Side" means a side indicator that is shown next to the score with weight 0.
+The Catalog has 42 implemented Checks. "Gate" in the tables below means the Check can fail the Run. The Benchmark area says which part of the score the Check feeds. "Side" means a side indicator that is shown next to the score with weight 0.
 
 Native Checks are written in Go and run on the host-side copy without a container. Every other tool runs in its own pinned container.
 
@@ -685,7 +685,7 @@ A Finding looks like this, shortened:
 
 Two flags say where a Finding lies:
 
-- `in_test_code` is true when the primary location of the Finding is Test code, whatever Check produced it. The File class is the one the Checks use: the test file probe first, so a spec next to the code that the project's Mocha loads is Test code and a Source file with a test-like name stays Source code, and the folder names for a file that belongs to no package. A Finding without a file location has `false`. `report.md` adds "in Test code" to such a Finding. The Benchmark's Typed lint part counts only `lint.typed` Findings with `false`, so a hit in a co-located spec that the project's Mocha config selects does not count. Earlier versions of js-prueffactory counted such a hit, with the same profile ID and Catalog version; Reports of different builds of the tool are not compared (see the fingerprint section below).
+- `in_test_code` is true when the primary location of the Finding is Test code, whatever Check produced it. The File class is the one the Checks use: the test file probe first, so a spec next to the code that the project's Mocha loads is Test code and a Source file with a test-like name stays Source code, and the folder names for a file that belongs to no package. A Finding without a file location has `false`. `report.md` adds "in Test code" to such a Finding. The Benchmark's Typed lint part counts only `lint.typed` Findings with `false`, so a hit in a co-located spec that the project's Mocha config selects does not count. Reports of different builds of the tool are not compared (see the fingerprint section below).
 - `in_test_data` is true when the Check that produced the Finding treats its file as Test data. Only the Checks that report Test data differently set it: `security.secrets`, `syntax.parse`, `artifacts.structured` and `repository.gitlab-ci`. Every other Check leaves Test data out or reports it like any other file, and its Findings have `false`. `report.md` adds "in Test data". A Finding that is both, such as a secret in a fixture that the project's tests load, shows "(in Test data, in Test code)" in the Findings lists.
 
 A few rules make the file safe to process automatically:
@@ -797,7 +797,7 @@ These are shown next to the score with weight 0: Coverage, functions above the c
 
 Every Report carries a Benchmark fingerprint: the profile ID, Catalog version, toolset version, every image digest, a hash of the generated ESLint config and rule list, the hash of the rule list of `lint.typed`, the hash of the tool-owned security rules, the advisory database date, the TypeScript 6 version, the Kubernetes version of the schemas, the hash of the GitLab CI JSON Schema, and the Node and npm version per Context. The date of the registry data is in the Report (`run.registry_data_date`) but not in the fingerprint, because `deps.outdated` and `deps.deprecated` are side indicators. Equal fingerprints are necessary for comparing scores but not enough while the profile is uncalibrated: the Reports must also come from the same build of the tool, `producer.vcs_revision` (see below). A newer vulnerability database alone can change a score.
 
-The Catalog version is part of the fingerprint, so Reports of two Catalog versions never share one. It names the milestone whose Checks a release ships: `milestone-1`, then `milestone-1.1` after the review of the first real project (tests behind `npm run` chains run as several Suites, the Pass rate counts (Suite, file) pairs, `lint.correctness` ignores `_` names, the size indicator is `source_code_lines`, and a few false Findings are gone), and `milestone-2` since milestone 2 started. It does not change with every Check that starts measuring something else. While the profile is `benchmark-v1-uncalibrated`, the fixes and new rules within a milestone keep the Catalog version and the profile ID, for example Secrets in Test code no longer counting, the Typed lint part following `in_test_code`, and the dev-dependency rule following the production entry points. The fingerprint hashes the generated ESLint config and a few rule lists, not the code of the Checks, so such a change often moves no field of it. Equal fingerprints therefore do not make scores comparable on their own: compare attempts only between Reports with equal fingerprints and the same `producer.vcs_revision` (`producer.version` alone does not tell two commits apart). This narrows what [ADR-0003](docs/adr/0003-no-comparison-against-earlier-versions.md) says about comparing by fingerprint, and the ADR carries an amendment that says so.
+The Catalog version is part of the fingerprint, so Reports of two Catalog versions never share one. It changes when a release ships a different set of Checks, not with every Check that starts measuring something else. While the profile is `benchmark-v1-uncalibrated`, fixes and new rules keep the Catalog version and the profile ID. The fingerprint hashes the generated ESLint config and a few rule lists, not the code of the Checks, so such a change often moves no field of it. Equal fingerprints therefore do not make scores comparable on their own: compare attempts only between Reports with equal fingerprints and the same `producer.vcs_revision` (`producer.version` alone does not tell two commits apart). This narrows what [ADR-0003](docs/adr/0003-no-comparison-against-earlier-versions.md) says about comparing by fingerprint, and the ADR carries an amendment that says so.
 
 ### An example
 
@@ -951,7 +951,7 @@ dev/
   toolsetupdate/    refreshes pinned digests and checksums
 testdata/projects/  made-up projects with deliberate defects
 docs/               ADRs, GitLab CI page, research notes
-.scratch/           the specs and tickets of milestone 2
+.scratch/           specs and tickets
 ```
 
 `example_projects/` is gitignored. It holds private projects kept out of version control for manual end-to-end tries. The tool must never depend on them or contain knowledge about them, and their own scripts must not be run.
@@ -1113,7 +1113,7 @@ These are deliberate, and the Report flags each as unsupported where it applies:
 - Counting suppressions set in config files rather than comments
 - Score calibration. The Benchmark constants are uncalibrated priors.
 
-The Checks that are planned but not implemented yet are listed under [Planned Checks](#planned-checks). Mutation testing is the next big one.
+The Checks that are planned but not implemented yet are listed under [Planned Checks](#planned-checks).
 
 ## Further reading
 
@@ -1122,9 +1122,6 @@ The Checks that are planned but not implemented yet are listed under [Planned Ch
 | [GLOSSARY.md](GLOSSARY.md) | The project's vocabulary |
 | [docs/adr/](docs/adr) | Four architecture decisions: no bind mounts, Docker via CLI, no comparison against earlier versions, network phases |
 | [docs/gitlab-ci.md](docs/gitlab-ci.md) | The full GitLab CI example |
-| [.scratch/milestone-2a-checks/spec.md](.scratch/milestone-2a-checks/spec.md) | Milestone 2, Spec A: static and test-based Checks |
-| [.scratch/milestone-2b-mutation/spec.md](.scratch/milestone-2b-mutation/spec.md) | Milestone 2, Spec B: mutation testing |
-| [.scratch/milestone-2c-application/spec.md](.scratch/milestone-2c-application/spec.md) | Milestone 2, Spec C: Application Checks |
 | [docs/research/](docs/research) | Research notes on additional checks and the benchmark score |
 
 ## License
