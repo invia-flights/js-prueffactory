@@ -41,12 +41,25 @@ The code, the Report and this README use a fixed vocabulary. [GLOSSARY.md](GLOSS
 ## Requirements
 
 - macOS on Apple silicon, or Linux. Windows and WSL are not supported.
-- Go 1.27.1 or newer to build the binary. There is no prebuilt release.
+- Go 1.27.1 or newer, only if you build the binary yourself instead of downloading it.
 - The `docker` CLI and a running Docker daemon with API 1.41 or newer, which is Docker Engine 20.10 or newer. Docker Desktop works. The tool calls only the `docker` command, so Docker contexts and `DOCKER_HOST` work as usual.
 - Internet access for the Preparation phase.
 - Optional: the `git` CLI. With it, the Report records the commit and whether the working tree is dirty. Without it, the dirty state is `unknown`.
 
 Node, npm and every linter run in pinned images, so you need none of them locally.
+
+## Download
+
+Every push to `main` whose tests pass replaces the binaries in the prerelease [`main-latest`](https://github.com/invia-flights/js-prueffactory/releases/tag/main-latest). The URLs stay the same:
+
+```sh
+# js-prueffactory-linux-amd64, js-prueffactory-linux-arm64 or js-prueffactory-darwin-arm64
+curl -fsSL -o js-prueffactory \
+  https://github.com/invia-flights/js-prueffactory/releases/download/main-latest/js-prueffactory-darwin-arm64
+chmod +x js-prueffactory
+```
+
+`SHA256SUMS` in the same release lists the checksums. Because the download is always the newest `main`, two Reports can come from different builds. `producer.vcs_revision` in `report.json` names the commit a binary was built from.
 
 ## Build
 
@@ -436,11 +449,13 @@ Every per-step limit is also bounded by the remaining Budget. Checks that never 
 
 ## Running in GitLab CI
 
-Build a static Linux binary in an earlier job, as shown under [Build](#build). The tool runs next to a `docker:dind` service, reaches Docker through `DOCKER_HOST`, needs no TTY and logs plain lines to stderr.
+Download the Linux binary in the job, as below, or build a static one in an earlier job, as shown under [Build](#build). The tool runs next to a `docker:dind` service, reaches Docker through `DOCKER_HOST`, needs no TTY and logs plain lines to stderr. The `docker:*-cli` images have `wget` but no `curl`.
 
 ```yaml
 script:
-  - ./bin/js-prueffactory test "$CI_PROJECT_DIR" --output-dir "$CI_PROJECT_DIR/.output/js-prueffactory"
+  - wget -qO /usr/local/bin/js-prueffactory https://github.com/invia-flights/js-prueffactory/releases/download/main-latest/js-prueffactory-linux-amd64
+  - chmod +x /usr/local/bin/js-prueffactory
+  - js-prueffactory test "$CI_PROJECT_DIR" --output-dir "$CI_PROJECT_DIR/.output/js-prueffactory"
 artifacts:
   when: always
   paths:
@@ -458,6 +473,8 @@ Every image is an official upstream image pinned by the digest of its multi-arch
 Build and test commands and the project rules are in [AGENTS.md](AGENTS.md). What each project under `testdata/projects/` proves is in [testdata/projects/README.md](testdata/projects/README.md).
 
 ```
+.github/workflows/
+  main-build.yml    tests main, builds the binaries, replaces the main-latest prerelease
 cmd/js-prueffactory/    main: wires the process into internal/cli
 internal/
   cli/          command front end: flags, output folder, exit code (test seam A)

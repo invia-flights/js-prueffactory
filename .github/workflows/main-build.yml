@@ -1,0 +1,63 @@
+# Builds js-prueffactory from every push to main and publishes the binaries in
+# the prerelease main-latest. Its tag moves to the pushed commit, so the
+# download URLs stay the same. A push whose tests fail publishes nothing.
+name: main build
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: main-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Test, build and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write # move the main-latest tag and replace the release assets
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Test
+        run: go test ./...
+
+      # -buildvcs=true fails the build instead of shipping a binary whose
+      # Reports lack producer.vcs_revision. The binaries go outside the work
+      # tree, where they would mark the next build as vcs.modified.
+      - name: Build
+        run: |
+          mkdir "$RUNNER_TEMP/dist"
+          for target in linux/amd64 linux/arm64 darwin/arm64; do
+            os=${target%/*} arch=${target#*/}
+            CGO_ENABLED=0 GOOS=$os GOARCH=$arch go build -trimpath -buildvcs=true -ldflags='-s -w' \
+              -o "$RUNNER_TEMP/dist/js-prueffactory-$os-$arch" ./cmd/js-prueffactory
+          done
+          (cd "$RUNNER_TEMP/dist" && sha256sum js-prueffactory-* > SHA256SUMS)
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: main-latest
+        run: |
+          notes="Built from $GITHUB_SHA, the latest commit on main whose tests pass. Replaced on every push to main."
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh api --method PATCH "repos/$GH_REPO/git/refs/tags/$TAG" -f sha="$GITHUB_SHA" -F force=true > /dev/null
+            gh release upload "$TAG" "$RUNNER_TEMP"/dist/* --clobber
+            gh release edit "$TAG" --notes "$notes"
+          else
+            gh release create "$TAG" "$RUNNER_TEMP"/dist/* --prerelease --latest=false --target "$GITHUB_SHA" \
+              --title "Latest main build" --notes "$notes"
+          fi
