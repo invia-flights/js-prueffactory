@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/images/icon.png" width="200" alt="js-prueffactory icon: a machine with a JS badge inspects a code file and turns it into a report">
+</p>
+
 # js-prueffactory
 
 js-prueffactory checks a JavaScript project and reports, in one place, what is wrong with it and what could not be checked.
@@ -475,6 +479,7 @@ Build and test commands and the project rules are in [AGENTS.md](AGENTS.md). Wha
 ```
 .github/workflows/
   main-build.yml    tests main, builds the binaries, replaces the main-latest prerelease
+assets/images/icon.png  the icon at the top of this README
 cmd/js-prueffactory/    main: wires the process into internal/cli
 internal/
   cli/          command front end: flags, output folder, exit code (test seam A)
