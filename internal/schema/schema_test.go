@@ -11,8 +11,6 @@ import (
 	"github.com/invia-flights/jscript-bench/internal/schema"
 )
 
-func ptr[T any](v T) *T { return &v }
-
 func marshal(t *testing.T, v any) []byte {
 	t.Helper()
 	b, err := json.Marshal(v)

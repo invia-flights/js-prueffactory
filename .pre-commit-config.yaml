@@ -1,0 +1,46 @@
+# Install once with `pre-commit install`. CI runs every hook on every file
+# (.github/workflows/ci.yml). testdata/ holds deliberately broken projects and
+# byte-exact golden files, so no hook touches it.
+exclude: (^|/)testdata/
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # frozen: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [--enforce-all]
+      - id: check-merge-conflict
+      - id: check-json
+      - id: check-yaml
+      # internal/checks/data/ keeps upstream files byte for byte.
+      - id: end-of-file-fixer
+        exclude: ^internal/checks/data/
+      - id: trailing-whitespace
+        exclude: ^internal/checks/data/
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  - repo: local
+    hooks:
+      - id: go-mod-tidy
+        name: go mod tidy
+        entry: go mod tidy -diff
+        language: system
+        files: (\.go|^go\.(mod|sum))$
+        pass_filenames: false
+
+  - repo: https://github.com/golangci/golangci-lint
+    rev: 25c5369a93aacb8cccea0d46e1569ca4a194564d # frozen: v2.15.0
+    hooks:
+      - id: golangci-lint-config-verify
+      - id: golangci-lint-full
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # frozen: v1.7.12
+    hooks:
+      - id: actionlint
+
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: c92afdf2c6ca336aaa8f39e2bd8d48f62dbd8e1f # frozen: v1.31.1
+    hooks:
+      - id: zizmor

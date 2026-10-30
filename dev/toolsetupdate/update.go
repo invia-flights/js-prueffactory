@@ -42,8 +42,7 @@ func (c Change) String() string {
 // edit replaces the string literal at [start, end) of a file's source.
 type edit struct {
 	start, end int
-	what       string
-	old, new   string
+	new        string
 }
 
 // pin is one value of the table to refresh: the literal holding it and how to

@@ -64,7 +64,7 @@ type stringField struct{ path, tag string }
 // their type.
 func stringFields(t reflect.Type, path string, out *[]stringField) {
 	switch t.Kind() {
-	case reflect.Ptr, reflect.Slice, reflect.Array:
+	case reflect.Pointer, reflect.Slice, reflect.Array:
 		stringFields(t.Elem(), path, out)
 	case reflect.Struct:
 		for i := 0; i < t.NumField(); i++ {
@@ -78,7 +78,7 @@ func stringFields(t reflect.Type, path string, out *[]stringField) {
 				child = path + "." + name
 			}
 			switch ft := f.Type; {
-			case ft == stringType, ft.Kind() == reflect.Ptr && ft.Elem() == stringType,
+			case ft == stringType, ft.Kind() == reflect.Pointer && ft.Elem() == stringType,
 				ft.Kind() == reflect.Slice && ft.Elem() == stringType:
 				*out = append(*out, stringField{child, f.Tag.Get("redact")})
 			default:

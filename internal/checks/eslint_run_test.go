@@ -148,7 +148,7 @@ func TestTargetsOfANestedPackageAreRelativeToItsFolderAndLeaveOutTheOuterPackage
 }
 
 func TestSymbolicLinksAreNeverGivenToESLint(t *testing.T) {
-	proj, dir := writeTree(t, map[string]string{
+	_, dir := writeTree(t, map[string]string{
 		"package.json": `{"name":"x"}`,
 		"src/real.js":  "1;\n",
 	})
@@ -217,7 +217,7 @@ func TestMochaGlobalsApplyToTestCodeOfPackagesThatNameMocha(t *testing.T) {
 }
 
 func TestAnOversizedFileIsNotGivenToESLintButIsListedAsSkipped(t *testing.T) {
-	proj, dir := writeTree(t, map[string]string{
+	_, dir := writeTree(t, map[string]string{
 		"package.json": `{"name":"x"}`,
 		"src/small.js": "1;\n",
 	})

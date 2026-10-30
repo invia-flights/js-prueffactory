@@ -357,7 +357,7 @@ func (r *Redactor) walk(v reflect.Value, identifier bool, path string) int {
 			}
 			n += c
 		}
-	case reflect.Ptr, reflect.Interface:
+	case reflect.Pointer, reflect.Interface:
 		if !v.IsNil() {
 			n += r.walk(v.Elem(), identifier, path)
 		}

@@ -72,7 +72,7 @@ func (d *Driver) StartService(ctx context.Context, spec ServiceSpec) (string, er
 		return "", err
 	}
 	if _, err := d.output(ctx, nil, "start", name); err != nil {
-		d.RemoveService(context.WithoutCancel(ctx), name)
+		_ = d.RemoveService(context.WithoutCancel(ctx), name)
 		return "", err
 	}
 	return name, nil
