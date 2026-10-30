@@ -478,7 +478,9 @@ Build and test commands and the project rules are in [AGENTS.md](AGENTS.md). Wha
 
 ```
 .github/workflows/
+  ci.yml            pre-commit hooks, go test -race, Docker tests and govulncheck for every PR and push to main
   main-build.yml    tests main, builds the binaries, replaces the main-latest prerelease
+.pre-commit-config.yaml, .golangci.yml   the hooks and linters that ci.yml runs too
 assets/images/icon.png  the icon at the top of this README
 cmd/js-prueffactory/    main: wires the process into internal/cli
 internal/

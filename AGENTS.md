@@ -11,6 +11,8 @@ go test -tags docker -timeout 60m ./...    # full, needs a Docker daemon; intern
 go test ./internal/writer -update          # after a renderer change; then review git diff internal/writer/testdata/golden
 go run ./dev/reportcheck <report-folder>   # validate a report folder (-json-only for --format json)
 go run ./dev/toolsetupdate -dry-run        # after bumping a tag in internal/toolset/; drop -dry-run to rewrite
+pre-commit install                         # once per clone: golangci-lint, go mod tidy, file hygiene, actionlint, zizmor
+pre-commit run --all-files                 # every hook on every file, as CI runs it
 ```
 
 ## Rules
@@ -19,7 +21,7 @@ go run ./dev/toolsetupdate -dry-run        # after bumping a tag in internal/too
 - Docker-only tests live in `*_docker_test.go` behind `//go:build docker`.
 - Name things with GLOSSARY.md terms (Run, Check, Gate, Finding, Report …), not the words it lists under _Avoid_.
 - This repo is public (MIT, GitHub). Every project, host and secret in it is invented. Fake keys use prefixes like `sk_prod_`; GitHub push protection rejects `sk_live_`.
-- The only CI is `.github/workflows/main-build.yml`: on every push to `main` it runs `go test ./...` and replaces the binaries in the GitHub prerelease `main-latest`. Nothing else here creates, changes or triggers anything in a CI system.
+- CI is GitHub Actions only. `ci.yml` runs the pre-commit hooks, `go test -race`, the Docker tests and govulncheck on every pull request and push to `main`. `main-build.yml` replaces the binaries in the prerelease `main-latest` on every push to `main`. Nothing else here creates, changes or triggers anything in a CI system.
 - Code, CLI text, report text and docs are in English.
 - `README.md` is the user guide: what the current build does and how to read its Report. Give each implemented Check one table row. Versions, part constants and the Catalog live in `internal/toolset/`, `internal/benchmark/profile.go` and `list-checks`; link there.
 

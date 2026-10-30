@@ -45,7 +45,7 @@ func TestFinalizeMovesPassedTestCasesToAnArtifactReferencedByTheExecution(t *tes
 		t.Fatalf("artifact = %+v", a)
 	}
 	body := string(a.Content)
-	if strings.Index(body, "a works") < 0 || strings.Index(body, "a works") > strings.Index(body, "b works") {
+	if !strings.Contains(body, "a works") || strings.Index(body, "a works") > strings.Index(body, "b works") {
 		t.Errorf("passed cases are missing or not sorted by file:\n%s", body)
 	}
 	if strings.Contains(body, "a fails") {

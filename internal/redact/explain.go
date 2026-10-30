@@ -61,10 +61,8 @@ func (r *Redactor) Explain(problems []string) []string {
 	var lines, untouched []string
 	for _, shape := range order {
 		g := groups[shape]
-		label := shape
-		if g.count == 1 {
-			label = g.first
-		} else {
+		label := g.first
+		if g.count > 1 {
 			label = fmt.Sprintf("%s, first at %s", shape, g.first)
 		}
 		if len(g.sources) == 0 {

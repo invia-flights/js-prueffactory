@@ -41,9 +41,7 @@ func (depsDeprecated) Run(ctx context.Context, in *Input) *Result {
 		return data.failed()
 	}
 	res := data.result()
-	for _, f := range deprecatedFindings(in, data.versions, data.answers, data.locate) {
-		res.Findings = append(res.Findings, f)
-	}
+	res.Findings = append(res.Findings, deprecatedFindings(in, data.versions, data.answers, data.locate)...)
 	prod, dev := deprecatedCounts(data.versions, data.answers)
 	res.Metrics = append(res.Metrics,
 		resultset.Metric{Name: "deprecated_prod", Value: floatPtr(prod), Unit: "versions"},
