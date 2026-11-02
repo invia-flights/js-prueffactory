@@ -1,8 +1,9 @@
-// This file turns the JSON output of hadolint and ShellCheck into Findings
-// (Go: repo_findings.go; its Redocly part arrives with api.lint). Error-level
+// This file turns the JSON output of hadolint, ShellCheck and Redocly CLI into
+// Findings (Go: repo_findings.go). Error-level
 // results are Gates, warnings are warnings, and the rest (info and style
 // results) are notes.
 import { quoteJSONString } from "../gocompat/json.ts";
+import { goString, trimSpaceBytes } from "../gocompat/utf8.ts";
 import { fields, trimSpace } from "../gocompat/strings.ts";
 import { type Schema, type GoSlice, unmarshal } from "../gocompat/unmarshal.ts";
 import { newFingerprint } from "../resultset/fingerprint.ts";
@@ -20,6 +21,8 @@ import {
 import { newFinding } from "../resultset/zero.ts";
 import { cutBytes, shorten } from "./cut_text.ts";
 import { type Input, untrusted } from "./input.ts";
+import type { ParseError } from "./artifacts_structured.ts";
+import type { OpenAPITarget } from "./repo_targets.ts";
 import { snapshotMount } from "./repo_tools.ts";
 
 /** projectPath turns a path a tool printed into a project-relative path. */
@@ -99,6 +102,27 @@ export function outputHead(...outputs: string[]): string {
     const t = trimSpace(o);
     if (t !== "") {
       return cutBytes(t, 200);
+    }
+  }
+  return "";
+}
+
+/**
+ * outputHeadBytes is outputHead of raw tool output: trimmed and cut as bytes,
+ * as Go does, and only then decoded, so that invalid UTF-8 counts one byte
+ * each.
+ */
+export function outputHeadBytes(...outputs: Uint8Array[]): string {
+  for (const o of outputs) {
+    const t = trimSpaceBytes(o);
+    if (t.length > 0) {
+      let n = Math.min(t.length, 200);
+      if (t.length > 200) {
+        while (n > 0 && ((t[n] ?? 0) & 0xc0) === 0x80) {
+          n--;
+        }
+      }
+      return goString(t.subarray(0, n));
     }
   }
   return "";
@@ -278,4 +302,174 @@ export function shellcheckFindings(
       ]),
     }),
   );
+}
+
+// --- Redocly CLI ---
+
+/**
+ * RedoclyNoJSON is Redocly exiting without a JSON report, as it does when it
+ * cannot read or parse a file. output is the first 200 bytes of what it
+ * printed.
+ */
+export class RedoclyNoJSON extends Error {
+  readonly output: string;
+  constructor(output: string) {
+    super(
+      output === ""
+        ? "redocly printed no JSON and nothing else"
+        : "redocly printed no JSON, it said: " + output,
+    );
+    this.name = "RedoclyNoJSON";
+    this.output = output;
+  }
+}
+
+/**
+ * unparseableFinding is the Gate for an OpenAPI file that is not valid YAML
+ * or JSON, reported when artifacts.structured is not there to report it.
+ */
+export function unparseableFinding(
+  input: Input,
+  target: OpenAPITarget,
+  perr: ParseError,
+  output: string,
+): Finding {
+  return repoFinding(input, "api.lint", {
+    tool: "redocly",
+    rule: "unparseable",
+    level: "error",
+    path: target.path,
+    line: perr.line,
+    column: perr.column,
+    message: "the file is not valid YAML or JSON, so it cannot be linted",
+    raw: output,
+  });
+}
+
+interface RedoclyProblem {
+  ruleId: string;
+  severity: string;
+  message: string;
+  location: GoSlice | null;
+}
+
+interface RedoclyLocation {
+  start: { line: bigint; col: bigint };
+}
+
+const redoclyStart =
+  'struct { Line int "json:\\"line\\""; Col int "json:\\"col\\"" }';
+const redoclyLocation = `struct { Start ${redoclyStart} "json:\\"start\\"" }`;
+const redoclyProblem = `struct { RuleID string "json:\\"ruleId\\""; Severity string "json:\\"severity\\""; Message string "json:\\"message\\""; Location []${redoclyLocation} "json:\\"location\\"" }`;
+
+const redoclySchema: Schema = {
+  kind: "struct",
+  type: `struct { Problems []${redoclyProblem} "json:\\"problems\\"" }`,
+  fields: [
+    {
+      name: "problems",
+      schema: {
+        kind: "slice",
+        type: "[]" + redoclyProblem,
+        elem: {
+          kind: "struct",
+          type: redoclyProblem,
+          fields: [
+            { name: "ruleId", schema: str },
+            { name: "severity", schema: str },
+            { name: "message", schema: str },
+            {
+              name: "location",
+              schema: {
+                kind: "slice",
+                type: "[]" + redoclyLocation,
+                elem: {
+                  kind: "struct",
+                  type: redoclyLocation,
+                  fields: [
+                    {
+                      name: "start",
+                      schema: {
+                        kind: "struct",
+                        type: redoclyStart,
+                        fields: [
+                          { name: "line", schema: int },
+                          { name: "col", schema: int },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+  ],
+};
+
+/** redoclyRaw is Go's json.Marshal of one decoded Redocly problem. */
+function redoclyRaw(p: RedoclyProblem): string {
+  const q = (s: string) => quoteJSONString(s, true);
+  const locations =
+    p.location === null
+      ? "null"
+      : "[" +
+        (p.location.items() as RedoclyLocation[])
+          .map(
+            (l) =>
+              `{"start":{"line":${l.start.line.toString()},"col":${l.start.col.toString()}}}`,
+          )
+          .join(",") +
+        "]";
+  return `{"ruleId":${q(p.ruleId)},"severity":${q(p.severity)},"message":${q(p.message)},"location":${locations}}`;
+}
+
+/**
+ * redoclyFindings reads `redocly lint --format json` output for one file.
+ * For a file with a remote $ref it drops the failures to fetch that
+ * reference, since the Execution phase has no network: the caller records a
+ * Limitation instead. It throws RedoclyNoJSON for output that is not that
+ * JSON.
+ */
+export function redoclyFindings(
+  input: Input,
+  target: OpenAPITarget,
+  stdout: Uint8Array,
+  stderr: Uint8Array,
+): Finding[] {
+  let problems: RedoclyProblem[];
+  try {
+    const doc = unmarshal(stdout, redoclySchema) as {
+      problems: GoSlice | null;
+    };
+    problems = (doc.problems?.items() ?? []) as RedoclyProblem[];
+  } catch {
+    throw new RedoclyNoJSON(outputHeadBytes(stderr, stdout));
+  }
+  const out: Finding[] = [];
+  for (const p of problems) {
+    if (
+      target.remoteRef &&
+      p.ruleId === "no-unresolved-refs" &&
+      p.message.includes("fetch failed")
+    ) {
+      continue;
+    }
+    const first = p.location?.items()[0] as RedoclyLocation | undefined;
+    out.push(
+      repoFinding(input, "api.lint", {
+        tool: "redocly",
+        rule: p.ruleId,
+        level: p.severity,
+        path: target.path,
+        line: first === undefined ? 0 : Number(first.start.line),
+        column: first === undefined ? 0 : Number(first.start.col),
+        message: p.message,
+        raw: redoclyRaw(p),
+      }),
+    );
+  }
+  return out;
 }
