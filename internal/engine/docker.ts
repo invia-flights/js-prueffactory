@@ -70,7 +70,7 @@ export async function prepare(r: RunState, signal: AbortSignal): Promise<void> {
     await makeWorkingCopy(r, signal, workImage);
   }
   r.network = await drv.createNetwork(signal, "net", true);
-  await prepareToolset(r);
+  await prepareToolset(r, signal);
   await prepareAdvisoryDB(r);
   await prepareKubernetesSchemas(r);
   // The Execution phase starts here: its first step proves the network is closed.

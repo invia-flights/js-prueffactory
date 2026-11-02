@@ -11,6 +11,10 @@
 // Kubernetes schemas with repository.kubernetes (17), the advisory database
 // with security.dependencies (19). Until then no ported Check asks for them,
 // and a Check that does gets the reason below.
+import { contextError } from "../docker/common.ts";
+import { DefaultNodeMajor, nodeImage, VariantDebian } from "../toolset/node.ts";
+import { imageRef } from "../toolset/toolset.ts";
+import { ensure as ensureToolset } from "../toolvolume/toolvolume.ts";
 import type { RunState } from "./engine.ts";
 import { runnable } from "./plan.ts";
 
@@ -24,13 +28,42 @@ export function needsToolset(r: RunState): boolean {
   );
 }
 
-/** prepareToolset makes the toolset volume available to the Execution phase. */
-export function prepareToolset(r: RunState): Promise<void> {
-  if (needsToolset(r)) {
-    r.toolsetErr = notPorted("the toolset volume");
+/**
+ * prepareToolset makes the toolset volume available to the Execution phase:
+ * it installs the pinned npm tools once per toolset version and reuses them
+ * in later Runs. A failure does not stop the Run: the Checks that need the
+ * tools end as infrastructure_error with the reason, and every other Check
+ * goes on. Only a cancelled Run throws.
+ */
+export async function prepareToolset(
+  r: RunState,
+  signal: AbortSignal,
+): Promise<void> {
+  if (!needsToolset(r)) {
+    return;
+  }
+  const drv = r.cfg.docker;
+  const img = nodeImage(DefaultNodeMajor, VariantDebian);
+  if (drv === null || img === undefined) {
+    throw new Error("no Docker driver is configured");
+  }
+  try {
+    const vol = await ensureToolset(signal, {
+      docker: drv,
+      cacheDir: r.cfg.cacheDir,
+      image: imageRef(img),
+      logf: (line) => {
+        r.log.print(line);
+      },
+    });
+    r.toolsetVolume = vol.name;
+  } catch (err) {
+    if (signal.aborted) {
+      throw contextError(signal);
+    }
+    r.toolsetErr = err instanceof Error ? err.message : String(err);
     r.log.print(`toolset preparation failed: ${r.toolsetErr}`);
   }
-  return Promise.resolve();
 }
 
 /** needsAdvisoryDB says whether any execution that will run scans with the advisory database. */

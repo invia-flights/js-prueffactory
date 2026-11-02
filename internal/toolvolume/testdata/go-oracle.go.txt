@@ -1,0 +1,114 @@
+package toolvolume
+
+// Generator of testdata/go-oracle.json (TypeScript port, ticket 13). The Go
+// code is frozen, so this file is kept as text: copy it to
+// internal/toolvolume/zz_oracle_test.go, run
+//
+//	go test ./internal/toolvolume -run TestZZOracle -count=1
+//
+// and delete the copy. It records, with a fake docker CLI, every argument
+// list that Ensure (installing and reusing) and CleanOtherVersions pass to the
+// docker CLI, and the Helm install script.
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/invia-flights/jscript-bench/internal/docker"
+	"github.com/invia-flights/jscript-bench/internal/toolset"
+)
+
+type oracleCase struct {
+	Name  string     `json:"name"`
+	Error string     `json:"error"`
+	Logs  []string   `json:"logs"`
+	Calls [][]string `json:"calls"`
+}
+
+// The fake answers: `volume inspect` with the label "toolset" (or "" for a
+// volume named *unlabelled*), `inspect` of a container with exit code 0, or 1
+// for the probe when MODE=install, `volume ls` with the volumes in VOLUMES.
+const oracleScript = `#!/bin/sh
+for a in "$@"; do printf '%s\037' "$a"; done >> "$(dirname "$0")/calls"
+printf '\036' >> "$(dirname "$0")/calls"
+case "$1 $2" in
+  "volume inspect") case "$*" in *unlabelled*) echo "" ;; *) echo toolset ;; esac; exit 0 ;;
+  "volume ls") for v in $VOLUMES; do echo "$v"; done; exit 0 ;;
+  "volume rm") case "$3" in *busy*) echo 'Error response from daemon: remove x: volume is in use' >&2; exit 1 ;; esac; exit 0 ;;
+esac
+case "$1" in
+  inspect)
+    case "$*" in *toolset-probe*) if [ "$MODE" != reuse ]; then echo '{"ExitCode":1,"OOMKilled":false}'; exit 0; fi ;; esac
+    case "$*" in *toolset-install*) if [ "$MODE" = fail ]; then echo '{"ExitCode":1,"OOMKilled":false}'; exit 0; fi ;; esac
+    echo '{"ExitCode":0,"OOMKilled":false}' ;;
+  start) case "$*" in *toolset-install*) if [ "$MODE" = fail ]; then echo 'line one' >&2; echo 'line two' >&2; echo 'npm error code E401' >&2; echo 'npm error 401 Unauthorized' >&2; fi ;; esac ;;
+esac
+exit 0
+`
+
+func oracleRun(t *testing.T, name, mode, volumes string, f func(d *docker.Driver, cache string, logf func(string, ...any)) error) oracleCase {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "docker"), []byte(oracleScript), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	env := []string{"PATH=/usr/bin:/bin", "MODE=" + mode, "VOLUMES=" + volumes}
+	d := docker.New(filepath.Join(dir, "docker"), env).WithScope(docker.Scope{RunID: "RUN", Host: "h", PID: 1, Deadline: time.Unix(0, 0).UTC()})
+	c := oracleCase{Name: name, Logs: []string{}}
+	logf := func(format string, args ...any) { c.Logs = append(c.Logs, strings.ReplaceAll(fmt.Sprintf(format, args...), dir, "<cache>")) }
+	if err := f(d, filepath.Join(dir, "cache"), logf); err != nil {
+		c.Error = strings.ReplaceAll(err.Error(), dir, "<cache>")
+	}
+	data, _ := os.ReadFile(filepath.Join(dir, "calls"))
+	for _, call := range strings.Split(string(data), "\x1e") {
+		if call == "" {
+			continue
+		}
+		parts := strings.Split(call, "\x1f")
+		c.Calls = append(c.Calls, parts[:len(parts)-1])
+	}
+	return c
+}
+
+func TestZZOracle(t *testing.T) {
+	ctx := context.Background()
+	ensure := func(version string) func(d *docker.Driver, cache string, logf func(string, ...any)) error {
+		return func(d *docker.Driver, cache string, logf func(string, ...any)) error {
+			v, err := Ensure(ctx, Config{Docker: d, CacheDir: cache, Version: version, Image: "node@sha256:img", Logf: logf})
+			if err == nil {
+				logf("result: %s installed=%v", v.Name, v.Installed)
+			}
+			return err
+		}
+	}
+	others := "jspf-toolset-VNOW jspf-toolset-vold jspf-toolset-vbusy someone-elses-volume"
+	cases := []oracleCase{
+		oracleRun(t, "ensure installs", "install", others, ensure("VNOW")),
+		oracleRun(t, "ensure reuses", "reuse", others, ensure("VNOW")),
+		oracleRun(t, "ensure install fails", "fail", "", ensure("VNOW")),
+		oracleRun(t, "ensure gives up on a volume that never gets its labels", "reuse", "", ensure("unlabelled")),
+		oracleRun(t, "clean other versions", "reuse", others, func(d *docker.Driver, cache string, logf func(string, ...any)) error {
+			CleanOtherVersions(ctx, Config{Docker: d, CacheDir: cache, Version: "VNOW", Logf: logf})
+			return nil
+		}),
+	}
+	out := map[string]any{
+		"recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8",
+		"note":         "docker CLI argument lists of toolvolume.Ensure and CleanOtherVersions with a fake CLI (scope RUN, host h, pid 1, deadline the Unix epoch), and the Helm install script",
+		"cases":        cases,
+		"helmScript":   helmInstallScript(toolset.Helm),
+		"volumeName":   VolumeName(toolset.Version()),
+	}
+	data, err := json.MarshalIndent(out, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/go-oracle.json", append(data, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
