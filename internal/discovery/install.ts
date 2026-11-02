@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { join as joinPath } from "node:path";
 
 import { clean } from "../gocompat/path.ts";
@@ -6,6 +5,7 @@ import { detect } from "../lockfile/detect.ts";
 import { managerSupport } from "../lockfile/load.ts";
 import { type Manifest, parseManifest } from "../lockfile/manifest.ts";
 import type { Package } from "./discovery.ts";
+import { readRegular } from "./tsemit.ts";
 
 // readInstallInfo decides how the dependencies of every package get
 // installed: with npm, from a lockfile or without, or not at all because the
@@ -15,16 +15,17 @@ export function readInstallInfo(root: string, pkgs: readonly Package[]): void {
   const manifests = new Map<string, Manifest | null>();
   for (const pkg of pkgs) {
     const dir = joinPath(root, pkg.path);
-    let m: Manifest | null;
-    try {
-      const data = readFileSync(joinPath(dir, "package.json"));
+    // Go reads the manifest with a plain os.ReadFile (install.go:28); the
+    // port reads it as the build step rules do (hardening beyond Go): a
+    // symlinked or huge package.json counts as missing.
+    const data = readRegular(root, joinPath(dir, "package.json"));
+    let m: Manifest | null = null;
+    if (data !== null) {
       try {
         m = parseManifest(data);
       } catch {
         m = null;
       }
-    } catch {
-      m = null;
     }
     manifests.set(pkg.path, m);
     const d = detect(dir, m);
