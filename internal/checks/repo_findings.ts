@@ -163,7 +163,7 @@ const hadolintSchema: Schema = {
  * rawJSON is Go's json.Marshal of a decoded record: its fields in order, the
  * strings with HTML escaped.
  */
-function rawJSON(fieldsInOrder: [string, string | bigint][]): string {
+export function rawJSON(fieldsInOrder: [string, string | bigint][]): string {
   return (
     "{" +
     fieldsInOrder

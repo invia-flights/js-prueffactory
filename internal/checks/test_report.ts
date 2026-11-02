@@ -5,7 +5,7 @@
 import { RunnerMocha, RunnerNodeTest } from "../discovery/discovery.ts";
 import { quote as goQuote } from "../gocompat/fmt.ts";
 import { clean, ext, isAbs, join } from "../gocompat/path.ts";
-import { quoteMeta } from "../gocompat/regexp.ts";
+import { quoteMeta } from "../gocompat/quotemeta.ts";
 import { compareBytes, fields, trimSpace } from "../gocompat/strings.ts";
 import { newFingerprint } from "../resultset/fingerprint.ts";
 import {

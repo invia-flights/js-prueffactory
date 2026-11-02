@@ -16,6 +16,7 @@ export const normalisations: readonly string[] = [
   "host details: report.json run.host.os and run.host.arch; the Host line of report.md",
   "Docker details: report.json run.docker.server_version, api_version, cpus and memory_bytes; the Docker server line of report.md",
   "producer: report.json producer.name, producer.version and producer.vcs_revision; the Producer line of report.md",
+  'tool log times: the RFC 3339 time of a logrus line (time="..." level=...) that a tool such as docker compose printed and a Check quotes, in report.json, report.md and the artifacts; it is the time of the Run',
   "artifact hashes that follow from the above: when an artifact's content changes through the normalisation or the allowlist, its SHA-256 and size in report.json and report.md become those of the changed content",
 ];
 
@@ -95,9 +96,18 @@ export function reportValues(reportJSON: string | undefined): Values {
   return values;
 }
 
+// toolLogTime is the time of a logrus line, such as docker compose's
+// `time="2026-11-02T15:03:23Z" level=warning`, with its quotes escaped in
+// JSON or not.
+const toolLogTime =
+  /time=(\\?")\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})\1 level=/g;
+
 // substitute replaces every occurrence of the run ID and the times.
 export function substitute(text: string, values: Values): string {
-  let out = text;
+  let out = text.replace(
+    toolLogTime,
+    (_m, q: string) => `time=${q}${placeholders.time}${q} level=`,
+  );
   if (values.runID !== undefined && values.runID !== "") {
     out = out.split(values.runID).join(placeholders.runID);
   }

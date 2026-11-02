@@ -5,6 +5,7 @@ import {
   normaliseArtifact,
   normaliseInvocationOutput,
   normaliseReportMarkdown,
+  substitute,
 } from "./normalise.ts";
 
 test("invocation output: progress timestamps and run IDs, as the Go build printed them", () => {
@@ -100,4 +101,24 @@ test("passed-tests artifacts: only the attempt durations are normalised", () => 
     normaliseArtifact("artifacts/tests.existing/C-0002/passed.json", artifact),
     artifact,
   );
+});
+
+test("report texts: the time of a tool's logrus line is the Run's, so it is normalised", () => {
+  const none = { runID: undefined, times: [] };
+  const json =
+    '"text": "time=\\"2026-11-02T15:03:23Z\\" level=warning msg=\\"The \\\\\\"CI_API_URL\\\\\\" variable is not set.\\""';
+  assert.equal(
+    substitute(json, none),
+    '"text": "time=\\"<time>\\" level=warning msg=\\"The \\\\\\"CI_API_URL\\\\\\" variable is not set.\\""',
+  );
+  assert.equal(
+    substitute(
+      'time="2026-11-02T15:03:23.5+01:00" level=warning msg="x"',
+      none,
+    ),
+    'time="<time>" level=warning msg="x"',
+  );
+  // Without the level that follows, it is no log line and stays.
+  const other = 'time="2026-11-02T15:03:23Z" msg="x"';
+  assert.equal(substitute(other, none), other);
 });
