@@ -31,6 +31,7 @@ import {
   noteServicesNotStarted,
   serviceNotStarted,
 } from "./service_not_started.ts";
+import { shownPath } from "./shown_text.ts";
 import type { SuiteEvents } from "./test_events.ts";
 import {
   type Frame,
@@ -585,6 +586,20 @@ export function topFrameFile(stack: readonly string[]): string {
   return "";
 }
 
+/**
+ * shownPackage is the name of a dependency as trusted text allows it: it
+ * comes from a path in the test output, so a name that is no npm package
+ * name is replaced (hardening beyond Go, which wrote it raw; real names read
+ * the same).
+ */
+export function shownPackage(name: string): string {
+  return /^(?:@[A-Za-z0-9~][A-Za-z0-9._~-]{0,213}\/)?[A-Za-z0-9~][A-Za-z0-9._~-]{0,213}$/.test(
+    name,
+  )
+    ? name
+    : "(package name with unusual characters)";
+}
+
 /** dependencyOf names the package a path inside node_modules belongs to, or "". */
 export function dependencyOf(file: string): string {
   const marker = "/node_modules/";
@@ -635,7 +650,7 @@ function warningFinding(input: Input, w: RawWarning): Finding {
   if (dep !== "") {
     rule = "warning-from-dependency";
     severity = SeverityNote;
-    origin = "the dependency " + dep;
+    origin = "the dependency " + shownPackage(dep);
   }
   let kind = w.name;
   if (w.code !== "") {
@@ -651,7 +666,7 @@ function warningFinding(input: Input, w: RawWarning): Finding {
 
   let message = `Node printed the ${kind} while the tests ran, and it comes from ${origin}: ${oneLine(w.message, 400)}`;
   if (at.path !== head) {
-    message += ` The first frame in the project is ${at.path}.`;
+    message += ` The first frame in the project is ${shownPath(at.path)}.`;
   }
   if (w.count > 1) {
     message += ` It was printed ${String(w.count)} times.`;

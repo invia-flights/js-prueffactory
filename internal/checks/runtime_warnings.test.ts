@@ -15,6 +15,7 @@ import {
   TrustUntrusted,
   Unknown,
 } from "../resultset/types.ts";
+import { newFingerprint } from "../resultset/fingerprint.ts";
 import { newFinding, newService } from "../resultset/zero.ts";
 import { lookup } from "./catalog.ts";
 import type { Result } from "./input.ts";
@@ -24,19 +25,23 @@ import {
   frameFile,
   framePath,
   maxWarningFindings,
+  nodeOptionsLimitation,
   parseNodeWarnings,
   recordSuiteRun,
   runtimeWarningsID,
   suiteHealthFindings,
+  useRunTestSuite,
   topFrameFile,
   warningFindings,
 } from "./runtime_warnings.ts";
 import { Shared } from "./shared.ts";
 import { parseTestEvents } from "./test_events.ts";
 import {
+  chainInput,
   endOfSuite,
   finishedSuite,
   foundAdd,
+  limitationsOfCode,
   lines,
   nodeTestInput,
   passedAdd,
@@ -746,4 +751,187 @@ test("at most 20 resource names are listed", () => {
   const names = Array.from({ length: 30 }, (_, i) => `R${String(i)}`);
   const [counted] = describeResources(names);
   assert.equal(counted.split(", ").length, 20);
+});
+
+// --- a package with several suites (Go: test_suites_names_test.go) ---
+
+test("the NODE_OPTIONS override is listed once when both Checks are selected", async (t) => {
+  const count = async (...picked: string[]): Promise<[number, number]> => {
+    const input = suiteInput(t, { "test/a.test.js": "x" });
+    input.shared = new Shared();
+    input.selection = {
+      only: [],
+      exclude: [],
+      effective: picked,
+      deselected: [],
+      isStandardScope: false,
+      fast: false,
+      deselectedByFast: [],
+    };
+    const restore = useRunTestSuite((_signal, i) => {
+      const res = finishedSuite(
+        i,
+        parseTestEvents(lines(foundAdd, passedAdd, endOfSuite)),
+        "",
+        false,
+      );
+      res.limitations = [nodeOptionsLimitation(i, testsExistingID)];
+      return Promise.resolve(res);
+    });
+    try {
+      const nodeOptions = (res: Result): number =>
+        (res.limitations ?? []).filter((l) =>
+          l.message.includes("NODE_OPTIONS"),
+        ).length;
+      return [
+        nodeOptions(await runCheck(testsExistingID, input)),
+        nodeOptions(await runCheck(runtimeWarningsID, input)),
+      ];
+    } finally {
+      restore();
+    }
+  };
+
+  assert.deepEqual(
+    await count(testsExistingID, runtimeWarningsID),
+    [1, 0],
+    "both selected: tests.existing lists it once and runtime.warnings not at all",
+  );
+  const [, warnings] = await count(runtimeWarningsID);
+  assert.equal(warnings, 1, "only runtime.warnings selected: it lists it once");
+});
+
+// runtime.warnings reads every suite of the package apart, and its Findings
+// name the suite they come from.
+
+test("runtime.warnings of several suites are read per suite and name their suite", async (t) => {
+  const input = chainInput(t);
+  input.selection = selectionWithout(testsExistingID, testsCoverageID);
+  stubSuites(t, (i, ran) => {
+    const end =
+      ran === 1 ? `{"ev":"end","resources":["TCPServerWrap"]}` : endOfSuite;
+    return finishedSuite(
+      i,
+      parseTestEvents(lines(foundAdd, passedAdd, end)),
+      bufferDeprecation,
+      false,
+    );
+  });
+
+  const res = await runCheck(runtimeWarningsID, input);
+
+  assert.equal(
+    res.status,
+    StatusCompleted,
+    `${res.reasonCode ?? ""} ${res.reason ?? ""}`,
+  );
+  const got = (res.findings ?? []).map((f) => {
+    assert.notEqual(f.suite, null, `finding without a suite: ${f.title}`);
+    return [ruleOf(f), f.suite];
+  });
+  assert.deepEqual(
+    got,
+    [
+      ["warning-from-project", "test:unit"],
+      ["warning-from-project", "test:api"],
+      ["open-resources", "test:api"],
+    ],
+    "an open handle of one suite is reported with that suite only",
+  );
+  assert.notEqual(
+    res.findings?.[0]?.fingerprint,
+    res.findings?.[1]?.fingerprint,
+    "the same warning in two suites has two fingerprints",
+  );
+});
+
+test("runtime.warnings of a single package suite keep their Findings without a suite", async (t) => {
+  const input = suiteInput(t, { "test/a.test.js": "x", "src/index.js": "x" });
+  input.shared = new Shared();
+  stubSuite(
+    t,
+    finishedSuite(
+      input,
+      parseTestEvents(lines(foundAdd, passedAdd, endOfSuite)),
+      bufferDeprecation,
+      false,
+    ),
+  );
+
+  const res = await runCheck(runtimeWarningsID, input);
+
+  assert.equal(res.findings?.length, 1, JSON.stringify(res.findings));
+  const f = res.findings[0];
+  assert.ok(f);
+  assert.equal(f.suite, null);
+  assert.deepEqual(
+    f.fingerprint,
+    newFingerprint(
+      runtimeWarningsID,
+      "warning-from-project",
+      f.locations[0]?.path ?? "",
+      "DeprecationWarning DEP0005 Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead. ",
+    ),
+    "the fingerprint did not change",
+  );
+});
+
+test("the NODE_OPTIONS override of runtime.warnings is listed once for all suites", async (t) => {
+  const input = chainInput(t);
+  input.selection = selectionWithout(testsExistingID, testsCoverageID);
+  stubSuites(t, (i) =>
+    finishedSuite(
+      i,
+      parseTestEvents(lines(foundAdd, passedAdd, endOfSuite)),
+      "",
+      false,
+    ),
+  );
+
+  const res = await runCheck(runtimeWarningsID, input);
+
+  const got = limitationsOfCode(res, "test_command_override");
+  assert.equal(got.length, 1, JSON.stringify(got));
+  const l = got[0];
+  assert.ok(l);
+  assert.ok(l.message.includes("NODE_OPTIONS"));
+  assert.ok(
+    l.message.endsWith("Applies to the suites: `test:unit`, `test:api`."),
+    l.message,
+  );
+});
+
+test("a Limitation of one suite of runtime.warnings is not listed for the others", async (t) => {
+  const input = chainInput(t);
+  const first = input.context.package?.tests?.suites[0];
+  assert.ok(first);
+  first.env = new Map([["NODE_NO_WARNINGS", "1"]]);
+  stubSuites(t, (i) =>
+    finishedSuite(
+      i,
+      parseTestEvents(lines(foundAdd, passedAdd, endOfSuite)),
+      "",
+      false,
+    ),
+  );
+
+  const res = await runCheck(runtimeWarningsID, input);
+
+  const got = limitationsOfCode(res, "warnings_suppressed");
+  assert.equal(got.length, 1, JSON.stringify(got));
+  const l = got[0];
+  assert.ok(l);
+  assert.ok(l.message.includes("NODE_NO_WARNINGS=1"));
+  assert.ok(l.message.includes("`test:unit`"), l.message);
+  assert.ok(!l.message.includes("`test:api`"), l.message);
+});
+
+test("runtime.warnings of suites that did not run says so once", async (t) => {
+  const input = chainInput(t);
+  stubSuites(t, () => ({ status: StatusCompleted, findings: [newFinding()] }));
+
+  const res = await runCheck(runtimeWarningsID, input);
+
+  assert.equal(res.status, StatusCompleted);
+  assert.equal(limitationsOfCode(res, "tests_not_run").length, 1);
 });

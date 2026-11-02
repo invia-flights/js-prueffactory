@@ -32,7 +32,7 @@ import {
   nodeTestNativeBase,
   nodeTestReporterPath,
 } from "./tests_existing_nodetest.ts";
-import { type TestErr, errorText } from "./test_events.ts";
+import { errorText, type SuiteEvents, type TestErr } from "./test_events.ts";
 import {
   locate,
   nativeTestCommand,
@@ -302,7 +302,7 @@ export function repeatProblem(
   suite: string,
   n: number,
   res: Result,
-  ev: import("./test_events.ts").SuiteEvents | null,
+  ev: SuiteEvents | null,
   end: RepeatEnd,
 ): RepeatCut | null {
   const which = `Run ${String(n)} of the suite ${quote(suite)}`;

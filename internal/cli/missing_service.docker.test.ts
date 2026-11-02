@@ -5,9 +5,8 @@
 // the failure, a Limitation per suite in the Gaps, tests.existing partial (Go:
 // missing_service_docker_test.go).
 //
-// The Go tests also select runtime.warnings and check its open-resources
-// Findings for the same marks; that Check is ported by ticket 15, which
-// extends these tests.
+// runtime.warnings reads the same run: its open-resources Findings carry the
+// note for the marks too.
 import assert from "node:assert/strict";
 import { readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
@@ -15,6 +14,7 @@ import { test } from "node:test";
 
 import { assertNothingLeft, copyProject, realRun } from "./realrun.testutil.ts";
 import {
+  type Finding,
   findingsOf,
   full,
   oneExecution,
@@ -27,7 +27,12 @@ const existing = "tests.existing";
 test("a suite that needs a Service the Run did not start is marked and not blamed on the project", async (t) => {
   const original = copyProject(t, "missing-service");
 
-  const r = await realRun(t, ["test", original, "--only", existing]);
+  const r = await realRun(t, [
+    "test",
+    original,
+    "--only",
+    `${existing},runtime.warnings`,
+  ]);
 
   assert.equal(r.code, 2, `incomplete, no Gate\n${r.stderr}`);
   assertNothingLeft(r);
@@ -92,6 +97,34 @@ test("a suite that needs a Service the Run did not start is marked and not blame
   assert.equal(serviceNamed(s, "minio").status, "not_started");
   assert.equal(serviceNamed(s, "redis").status, "started");
 
+  // The integration suite's store client keeps reconnecting to minio, so the
+  // run ends with a socket open. runtime.warnings reads the same run and says
+  // that the missing Service may be the cause, as the failed test does. It
+  // stays completed: its scoring does not change.
+  const w = oneExecution(s, "runtime.warnings");
+  assert.equal(w.status, "completed");
+  assert.equal(w.gate, 0);
+  const open = findingsOf(s, "runtime.warnings").filter(
+    (x) => x.rule_id === "open-resources",
+  );
+  assert.equal(
+    open.length,
+    1,
+    `open-resources Findings of test:integration: ${JSON.stringify(open)}`,
+  );
+  const o = open[0];
+  assert.ok(o);
+  assert.equal(o.suite, "test:integration");
+  assert.ok(
+    o.message.includes(
+      "The suite `test:integration` may need the compose Service minio, which the Run did not start, so this warning may come from that and not from the project.",
+    ),
+    o.message,
+  );
+  assert.equal(o.confidence, "suspected");
+  assert.equal(o.gate, false);
+  assert.deepEqual(o.limitations, ["service_not_started"]);
+
   const md = readFileSync(join(r.reportDir, "report.md"), "utf8");
   assert.ok(
     md.includes("service_not_started"),
@@ -103,8 +136,7 @@ test("a suite that needs a Service the Run did not start is marked and not blame
 // refers to minio in a way the static search finds (the host is built in code),
 // so only the integration Suite, whose lookup fails, is marked. The unit Suite
 // leaves a server open too, and its Finding stays what it was without the
-// Service note: confirmed, with no note and no Limitation reference
-// (runtime.warnings, which makes that Finding, is ticket 15's).
+// Service note: confirmed, with no note and no Limitation reference.
 test("an unmarked suite keeps its runtime marks apart while the marked suite gets the note", async (t) => {
   const original = copyProject(t, "missing-service");
   rmSync(join(original, "test", ".test.env"));
@@ -150,7 +182,12 @@ describe('local server', () => {
 `,
   });
 
-  const r = await realRun(t, ["test", original, "--only", existing]);
+  const r = await realRun(t, [
+    "test",
+    original,
+    "--only",
+    `${existing},runtime.warnings`,
+  ]);
 
   assertNothingLeft(r);
   const s = full(r);
@@ -171,4 +208,37 @@ describe('local server', () => {
   assert.equal(e.reason_code, "service_not_started");
   assert.ok(e.reason?.includes("test:integration"), String(e.reason));
   assert.ok(!(e.reason ?? "").includes("test:unit"), e.reason ?? "");
+
+  const open = new Map<string, Finding>();
+  for (const f of findingsOf(s, "runtime.warnings")) {
+    if (f.rule_id === "open-resources" && f.suite !== null) {
+      open.set(f.suite, f);
+    }
+  }
+  const integration = open.get("test:integration");
+  assert.ok(
+    integration,
+    `no open-resources Finding of test:integration: ${JSON.stringify([...open])}`,
+  );
+  assert.ok(
+    integration.message.includes("may need the compose Service minio"),
+    integration.message,
+  );
+  assert.equal(integration.confidence, "suspected");
+  const unit = open.get("test:unit");
+  assert.ok(
+    unit,
+    `no open-resources Finding of test:unit: ${JSON.stringify([...open])}`,
+  );
+  assert.ok(
+    !unit.message.includes("may need the compose Service"),
+    unit.message,
+  );
+  assert.equal(unit.confidence, "confirmed");
+  assert.equal(unit.gate, false);
+  assert.deepEqual(
+    unit.limitations,
+    [],
+    "the unchanged Finding without the note",
+  );
 });

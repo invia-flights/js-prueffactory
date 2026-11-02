@@ -20,6 +20,7 @@ import { type Check, register } from "./check.ts";
 import type { Input, Result } from "./input.ts";
 import { workMount, workPath } from "./package_install.ts";
 import { selected } from "./selection.ts";
+import { shownWord } from "./shown_text.ts";
 import { Shared } from "./shared.ts";
 import { runSuites, suiteCount } from "./test_suites.ts";
 import {
@@ -568,7 +569,7 @@ function coverageNote(input: Input, suite: Result): string {
         s !== undefined
       ) {
         parts.push(
-          s.origin +
+          shownWord(s.origin, "suite name") +
             " did not run its tests, so what only it reaches is not counted",
         );
       }
