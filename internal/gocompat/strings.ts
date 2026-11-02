@@ -251,3 +251,32 @@ export function stringsOf(v: unknown): string[] {
   }
   return [];
 }
+
+/**
+ * trimRight is Go's strings.TrimRight for a cutset of single UTF-16 units
+ * (every cutset in this tool is ASCII): it removes every trailing character
+ * that is in cutset. It runs in linear time; a regular expression such as
+ * /x+$/ backtracks quadratically over a long run of x that is not at the
+ * end.
+ */
+export function trimRight(s: string, cutset: string): string {
+  let end = s.length;
+  while (end > 0 && cutset.includes(s.charAt(end - 1))) {
+    end--;
+  }
+  return s.slice(0, end);
+}
+
+/** trimLeft is Go's strings.TrimLeft for a cutset of single UTF-16 units, in linear time. */
+export function trimLeft(s: string, cutset: string): string {
+  let start = 0;
+  while (start < s.length && cutset.includes(s.charAt(start))) {
+    start++;
+  }
+  return s.slice(start);
+}
+
+/** trim is Go's strings.Trim for a cutset of single UTF-16 units, in linear time. */
+export function trim(s: string, cutset: string): string {
+  return trimLeft(trimRight(s, cutset), cutset);
+}

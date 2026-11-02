@@ -31,6 +31,7 @@ import {
   newSet,
 } from "../resultset/zero.ts";
 import { markdown } from "./markdown.ts";
+import { trimRight } from "../gocompat/strings.ts";
 
 export const sha = "cd".repeat(32);
 
@@ -295,7 +296,7 @@ export function outsideCodeFences(text: string): string {
   const out: string[] = [];
   let fence = "";
   for (const line of text.split("\n")) {
-    const trimmed = line.replace(/ +$/, "");
+    const trimmed = trimRight(line, " ");
     if (fence === "") {
       if (isFenceLine(trimmed)) {
         fence = trimmed;
@@ -379,7 +380,7 @@ export function stripCodeSpans(s: string): string {
 export function checkFences(text: string): string | undefined {
   let fence = "";
   for (const line of text.split("\n")) {
-    const trimmed = line.replace(/ +$/, "");
+    const trimmed = trimRight(line, " ");
     if (fence === "") {
       if (isFenceLine(trimmed)) {
         fence = trimmed;

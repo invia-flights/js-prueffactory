@@ -27,6 +27,7 @@
 import { isNotExist } from "../gocompat/os.ts";
 import { base, join } from "../gocompat/path.ts";
 import { maxConfigFile, readRegular } from "./files.ts";
+import { trimRight } from "../gocompat/strings.ts";
 
 // safeKeys lists "section.key" (no subsection) and "section.*.key" (any
 // subsection) names that only describe the repository and cannot run a
@@ -92,7 +93,7 @@ export function configFileRisk(text: string): string {
   let section = "";
   let sub = false;
   for (const raw of text.split("\n")) {
-    let line = raw.replace(/[ \t\r]+$/, "");
+    let line = trimRight(raw, " \t\r");
     // git continues a value over a backslash at the end of a line, but not
     // inside a comment, so this checker and git could read the next line
     // differently. Such a file is not examined further.

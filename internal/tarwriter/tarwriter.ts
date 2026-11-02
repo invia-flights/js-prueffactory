@@ -18,6 +18,7 @@ import type { Writable } from "node:stream";
 
 import { quoteBytes } from "../gocompat/fmt.ts";
 import { join } from "../gocompat/path.ts";
+import { trimRight } from "../gocompat/strings.ts";
 
 // TarHeader is the part of a tar header js-prueffactory sets.
 export interface TarHeader {
@@ -109,7 +110,7 @@ export class TarWriter {
     let paxName = toASCII(
       join(name.slice(0, slash), "PaxHeaders.0", name.slice(slash)),
     ).slice(0, nameSize);
-    paxName = trimRightSlashes(paxName);
+    paxName = trimRight(paxName, "/");
     const raw = Buffer.alloc(blockSize);
     raw[156] = typeXHeader;
     formatString(raw, 0, nameSize, paxName);
@@ -252,12 +253,6 @@ function toASCII(s: string): string {
   return out;
 }
 
-function trimRightSlashes(s: string): string {
-  let end = s.length;
-  while (end > 0 && s[end - 1] === "/") end--;
-  return s.slice(0, end);
-}
-
 // splitUSTARPath splits a long ASCII name at a "/" into a prefix of at most
 // 155 and a name of at most 100 bytes.
 function splitUSTARPath(name: string): [string, string] | undefined {
@@ -307,7 +302,7 @@ function formatString(blk: Buffer, at: number, size: number, s: string): void {
     blk[at + s.length] = 0;
   }
   if (s.length > size && blk[at + size - 1] === 0x2f) {
-    blk[at + trimRightSlashes(s.slice(0, size - 1)).length] = 0;
+    blk[at + trimRight(s.slice(0, size - 1), "/").length] = 0;
   }
 }
 

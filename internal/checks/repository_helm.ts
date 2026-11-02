@@ -13,7 +13,12 @@ import { join as joinPath } from "node:path";
 import type { Project } from "../discovery/discovery.ts";
 import type { ContainerResult } from "../docker/driver.ts";
 import { base, clean, dir, join } from "../gocompat/path.ts";
-import { compareBytes, sortStrings, trimSpace } from "../gocompat/strings.ts";
+import {
+  compareBytes,
+  sortStrings,
+  trimRight,
+  trimSpace,
+} from "../gocompat/strings.ts";
 import { goString } from "../gocompat/utf8.ts";
 import { newFingerprint } from "../resultset/fingerprint.ts";
 import {
@@ -427,7 +432,7 @@ export function helmLintFindings(
 ): Finding[] {
   const messages: { level: string; text: string }[] = [];
   for (let line of output.split("\n")) {
-    line = line.replace(/\r+$/, "");
+    line = trimRight(line, "\r");
     const m = helmMessage.exec(line);
     const last = messages.at(-1);
     if (m !== null) {

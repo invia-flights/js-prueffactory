@@ -8,7 +8,7 @@ TypeScript CLI (Node 24 or newer) that benchmarks a JavaScript project by runnin
 npm ci --ignore-scripts                    # once per clone, and after a change of package-lock.json
 npm test                                   # fast tests, no Docker, about half a minute
 npm run test:docker                        # Docker tests, need a Docker daemon; the internal/cli ones alone take ~15 min; `*.serial.docker.test.ts` run afterwards, one at a time
-npm run lint                               # ESLint, strict type-checked rules, no warnings allowed
+npm run lint                               # ESLint, strict type-checked rules and regexp/no-super-linear-* (a regex that can backtrack badly on project text fails; fix it or justify it on its line), no warnings allowed
 npm run format:check                       # Prettier; `npm run format` rewrites
 npm run typecheck                          # tsc, no emit
 npm run test:golden-update                 # after a renderer change; then review git diff internal/writer/testdata/golden

@@ -2,7 +2,14 @@
 // table cell, as a code span or as a code fence. None of them lets the text
 // make headings, lists, links, HTML or a fence of its own.
 
-import { fields, isControl, isSpace, trimSpace } from "../gocompat/strings.ts";
+import {
+  fields,
+  isControl,
+  isSpace,
+  trim,
+  trimRight,
+  trimSpace,
+} from "../gocompat/strings.ts";
 import { longestBacktickRun, quote } from "../resultset/quote.ts";
 
 /**
@@ -111,7 +118,7 @@ export function cell(s: string): string {
  * longest backtick run inside the text.
  */
 export function fence(s: string): string {
-  s = clean(s).replace(/\n+$/, "");
+  s = trimRight(clean(s), "\n");
   const f = "`".repeat(Math.max(3, longestBacktickRun(s) + 1));
   return f + "\n" + s + "\n" + f + "\n";
 }
@@ -186,7 +193,7 @@ export function reasonText(s: string): string {
       content.length > 1 &&
       content.startsWith(" ") &&
       content.endsWith(" ") &&
-      content.replace(/^ +| +$/g, "") !== ""
+      trim(content, " ") !== ""
     ) {
       content = content.slice(1, -1);
     }

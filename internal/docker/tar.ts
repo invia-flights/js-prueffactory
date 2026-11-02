@@ -5,6 +5,7 @@ import { buffer } from "node:stream/consumers";
 import { quote } from "../gocompat/fmt.ts";
 import { TarWriter } from "../tarwriter/tarwriter.ts";
 import { byteOrder } from "./common.ts";
+import { trim } from "../gocompat/strings.ts";
 
 // File is a file copied into a container before it starts.
 export interface File {
@@ -27,10 +28,7 @@ export async function tarFiles(files: readonly File[]): Promise<Buffer> {
   const tw = new TarWriter(out);
   const dirs = new Set<string>();
   for (const f of sorted) {
-    const name = posix
-      .normalize(f.path)
-      .replace(/^\/+/, "")
-      .replace(/\/+$/, "");
+    const name = trim(posix.normalize(f.path), "/");
     const parents: string[] = [];
     for (
       let dir = posix.dirname(name);

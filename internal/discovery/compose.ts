@@ -3,7 +3,7 @@ import { join as joinPath } from "node:path";
 
 import { formatFloatV } from "../gocompat/fmt.ts";
 import { GoError, pathError } from "../gocompat/os.ts";
-import { compareBytes, sortStrings } from "../gocompat/strings.ts";
+import { compareBytes, sortStrings, trim } from "../gocompat/strings.ts";
 import { type ServiceFamily, serviceFamilyOf } from "../toolset/services.ts";
 import * as yaml from "../yamlv3/yaml.ts";
 import { interpolate, readDotEnv } from "./compose_env.ts";
@@ -420,7 +420,7 @@ function versionDiffers(ref: ImageRef, family: ServiceFamily): boolean {
 function versionParts(tag: string): bigint[] {
   const head = /^[0-9.]*/.exec(tag)?.[0] ?? "";
   const parts: bigint[] = [];
-  for (const p of head.replace(/^\.+|\.+$/g, "").split(".")) {
+  for (const p of trim(head, ".").split(".")) {
     // strconv.Atoi: decimal digits within the int64 range.
     if (!/^[0-9]+$/.test(p)) break;
     const n = BigInt(p);

@@ -7,7 +7,7 @@
 // nil slice as null, keeps the sign of negative zero and formats times as RFC
 // 3339 with trimmed fractional seconds.
 
-import { compareBytes, zeroPad } from "./strings.ts";
+import { compareBytes, trimRight, zeroPad } from "./strings.ts";
 
 /** RedactTag is the `redact` struct tag of a report field (see redaction). */
 export type RedactTag = "vocabulary" | "identifier";
@@ -193,7 +193,7 @@ export function formatTime(d: Date): string {
   if (ms === 0) {
     return base;
   }
-  return `${base.slice(0, -1)}.${zeroPad(ms, 3).replace(/0+$/, "")}Z`;
+  return `${base.slice(0, -1)}.${trimRight(zeroPad(ms, 3), "0")}Z`;
 }
 
 export interface MarshalOptions {

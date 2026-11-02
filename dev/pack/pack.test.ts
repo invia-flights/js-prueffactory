@@ -170,6 +170,7 @@ describe("a packed tarball", () => {
       // .ts file; comments may still name one.
       assert.doesNotMatch(
         text,
+        // eslint-disable-next-line regexp/no-super-linear-move -- reads the packed sources of this repository, which are not untrusted input
         /^[^/\n]*from "\.{1,2}\/[^"]*\.ts";$|import\("\.{1,2}\/[^"]*\.ts"\)/m,
         entry,
       );

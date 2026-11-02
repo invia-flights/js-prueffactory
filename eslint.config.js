@@ -1,6 +1,7 @@
 // @ts-check
 import eslint from "@eslint/js";
 import { defineConfig, globalIgnores } from "eslint/config";
+import regexp from "eslint-plugin-regexp";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
@@ -40,6 +41,16 @@ export default defineConfig(
           ],
         },
       ],
+    },
+  },
+  // Regular expressions run over untrusted project text, so one that can
+  // backtrack badly is a way to hang the tool. Go's RE2 has no such pattern;
+  // V8's engine does. A hit is fixed, or silenced on its line with the reason.
+  {
+    plugins: { regexp },
+    rules: {
+      "regexp/no-super-linear-backtracking": "error",
+      "regexp/no-super-linear-move": "error",
     },
   },
 );

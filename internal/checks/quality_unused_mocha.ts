@@ -10,7 +10,12 @@ import { join as osJoin } from "node:path";
 import { BuildOutput, TestData } from "../discovery/discovery.ts";
 import { parseMochaArgs } from "../discovery/testfiles.ts";
 import { base, clean, dir, ext, join } from "../gocompat/path.ts";
-import { fields, sortStrings, trimSpace } from "../gocompat/strings.ts";
+import {
+  fields,
+  sortStrings,
+  trimRight,
+  trimSpace,
+} from "../gocompat/strings.ts";
 import { type Schema, unmarshal } from "../gocompat/unmarshal.ts";
 import { goString } from "../gocompat/utf8.ts";
 import * as yaml from "../yamlv3/yaml.ts";
@@ -526,13 +531,6 @@ function isGoSpaceAt(s: string, i: number): boolean {
   return cp !== undefined && trimSpace(String.fromCodePoint(cp)) === "";
 }
 
-/** trimRightCR is strings.TrimRight(s, "\r"), in linear time. */
-function trimRightCR(s: string): string {
-  let end = s.length;
-  while (end > 0 && s[end - 1] === "\r") end--;
-  return s.slice(0, end);
-}
-
 /**
  * dockerfileRunLines returns the commands of the RUN instructions of a
  * Dockerfile, with their line continuations joined and their options
@@ -549,7 +547,7 @@ export function dockerfileRunLines(content: string): string[] {
     const push = (piece: string): void => {
       if (piece !== "") parts.push(piece);
     };
-    push(trimRightCR(lines[i] ?? ""));
+    push(trimRight(lines[i] ?? "", "\r"));
     while (
       parts[parts.length - 1]?.endsWith("\\") === true &&
       i + 1 < lines.length
@@ -557,7 +555,7 @@ export function dockerfileRunLines(content: string): string[] {
       const last = parts.pop() ?? "";
       push(last.slice(0, -1));
       i++;
-      push(trimRightCR(lines[i] ?? ""));
+      push(trimRight(lines[i] ?? "", "\r"));
     }
     const line = parts.join("");
     const rest = runInstruction(trimSpace(line));

@@ -1,4 +1,4 @@
-import { zeroPad } from "../gocompat/strings.ts";
+import { trimRight, zeroPad } from "../gocompat/strings.ts";
 // GoTime is the time.Time a YAML timestamp decodes to in yaml.v3: a wall
 // clock in UTC or in a fixed zone of the given offset (time.FixedZone with
 // an empty name).
@@ -60,7 +60,7 @@ export function formatRFC3339Nano(t: GoTime): string {
 // when they are zero.
 function fraction(ns: number): string {
   if (ns === 0) return "";
-  return "." + zeroPad(ns, 9).replace(/0+$/, "");
+  return "." + trimRight(zeroPad(ns, 9), "0");
 }
 
 function numericZone(offset: number, colon: boolean): string {

@@ -1,6 +1,6 @@
 import { rel as filepathRel } from "../gocompat/filepath.ts";
 import { base, dir, join as joinPath } from "../gocompat/path.ts";
-import { compareBytes, fields } from "../gocompat/strings.ts";
+import { compareBytes, fields, trim } from "../gocompat/strings.ts";
 import * as json from "../gocompat/unmarshal.ts";
 import {
   type ReadOutcome,
@@ -202,7 +202,7 @@ export function buildScript(root: string, manifest: string): string {
       const words = fields(command);
       const noEmit = words.some((w) => /^noemit$/i.test(w.replace(/^-+/, "")));
       for (const w of words) {
-        const tool = base(w.replace(/^["']+|["']+$/g, ""));
+        const tool = base(trim(w, `"'`));
         if (buildTools.has(tool) && !(tool === "tsc" && noEmit)) {
           return "scripts." + name;
         }

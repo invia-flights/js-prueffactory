@@ -9,6 +9,7 @@ import {
   compareBytes,
   sortStrings,
   toLower,
+  trimRight,
   trimSpace,
 } from "../gocompat/strings.ts";
 import { goString } from "../gocompat/utf8.ts";
@@ -425,7 +426,7 @@ export function parseTSC(out: string): {
   // for a global one.
   let last = -1;
   for (let line of out.split("\n")) {
-    line = line.replace(/\r+$/, "");
+    line = trimRight(line, "\r");
     if (trimSpace(line) === "") {
       continue;
     }

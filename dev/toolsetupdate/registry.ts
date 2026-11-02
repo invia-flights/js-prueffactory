@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { STATUS_CODES } from "node:http";
 
 import { quote } from "../../internal/gocompat/fmt.ts";
-import { trimSpace } from "../../internal/gocompat/strings.ts";
+import { trim, trimSpace } from "../../internal/gocompat/strings.ts";
 import {
   type Schema,
   SyntaxError as JSONSyntaxError,
@@ -274,7 +274,7 @@ export class Registry {
       const kv = trimSpace(part);
       const eq = kv.indexOf("=");
       if (eq >= 0) {
-        fields.set(kv.slice(0, eq), kv.slice(eq + 1).replace(/^"+|"+$/g, ""));
+        fields.set(kv.slice(0, eq), trim(kv.slice(eq + 1), '"'));
       }
     }
     const realmText = fields.get("realm") ?? "";
