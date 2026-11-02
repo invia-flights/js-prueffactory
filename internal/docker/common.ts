@@ -2,6 +2,8 @@
 // state and import nothing of the driver, so driver.ts, cache.ts, service.ts
 // and sweep.ts can all use them without import cycles.
 
+import { trimSpace } from "../gocompat/strings.ts";
+
 // Label keys stamped on every run-owned resource.
 export const LabelRunID = "js-prueffactory.run-id";
 export const LabelHost = "js-prueffactory.host";
@@ -72,32 +74,15 @@ export function fastLookupFailure(): string[] {
   return ["--dns-opt", "timeout:1", "--dns-opt", "attempts:1"];
 }
 
-// goSpace is what Go's unicode.IsSpace accepts; JavaScript's \s differs
-// (it has U+FEFF and lacks U+0085).
-const goSpaceClass =
-  "\\t\\n\\v\\f\\r \\u0085\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000";
-const trimRe = new RegExp(`^[${goSpaceClass}]+|[${goSpaceClass}]+$`, "g");
-const fieldsRe = new RegExp(`[${goSpaceClass}]+`);
-
-// trimSpace is Go's strings.TrimSpace.
-export function trimSpace(s: string): string {
-  return s.replace(trimRe, "");
-}
-
-// fields is Go's strings.Fields.
-export function fields(s: string): string[] {
-  return s.split(fieldsRe).filter((f) => f !== "");
-}
+// trimSpace and fields are Go's strings.TrimSpace and strings.Fields;
+// byteOrder is Go's byte-wise string order. They live in gocompat.
+export { fields, trimSpace } from "../gocompat/strings.ts";
+export { compareBytes as byteOrder } from "../gocompat/strings.ts";
 
 // lastLine is the last line of a command's stderr, trimmed.
 export function lastLine(s: string): string {
   const lines = trimSpace(s).split("\n");
   return trimSpace(lines[lines.length - 1] ?? "");
-}
-
-// byteOrder compares strings as Go does: byte-wise over UTF-8.
-export function byteOrder(a: string, b: string): number {
-  return Buffer.compare(Buffer.from(a), Buffer.from(b));
 }
 
 // LimitedBuffer keeps at most max bytes and drops the rest.
