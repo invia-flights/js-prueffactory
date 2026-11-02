@@ -103,7 +103,7 @@ test("schema drift reports a stale file, leaves formatting alone, and a failing 
     [["schema-drift.generator-failed", "warning", "tools/legacy/package.json"]],
   );
   const ev = failed[0]?.evidence[0];
-  assert.equal(ev?.trust, "untrusted");
+  assert.equal(ev?.trust, "untrusted_data");
   assert.ok(ev.text.includes("cannot download the legacy schema"), ev.text);
 
   assert.equal(treeFingerprint(original), before, "the Original changed");
