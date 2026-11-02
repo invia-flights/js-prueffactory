@@ -24,8 +24,8 @@
 // check and the `git` call. The Original is not expected to be modified by
 // an attacker while the Run reads it, and the Snapshot (not the Original) is
 // what the Checks and containers see.
-import { isNotExist } from "../goport/os.ts";
-import { base, join } from "../goport/path.ts";
+import { isNotExist } from "../gocompat/os.ts";
+import { base, join } from "../gocompat/path.ts";
 import { maxConfigFile, readRegular } from "./files.ts";
 
 // safeKeys lists "section.key" (no subsection) and "section.*.key" (any

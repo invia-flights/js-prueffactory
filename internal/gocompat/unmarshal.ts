@@ -6,8 +6,9 @@
 //
 // Only the Go types the port decodes are modelled: string, bool, int,
 // json.RawMessage, pointers, map[string]T, []T and structs with json names.
-import { isPrint, quote, quoteRune } from "./quote.ts";
-import { decodeRune, fullRune, isSpace, RuneError, text } from "./utf8.ts";
+import { quoteBytes, quoteRune } from "./fmt.ts";
+import { isPrint, isSpace } from "./strings.ts";
+import { decodeRune, fullRune, RuneError, text } from "./utf8.ts";
 
 // SyntaxError is json.SyntaxError: the message and the offset after which
 // the error occurred.
@@ -73,9 +74,9 @@ export class GoSlice {
   }
 }
 
-// Decoded values: string → string, bool → boolean, int → bigint,
-// raw → Uint8Array | null, pointer → value | null, map → Map | null,
-// slice → GoSlice | null, struct → a record keyed by json name.
+// Decoded values: string -> string, bool -> boolean, int -> bigint,
+// raw -> Uint8Array | null, pointer -> value | null, map -> Map | null,
+// slice -> GoSlice | null, struct -> a record keyed by json name.
 export type Value = unknown;
 
 export function zeroValue(schema: Schema): Value {
@@ -337,7 +338,7 @@ function quoteText(what: Uint8Array): string {
     }
     i += size;
   }
-  return needEscape ? quote(what) : "`" + text(what) + "`";
+  return needEscape ? quoteBytes(what) : "`" + text(what) + "`";
 }
 
 function hasEscapedUTF16Prefix(b: Uint8Array): boolean {
@@ -419,7 +420,7 @@ export function unquote(b: Uint8Array, start: number, end: number): string {
     const [r, size] = decodeRune(b, n);
     if (r === RuneError && size === 1) {
       flush(n);
-      out += "�";
+      out += "\ufffd";
       n++;
       run = n;
       continue;

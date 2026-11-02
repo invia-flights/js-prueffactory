@@ -1,5 +1,5 @@
-import { GoError, readFile } from "../goport/os.ts";
-import { join } from "../goport/path.ts";
+import { GoError, readFile } from "../gocompat/os.ts";
+import { join } from "../gocompat/path.ts";
 import { Detection, detect, NPM } from "./detect.ts";
 import type { Lock } from "./lockfile.ts";
 import { parseLock, SyntaxError, UnsupportedVersionError } from "./lockfile.ts";

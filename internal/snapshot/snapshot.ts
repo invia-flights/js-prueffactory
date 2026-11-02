@@ -2,7 +2,7 @@
 // copy of its files that Checks work from, and the final re-hash that proves
 // the Original was not modified. It never writes to the Original.
 //
-// Paths are held as byte strings (see goport/os.ts): Go keeps file names as
+// Paths are held as byte strings (see gocompat/os.ts): Go keeps file names as
 // bytes, hashes those bytes and sorts by them, and a name that is not valid
 // UTF-8 must not be lost. Texts leave this module as Go would print them.
 import { createHash } from "node:crypto";
@@ -22,7 +22,6 @@ import {
   writeSync,
 } from "node:fs";
 import type { Dirent, Stats } from "node:fs";
-import { once } from "node:events";
 import type { Writable } from "node:stream";
 
 import {
@@ -32,9 +31,10 @@ import {
   fsPath,
   GoError,
   pathError,
-} from "../goport/os.ts";
-import { clean, dir, evalSymlinks, isAbs, join, rel } from "../goport/path.ts";
-import { tarHeader } from "./tar.ts";
+} from "../gocompat/os.ts";
+import { evalSymlinks, rel } from "../gocompat/filepath.ts";
+import { clean, dir, isAbs, join } from "../gocompat/path.ts";
+import { TarWriter } from "../tarwriter/tarwriter.ts";
 
 // Algorithm is the ID of the hashing algorithm recorded in the Report.
 export const Algorithm = "sorted-path-sha256-v1";
@@ -102,46 +102,52 @@ export class Snapshot {
     }
   }
 
-  // tarChunks yields the copy as a tar archive. Entries are owned by root,
-  // files have mode 0644 or 0755 and no timestamps, so the archive depends
-  // only on what the Snapshot hash covers. This is the only way the Snapshot
-  // reaches Docker.
-  *tarChunks(): Generator<Uint8Array> {
-    const top = byteString(this.dir);
-    const entries: [string, Dirent<Buffer>][] = [];
-    walkCopy(top, "", entries);
-    for (const [relB, d] of entries) {
-      const path = top + "/" + relB;
-      if (d.isDirectory()) {
-        yield tarHeader({ type: "5", name: relB + "/", mode: 0o755, size: 0 });
-      } else if (d.isSymbolicLink()) {
-        let target: string;
-        try {
-          target = readlinkSync(fsPath(path), { encoding: "buffer" }).toString(
-            "latin1",
-          );
-        } catch (err) {
-          throw pathError("readlink", fromByteString(path), err);
-        }
-        yield tarHeader({
-          type: "2",
-          name: relB,
-          linkname: target,
-          mode: 0o777,
-          size: 0,
-        });
-      } else if (d.isFile()) {
-        yield* fileEntry(path, relB);
-      }
-    }
-    // Two zero blocks end the archive.
-    yield new Uint8Array(1024);
-  }
-
-  // writeTar writes tarChunks to out and waits until out took them.
+  // writeTar writes the copy as a tar archive to out and ends out. Entries
+  // are owned by root, files have mode 0644 or 0755 and no timestamps, so
+  // the archive depends only on what the Snapshot hash covers. This is the
+  // only way the Snapshot reaches Docker (driver.putTar).
+  //
+  // Names that are not valid UTF-8 reach the archive with U+FFFD in place of
+  // each invalid byte: the shared tar writer takes text names. Go writes the
+  // bytes.
   async writeTar(out: Writable): Promise<void> {
-    for (const chunk of this.tarChunks()) {
-      if (!out.write(chunk)) await once(out, "drain");
+    const tw = new TarWriter(out);
+    try {
+      const top = byteString(this.dir);
+      const entries: [string, Dirent<Buffer>][] = [];
+      walkCopy(top, "", entries);
+      for (const [relB, d] of entries) {
+        const path = top + "/" + relB;
+        const name = fromByteString(relB);
+        if (d.isDirectory()) {
+          await tw.writeHeader({
+            type: "directory",
+            name: name + "/",
+            mode: 0o755,
+          });
+        } else if (d.isSymbolicLink()) {
+          let target: string;
+          try {
+            target = readlinkSync(fsPath(path), {
+              encoding: "buffer",
+            }).toString("latin1");
+          } catch (err) {
+            throw pathError("readlink", fromByteString(path), err);
+          }
+          await tw.writeHeader({
+            type: "symlink",
+            name,
+            linkname: fromByteString(target),
+            mode: 0o777,
+          });
+        } else if (d.isFile()) {
+          await writeFileEntry(tw, path, name);
+        }
+      }
+      await tw.close();
+    } catch (err) {
+      tw.abort(err);
+      throw err;
     }
   }
 }
@@ -351,7 +357,11 @@ function walkCopy(
   }
 }
 
-function* fileEntry(path: string, relB: string): Generator<Uint8Array> {
+async function writeFileEntry(
+  tw: TarWriter,
+  path: string,
+  name: string,
+): Promise<void> {
   let st: Stats;
   try {
     st = statSync(fsPath(path));
@@ -359,7 +369,7 @@ function* fileEntry(path: string, relB: string): Generator<Uint8Array> {
     throw pathError("stat", fromByteString(path), err);
   }
   const mode = (st.mode & 0o100) !== 0 ? 0o755 : 0o644;
-  yield tarHeader({ type: "0", name: relB, mode, size: st.size });
+  await tw.writeHeader({ type: "file", name, mode, size: st.size });
   let fd: number;
   try {
     fd = openSync(fsPath(path), "r");
@@ -371,15 +381,10 @@ function* fileEntry(path: string, relB: string): Generator<Uint8Array> {
     while (left > 0) {
       const buf = Buffer.alloc(Math.min(left, 1 << 20));
       const n = readSync(fd, buf);
-      if (n === 0)
-        throw new GoError(
-          "archive/tar: missed writing " + String(left) + " bytes",
-        );
+      if (n === 0) break; // the writer reports the missing bytes
       left -= n;
-      yield buf.subarray(0, n);
+      await tw.write(buf.subarray(0, n));
     }
-    const pad = st.size % 512;
-    if (pad !== 0) yield new Uint8Array(512 - pad);
   } finally {
     closeSync(fd);
   }

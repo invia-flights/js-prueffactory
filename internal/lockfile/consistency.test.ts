@@ -81,9 +81,9 @@ test("mismatches come in a stable order", () => {
 
 test("dependency names are ordered by bytes, not UTF-16 units", () => {
   const l = lock('{"lockfileVersion": 3, "packages": {"": {}}}');
-  const m = manifest('{"dependencies": {"\u{1f600}": "1", "｡": "1"}}');
+  const m = manifest('{"dependencies": {"\u{1f600}": "1", "\uff61": "1"}}');
   assert.deepEqual(
     check(m, l).map((mm) => mm.name),
-    ["｡", "\u{1f600}"],
+    ["\uff61", "\u{1f600}"],
   );
 });

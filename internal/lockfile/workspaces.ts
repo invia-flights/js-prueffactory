@@ -1,5 +1,5 @@
-import * as json from "../goport/json.ts";
-import { clean, match } from "../goport/path.ts";
+import * as json from "../gocompat/unmarshal.ts";
+import { clean, match } from "../gocompat/path.ts";
 
 const listSchema: json.Schema = {
   kind: "slice",

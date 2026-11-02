@@ -1,6 +1,6 @@
 import { readdirSync } from "node:fs";
 
-import { compareBytewise } from "../goport/bytewise.ts";
+import { compareBytes } from "../gocompat/strings.ts";
 import type { Manifest } from "./manifest.ts";
 
 // Manager is a package manager.
@@ -39,7 +39,7 @@ export class Detection {
     for (const l of this.lockfiles) {
       if (!out.includes(l.manager)) out.push(l.manager);
     }
-    return out.sort(compareBytewise);
+    return out.sort(compareBytes);
   }
 
   // managerEvidence names what the manager was detected from.
@@ -85,7 +85,7 @@ export function detect(dir: string, m: Manifest | null): Detection {
   } catch {
     // An unreadable folder has no lockfiles.
   }
-  for (const e of entries.sort((a, b) => compareBytewise(a.name, b.name))) {
+  for (const e of entries.sort((a, b) => compareBytes(a.name, b.name))) {
     if (e.isDirectory()) continue;
     const mgr = lockfileNames.get(e.name);
     if (mgr !== undefined) {

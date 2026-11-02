@@ -18,8 +18,9 @@ import { Writable } from "node:stream";
 import { describe, test } from "node:test";
 import type { TestContext } from "node:test";
 
-import { compareBytewise } from "../goport/bytewise.ts";
+import { compareBytes } from "../gocompat/strings.ts";
 import { Algorithm, take } from "./snapshot.ts";
+import type { Snapshot } from "./snapshot.ts";
 import { exists, takeIn, tempDir, write } from "./snapshot.testutil.ts";
 import { readTar } from "./tar.testutil.ts";
 
@@ -258,21 +259,21 @@ test("writeTar streams the copy with root-owned entries", async (t) => {
   );
 });
 
-test("the tar keeps long and non-ASCII names", (t) => {
+test("the tar keeps long and non-ASCII names", async (t) => {
   const root = tempDir(t);
   const long =
     "d".repeat(60) + "/" + "e".repeat(60) + "/" + "f".repeat(120) + ".txt";
   write(root, long, "long");
-  write(root, "été.txt", "summer");
+  write(root, "\u00e9t\u00e9.txt", "summer");
   symlinkSync(long, join(root, "long-link"));
-  symlinkSync("été.txt", join(root, "accent-link"));
+  symlinkSync("\u00e9t\u00e9.txt", join(root, "accent-link"));
   const s = takeIn(t, root);
 
-  const entries = readTar(Buffer.concat([...s.tarChunks()]));
+  const entries = readTar(await tarOf(s));
   const byName = new Map(entries.map((e) => [e.name, e]));
   assert.equal(byName.get(long)?.content.toString(), "long");
-  assert.equal(byName.get("été.txt")?.content.toString(), "summer");
-  assert.equal(byName.get("accent-link")?.linkname, "été.txt");
+  assert.equal(byName.get("\u00e9t\u00e9.txt")?.content.toString(), "summer");
+  assert.equal(byName.get("accent-link")?.linkname, "\u00e9t\u00e9.txt");
   assert.equal(byName.get("long-link")?.linkname, long);
 });
 
@@ -311,7 +312,7 @@ interface Recorded {
   limitations: { code: string; message: string; path: string }[];
 }
 const recorded = JSON.parse(
-  readFileSync(new URL("testdata/go-snapshots.json", import.meta.url), "utf8"),
+  readFileSync(new URL("testdata/go-oracle.json", import.meta.url), "utf8"),
 ) as { recordedFrom: string; snapshots: Recorded[] };
 
 function build(t: TestContext, spec: SpecEntry[]): string {
@@ -343,10 +344,7 @@ describe("the Snapshot matches the Go build", () => {
     .map((e) => "testdata/projects/" + e.name);
   test("every test project is in the fixture", () => {
     const names = recorded.snapshots.filter((r) => !r.spec).map((r) => r.name);
-    assert.deepEqual(
-      names.sort(compareBytewise),
-      projects.sort(compareBytewise),
-    );
+    assert.deepEqual(names.sort(compareBytes), projects.sort(compareBytes));
   });
 
   for (const want of recorded.snapshots) {
@@ -368,3 +366,16 @@ describe("the Snapshot matches the Go build", () => {
     });
   }
 });
+
+async function tarOf(s: Snapshot): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  await s.writeTar(
+    new Writable({
+      write(chunk: Buffer, _enc, done) {
+        chunks.push(chunk);
+        done();
+      },
+    }),
+  );
+  return Buffer.concat(chunks);
+}

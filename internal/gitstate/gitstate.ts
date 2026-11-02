@@ -9,7 +9,7 @@
 // config.ts). Without a usable or safe git it reads HEAD directly and
 // reports the dirty state as unknown.
 //
-// Paths and file contents are byte strings inside (see goport/os.ts); the
+// Paths and file contents are byte strings inside (see gocompat/os.ts); the
 // texts that leave are what Go prints.
 import { execFile } from "node:child_process";
 import { lstatSync, statSync } from "node:fs";
@@ -21,10 +21,10 @@ import {
   GoError,
   isNotExist,
   pathError,
-} from "../goport/os.ts";
-import { clean, isAbs, join } from "../goport/path.ts";
-import { quote } from "../goport/quote.ts";
-import { trimSpace } from "../goport/utf8.ts";
+} from "../gocompat/os.ts";
+import { clean, dir, isAbs, join } from "../gocompat/path.ts";
+import { quoteBytes } from "../gocompat/fmt.ts";
+import { trimSpaceBytes } from "../gocompat/utf8.ts";
 import { configRisk } from "./config.ts";
 import {
   checkSignal,
@@ -137,6 +137,11 @@ export class Reader {
   // start a program are overridden on the command line (belt and braces:
   // the repository's configuration has already been checked, see
   // config.ts).
+  //
+  // Beyond Go: GIT_CEILING_DIRECTORIES pins discovery to root. Without it a
+  // `.git` that git does not accept as a repository makes git walk up into
+  // a parent repository whose configuration was never checked. A `.git`
+  // file (linked worktree, submodule) is still read at root itself.
   #git(
     root: string,
     signal: AbortSignal | undefined,
@@ -172,6 +177,7 @@ export class Reader {
       "GIT_ATTR_NOSYSTEM=1",
       "HOME=/dev/null",
       "XDG_CONFIG_HOME=/dev/null",
+      "GIT_CEILING_DIRECTORIES=" + dir(root),
     ]) {
       const eq = kv.indexOf("=");
       if (eq > 0) env[kv.slice(0, eq)] = kv.slice(eq + 1);
@@ -208,12 +214,15 @@ export class Reader {
 // so that variables such as GIT_DIR or GIT_INDEX_FILE of the caller cannot
 // redirect it away from the Original. HOME and XDG_CONFIG_HOME are not
 // passed, so the user's git configuration is not read.
+//
+// Beyond Go: PATH entries that are not absolute ("." or "bin") are skipped,
+// so a `git` in the project or the current folder never runs.
 export function fromEnv(getenv: (name: string) => string): Reader {
   const path = getenv("PATH");
   let exe = "";
-  for (const dir of path === "" ? [] : path.split(":")) {
-    if (dir === "") continue;
-    const p = join(dir, "git");
+  for (const entry of path === "" ? [] : path.split(":")) {
+    if (!isAbs(entry)) continue;
+    const p = join(entry, "git");
     try {
       const st = statSync(p);
       if (st.isFile() && (st.mode & 0o111) !== 0) {
@@ -276,7 +285,7 @@ function commitFromHead(
   const ref = text.startsWith("ref: ") ? text.slice("ref: ".length) : undefined;
   if (ref === undefined || ref === "" || ref.includes("..")) {
     throw new GoError(
-      `HEAD is not a commit or a branch: ${quote(Buffer.from(text, "latin1"))}`,
+      `HEAD is not a commit or a branch: ${quoteBytes(Buffer.from(text, "latin1"))}`,
     );
   }
   for (const dir of [gitDir, common]) {
@@ -328,5 +337,7 @@ function joinFrom(base: string, p: string): string {
 
 // trim is strings.TrimSpace on a byte string.
 function trim(s: string): string {
-  return Buffer.from(trimSpace(Buffer.from(s, "latin1"))).toString("latin1");
+  return Buffer.from(trimSpaceBytes(Buffer.from(s, "latin1"))).toString(
+    "latin1",
+  );
 }

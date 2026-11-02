@@ -199,7 +199,7 @@ test("a relative link that reaches the root through an alias is left out", (t) =
 // compares UTF-16 units and puts U+1F600 (a surrogate pair) before U+FF61.
 test("paths are ordered by their UTF-8 bytes", (t) => {
   const root = tempDir(t);
-  write(root, "｡", "halfwidth");
+  write(root, "\uff61", "halfwidth");
   write(root, "\u{1f600}", "emoji");
 
   const s = takeIn(t, root);
@@ -209,7 +209,7 @@ test("paths are ordered by their UTF-8 bytes", (t) => {
     sha(`${path}\x00file\x000\x00${sha(content).toString("hex")}`);
   // UTF-8: EF BD A1 before F0 9F 98 80.
   const want = sha(
-    Buffer.concat([entry("｡", "halfwidth"), entry("\u{1f600}", "emoji")]),
+    Buffer.concat([entry("\uff61", "halfwidth"), entry("\u{1f600}", "emoji")]),
   );
   assert.equal(s.hash, want.toString("hex"));
 });

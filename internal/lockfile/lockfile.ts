@@ -5,8 +5,8 @@
 // The other lockfile Checks (security.integrity, security.licenses,
 // package.install-scripts and security.dependencies) build on the same
 // parsed Lock.
-import * as json from "../goport/json.ts";
-import { goString, text, trimSpace } from "../goport/utf8.ts";
+import * as json from "../gocompat/unmarshal.ts";
+import { goString, text, trimSpaceBytes } from "../gocompat/utf8.ts";
 
 // SyntaxError says that a document is not what it should be: not valid JSON,
 // or valid JSON of the wrong shape. line and column are 1-based and zero
@@ -67,7 +67,7 @@ export class Entry {
   // back as the raw JSON text so nothing is lost.
   license(): string {
     if (this.licenseRaw === null) return "";
-    const raw = trimSpace(this.licenseRaw);
+    const raw = trimSpaceBytes(this.licenseRaw);
     if (raw.length === 0 || text(raw) === "null") return "";
     try {
       return json.unmarshal(raw, json.stringSchema) as string;
@@ -198,7 +198,7 @@ export function trimBOM(data: Uint8Array): Uint8Array {
 // decode unmarshals a JSON object and turns every failure into a
 // SyntaxError with a position.
 export function decode(data: Uint8Array, schema: json.Schema): unknown {
-  const trimmed = trimSpace(data);
+  const trimmed = trimSpaceBytes(data);
   if (trimmed.length === 0) throw new SyntaxError("the file is empty");
   if (
     trimmed[0] !== 0x7b &&

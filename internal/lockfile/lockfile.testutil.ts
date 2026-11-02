@@ -2,7 +2,7 @@
 
 export const text = (s: string): Uint8Array => new TextEncoder().encode(s);
 
-// Repeat stands for prefix + open×count + middle + close×count + suffix:
+// Repeat stands for prefix + open*count + middle + close*count + suffix:
 // deeply nested documents, kept short in the fixture.
 export interface Repeat {
   prefix: string;

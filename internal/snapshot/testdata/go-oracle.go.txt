@@ -1,0 +1,129 @@
+package snapshot_test
+
+// Generator of testdata/go-oracle.json for the TypeScript port. The Go code
+// is frozen, so this is no .go file. To re-record:
+//
+//   cp internal/snapshot/testdata/go-oracle.go.txt internal/snapshot/zz_oracle_test.go
+//   RECORD_OUT=$PWD/internal/snapshot/testdata/go-oracle.json \
+//     go test ./internal/snapshot -run TestRecordForTypeScriptPort -count=1
+//   rm internal/snapshot/zz_oracle_test.go
+
+import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/invia-flights/jscript-bench/internal/snapshot"
+)
+
+type specEntry struct {
+	Path    string `json:"path"`
+	Content string `json:"content,omitempty"`
+	Mode    int    `json:"mode,omitempty"`
+	Link    string `json:"link,omitempty"`
+	Dir     bool   `json:"dir,omitempty"`
+}
+
+type recorded struct {
+	Name        string      `json:"name"`
+	Spec        []specEntry `json:"spec,omitempty"`
+	Hash        string      `json:"hash"`
+	FileCount   int         `json:"fileCount"`
+	Excluded    []string    `json:"excluded"`
+	Limitations []map[string]string `json:"limitations"`
+}
+
+func record(t *testing.T, name, root string, spec []specEntry) recorded {
+	s := take(t, root, snapshot.Options{})
+	lims := []map[string]string{}
+	for _, l := range s.Limitations {
+		lims = append(lims, map[string]string{"code": l.Code, "message": strings.ReplaceAll(l.Message, root, "<root>"), "path": l.Path})
+	}
+	return recorded{Name: name, Spec: spec, Hash: s.Hash, FileCount: s.FileCount, Excluded: s.Excluded, Limitations: lims}
+}
+
+func build(t *testing.T, spec []specEntry) string {
+	root := resolved(t, t.TempDir())
+	outside := resolved(t, t.TempDir())
+	for _, e := range spec {
+		p := filepath.Join(root, filepath.FromSlash(e.Path))
+		switch {
+		case e.Dir:
+			if err := os.MkdirAll(p, 0o755); err != nil {
+				t.Fatal(err)
+			}
+		case e.Link != "":
+			_ = os.MkdirAll(filepath.Dir(p), 0o755)
+			target := strings.ReplaceAll(strings.ReplaceAll(e.Link, "@ROOT", root), "@OUTSIDE", outside)
+			if err := os.Symlink(target, p); err != nil {
+				t.Fatal(err)
+			}
+		default:
+			mode := os.FileMode(e.Mode)
+			if mode == 0 {
+				mode = 0o644
+			}
+			write(t, root, e.Path, e.Content, mode)
+		}
+	}
+	return root
+}
+
+func TestRecordForTypeScriptPort(t *testing.T) {
+	out := os.Getenv("RECORD_OUT")
+	if out == "" {
+		t.Skip("recorder")
+	}
+	var all []recorded
+	projects, err := os.ReadDir(filepath.Join("..", "..", "testdata", "projects"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range projects {
+		if !p.IsDir() {
+			continue
+		}
+		root := resolved(t, filepath.Join("..", "..", "testdata", "projects", p.Name()))
+		all = append(all, record(t, "testdata/projects/"+p.Name(), root, nil))
+	}
+	specs := map[string][]specEntry{
+		"names in UTF-16 and byte order": {
+			{Path: "｡", Content: "halfwidth"}, {Path: "\U0001f600", Content: "emoji"},
+			{Path: "b", Content: "b"}, {Path: "Z", Content: "Z"}, {Path: "é", Content: "e"},
+			{Path: "｡dir/x", Content: "x"}, {Path: "\U0001f600dir/y", Content: "y"},
+			{Path: "", Content: "private"}, {Path: "a b", Content: "space"}, {Path: "a-b", Content: "dash"},
+			{Path: "a/b", Content: "nested"}, {Path: "a.b", Content: "dot"},
+		},
+		"exclusions, links and modes": {
+			{Path: "README.md", Content: "readme"}, {Path: "run.sh", Content: "#!/bin/sh\n", Mode: 0o755},
+			{Path: "empty.txt", Content: ""}, {Path: "group-exec", Content: "g", Mode: 0o654},
+			{Path: "node_modules/dep/index.js", Content: "x"}, {Path: "sub/node_modules/dep/index.js", Content: "x"},
+			{Path: ".git/HEAD", Content: "ref: refs/heads/main\n"}, {Path: "sub/.git/HEAD", Content: "kept"},
+			{Path: "sub/.git", Dir: true}, {Path: "emptydir", Dir: true}, {Path: "deep/er/est/f.txt", Content: "deep"},
+			{Path: "docs/index.md", Link: "../README.md"}, {Path: "abs-link.md", Link: "@ROOT/README.md"},
+			{Path: "escape.txt", Link: "@OUTSIDE/secret.txt"}, {Path: "dangling-inside", Link: "missing.txt"},
+			{Path: "dir-link", Link: "deep"}, {Path: "self-root", Link: "."}, {Path: "dot-dot", Link: ".."},
+			{Path: "loop-a", Link: "loop-b"}, {Path: "loop-b", Link: "loop-a"},
+			{Path: "through-file", Link: "README.md/x"}, {Path: "trailing-slash", Link: "deep/"},
+			{Path: "dot-slash", Link: "./README.md"}, {Path: "double-slash", Link: "deep//er"},
+		},
+		"git file at the root": {
+			{Path: ".git", Content: "gitdir: /elsewhere\n"}, {Path: "a.txt", Content: "a"},
+		},
+	}
+	for _, name := range []string{"names in UTF-16 and byte order", "exclusions, links and modes", "git file at the root"} {
+		all = append(all, record(t, name, build(t, specs[name]), specs[name]))
+	}
+	b, err := json.MarshalIndent(map[string]any{
+		"recordedFrom": "Go build at freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8 (internal/snapshot)",
+		"snapshots":    all,
+	}, "", " ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(out, append(b, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}

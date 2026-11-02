@@ -108,7 +108,7 @@ interface RecordedLoad {
   got: Record<string, unknown>;
 }
 const recorded = JSON.parse(
-  readFileSync(new URL("testdata/go-parse.json", import.meta.url), "utf8"),
+  readFileSync(new URL("testdata/go-oracle.json", import.meta.url), "utf8"),
 ) as { loads: RecordedLoad[] };
 
 function summary(l: Loaded, dir: string): Record<string, unknown> {

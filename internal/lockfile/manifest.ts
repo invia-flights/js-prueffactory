@@ -1,5 +1,5 @@
-import type * as json from "../goport/json.ts";
-import { text, trimSpace } from "../goport/utf8.ts";
+import type * as json from "../gocompat/unmarshal.ts";
+import { text, trimSpaceBytes } from "../gocompat/utf8.ts";
 import { decode, mapOf, trimBOM } from "./lockfile.ts";
 import { isWorkspaceMember, workspacePatterns } from "./workspaces.ts";
 
@@ -64,7 +64,7 @@ export function parseManifest(data: Uint8Array): Manifest {
   m.devDependencies = mapOf(raw.devDependencies);
   m.optionalDependencies = mapOf(raw.optionalDependencies);
   m.packageManager = raw.packageManager;
-  const ws = trimSpace(raw.workspaces ?? new Uint8Array());
+  const ws = trimSpaceBytes(raw.workspaces ?? new Uint8Array());
   m.hasWorkspaces = ws.length > 0 && text(ws) !== "null";
   m.workspaces = workspacePatterns(ws);
   return m;

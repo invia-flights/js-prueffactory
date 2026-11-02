@@ -1,4 +1,4 @@
-import { compareBytewise } from "../goport/bytewise.ts";
+import { compareBytes } from "../gocompat/strings.ts";
 import type { Entry, Lock } from "./lockfile.ts";
 import type { Manifest } from "./manifest.ts";
 
@@ -34,7 +34,7 @@ export function check(m: Manifest, l: Lock): Mismatch[] {
     ["optionalDependencies", m.optionalDependencies],
   ];
   for (const [section, deps] of sections) {
-    for (const name of [...deps.keys()].sort(compareBytewise)) {
+    for (const name of [...deps.keys()].sort(compareBytes)) {
       const specifier = deps.get(name) ?? "";
       const installed = l.packages.has("node_modules/" + name);
       const recorded =

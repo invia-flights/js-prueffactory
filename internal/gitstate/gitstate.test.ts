@@ -10,7 +10,8 @@ import {
   utimesSync,
   writeFileSync,
 } from "node:fs";
-import { join } from "node:path";
+import { dirname, join, relative } from "node:path";
+import process from "node:process";
 import { describe, test } from "node:test";
 
 import { Clean, Dirty, fromEnv, Reader, Unknown } from "./gitstate.ts";
@@ -272,7 +273,9 @@ test(
       `--no-optional-locks -c core.fsmonitor=false -c core.hooksPath=/dev/null ` +
       `-c core.attributesFile=/dev/null -c core.untrackedCache=false -c protocol.allow=never -C ${dir}`;
     const env =
-      "GIT_ATTR_NOSYSTEM=1\nGIT_CONFIG_GLOBAL=/dev/null\nGIT_CONFIG_NOSYSTEM=1\n" +
+      "GIT_ATTR_NOSYSTEM=1\n" +
+      `GIT_CEILING_DIRECTORIES=${dirname(dir)}\n` +
+      "GIT_CONFIG_GLOBAL=/dev/null\nGIT_CONFIG_NOSYSTEM=1\n" +
       "GIT_CONFIG_SYSTEM=/dev/null\nGIT_NO_LAZY_FETCH=1\nGIT_OPTIONAL_LOCKS=0\n" +
       "GIT_TERMINAL_PROMPT=0\nHOME=/dev/null\nLC_ALL=C\nPATH=/usr/bin:/bin\nXDG_CONFIG_HOME=/dev/null\n";
     assert.equal(
@@ -282,3 +285,40 @@ test(
     );
   },
 );
+
+// Security hardening beyond Go: Go would walk up from a .git folder that
+// git rejects and report the parent repository.
+test(
+  "a .git folder git rejects never yields the parent repository",
+  { skip: noGit },
+  async (t) => {
+    const parent = repo(t);
+    const root = join(parent, "sub");
+    mkdirSync(join(root, ".git"), { recursive: true });
+    writeFile(root, "x.txt", "x");
+    const parentCommit = gitIn(parent, "rev-parse", "HEAD");
+    await assert.rejects(read(withGit(t), root), (err: Error) => {
+      assert.match(err.message, /^cannot read HEAD: /);
+      assert.ok(!err.message.includes(parentCommit));
+      return true;
+    });
+  },
+);
+
+// Security hardening beyond Go: a relative PATH entry would run a git from
+// the project or the current folder.
+test("fromEnv skips PATH entries that are not absolute", (t) => {
+  const bin = tempDir(t);
+  writeFileSync(join(bin, "git"), "#!/bin/sh\n");
+  chmodSync(join(bin, "git"), 0o755);
+  const relativeBin = relative(process.cwd(), bin);
+  for (const path of [relativeBin, ".", "./" + relativeBin]) {
+    assert.equal(
+      fromEnv((name) => (name === "PATH" ? path : "")).exe,
+      "",
+      path,
+    );
+  }
+  const r = fromEnv((name) => (name === "PATH" ? relativeBin + ":" + bin : ""));
+  assert.equal(r.exe, join(bin, "git"));
+});

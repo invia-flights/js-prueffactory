@@ -7,7 +7,7 @@ import {
   readSync,
 } from "node:fs";
 
-import { fsPath, GoError, pathError } from "../goport/os.ts";
+import { fsPath, GoError, pathError } from "../gocompat/os.ts";
 
 // Size limits for files read out of an untrusted `.git` folder.
 export const maxSmallFile = 64 << 10; // HEAD, loose refs, commondir, a `.git` file

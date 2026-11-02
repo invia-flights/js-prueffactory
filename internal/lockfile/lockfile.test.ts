@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 
-import { compareBytewise } from "../goport/bytewise.ts";
+import { compareBytes } from "../gocompat/strings.ts";
 import * as lockfile from "./lockfile.ts";
 import type { Entry } from "./lockfile.ts";
 import { docBytes, text, v3Lock } from "./lockfile.testutil.ts";
@@ -43,11 +43,11 @@ interface RecordedCase {
 }
 
 const recorded = JSON.parse(
-  readFileSync(new URL("testdata/go-parse.json", import.meta.url), "utf8"),
+  readFileSync(new URL("testdata/go-oracle.json", import.meta.url), "utf8"),
 ) as { recordedFrom: string; cases: RecordedCase[] };
 
 function pairs(m: ReadonlyMap<string, string>): Pairs {
-  return [...m].sort(([a], [b]) => compareBytewise(a, b));
+  return [...m].sort(([a], [b]) => compareBytes(a, b));
 }
 
 function errorRecord(err: unknown): RecordedError {
@@ -119,7 +119,7 @@ describe("parsing matches the Go build", () => {
           value: {
             version: l.version,
             packages: [...l.packages]
-              .sort(([a], [b]) => compareBytewise(a, b))
+              .sort(([a], [b]) => compareBytes(a, b))
               .map(([k, e]) => [k, entryRecord(e)]),
           },
         };

@@ -3,6 +3,8 @@
 // decodes them; TextDecoder replaces a maximal invalid subpart with one
 // U+FFFD instead, so it cannot stand in for Go.
 
+import { isSpace } from "./strings.ts";
+
 export const RuneError = 0xfffd;
 
 // decodeRune returns the rune at b[i] and its width in bytes, as
@@ -68,7 +70,7 @@ export function goString(b: Uint8Array): string {
     }
     const [r, size] = decodeRune(b, i);
     if (r === RuneError && size === 1) {
-      out += utf8Slice(b, start, i) + "�";
+      out += utf8Slice(b, start, i) + "\ufffd";
       i++;
       start = i;
       continue;
@@ -78,32 +80,9 @@ export function goString(b: Uint8Array): string {
   return out + utf8Slice(b, start, b.length);
 }
 
-const textEncoder = new TextEncoder();
-
-// utf8 encodes a string as UTF-8. Lone surrogates become U+FFFD.
-export function utf8(s: string): Uint8Array {
-  return textEncoder.encode(s);
-}
-
-// isSpace reports whether r is white space as unicode.IsSpace defines it.
-export function isSpace(r: number): boolean {
-  if (r <= 0xff) {
-    return r === 0x20 || (r >= 0x09 && r <= 0x0d) || r === 0x85 || r === 0xa0;
-  }
-  return (
-    r === 0x1680 ||
-    (r >= 0x2000 && r <= 0x200a) ||
-    r === 0x2028 ||
-    r === 0x2029 ||
-    r === 0x202f ||
-    r === 0x205f ||
-    r === 0x3000
-  );
-}
-
-// trimSpace returns b without leading and trailing Unicode white space, as
-// bytes.TrimSpace. Invalid UTF-8 stops the trimming.
-export function trimSpace(b: Uint8Array): Uint8Array {
+// trimSpaceBytes returns b without leading and trailing Unicode white
+// space, as bytes.TrimSpace. Invalid UTF-8 stops the trimming.
+export function trimSpaceBytes(b: Uint8Array): Uint8Array {
   let start = 0;
   while (start < b.length) {
     const [r, size] = decodeRune(b, start);

@@ -65,7 +65,7 @@ describe("workspace members follow the workspaces patterns", () => {
 // The Go build's answers for patterns with classes, escapes, malformed
 // patterns and odd paths (see recordedFrom).
 const recorded = JSON.parse(
-  readFileSync(new URL("testdata/go-parse.json", import.meta.url), "utf8"),
+  readFileSync(new URL("testdata/go-oracle.json", import.meta.url), "utf8"),
 ) as { workspaces: { patterns: string[]; rel: string; member: boolean }[] };
 
 test("workspace matching matches the Go build", () => {
