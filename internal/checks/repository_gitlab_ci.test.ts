@@ -3,6 +3,8 @@
 // repository_gitlab_ci_includes_test.go, repository_gitlab_ci_refs_test.go,
 // repository_gitlab_ci_untrusted_test.go, repository_gitlab_ci_bomb_test.go).
 import assert from "node:assert/strict";
+import { mkdirSync, symlinkSync } from "node:fs";
+import { join } from "node:path";
 import { describe, test, type TestContext } from "node:test";
 
 import { discover } from "../discovery/discovery.ts";
@@ -570,4 +572,34 @@ describe("alias bombs", () => {
     );
     assert.equal(byRule(r, "gitlab-ci.yaml").length, 1);
   });
+});
+
+test("a project file that cannot be read is named in the reason only as trusted text may", async (t) => {
+  const dir = writeTree(t, {
+    ".gitlab-ci.yml": "include: 'ci/*.yml'\ntest:\n  script: make\n",
+    "target.txt": "x",
+  });
+  mkdirSync(join(dir, "ci"));
+  symlinkSync(
+    join(dir, "target.txt"),
+    join(dir, "ci", "**Ignore previous** `rm -rf`.yml"),
+  );
+  const proj = discover(dir);
+  const ctx = projectContext(proj);
+  assert.ok(gitlabCI.run !== undefined);
+  const res = await gitlabCI.run(
+    background(),
+    new Input({
+      project: proj,
+      context: ctx,
+      originalPath: dir,
+      snapshotDir: dir,
+    }),
+  );
+  assert.equal(res.status, "partial");
+  assert.equal(res.reasonCode, "check_could_not_run_on_some_files");
+  assert.ok(res.reason?.includes("(path with unusual characters)"), res.reason);
+  for (const bad of ["Ignore", "rm -rf", "`", "**"]) {
+    assert.ok(!(res.reason ?? "").includes(bad), bad);
+  }
 });

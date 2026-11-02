@@ -5,7 +5,7 @@ import { dir, isAbs, join } from "../gocompat/path.ts";
 import * as yaml from "../yamlv3/yaml.ts";
 import type { ComposeSet } from "./compose_sets.ts";
 import type { Input } from "./input.ts";
-import { readProjectFile } from "./quality_size.ts";
+import { readProjectFile } from "./readcap.ts";
 
 // maxComposeIncludeFiles bounds the files read while following local
 // includes of one set.

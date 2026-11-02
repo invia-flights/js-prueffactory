@@ -10,8 +10,8 @@ import type { Value } from "../jsonschema/jsonschema.ts";
 import type { Finding, Limitation } from "../resultset/types.ts";
 import { CIDoc, type CIPos, CIReadError, readCIDoc } from "./gitlab_ci_yaml.ts";
 import type { Input } from "./input.ts";
-import { readProjectFile } from "./quality_size.ts";
-import { errNotRegular, errTooLarge } from "./readcap.ts";
+
+import { errNotRegular, errTooLarge, readProjectFile } from "./readcap.ts";
 import { inNodeModules } from "./repo_targets.ts";
 import {
   gitlabCIFile,
