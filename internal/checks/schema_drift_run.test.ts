@@ -83,10 +83,7 @@ function driftRunInput(t: TestContext, scripts: string): Input {
 }
 
 async function run(input: Input): Promise<Result> {
-  const r = await impl("schema.drift").run?.(
-    new AbortController().signal,
-    input,
-  );
+  const r = await impl("schema.drift").run(new AbortController().signal, input);
   assert.ok(r);
   return r;
 }

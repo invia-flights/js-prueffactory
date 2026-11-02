@@ -294,7 +294,7 @@ function lintTree(t: TestContext, files: Record<string, string>): Input {
 const isVersionQuery = (cmd: string[]): boolean => cmd[1] === "-p";
 
 const lint = (input: Input) =>
-  impl("lint.existing").run?.(new AbortController().signal, input);
+  impl("lint.existing").run(new AbortController().signal, input);
 
 const eslint9 = '{"devDependencies":{"eslint":"^9"}}';
 
@@ -358,7 +358,7 @@ test("a clean ESLint run completes without findings", async (t) => {
 
   const res = await lint(input);
 
-  assert.equal(res?.status, StatusCompleted);
+  assert.equal(res.status, StatusCompleted);
   assert.equal(res.findings?.length, 0);
 });
 
@@ -380,7 +380,7 @@ test("a legacy ESLint config with an ESLint that no longer reads it is a project
 
   const res = await lint(input);
 
-  assert.equal(res?.status, StatusCompleted);
+  assert.equal(res.status, StatusCompleted);
   assert.equal(res.findings?.length, 1);
   const f = res.findings[0];
   assert.ok(f?.gate && f.rule_id === "eslint-legacy-config");
@@ -404,7 +404,7 @@ test("ESLint without any configuration is never started and makes no finding", a
 
   const res = await lint(input);
 
-  assert.equal(res?.findings?.length, 0);
+  assert.equal(res.findings?.length, 0);
   assert.deepEqual(
     fake.commands,
     [],
@@ -425,7 +425,7 @@ test("a Biome package whose ESLint has no configuration runs Biome only", async 
 
   const res = await lint(input);
 
-  assert.equal(res?.status, StatusCompleted);
+  assert.equal(res.status, StatusCompleted);
   assert.equal(res.findings?.length, 3, "Biome's three findings");
   assert.equal(fake.count("eslint"), 0, "no ESLint");
 });
@@ -446,7 +446,7 @@ test("an ESLint exit of 2 for another reason than a missing configuration stays 
 
   const res = await lint(input);
 
-  assert.equal(res?.findings?.length, 1);
+  assert.equal(res.findings?.length, 1);
   assert.ok(res.findings[0]?.gate);
   assert.equal(res.findings[0].rule_id, "eslint-failed");
 });
@@ -467,7 +467,7 @@ test("an ESLint config that fails to load is a project error with the error as e
 
   const res = await lint(input);
 
-  assert.equal(res?.status, StatusCompleted);
+  assert.equal(res.status, StatusCompleted);
   assert.equal(res.findings?.length, 1);
   assert.ok(res.findings[0]?.gate);
   assert.equal(res.findings[0].rule_id, "eslint-failed");
@@ -493,7 +493,7 @@ test("a declared linter that is not installed is a project error", async (t) => 
 
   const res = await lint(input);
 
-  assert.equal(res?.status, StatusCompleted);
+  assert.equal(res.status, StatusCompleted);
   assert.equal(res.findings?.length, 1);
   assert.ok(res.findings[0]?.gate);
   assert.equal(res.findings[0].rule_id, "eslint-not-installed");
@@ -524,7 +524,7 @@ test("a broken linter run is a tool error and not a finding of the project", asy
 
       const res = await lint(input);
 
-      assert.equal(res?.status, StatusToolError);
+      assert.equal(res.status, StatusToolError);
       assert.equal(res.findings?.length ?? 0, 0, "no finding");
       assert.equal(res.reasonCode, "linter_failed");
     });
@@ -544,7 +544,7 @@ test("Biome runs lint from node_modules with the JSON reporter", async (t) => {
 
   const res = await lint(input);
 
-  assert.equal(res?.status, StatusCompleted);
+  assert.equal(res.status, StatusCompleted);
   assert.equal(res.findings?.length, 3, "the three diagnostics");
   assert.equal(
     res.findings.filter((f) => f.gate).length,
@@ -584,7 +584,7 @@ test("Biome is retried once without VCS integration when the missing .git folder
 
   const res = await lint(input);
 
-  assert.equal(res?.status, StatusCompleted);
+  assert.equal(res.status, StatusCompleted);
   assert.equal(res.findings?.length, 3, "the diagnostics of the retry");
   assert.equal(fake.count("biome lint"), 2, "the run and one retry");
   assert.ok(
@@ -621,7 +621,7 @@ test("a Biome config problem that has nothing to do with git is a project error 
 
   const res = await lint(input);
 
-  assert.equal(res?.status, StatusCompleted);
+  assert.equal(res.status, StatusCompleted);
   assert.equal(res.findings?.length, 1);
   const f = res.findings[0];
   assert.ok(f?.gate && f.rule_id === "biome-config-error");
@@ -643,7 +643,7 @@ test("when the retry without VCS fails as well the override is not claimed and t
 
   const res = await lint(input);
 
-  assert.equal(res?.findings?.length, 1);
+  assert.equal(res.findings?.length, 1);
   assert.ok(res.findings[0]?.gate);
   assert.deepEqual(res.limitations, []);
   assert.equal(fake.count("biome lint"), 2, "exactly one retry");
@@ -676,11 +676,11 @@ test("a project with both linters gets both", async (t) => {
   const res = await lint(input);
 
   const tools = new Map<string, number>();
-  for (const f of res?.findings ?? []) {
+  for (const f of res.findings ?? []) {
     const origin = f.evidence[0]?.origin ?? "";
     tools.set(origin, (tools.get(origin) ?? 0) + 1);
   }
-  assert.equal(res?.status, StatusCompleted);
+  assert.equal(res.status, StatusCompleted);
   assert.equal(tools.get("eslint"), 1);
   assert.equal(tools.get("biome"), 3);
   assert.ok(res.command?.includes("&&"), "the commands are joined");
@@ -704,7 +704,7 @@ test("when one of two linters cannot run the other one's findings are kept and t
 
   const res = await lint(input);
 
-  assert.equal(res?.status, StatusPartial);
+  assert.equal(res.status, StatusPartial);
   assert.equal(res.findings?.length, 3);
   assert.equal(res.reasonCode, "linter_could_not_run");
 });
@@ -723,7 +723,7 @@ test("a package whose install is unsupported is unsupported", async (t) => {
 
   const res = await lint(input);
 
-  assert.equal(res?.status, StatusUnsupported);
+  assert.equal(res.status, StatusUnsupported);
   assert.equal(res.reasonCode, "workspaces_unsupported");
 });
 
@@ -743,7 +743,7 @@ test("the linters and their versions are recorded as an artifact", async (t) => 
 
   const res = await lint(input);
 
-  assert.equal(res?.artifacts?.length, 1);
+  assert.equal(res.artifacts?.length, 1);
   const a = res.artifacts[0];
   assert.equal(
     a?.path,
@@ -781,7 +781,7 @@ test("more findings than the cap keep every Gate and cut the warnings and say ho
 
   const res = await lint(input);
 
-  assert.equal(res?.findings?.length, eslintMaxFindings);
+  assert.equal(res.findings?.length, eslintMaxFindings);
   assert.equal(
     res.findings.filter((f) => f.gate).length,
     1,
@@ -814,7 +814,7 @@ test("a linter version with unusual characters is not quoted in a trusted messag
 
   const res = await lint(input);
 
-  const f = res?.findings?.[0];
+  const f = res.findings?.[0];
   assert.ok(f);
   assert.ok(!f.message.includes("IGNORE"), f.message);
   assert.ok(f.message.includes("(version with unusual characters)"), f.message);

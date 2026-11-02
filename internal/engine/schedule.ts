@@ -381,8 +381,7 @@ export function linkEvidence(
 
 /**
  * safeRun calls the Check and turns an exception into a tool_error, so one
- * broken Check never takes the Run down. A Check whose family is not ported
- * yet has no run; its execution is a tool_error that says so.
+ * broken Check never takes the Run down.
  */
 async function safeRun(
   r: RunState,
@@ -390,13 +389,6 @@ async function safeRun(
   p: Planned,
   docker: boolean,
 ): Promise<Result> {
-  if (p.check.run === undefined) {
-    return {
-      status: StatusToolError,
-      reasonCode: "internal_error",
-      reason: `the TypeScript build does not run ${p.entry.id} yet`,
-    };
-  }
   try {
     const proj = r.proj;
     const snap = r.snap;

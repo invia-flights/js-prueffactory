@@ -65,7 +65,7 @@ test("smells finds nothing to examine when the probe found no Test code either",
 
   // No Docker driver and no toolset: the Check must answer before it needs
   // either.
-  const res = await impl("tests.smells").run?.(
+  const res = await impl("tests.smells").run(
     new AbortController().signal,
     input,
   );

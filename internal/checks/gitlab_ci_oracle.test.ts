@@ -177,7 +177,6 @@ describe("repository.gitlab-ci reports what the Go build reports", () => {
         snapshotDir: dir,
       });
       const check = impl("repository.gitlab-ci");
-      assert.ok(check.run !== undefined);
       const start = performance.now();
       const res = await check.run(AbortSignal.timeout(60_000), input);
       if (c.name.startsWith("deep-")) {

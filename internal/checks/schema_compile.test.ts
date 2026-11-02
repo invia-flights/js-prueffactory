@@ -314,13 +314,13 @@ test("schema.compile uses the toolset and the default Node image in the project 
 test("without the toolset volume schema.compile is an infrastructure error", async (t) => {
   const [input] = schemaInput(t, { "s.json": draft07 });
   input.toolsetError = "the volume could not be made";
-  const res = await impl("schema.compile").run?.(
+  const res = await impl("schema.compile").run(
     new AbortController().signal,
     input,
   );
   assert.deepEqual(
-    [res?.status, res?.reasonCode],
+    [res.status, res.reasonCode],
     ["infrastructure_error", "toolset_unavailable"],
   );
-  assert.ok(res?.reason?.includes("Ajv"));
+  assert.ok(res.reason?.includes("Ajv"));
 });

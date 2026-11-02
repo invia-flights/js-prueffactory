@@ -44,7 +44,6 @@ async function runGitlabCI(
   if (applicability === NotApplicable) {
     return { applicability, reason, result: null };
   }
-  assert.ok(gitlabCI.run !== undefined);
   const result = await gitlabCI.run(
     background(),
     new Input({
@@ -586,7 +585,6 @@ test("a project file that cannot be read is named in the reason only as trusted 
   );
   const proj = discover(dir);
   const ctx = projectContext(proj);
-  assert.ok(gitlabCI.run !== undefined);
   const res = await gitlabCI.run(
     background(),
     new Input({

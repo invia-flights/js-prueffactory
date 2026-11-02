@@ -15,9 +15,6 @@
 // it. Go's optional interfaces (ImageUser, PrerequisiteUser, ...) are optional
 // methods of the same object: the engine asks for a method and treats a
 // missing one as Go treated a Check that does not implement the interface.
-// During the port a Check whose family is not ported yet has no run; the
-// engine reports such an execution as a tool_error that names the gap
-// (engine/schedule.ts), so a Selection never hides it.
 import type { Context, Project } from "../discovery/discovery.ts";
 import { quote } from "../gocompat/fmt.ts";
 import type { Applicability, Finding } from "../resultset/types.ts";
@@ -42,7 +39,7 @@ export interface Check {
    * the Run is cancelled, the Budget runs out or the execution reaches its
    * time limit. A thrown error becomes a tool_error, as a Go panic did.
    */
-  run?(signal: AbortSignal, input: Input): Promise<Result>;
+  run(signal: AbortSignal, input: Input): Promise<Result>;
 
   /**
    * images returns the pinned image references the Check will run in the

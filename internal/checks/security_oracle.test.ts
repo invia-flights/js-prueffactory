@@ -331,10 +331,7 @@ describe("Go parity: the native lockfile Checks", () => {
     test(`${n.check} on ${n.project.name}`, async (t) => {
       const dir = writeFiles(t, n.project.files);
       const input = inputAt(dir, n.package);
-      const res = await impl(n.check).run?.(
-        new AbortController().signal,
-        input,
-      );
+      const res = await impl(n.check).run(new AbortController().signal, input);
       assert.ok(res);
       assert.equal(res.status, n.status);
       assert.equal(res.reasonCode ?? "", n.reasonCode);

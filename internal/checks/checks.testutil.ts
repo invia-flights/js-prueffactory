@@ -84,11 +84,8 @@ export function repoInput(
   });
 }
 
-/** runCheck runs a registered Check, which must have a run method. */
+/** runCheck runs a registered Check. */
 export async function runCheck(id: string, input: Input): Promise<Result> {
   const c = impl(id);
-  if (c.run === undefined) {
-    assert.fail(`${id} does not run`);
-  }
   return c.run(new AbortController().signal, input);
 }

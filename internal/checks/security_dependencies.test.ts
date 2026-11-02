@@ -159,7 +159,7 @@ test("an unusable lockfile is unsupported, not clean", async (t) => {
     "package.json": '{"name":"x","version":"1.0.0"}',
     "package-lock.json": '{"lockfileVersion": 1, "dependencies": {}}',
   });
-  const res = await impl(depsSecurityID).run?.(
+  const res = await impl(depsSecurityID).run(
     new AbortController().signal,
     inputOf(dir, {
       advisoryVolume: "jspf-cache-osv-db",
@@ -173,7 +173,7 @@ test("an unusable lockfile is unsupported, not clean", async (t) => {
 });
 
 test("without an advisory database the Check ends as infrastructure error, not clean", async () => {
-  const res = await impl(depsSecurityID).run?.(
+  const res = await impl(depsSecurityID).run(
     new AbortController().signal,
     inputOf(vulnerable, {
       advisoryError:
@@ -188,11 +188,11 @@ test("without an advisory database the Check ends as infrastructure error, not c
 });
 
 test("without any database information the reason says the Preparation phase gave none", async () => {
-  const res = await impl(depsSecurityID).run?.(
+  const res = await impl(depsSecurityID).run(
     new AbortController().signal,
     inputOf(vulnerable),
   );
-  assert.equal(res?.status, StatusInfrastructureError);
+  assert.equal(res.status, StatusInfrastructureError);
   assert.equal(
     res.reason,
     "the Preparation phase did not provide the advisory database",
@@ -201,11 +201,11 @@ test("without any database information the reason says the Preparation phase gav
 
 test("a package without a lockfile and without a produced one is unsupported", async (t) => {
   const dir = writeTree(t, { "package.json": '{"name":"x"}' });
-  const res = await impl(depsSecurityID).run?.(
+  const res = await impl(depsSecurityID).run(
     new AbortController().signal,
     inputOf(dir, { advisoryVolume: "v", advisoryDate: new Date() }),
   );
-  assert.equal(res?.status, StatusUnsupported);
+  assert.equal(res.status, StatusUnsupported);
   assert.equal(res.reasonCode, "no_lockfile");
 });
 

@@ -127,7 +127,7 @@ test("the strict run is one repeat run with the flag in NODE_OPTIONS after the t
     return okRun(i);
   });
 
-  await testsExisting.run?.(background(), input);
+  await testsExisting.run(background(), input);
   await runCheck(testsFlakyID, input);
   const res = await run(input);
 
@@ -313,7 +313,7 @@ test("tests that tests.flaky reports are left out and counted", async (t) => {
     }
   });
 
-  await testsExisting.run?.(background(), input);
+  await testsExisting.run(background(), input);
   const flaky = await runCheck(testsFlakyID, input);
   const res = await run(input);
 

@@ -32,15 +32,15 @@ test("a package that needs a build step is unsupported and starts no container",
   });
   const c = packageContext(proj, ".");
   assert.deepEqual(impl("syntax.parse").images?.(c), []);
-  const res = await impl("syntax.parse").run?.(
+  const res = await impl("syntax.parse").run(
     new AbortController().signal,
     new Input({ project: proj, context: c, snapshotDir: proj.root }),
   );
   assert.deepEqual(
-    [res?.status, res?.reasonCode],
+    [res.status, res.reasonCode],
     ["unsupported", "build_step_required"],
   );
-  assert.deepEqual(res?.limitations, [
+  assert.deepEqual(res.limitations, [
     {
       reason_code: "build_output_skipped",
       message:

@@ -1,11 +1,18 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { Applicable } from "../resultset/types.ts";
+import { Applicable, StatusCompleted } from "../resultset/types.ts";
 import "./all.ts";
 import { catalog, Implemented, Planned } from "./catalog.ts";
-import { implementation, register } from "./check.ts";
+import { type Check, implementation, register } from "./check.ts";
 import { registry } from "./registry.ts";
+
+function fake(): Check {
+  return {
+    applicability: () => [Applicable, ""],
+    run: () => Promise.resolve({ status: StatusCompleted }),
+  };
+}
 
 test("every implemented Catalog Check has a registered implementation, no planned one has", () => {
   // Go: TestACheckIsImplementedExactlyWhenItIsRegistered. The status comes
@@ -23,23 +30,21 @@ test("registering a planned Check is what makes it implemented", (t) => {
   t.after(() => registry.delete("tests.mutation"));
   const status = () => catalog().find((e) => e.id === "tests.mutation")?.status;
   assert.equal(status(), Planned);
-  register("tests.mutation", { applicability: () => [Applicable, ""] });
+  register("tests.mutation", fake());
   assert.equal(status(), Implemented);
 });
 
 test("register refuses an ID outside the Catalog and a second registration", () => {
-  const check = { applicability: () => [Applicable, ""] as const };
+  const check = fake();
   assert.throws(
     () => {
-      register("tests.exsting", { applicability: () => [Applicable, ""] });
+      register("tests.exsting", fake());
     },
     { message: 'checks: "tests.exsting" is not in the Catalog' },
   );
   assert.throws(
     () => {
-      register("syntax.parse", {
-        applicability: () => [check.applicability()[0], ""],
-      });
+      register("syntax.parse", check);
     },
     { message: 'checks: "syntax.parse" registered twice' },
   );

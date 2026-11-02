@@ -39,7 +39,6 @@ async function runManifest(
   const proj = discover(dir);
   const context = proj.contexts.find((c) => c.package?.path === at);
   assert.ok(context !== undefined);
-  assert.ok(packageManifest.run !== undefined);
   return packageManifest.run(
     background(),
     new Input({

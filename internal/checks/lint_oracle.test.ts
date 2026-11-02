@@ -501,7 +501,7 @@ describe("lint.existing runs the project's linters as Go does", () => {
         }),
       );
 
-      const res = await impl("lint.existing").run?.(
+      const res = await impl("lint.existing").run(
         new AbortController().signal,
         input,
       );

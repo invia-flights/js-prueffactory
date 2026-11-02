@@ -38,7 +38,7 @@ async function runLockfileCheck(id: string, dir: string): Promise<Result> {
   const proj = discover(dir);
   const context = proj.contexts[1];
   assert.ok(context);
-  const res = await impl(id).run?.(
+  const res = await impl(id).run(
     new AbortController().signal,
     new Input({
       project: proj,

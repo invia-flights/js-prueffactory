@@ -74,7 +74,7 @@ export const nodeNative = ["node", "--test"];
 
 /** runTestsExisting is the Run of tests.existing in the Input's Context. */
 export async function runTestsExisting(input: Input): Promise<Result> {
-  const res = await testsExisting.run?.(background(), input);
+  const res = await testsExisting.run(background(), input);
   assert.ok(res);
   return res;
 }

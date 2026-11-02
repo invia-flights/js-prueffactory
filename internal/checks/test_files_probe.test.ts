@@ -185,7 +185,7 @@ test("a Mocha suite of a package that cannot be installed is named in a Limitati
     code: "yarn_not_supported",
     reason: "the package uses Yarn",
   };
-  const run = packageInstall.run?.bind(packageInstall);
+  const run = packageInstall.run.bind(packageInstall);
   assert.ok(run);
 
   const res = await run(background(), input);
@@ -207,7 +207,7 @@ test("a package without Mocha suites gets no probe Limitation", async (t) => {
     code: "yarn_not_supported",
     reason: "the package uses Yarn",
   };
-  const run = packageInstall.run?.bind(packageInstall);
+  const run = packageInstall.run.bind(packageInstall);
   assert.ok(run);
 
   const res = await run(background(), input);
