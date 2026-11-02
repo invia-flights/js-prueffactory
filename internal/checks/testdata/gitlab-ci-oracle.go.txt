@@ -1,0 +1,120 @@
+// Generator of gitlab-ci-oracle.json: what the Go build's repository.gitlab-ci
+// reports for every case of gitlab-ci-cases.json and for the alias bombs below.
+// It must see the package's unexported names, so it runs as a test of
+// package checks. Kept as text; regenerate from the repository root with:
+//
+//	cp internal/checks/testdata/gitlab-ci-oracle.go.txt internal/checks/zz_oracle_test.go
+//	go test ./internal/checks -run TestZZGitlabOracle -count=1 && rm internal/checks/zz_oracle_test.go
+package checks
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+	"testing"
+
+	"github.com/invia-flights/jscript-bench/internal/discovery"
+)
+
+type zzCase struct {
+	Name  string            `json:"name"`
+	Files map[string]string `json:"files"`
+}
+
+type zzResult struct {
+	Name         string            `json:"name"`
+	Files        map[string]string `json:"files"`
+	Status       string            `json:"status"`
+	ReasonCode   string            `json:"reason_code"`
+	Reason       string            `json:"reason"`
+	Findings     json.RawMessage   `json:"findings"`
+	Limitations  json.RawMessage   `json:"limitations"`
+	ContextTools json.RawMessage   `json:"context_tools"`
+}
+
+func zzBombs() []zzCase {
+	var merge strings.Builder
+	merge.WriteString(".l0: &l0 {}\n")
+	for i := 1; i <= 12; i++ {
+		refs := strings.Repeat(fmt.Sprintf("*l%d, ", i-1), 9)
+		fmt.Fprintf(&merge, ".l%d: &l%d\n  <<: [%s]\n", i, i, strings.TrimSuffix(refs, ", "))
+	}
+	merge.WriteString("test:\n  script: make\n")
+	var plain strings.Builder
+	plain.WriteString("a0: &a0 [x, x, x, x, x, x, x, x, x]\n")
+	for i := 1; i <= 12; i++ {
+		refs := strings.Repeat(fmt.Sprintf("*a%d, ", i-1), 9)
+		fmt.Fprintf(&plain, "a%d: &a%d [%s]\n", i, i, strings.TrimSuffix(refs, ", "))
+	}
+	// Just under the limit: 2^20 nodes is not reached.
+	var small strings.Builder
+	small.WriteString("a0: &a0 [x, x, x, x, x, x, x, x, x]\n")
+	for i := 1; i <= 4; i++ {
+		refs := strings.Repeat(fmt.Sprintf("*a%d, ", i-1), 9)
+		fmt.Fprintf(&small, "a%d: &a%d [%s]\n", i, i, strings.TrimSuffix(refs, ", "))
+	}
+	return []zzCase{
+		{"bomb-merge", map[string]string{".gitlab-ci.yml": merge.String()}},
+		{"bomb-plain", map[string]string{".gitlab-ci.yml": plain.String()}},
+		{"aliases-under-limit", map[string]string{".gitlab-ci.yml": small.String()}},
+	}
+}
+
+func TestZZGitlabOracle(t *testing.T) {
+	data, err := os.ReadFile("testdata/gitlab-ci-cases.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases []zzCase
+	if err := json.Unmarshal(data, &cases); err != nil {
+		t.Fatal(err)
+	}
+	cases = append(cases, zzBombs()...)
+	var out []zzResult
+	for _, c := range cases {
+		dir := t.TempDir()
+		names := make([]string, 0, len(c.Files))
+		for rel := range c.Files {
+			names = append(names, rel)
+		}
+		sort.Strings(names)
+		for _, rel := range names {
+			p := filepath.Join(dir, filepath.FromSlash(rel))
+			if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(p, []byte(c.Files[rel]), 0o644); err != nil {
+				t.Fatal(err)
+			}
+		}
+		proj, err := discovery.Discover(dir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		res := gitlabCI{}.Run(context.Background(), &Input{
+			Project: proj, Context: &proj.Contexts[0], OriginalPath: "/work/project", SnapshotDir: dir,
+		})
+		findings, _ := json.Marshal(res.Findings)
+		limitations, _ := json.Marshal(res.Limitations)
+		tools, _ := json.Marshal(res.ContextTools)
+		out = append(out, zzResult{
+			Name: c.Name, Files: c.Files, Status: string(res.Status), ReasonCode: res.ReasonCode, Reason: res.Reason,
+			Findings: findings, Limitations: limitations, ContextTools: tools,
+		})
+	}
+	doc := map[string]any{
+		"recordedFrom": "the Go build at the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8 (Go 1.27.3)",
+		"cases":        out,
+	}
+	b, err := json.MarshalIndent(doc, "", " ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/gitlab-ci-oracle.json", append(b, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}

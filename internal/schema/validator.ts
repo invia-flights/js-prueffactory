@@ -233,10 +233,10 @@ function keywordOf(e: ErrorObject): string {
 
 /** goQuote is the Go library's quote: %q in single quotes. */
 export function goQuote(s: string): string {
-  const q = quote(s);
-  return (
-    "'" + q.slice(1, -1).replaceAll('\\"', '"').replaceAll("'", "\\'") + "'"
-  );
+  // As Go: the replacements run over the whole %q text, quotes included, so
+  // a value that ends with a backslash loses that escape ('\' for "\\").
+  const q = quote(s).replaceAll('\\"', '"').replaceAll("'", "\\'");
+  return "'" + q.slice(1, -1) + "'";
 }
 
 /** display is the Go library's display of a primitive value (fmt %v). */
