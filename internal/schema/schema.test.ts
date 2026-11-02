@@ -2,10 +2,19 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 
+import { apply } from "../benchmark/score.ts";
 import { marshal } from "../gocompat/json.ts";
 import { goldenScored } from "../resultset/helpers.testutil.ts";
 import { populated } from "../resultset/resultsettest/populated.testutil.ts";
-import { ReportShape, type Set } from "../resultset/types.ts";
+import {
+  type Project,
+  scoredProject,
+} from "../resultset/resultsettest/scored.testutil.ts";
+import {
+  ReportShape,
+  type Set,
+  StatusUnsupported,
+} from "../resultset/types.ts";
 import { validate as validateRules } from "../resultset/validate.ts";
 import { FileName, leaves, report, validate } from "./schema.ts";
 
@@ -171,17 +180,38 @@ test("the schema rejects unknown fields everywhere", () => {
   assert.notDeepEqual(validate(Buffer.from(JSON.stringify(doc))), []);
 });
 
-// Go: TestABenchmarkReportWithEveryStateIsValid. The Go test scored four
-// variants with benchmark.Apply; until the scorer is ported (ticket 06) the
-// golden benchmark Reports stand in, and the scorer's ticket adds the
-// variants.
-test("a benchmark Report is valid", () => {
+// Go: TestABenchmarkReportWithEveryStateIsValid.
+describe("a benchmark Report with every state is valid", () => {
+  const variants: Record<string, ((p: Project) => void) | null> = {
+    clean: null,
+    "a Gate": (p) => {
+      p.add("syntax.parse", "SyntaxError", true);
+    },
+    unknown: (p) => {
+      p.status("tests.existing", StatusUnsupported, "x");
+    },
+    "project fault": (p) => {
+      p.notApplicable("tests.existing");
+    },
+  };
+  for (const [name, mutate] of Object.entries(variants)) {
+    test(name, () => {
+      const p = scoredProject();
+      mutate?.(p);
+      const s = p.done();
+      apply(s);
+      assert.deepEqual(validateRules(s), [], "the scored set is inconsistent");
+      assert.deepEqual(validate(reportBytes(s)), []);
+    });
+  }
   for (const name of [
     "benchmark-pass",
     "benchmark-fail",
     "benchmark-incomplete",
   ] as const) {
-    assert.deepEqual(validate(reportBytes(goldenScored(name))), [], name);
+    test(`golden ${name}`, () => {
+      assert.deepEqual(validate(reportBytes(goldenScored(name))), []);
+    });
   }
 });
 
