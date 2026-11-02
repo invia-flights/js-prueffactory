@@ -52,22 +52,26 @@ for (const [unit, threshold] of goThresholds) {
   });
 }
 
-test("Go's panic text names the regexp", () => {
+test("the failure names Go's error and shows the glob only as trusted text may", () => {
   const failure = globCompileFailure("*a".repeat(1118480));
-  assert.ok(failure?.startsWith("regexp: Compile(`^[^/]*a[^/]*a") === true);
-  assert.ok(
-    failure.includes("): error parsing regexp: expression too large: `^[^/]*a"),
+  assert.equal(
+    failure?.endsWith("): error parsing regexp: expression too large"),
+    true,
   );
+  // The glob has a `*`, which a trusted field may show; its length does not
+  // matter because shownGlob cuts it to a placeholder.
+  assert.equal(failure.includes("(path with unusual characters)"), true);
   assert.equal(globCompileFailure("*a".repeat(1118479)), undefined);
-  // A glob with a backquote is quoted with double quotes, as Go's quote does.
-  assert.ok(
-    globCompileFailure("`?".repeat(1677721))?.startsWith(
-      'regexp: Compile("^`[^/]',
-    ),
+  // A hostile glob never reaches the text.
+  const hostile = globCompileFailure(
+    "[click](http://evil.example)" + "?".repeat(3_355_442),
   );
+  assert.ok(hostile !== undefined);
+  assert.ok(!hostile.includes("evil.example") && !hostile.includes("click"));
+  assert.ok(hostile.length < 200);
 });
 
-test("a too large include glob ends the Check as Go's panic did", async (t) => {
+test("a too large include glob ends the Check like Go's panic did", async (t) => {
   const proj = tree(t, {
     ".gitlab-ci.yml": `include:\n  - local: '${"*a".repeat(1118480)}'\ntest:\n  script: make\n`,
   });
@@ -82,6 +86,6 @@ test("a too large include glob ends the Check as Go's panic did", async (t) => {
         snapshotDir: proj.root,
       }),
     ),
-    /^Error: regexp: Compile\(`\^\[\^\/\]\*a/,
+    /^Error: regexp: Compile\(the regexp of the include glob .{1,100}\): error parsing regexp: expression too large$/,
   );
 });

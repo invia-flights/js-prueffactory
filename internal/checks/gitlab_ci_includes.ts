@@ -3,7 +3,6 @@
 // recursively. The others need the network or GitLab's own files, so each is
 // a Limitation.
 import { type FileClass, Source, TestData } from "../discovery/discovery.ts";
-import { quote } from "../gocompat/fmt.ts";
 import { GoError } from "../gocompat/os.ts";
 import { clean } from "../gocompat/path.ts";
 import { sortStrings } from "../gocompat/strings.ts";
@@ -453,59 +452,20 @@ export function globTooLarge(tokens: readonly GlobToken[]): boolean {
   return allocated >= maxRegexpSize && size > maxRegexpSize;
 }
 
-const metaBytes = new Set(
-  Array.from("\\.+*?()|[]{}^$", (c) => c.charCodeAt(0)),
-);
-
-/** globRegexpSource is the regexp source Go's globRegexp built. */
-function globRegexpSource(b: Uint8Array): string {
-  let out = "^";
-  for (let i = 0; i < b.length; i++) {
-    const c = b[i] ?? 0;
-    if (c === 0x2a && b[i + 1] === 0x2a) {
-      i++;
-      if (b[i + 1] === 0x2f) {
-        i++;
-        out += "(?:.*/)?";
-      } else {
-        out += ".*";
-      }
-    } else if (c === 0x2a) {
-      out += "[^/]*";
-    } else if (c === 0x3f) {
-      out += "[^/]";
-    } else {
-      out += (metaBytes.has(c) ? "\\" : "") + String.fromCharCode(c);
-    }
-  }
-  return out + "$";
-}
-
-// regexpQuote is regexp's quote: backquotes when strconv.CanBackquote, else
-// strconv.Quote.
-function regexpQuote(s: string): string {
-  for (const ch of s) {
-    const r = ch.codePointAt(0) ?? 0;
-    if (r === 0xfeff || r === 0x60 || r === 0x7f || (r < 0x20 && r !== 0x09)) {
-      return quote(s);
-    }
-  }
-  return "`" + s + "`";
-}
-
 /**
- * globCompileFailure is the text of the panic Go's regexp.MustCompile raised
- * for a glob too large to compile, or undefined when Go compiled it. The
- * panic ended the Go build's Check, which the engine reported as a
- * tool_error "the Check panicked: ...".
+ * globCompileFailure is the text of the failure Go's regexp.MustCompile
+ * raised for a glob too large to compile, or undefined when Go compiled it.
+ * Go's panic ended the Check, which the engine reported as a tool_error "the
+ * Check panicked: ...", and its text held the whole regexp, that is the
+ * project's glob, up to megabytes, in a trusted field. Here the glob appears
+ * as shownGlob shows it (hardening beyond Go, see traps.md); everything else
+ * is Go's text.
  */
 export function globCompileFailure(pattern: string): string | undefined {
-  const b = Buffer.from(pattern, "utf8");
-  if (!globTooLarge(globTokens(b))) {
+  if (!globTooLarge(globTokens(Buffer.from(pattern, "utf8")))) {
     return undefined;
   }
-  const src = globRegexpSource(b);
-  return `regexp: Compile(${regexpQuote(src)}): error parsing regexp: expression too large: \`${src}\``;
+  return `regexp: Compile(the regexp of the include glob ${shownGlob(pattern)}): error parsing regexp: expression too large`;
 }
 
 /** GlobMatcher says whether a project path matches a local include glob. */
