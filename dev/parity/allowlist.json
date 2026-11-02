@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "case": "runs/*package.install*",
+    "file": "artifacts/package.install/*/npm-install.log",
+    "reason": "npm's own log differs between two Runs of the same build: npm writes its cache hits in completion order, with timings, and names its debug log after the current time. Checked Go against Go on failing-test and syntax-error (ticket 02). The command, exit code and every Finding taken from the log are compared in report.json. Runs that install as a prerequisite of another selected Check add their own case pattern."
+  }
+]
