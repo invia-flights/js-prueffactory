@@ -1,17 +1,22 @@
 // Seam A without Docker: a reason says what js-prueffactory supports, never in
 // which milestone. Readers of a Report don't know the milestones, and a reason
-// that names one turns false when the next one starts. The reasons that
-// list-checks prints need Discovery and are tested with list-checks.
+// that names one turns false when the next one starts.
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { test } from "node:test";
+import { describe, test } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import ts from "typescript";
 
 import { catalog, CatalogVersion, Planned } from "../checks/catalog.ts";
 import { call, noDocker, project, useCatalogFor } from "./cli.testutil.ts";
+import {
+  listChecksJSON,
+  noDockerEnv,
+  projectWith,
+  rowOf,
+} from "./listchecks.testutil.ts";
 
 // assertNamesNoMilestone fails when text names a milestone. The Catalog
 // version is an identifier that list-checks and the Report show, not a
@@ -26,6 +31,90 @@ function assertNamesNoMilestone(where: string, text: string): void {
 }
 
 const plannedCheck = "api.dast";
+
+describe("reasons say what the tool supports and name no milestone", () => {
+  const lock = '{"lockfileVersion":3,"packages":{}}';
+  // check is the Check whose reason is read, or "" for the Node version of
+  // the package Context; want is text the reason holds.
+  const cases: [string, Record<string, string>, string, string][] = [
+    [
+      "yarn lockfile",
+      { "package.json": '{"name":"demo"}', "yarn.lock": "# yarn\n" },
+      "package.install",
+      "the package uses yarn (yarn.lock), and js-prueffactory supports only npm",
+    ],
+    [
+      "workspaces field",
+      {
+        "package.json": '{"name":"demo","workspaces":["packages/*"]}',
+        "package-lock.json": lock,
+      },
+      "package.install",
+      "the package.json has a workspaces field, and js-prueffactory does not support npm workspaces",
+    ],
+    [
+      "jest test script",
+      {
+        "package.json": '{"scripts":{"test":"jest --ci"}}',
+        "package-lock.json": lock,
+      },
+      "tests.existing",
+      "js-prueffactory runs only `mocha …` and `node … --test …`",
+    ],
+    [
+      "node version file",
+      { "package.json": '{"name":"demo"}', ".nvmrc": "18\n" },
+      "",
+      "Node 18, declared in .nvmrc, is not supported: js-prueffactory runs Node ",
+    ],
+    [
+      "engines.node",
+      { "package.json": '{"name":"demo","engines":{"node":"<18"}}' },
+      "",
+      "is satisfied by none of the supported Node majors: js-prueffactory runs Node ",
+    ],
+  ];
+  for (const [name, files, check, want] of cases) {
+    test(name, async (t) => {
+      const dir = projectWith(t, files);
+      const l = await listChecksJSON(t, dir, "--format", "json");
+      const reason =
+        check === ""
+          ? (l.contexts.at(-1)?.node_unsupported ?? "")
+          : (rowOf(l, check).applicability[0]?.reason ?? "");
+      assert.ok(reason.includes(want), reason);
+      for (const format of ["json", "markdown"]) {
+        const r = await call(
+          noDockerEnv(t),
+          "list-checks",
+          dir,
+          "--format",
+          format,
+        );
+        assert.equal(r.code, 0, r.stderr);
+        assertNamesNoMilestone(`list-checks --format ${format}`, r.stdout);
+      }
+    });
+  }
+});
+
+test("a workspace member is unsupported for what the tool supports", async (t) => {
+  const dir = projectWith(t, {
+    "package.json": '{"name":"root","workspaces":["packages/*"]}',
+    "package-lock.json": '{"lockfileVersion":3,"packages":{}}',
+    "packages/a/package.json": '{"name":"a"}',
+  });
+  const l = await listChecksJSON(t, dir, "--format", "json");
+  const a = rowOf(l, "package.install").applicability.find(
+    (x) => x.path === "packages/a",
+  );
+  assert.ok(a, "the workspace member is not listed");
+  assert.ok(
+    a.reason.includes("and js-prueffactory does not support npm workspaces"),
+    a.reason,
+  );
+  assertNamesNoMilestone("the workspace member's reason", a.reason);
+});
 
 test("selecting a planned Check is refused without naming a milestone", async (t) => {
   useCatalogFor(

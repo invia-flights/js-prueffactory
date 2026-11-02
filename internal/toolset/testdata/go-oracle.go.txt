@@ -1,0 +1,35 @@
+// Generator of go-oracle.json: the toolset table and version of the Go build.
+// The Go code is frozen, so this is kept as text. To regenerate, copy it to
+// internal/toolset/zz_oracle_test.go, run
+//
+//	go test ./internal/toolset -run TestZZOracle -count=1
+//
+// and delete the copy.
+package toolset
+
+import (
+	"encoding/json"
+	"os"
+	"sort"
+	"testing"
+)
+
+func TestZZOracle(t *testing.T) {
+	lines := []string{}
+	for k, v := range entries {
+		lines = append(lines, k+"="+v)
+	}
+	sort.Strings(lines)
+	out := map[string]any{
+		"recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8",
+		"version":      Version(),
+		"lines":        lines,
+	}
+	b, err := json.MarshalIndent(out, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/go-oracle.json", append(b, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}

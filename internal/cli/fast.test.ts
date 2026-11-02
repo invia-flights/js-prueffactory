@@ -1,5 +1,4 @@
-// Seam A tests without Docker for the --fast flag. The parts of the Go tests
-// that read list-checks output need Discovery and come with list-checks.
+// Seam A tests without Docker for the --fast flag.
 import assert from "node:assert/strict";
 import { describe, test, type TestContext } from "node:test";
 
@@ -11,6 +10,7 @@ import {
   tempDir,
   useCatalogFor,
 } from "./cli.testutil.ts";
+import { listChecksJSON, noDockerEnv, rowOf } from "./listchecks.testutil.ts";
 
 // fastCatalog is the real Catalog with tests.mutation and api.fuzz
 // implemented. api.dast stays planned.
@@ -24,6 +24,105 @@ function fastCatalog(t: TestContext): void {
     ),
   );
 }
+
+test("list-checks shows which Checks --fast skips", async (t) => {
+  const dir = project(t);
+  const l = await listChecksJSON(t, dir, "--format", "json");
+  assert.deepEqual(
+    l.checks.filter((c) => c.skipped_by_fast).map((c) => c.id),
+    ["tests.mutation", "api.fuzz", "api.dast"],
+  );
+  assert.equal(l.fast, false);
+
+  const r = await call(noDockerEnv(t), "list-checks", dir);
+  const lines = r.stdout.split("\n");
+  const header = lines.find((line) => line.startsWith("| Check")) ?? "";
+  assert.ok(header.includes("Skipped by `--fast`"), header);
+  const column = header.split("|").findIndex((h) => h.includes("Skipped by"));
+  const rows = new Map<string, string>();
+  for (const line of lines) {
+    const cells = line.split("|");
+    if (line.startsWith("| `") && cells.length > 2) {
+      rows.set((cells[1] ?? "").trim().replaceAll("`", ""), line);
+    }
+  }
+  for (const c of l.checks) {
+    const cell = (rows.get(c.id) ?? "").split("|")[column]?.trim();
+    assert.equal(cell, c.skipped_by_fast ? "yes" : "no", c.id);
+  }
+});
+
+test("list-checks --fast with every marked Check planned keeps the Selection", async (t) => {
+  useCatalogFor(
+    t,
+    catalog().map((e) => (e.skippedByFast ? { ...e, status: Planned } : e)),
+  );
+  const dir = project(t);
+  const l = await listChecksJSON(t, dir, "--format", "json", "--fast");
+  assert.equal(l.fast, true);
+  const plain = await listChecksJSON(t, dir, "--format", "json");
+  assert.deepEqual(
+    l.checks.map((c) => c.selected),
+    plain.checks.map((c) => c.selected),
+  );
+});
+
+test("list-checks --fast shows the resulting Selection", async (t) => {
+  fastCatalog(t);
+  const dir = project(t);
+  const plain = await listChecksJSON(t, dir, "--format", "json");
+  for (const id of ["tests.mutation", "api.fuzz"]) {
+    assert.equal(rowOf(plain, id).selected, true, id);
+  }
+  const l = await listChecksJSON(t, dir, "--format", "json", "--fast");
+  for (const id of ["tests.mutation", "api.fuzz", "api.dast"]) {
+    const row = rowOf(l, id);
+    assert.equal(row.selected, false, id);
+    assert.equal(row.skipped_by_fast, true, id);
+  }
+  assert.equal(rowOf(l, "syntax.parse").selected, true);
+});
+
+test("--fast removes skipped Checks after --only and --exclude", async (t) => {
+  fastCatalog(t);
+  const dir = project(t);
+  let l = await listChecksJSON(
+    t,
+    dir,
+    "--format",
+    "json",
+    "--fast",
+    "--only",
+    "tests.mutation,syntax.parse",
+  );
+  for (const c of l.checks) {
+    assert.equal(c.selected, c.id === "syntax.parse", c.id);
+  }
+  l = await listChecksJSON(
+    t,
+    dir,
+    "--format",
+    "json",
+    "--fast",
+    "--exclude",
+    "syntax",
+  );
+  assert.equal(rowOf(l, "syntax.parse").selected, false);
+  assert.equal(rowOf(l, "tests.mutation").selected, false);
+  assert.equal(rowOf(l, "package.manifest").selected, true);
+});
+
+test("without --fast the Checks --fast skips can be selected", async (t) => {
+  fastCatalog(t);
+  const r = await call(
+    noDockerEnv(t),
+    "list-checks",
+    project(t),
+    "--only",
+    "tests.mutation,api.fuzz",
+  );
+  assert.equal(r.code, 0, r.stderr);
+});
 
 describe("--fast works with every command and never trips over a planned marked Check", () => {
   for (const command of ["test", "benchmark"]) {
