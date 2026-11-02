@@ -372,10 +372,10 @@ describe("allowlist", () => {
         ],
         ["runs/*tests.flaky*", "artifacts/package.install/*/npm-install.log"],
         [
-          "runs/*tests.coverage*",
+          "runs/*only=tests.coverage*",
           "artifacts/package.install/*/npm-install.log",
         ],
-        ["runs/*runtime*", "artifacts/package.install/*/npm-install.log"],
+        ["runs/*only=runtime*", "artifacts/package.install/*/npm-install.log"],
         [
           "runs/*quality.unused*",
           "artifacts/package.install/*/npm-install.log",
