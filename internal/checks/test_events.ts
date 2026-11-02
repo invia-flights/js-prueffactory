@@ -262,7 +262,7 @@ const eventLineSchema: Schema = {
     { name: "suitePath", schema: strings },
     { name: "focused", schema: { kind: "bool" } },
     { name: "outcome", schema: { kind: "string" } },
-    { name: "duration", schema: { kind: "float" } },
+    { name: "duration", schema: { kind: "float64" } },
     { name: "err", schema: { kind: "pointer", elem: testErrSchema } },
     { name: "hookType", schema: { kind: "string" } },
     { name: "scope", schema: { kind: "string" } },

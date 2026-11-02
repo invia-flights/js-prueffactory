@@ -1,19 +1,58 @@
+// schema.compile compiles every JSON Schema of the project with Ajv 8 from the
+// toolset volume (Go: schema_compile.go): once without strict mode, where a
+// failure is a Gate, and once with it, where a failure is a warning. Test
+// data only gets notes. The Check reads the schema files on the host and
+// hands them to the helper parsed, so the helper never opens a project path
+// and nothing is fetched. Ajv, ajv-draft-04 and ajv-formats run in the
+// container, so the host needs no draft-04 support of its own.
+import { readFileSync } from "node:fs";
+
 import type { FileClass, Project } from "../discovery/discovery.ts";
+import { TestData } from "../discovery/discovery.ts";
+import type { ContainerResult } from "../docker/driver.ts";
 import { formatNumber, quoteJSONString } from "../gocompat/json.ts";
 import { ext } from "../gocompat/path.ts";
 import { compareBytes, trimSpace } from "../gocompat/strings.ts";
-import { type Schema, unmarshal } from "../gocompat/unmarshal.ts";
-import { Applicable, NotApplicable } from "../resultset/types.ts";
+import { type GoSlice, type Schema, unmarshal } from "../gocompat/unmarshal.ts";
+import { newFingerprint } from "../resultset/fingerprint.ts";
+import {
+  Applicable,
+  ConfidenceConfirmed,
+  ConfidenceLikely,
+  type Finding,
+  KindDefect,
+  KindHint,
+  type Limitation,
+  NotApplicable,
+  SeverityError,
+  SeverityNote,
+  SeverityWarning,
+  StatusCompleted,
+  StatusPartial,
+  type ToolRef,
+} from "../resultset/types.ts";
+import { newFinding } from "../resultset/zero.ts";
+import { DefaultNodeMajor, nodeImage, VariantDebian } from "../toolset/node.ts";
+import { npmTool } from "../toolset/npmtools.ts";
+import { imageRef } from "../toolset/toolset.ts";
+import { MountPath, ToolBin } from "../toolvolume/toolvolume.ts";
 import * as yaml from "../yamlv3/yaml.ts";
 import { type Check, register } from "./check.ts";
+import {
+  failedToRun,
+  helperFailed,
+  toolsetUnavailable,
+} from "./helper_result.ts";
+import { type Input, type Result, untrusted } from "./input.ts";
 import { inNodeModules, readRegular } from "./repo_targets.ts";
+import { shownPath, shownURL, shownWord } from "./shown_text.ts";
 
 export const schemaCompileID = "schema.compile";
 
-// schemaCompile compiles every JSON Schema of the project with Ajv 8 from the
-// toolset volume. The Check reads the schema files on the host and hands them
-// to the helper parsed, so the helper never opens a project path and nothing
-// is fetched. The run arrives with ticket 16 of the port.
+const schemaCompileScript = readFileSync(
+  new URL("js/schema-compile.js", import.meta.url),
+);
+
 export const schemaCompile: Check = {
   applicability(p, c) {
     if (c.package !== null) {
@@ -31,6 +70,17 @@ export const schemaCompile: Check = {
     }
     return [Applicable, ""];
   },
+
+  images(c) {
+    return c.package !== null ? [] : [schemaCompileImage()];
+  },
+
+  /** usesToolset says that Ajv comes from the toolset volume. */
+  usesToolset(c) {
+    return c.package === null;
+  },
+
+  run: runSchemaCompile,
 };
 
 register(schemaCompileID, schemaCompile);
@@ -259,4 +309,355 @@ function marshalValue(v: unknown): string | undefined {
     return "{" + parts.join(",") + "}";
   }
   return undefined;
+}
+
+function schemaCompileImage(): string {
+  const img = nodeImage(DefaultNodeMajor, VariantDebian);
+  if (img === undefined) {
+    throw new Error("the toolset has no default Node image");
+  }
+  return imageRef(img);
+}
+
+/** SchemaProblem is one way a compile failed. */
+export interface SchemaProblem {
+  kind: string;
+  message: string;
+}
+
+/** SchemaCompileResult is the helper's result for one schema file. */
+export interface SchemaCompileResult {
+  path: string;
+  draft: string;
+  lax: SchemaProblem | null;
+  strict: SchemaProblem | null;
+  remote: string[];
+}
+
+export interface SchemaCompileOutput {
+  version: string;
+  schemas: SchemaCompileResult[];
+}
+
+const str: Schema = { kind: "string" };
+const problemSchema: Schema = {
+  kind: "pointer",
+  elem: {
+    kind: "struct",
+    type: "checks.schemaProblem",
+    fields: [
+      { name: "kind", schema: str },
+      { name: "message", schema: str },
+    ],
+  },
+};
+const outputSchema: Schema = {
+  kind: "struct",
+  type: "checks.schemaCompileOutput",
+  fields: [
+    { name: "version", schema: str },
+    {
+      name: "schemas",
+      schema: {
+        kind: "slice",
+        type: "[]checks.schemaCompileResult",
+        elem: {
+          kind: "struct",
+          type: "checks.schemaCompileResult",
+          fields: [
+            { name: "path", schema: str },
+            { name: "draft", schema: str },
+            { name: "lax", schema: problemSchema },
+            { name: "strict", schema: problemSchema },
+            {
+              name: "remote",
+              schema: { kind: "slice", type: "[]string", elem: str },
+            },
+          ],
+        },
+      },
+    },
+  ],
+};
+
+/** parseOutput decodes the helper's answer; it throws for anything else. */
+function parseOutput(stdout: Uint8Array): SchemaCompileOutput {
+  const out = unmarshal(stdout, outputSchema) as {
+    version: string;
+    schemas: GoSlice | null;
+  };
+  const schemas = (out.schemas?.items() ?? []) as (Omit<
+    SchemaCompileResult,
+    "remote"
+  > & { remote: GoSlice | null })[];
+  return {
+    version: out.version,
+    schemas: schemas.map((s) => ({
+      ...s,
+      remote: (s.remote?.items() ?? []) as string[],
+    })),
+  };
+}
+
+const escapes: Readonly<Record<number, string>> = {
+  0x3c: "\\u003c",
+  0x3e: "\\u003e",
+  0x26: "\\u0026",
+};
+
+/**
+ * compactJSON is what Go's json.Marshal writes for a json.RawMessage: the
+ * value without white space between tokens, with <, >, & and U+2028, U+2029
+ * escaped inside strings and every other byte kept. data is valid JSON.
+ */
+export function compactJSON(data: Uint8Array): Buffer {
+  const out: number[] = [];
+  const push = (text: string) => {
+    for (let k = 0; k < text.length; k++) out.push(text.charCodeAt(k));
+  };
+  let inString = false;
+  for (let i = 0; i < data.length; i++) {
+    const c = data[i] ?? 0;
+    if (!inString) {
+      if (c === 0x20 || c === 0x09 || c === 0x0a || c === 0x0d) {
+        continue;
+      }
+      inString = c === 0x22;
+      out.push(c);
+      continue;
+    }
+    const escaped = escapes[c];
+    if (c === 0x5c) {
+      out.push(c, data[i + 1] ?? 0);
+      i++;
+    } else if (c === 0x22) {
+      inString = false;
+      out.push(c);
+    } else if (escaped !== undefined) {
+      push(escaped);
+    } else if (
+      c === 0xe2 &&
+      data[i + 1] === 0x80 &&
+      (data[i + 2] === 0xa8 || data[i + 2] === 0xa9)
+    ) {
+      push(data[i + 2] === 0xa8 ? "\\u2028" : "\\u2029");
+      i += 2;
+    } else {
+      out.push(c);
+    }
+  }
+  return Buffer.from(out);
+}
+
+/** schemaHelperInput builds the helper's input document. */
+export function schemaHelperInput(targets: readonly SchemaTarget[]): Buffer {
+  const q = (s: string) => Buffer.from(quoteJSONString(s, true));
+  const parts: Buffer[] = [
+    Buffer.from(`{"modules":`),
+    q(ToolBin),
+    Buffer.from(`,"schemas":[`),
+  ];
+  targets.forEach((t, i) => {
+    parts.push(
+      Buffer.from(i === 0 ? `{"path":` : `,{"path":`),
+      q(t.path),
+      Buffer.from(`,"draft":`),
+      q(t.draft),
+      Buffer.from(`,"schema":`),
+      compactJSON(t.schema),
+      Buffer.from("}"),
+    );
+  });
+  parts.push(Buffer.from("]}"));
+  return Buffer.concat(parts);
+}
+
+async function runSchemaCompile(
+  signal: AbortSignal,
+  input: Input,
+): Promise<Result> {
+  const res: Result = { status: StatusCompleted };
+  if (input.toolsetVolume === "") {
+    return toolsetUnavailable(input, "Ajv");
+  }
+
+  const [targets, over] = schemaTargets(input.project);
+  res.command = ["node", "/jspf/schema-compile.js", "/jspf/input.json"];
+  const docker = input.docker;
+  if (docker === null) {
+    // Go dereferenced the nil driver here and panicked.
+    throw new Error("no Docker driver is configured");
+  }
+  let container: ContainerResult;
+  try {
+    container = await docker.runContainer(signal, {
+      name: "schema-compile",
+      image: schemaCompileImage(),
+      cmd: res.command,
+      workDir: "/jspf",
+      network: input.network,
+      mounts: [
+        { volume: input.toolsetVolume, path: MountPath, readOnly: true },
+      ],
+      files: [
+        {
+          path: "/jspf/schema-compile.js",
+          mode: 0o644,
+          content: schemaCompileScript,
+        },
+        {
+          path: "/jspf/input.json",
+          mode: 0o644,
+          content: schemaHelperInput(targets),
+        },
+      ],
+    });
+  } catch (err) {
+    return failedToRun(res, err);
+  }
+  const exit = container.exitCode;
+  res.tool = { name: "ajv", version: null, exit_code: exit };
+
+  let out: SchemaCompileOutput;
+  try {
+    if (exit !== 0) {
+      throw new Error("exit");
+    }
+    out = parseOutput(container.stdout);
+  } catch {
+    return helperFailed(res, "Ajv", container, 800);
+  }
+  const interpreted = interpretSchemaCompileTargets(input, out, targets, over);
+  interpreted.command = res.command;
+  if (interpreted.tool) {
+    interpreted.tool.exit_code = exit;
+  }
+  return interpreted;
+}
+
+/** interpretSchemaCompile turns the helper's output into Findings and a status. */
+export function interpretSchemaCompile(
+  input: Input,
+  out: SchemaCompileOutput,
+): Result {
+  const [targets] = schemaTargets(input.project);
+  return interpretSchemaCompileTargets(input, out, targets, []);
+}
+
+function interpretSchemaCompileTargets(
+  input: Input,
+  out: SchemaCompileOutput,
+  targets: readonly SchemaTarget[],
+  over: readonly string[],
+): Result {
+  const findings: Finding[] = [];
+  const limitations: Limitation[] = [];
+  const contextTools: ToolRef[] = [];
+  const res: Result = {
+    status: StatusCompleted,
+    tool: { name: "ajv", version: out.version, exit_code: null },
+  };
+  for (const name of ["ajv", "ajv-draft-04", "ajv-formats"]) {
+    const tool = npmTool(name);
+    if (tool !== undefined) {
+      contextTools.push({
+        name: tool.name,
+        version: tool.version,
+        digest: tool.integrity,
+      });
+    }
+  }
+  if (contextTools.length > 0) res.contextTools = contextTools;
+
+  const classOf = new Map<string, FileClass>();
+  for (const t of targets) {
+    classOf.set(t.path, t.class);
+  }
+  const remote: string[] = [];
+  for (const s of out.schemas) {
+    const testData = classOf.get(s.path) === TestData;
+    if (s.lax !== null) {
+      findings.push(schemaFinding(input, s, s.lax, testData));
+    } else if (s.strict !== null) {
+      findings.push(schemaFinding(input, s, s.strict, testData));
+    }
+    if (s.remote.length > 0) {
+      limitations.push({
+        reason_code: "remote_ref_not_fetched",
+        message:
+          "the schema refers to " +
+          s.remote.map((r) => shownURL(r, "reference")).join(", ") +
+          ", which cannot be fetched without network access, so what it points to was not compiled",
+        check_id: schemaCompileID,
+        path: s.path,
+      });
+      remote.push(s.path);
+    }
+  }
+  for (const p of over) {
+    limitations.push({
+      reason_code: "schema_files_not_examined",
+      message:
+        "the project has more JSON Schema files than one Run examines, so this one was left out",
+      check_id: schemaCompileID,
+      path: p,
+    });
+  }
+  if (findings.length > 0) res.findings = findings;
+  if (limitations.length > 0) res.limitations = limitations;
+
+  if (over.length > 0) {
+    res.status = StatusPartial;
+    res.reasonCode = "schema_files_not_examined";
+    res.reason = `${String(over.length)} JSON Schema file(s) were left out because the project has more than a Run examines`;
+  } else if (remote.length > 0) {
+    res.status = StatusPartial;
+    res.reasonCode = "remote_ref_not_fetched";
+    res.reason = `${String(remote.length)} schema(s) have a reference to another host that cannot be fetched offline`;
+  } else {
+    res.status = StatusCompleted;
+  }
+  return res;
+}
+
+/**
+ * schemaFinding builds the Finding for one problem of one schema. A failure
+ * without strict mode is a Gate and a strict-only problem a warning, both
+ * only a note in Test data.
+ */
+function schemaFinding(
+  input: Input,
+  s: SchemaCompileResult,
+  p: SchemaProblem,
+  testData: boolean,
+): Finding {
+  const f = newFinding({
+    check_id: schemaCompileID,
+    context_id: input.context.id,
+    rule_id: p.kind,
+    fingerprint: newFingerprint(schemaCompileID, p.kind, s.path, p.message),
+    kind: KindDefect,
+    locations: [input.location("primary", s.path, 0, 0)],
+    evidence: [untrusted("tool_output", p.message, "ajv")],
+    reproduction: input.reproduction(schemaCompileID),
+    limitations: [],
+  });
+  if (p.kind === "strict-mode") {
+    f.title = "JSON Schema breaks strict mode";
+    f.message = `${shownPath(s.path)} (${shownWord(s.draft, "draft")}) compiles, but Ajv in strict mode reports: ${p.message}`;
+    f.severity = SeverityWarning;
+    f.confidence = ConfidenceLikely;
+  } else {
+    f.title = "JSON Schema does not compile";
+    f.message = `${shownPath(s.path)} (${shownWord(s.draft, "draft")}) does not compile with Ajv: ${p.message}`;
+    f.severity = SeverityError;
+    f.confidence = ConfidenceConfirmed;
+    f.gate = true;
+  }
+  if (testData) {
+    f.severity = SeverityNote;
+    f.kind = KindHint;
+    f.gate = false;
+  }
+  return f;
 }

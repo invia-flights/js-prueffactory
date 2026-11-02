@@ -348,9 +348,9 @@ describe("allowlist", () => {
     );
   });
 
-  // Every accepted difference names its reason. The npm log entry is the
-  // only one so far (ticket 13): npm writes its log in a different order in
-  // two Runs of the same build.
+  // Every accepted difference names its reason. The npm log entries are the
+  // only ones so far (tickets 13 and 16): npm writes its log in a different
+  // order, with timings, in two Runs of the same build.
   test("every committed allowlist entry is a whole-file entry with a reason", async () => {
     const committed = JSON.parse(
       await readFile(new URL("allowlist.json", import.meta.url), "utf8"),
@@ -360,6 +360,14 @@ describe("allowlist", () => {
       [
         [
           "runs/*package.install*",
+          "artifacts/package.install/*/npm-install.log",
+        ],
+        [
+          "runs/*/schema-drift/*",
+          "artifacts/package.install/*/npm-install.log",
+        ],
+        [
+          "runs/*tests.existing*",
           "artifacts/package.install/*/npm-install.log",
         ],
       ],

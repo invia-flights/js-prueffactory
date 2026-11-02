@@ -4,11 +4,12 @@
 // offsets, the field paths of type errors and the merge rules below follow
 // that implementation, not the historical v1 decoder.
 //
-// Only the Go types the port decodes are modelled: string, bool, int,
-// float64, json.RawMessage, interface{}, pointers, map[string]T, []T and structs with
-// json names.
+// Only the Go types the port decodes are modelled: string, bool, int and
+// int64, float64, time.Time, json.RawMessage, interface{}, pointers,
+// map[string]T, []T and structs with json names.
 import { quoteBytes, quoteRune } from "./fmt.ts";
 import { isPrint, isSpace } from "./strings.ts";
+import { parseRFC3339 } from "./time.ts";
 import { decodeRune, fullRune, RuneError, text } from "./utf8.ts";
 
 // SyntaxError is json.SyntaxError: the message and the offset after which
@@ -51,8 +52,13 @@ export interface Field {
 export type Schema =
   | { readonly kind: "string" }
   | { readonly kind: "bool" }
-  | { readonly kind: "int" }
-  | { readonly kind: "float" }
+  // type is "int" (the default) or "int64"; both hold an int64.
+  | { readonly kind: "int"; readonly type?: string }
+  | { readonly kind: "float64" }
+  // A time.Time: a string read with time.Parse(time.RFC3339). A string that
+  // does not parse stops the decoding with the time package's error, which
+  // wins over a type error found before it.
+  | { readonly kind: "time" }
   | { readonly kind: "raw" }
   | { readonly kind: "any" }
   | { readonly kind: "pointer"; readonly elem: Schema }
@@ -77,7 +83,7 @@ export class GoSlice {
   }
 }
 
-// Decoded values: string -> string, bool -> boolean, int -> bigint, float -> number,
+// Decoded values: string -> string, bool -> boolean, int -> bigint,
 // raw -> Uint8Array | null, any -> AnyValue, pointer -> value | null, map -> Map | null,
 // slice -> GoSlice | null, struct -> a record keyed by json name.
 export type Value = unknown;
@@ -95,8 +101,10 @@ export function zeroValue(schema: Schema): Value {
       return false;
     case "int":
       return 0n;
-    case "float":
+    case "float64":
       return 0;
+    case "time":
+      return goZeroTime();
     case "raw":
     case "any":
     case "pointer":
@@ -561,16 +569,30 @@ class Decoder {
           return this.fail("bool", current, pos, end, path);
         }
         return [c === 0x74, end];
-      case "int":
+      case "int": {
+        const type = schema.type ?? "int";
         if (c !== 0x2d && !isDigit(c)) {
-          return this.fail("int", current, pos, end, path);
+          return this.fail(type, current, pos, end, path);
         }
-        return [this.decodeInt(current, pos, end, path), end];
-      case "float":
+        return [this.decodeInt(type, current, pos, end, path), end];
+      }
+      case "float64": {
         if (c !== 0x2d && !isDigit(c)) {
           return this.fail("float64", current, pos, end, path);
         }
-        return [this.decodeFloat(current, pos, end, path), end];
+        const literal = text(b.subarray(pos, end));
+        const f = Number(literal);
+        if (!Number.isFinite(f)) {
+          this.record("number " + literal, "float64", end, path);
+          return [current, end];
+        }
+        return [f, end];
+      }
+      case "time":
+        if (c !== 0x22) {
+          return this.fail("time.Time", current, pos, end, path);
+        }
+        return [parseRFC3339(unquote(b, pos, end)), end];
       case "raw":
         return [b.slice(pos, end), end];
       case "any":
@@ -678,6 +700,7 @@ class Decoder {
   // decodeInt parses a number literal into an int64; any other literal,
   // such as 1.0 or 1e3, is a type error that names the literal.
   private decodeInt(
+    type: string,
     current: Value,
     pos: number,
     end: number,
@@ -688,22 +711,7 @@ class Decoder {
       const n = BigInt(literal);
       if (n >= int64Min && n <= int64Max) return n;
     }
-    this.record("number " + literal, "int", end, path);
-    return current;
-  }
-
-  // decodeFloat parses a number literal into a float64 (strconv.ParseFloat);
-  // one out of its range is a type error that names the literal.
-  private decodeFloat(
-    current: Value,
-    pos: number,
-    end: number,
-    path: readonly string[],
-  ): Value {
-    const literal = text(this.b.subarray(pos, end));
-    const f = Number(literal);
-    if (Number.isFinite(f)) return f;
-    this.record("number " + literal, "float64", end, path);
+    this.record("number " + literal, type, end, path);
     return current;
   }
 
@@ -882,4 +890,11 @@ export function equalFold(name: string, field: string): boolean {
     return false;
   }
   return true;
+}
+
+// goZeroTime is Go's zero time.Time: January 1 of year 1, UTC.
+function goZeroTime(): Date {
+  const t = new Date(0);
+  t.setUTCFullYear(1, 0, 1);
+  return t;
 }

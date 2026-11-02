@@ -1,0 +1,364 @@
+// Generator of parse-oracle.json: what the Go build of the freeze commit
+// (238e07f66d8cafab24ef363cb79e207bd48babd8) answers for the parse and
+// description Checks' pure functions: parseStructured (artifacts.structured,
+// api.lint), driftDiff, driftDiffArtifact and driftEvidence (schema.drift),
+// schemaHelperInput (schema.compile) and redoclyFindings (api.lint). Kept as
+// text, because the functions are unexported; regenerate from the repository
+// root with:
+//
+//	cp internal/checks/testdata/parse-oracle.go.txt internal/checks/zz_parse_oracle_test.go
+//	go test ./internal/checks -run TestZZParseOracle -count=1 && rm internal/checks/zz_parse_oracle_test.go
+package checks
+
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"os"
+	"strings"
+	"testing"
+
+	"github.com/invia-flights/jscript-bench/internal/discovery"
+	"github.com/invia-flights/jscript-bench/internal/resultset"
+)
+
+type oracleFile struct {
+	Rel  string `json:"rel"`
+	Data []byte `json:"data"`
+}
+
+type oracleParse struct {
+	oracleFile
+	Error *struct {
+		Rule    string `json:"rule"`
+		Line    int    `json:"line"`
+		Column  int    `json:"column"`
+		Message string `json:"message"`
+	} `json:"error"`
+}
+
+type oracleDrift struct {
+	Rel       string `json:"rel"`
+	Committed []byte `json:"committed"`
+	Generated []byte `json:"generated"`
+	Diff      []byte `json:"diff"`
+	Differs   bool   `json:"differs"`
+}
+
+type oracleArtifact struct {
+	ContextID string `json:"context_id"`
+	Rel       string `json:"rel"`
+	Diff      []byte `json:"diff"`
+	ID        string `json:"id"`
+	Path      string `json:"path"`
+	// Content is the artifact's content, or for a long one its SHA-256 in
+	// ContentSHA256 and its size.
+	Content       []byte `json:"content"`
+	ContentSHA256 string `json:"content_sha256"`
+	ContentSize   int    `json:"content_size"`
+	Truncated     bool   `json:"truncated"`
+	// Evidence is driftEvidence of the artifact, as Go's JSON encoder writes
+	// its text.
+	Evidence string `json:"evidence"`
+}
+
+type oracleHelperInput struct {
+	Targets []oracleFile `json:"targets"` // Rel = path, Data = schema bytes
+	Drafts  []string     `json:"drafts"`
+	Input   []byte       `json:"input"`
+}
+
+type oracleRedocly struct {
+	Path      string `json:"path"`
+	RemoteRef bool   `json:"remote_ref"`
+	Stdout    []byte `json:"stdout"`
+	Stderr    []byte `json:"stderr"`
+	Error     string `json:"error"`
+	Findings  []struct {
+		Rule     string `json:"rule"`
+		Title    string `json:"title"`
+		Message  string `json:"message"`
+		Line     int    `json:"line"`
+		Column   int    `json:"column"`
+		Evidence string `json:"evidence"`
+		Gate     bool   `json:"gate"`
+		Severity string `json:"severity"`
+	} `json:"findings"`
+}
+
+var parseCases = []oracleFile{
+	// JSON from the Go tests.
+	{"config/app.json", []byte("{\n  \"name\": \"demo\",\n  \"port\": 80,\n}\n")},
+	{"package.json", []byte(`{"name":"demo"}`)},
+	{"data/bom.json", []byte("\xef\xbb\xbf[1, 2, 3]\n")},
+	{"package.json", []byte("{\n  // a comment\n  \"compilerOptions\": { /* inline */ \"strict\": true },\n  \"url\": \"http://example.com//not-a-comment\"\n}\n")},
+	{"tsconfig.json", []byte("{\n  // a comment\n  \"compilerOptions\": { /* inline */ \"strict\": true },\n}\n")},
+	{"biome.json", []byte("{\n  \"a\": [1, 2,],\n  \"b\": 1, // note\n}\n")},
+	{".vscode/settings.json", []byte("{\n  \"a\": [1, 2,],\n  \"b\": 1, // note\n}\n")},
+	{"tsconfig.json", []byte("{\n  /* never closed\n  \"a\": 1\n}\n")},
+	{"cut.json", []byte("{\n  \"héllo\": \"wörld\",\n  \"x\":")},
+	{"wide.json", []byte("{\"ключ\": }")},
+	{"empty.json", []byte("")},
+	{"blank.json", []byte("  \n\t ")},
+	// JSON edge cases.
+	{"a.json", []byte("{\"a\": \"\xff\xfe\"}")},
+	{"a.json", []byte("{\"a\": 1 \xff}")},
+	{"a.json", []byte("{\"a\": \"tab\there\"}")},
+	{"a.json", []byte("{\"a\": \"\x00\"}")},
+	{"a.json", []byte("{\"a\": \"\\x41\"}")},
+	{"a.json", []byte("{\"a\": \"\\u12\"}")},
+	{"a.json", []byte("{\"a\": \"\\ud800\"}")},
+	{"a.json", []byte("[01]")},
+	{"a.json", []byte("[-]")},
+	{"a.json", []byte("[1.]")},
+	{"a.json", []byte("[1e]")},
+	{"a.json", []byte("[1e400, 123456789012345678901234567890]")},
+	{"a.json", []byte("[NaN]")},
+	{"a.json", []byte("{'a': 1}")},
+	{"a.json", []byte("{\"a\":1}{")},
+	{"a.json", []byte("{\"a\":1} x")},
+	{"a.json", []byte("[1,]")},
+	{"a.json", []byte("{,}")},
+	{"a.json", []byte("{\"a\" 1}")},
+	{"a.json", []byte("[tru]")},
+	{"a.json", []byte("[true false]")},
+	{"a.json", []byte("{\"a\":1,\"a\":2}")},
+	{"a.json", []byte("\"\xe2\x80\xa8\"")},
+	{"a.json", []byte("\xef\xbb\xbf\xef\xbb\xbf{}")},
+	{"a.json", []byte("{\r\n  \"a\": 1,\r\n}\r\n")},
+	{"a.json", []byte("{\n  \"é\": \"😀\", \"b\": ]\n}")},
+	{"a.json", []byte(strings.Repeat("[", 10001) + strings.Repeat("]", 10001))},
+	{"a.json", []byte(strings.Repeat("[", 10000) + strings.Repeat("]", 10000))},
+	{"a.json", []byte(strings.Repeat("[", 50))},
+	{"a.json", []byte("/* c */ {}")},
+	{"jsconfig.base.json", []byte("{\"a\": 1, /* x */}")},
+	{".devcontainer/devcontainer.json", []byte("{\"a\": [1,], // x\n}")},
+	{".eslintrc.json", []byte("{\"a\": [1,], // x\n}")},
+	{"biome.jsonc", []byte("{\"a\": [1,], // x\n}")},
+	{"x/.vscode/launch.json", []byte("{\"a\": [1,]}")},
+	{"tsconfig.json", []byte("{\"a\": \"// not a comment\", \"b\": \"/*\" }")},
+	{"tsconfig.json", []byte("{\"a\": 1 /* unterminated")},
+	{"tsconfig.json", []byte("{\"a\": [ , ]}")},
+	{"tsconfig.json", []byte("{\"a\": 1,, }")},
+	// YAML from the Go tests.
+	{".gitlab-ci.yml", []byte("stages: [test]\n.base:\n  script:\n    - echo base\ntest:\n  script:\n    - !reference [.base, script]\n    - echo done\n  variables:\n    SECRET: !vault |\n      $ANSIBLE_VAULT;1.1;AES256\n")},
+	{"k8s/all.yaml", []byte("apiVersion: v1\nkind: A\n---\napiVersion: v1\nkind: B\n---\n")},
+	{"empty.yaml", []byte("")},
+	{"comments-only.yml", []byte("# nothing here\n")},
+	{"ci/pipeline.yml", []byte("stages:\n  - test\nbuild:\n  script: @run\n")},
+	{"second.yaml", []byte("a: 1\n---\nb: [\n")},
+	{"tabs.yaml", []byte("a:\n\t- b\n")},
+	{"api.yml", []byte("a: 1\nb: x\nnote: \"say â€\u009dhi\"\n")},
+	{"anchors.yaml", []byte("x: 1\ny: *nope\n")},
+	// YAML edge cases.
+	{"a.yaml", []byte("openapi: 3.0.3\ninfo:\n  title: Orders\n  version: \"1.0.0\"\n  description: \"broken \u0001 here\"\npaths: {}\n")},
+	{"a.yaml", []byte("a: \"x\ufffey\"\n")},
+	{"a.yaml", []byte("a: x\x7fy\n")},
+	{"a.yaml", []byte("a: \xff\xfe\n")},
+	{"a.yaml", []byte("\xef\xbb\xbfa: 1\n")},
+	{"a.yaml", []byte("a: 1\na: 2\n")},
+	{"a.yaml", []byte("key: value: x\n")},
+	{"a.yaml", []byte("a: \"unclosed\n")},
+	{"a.yaml", []byte("- a\nb: c\n")},
+	{"a.yaml", []byte("{a: 1\n")},
+	{"a.yaml", []byte("a: &x 1\nb: *y\n")},
+	{"a.yaml", []byte(strings.Repeat("[", 20000))},
+	{"a.yaml", []byte("%YAML 1.3\n---\na: 1\n")},
+	{"a.yaml", []byte("%FOO bar\n---\na: 1\n")},
+	{"a.yaml", []byte("a: !!int x\n")},
+	{"a.yaml", []byte("a: !custom {b: 1}\n")},
+	{"a.yaml", []byte("? [a, b]\n: c\n")},
+	{"a.yaml", []byte("a:\n  - b\n - c\n")},
+	{"a.yaml", []byte("a: 1\r\nb: [\r\n")},
+	{"a.yaml", []byte("---\n")},
+	{"a.yaml", []byte("...\n")},
+	{"a.yaml", []byte("a: 1\x00\n")},
+	{"a.yaml", []byte("\ta: 1\n")},
+	{"a.yaml", []byte("a: 'it''s'\nb: 'unclosed\n")},
+	{"a.yaml", []byte("a: |\n  x\n b\n")},
+	{"a.yaml", []byte("a: >-\n  x\n\t\n")},
+	{"a.yaml", []byte("a: [1, 2\nb: 3\n")},
+	{"a.yaml", []byte("a: {b: 1, c\n")},
+	{"a.yaml", []byte("- &a [*a]\n")},
+	{"a.yaml", []byte("a: !<tag:yaml.org,2002:str> x\n")},
+	{"a.yaml", []byte("a: !foo!bar x\n")},
+	{"a.yaml", []byte("a: b\n  c: d\n")},
+	{"a.yaml", []byte("\"a\nb\": 1\n")},
+	{"a.yaml", []byte("a: `x`\n")},
+	{"a.yaml", []byte("a: 1\n---\nb: 2\n---\nc: [\n")},
+	{"a.yaml", []byte(strings.Repeat("a: b\n", 1000) + "c: [\n")},
+	{"a.yaml", []byte("a: " + strings.Repeat("x", 5000) + "\nb: [\n")},
+	{"a.yaml", []byte("a: line 1: x\nb: [\n")},
+	{"a.yml", []byte("a:\n  b: 1\n c: 2\n")},
+	{"a.yml", []byte("- a\n-b\n- [\n")},
+	{"a.yml", []byte("a: \"\\x\"\n")},
+	{"a.yml", []byte("a: \"\\u12\"\n")},
+	{"a.yml", []byte("&a a: b\n*a : c\n")},
+	{"a.yml", []byte("a: b # c\n#d\ne: [f, # g\n")},
+	{"a.yml", []byte("\u0085a: 1\n")},
+	{"a.yml", []byte("a: \u2028b\n")},
+}
+
+var driftCases = [][3]string{
+	{"schemas/a.json", "{\n    \"b\": [1, 2],\n    \"a\": {\"x\": true}\n}\n", `{"a":{"x":true},"b":[1,2]}`},
+	{"schemas/b.json", `{"n":1}`, "\ufeff{ \"n\": 1.0 }\n"},
+	{"schemas/user.json", "{\n  \"required\": [\"id\"],\n  \"type\": \"object\"\n}\n", `{"type":"object","required":["id","email"]}`},
+	{"types/api.d.ts", "export type A = 1;\n", "export type A = 2;\n"},
+	{"README.md", "same\n", "same\n"},
+	{"schemas/a.json", "{ broken\n", `{"a":1}`},
+	{"a.json", `{"a":1,"a":2}`, `{"a":2}`},
+	{"a.json", `{"a":{"x":1},"a":{"y":2}}`, `{"a":{"y":2}}`},
+	{"a.json", `{"a":{"x":1},"a":{"y":2}}`, `{"a":{"x":1,"y":2}}`},
+	{"a.json", `[1, 1.0, 1e2, -0, 0.10]`, `[1.00, 1, 100, 0, 0.1]`},
+	{"a.json", `[123456789012345678901234567890]`, `[123456789012345678901234567891]`},
+	{"a.json", `[1e400]`, `[2e400]`},
+	{"a.json", `[1e400]`, `[1e400]`},
+	{"a.json", `[1E2]`, `[100.0]`},
+	{"a.json", `[0.1]`, `[1e-1]`},
+	{"a.json", `{"s":"<a & b>","u":"\u2028","e":"é😀","c":"\u0001"}`, `{"s":"<a & b>!"}`},
+	{"a.json", "{\"s\":\"\xff\"}", "{\"s\":\"\xfe\"}"},
+	{"a.json", `{"z":{},"y":[],"x":null,"w":false,"v":true,"u":""}`, `{"z":{},"y":[],"x":null,"w":true}`},
+	{"a.json", `"just a string"`, `"another"`},
+	{"a.json", `1`, `2`},
+	{"bin.dat", "a\x00b", "a\x00c"},
+	{"crlf.txt", "a\r\nb\r\nc\r\n", "a\r\nB\r\nc\r\n"},
+	{"latin.txt", "caf\xe9\nx\n", "caf\xe9\ny\n"},
+	{"e.txt", "", "x\ny\n"},
+	{"f.txt", "x\ny", "x\ny\n"},
+	{"weird\nname\x7f.txt", "a\n", "b\n"},
+	{"we ird\"name.json", `{"a":1}`, `{"a":4}`},
+	{"deep.json", strings.Repeat("[", 300) + "1" + strings.Repeat("]", 300), strings.Repeat("[", 300) + "2" + strings.Repeat("]", 300)},
+	{"deeper.json", strings.Repeat("[", 9999) + "1" + strings.Repeat("]", 9999), strings.Repeat("[ ", 9999) + "1.0" + strings.Repeat(" ]", 9999)},
+	{"x.json", `{"a":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]}`, `{"a":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,16]}`},
+	{"x.json", `{"a": 1} `, `{"a": 1} x`},
+	{"x.json", "\xef\xbb\xbf{\"a\": 1}", `{"a": 1}`},
+	{"x.json", `[1, 2]`, `{"a": [1, 2]}`},
+}
+
+func TestZZParseOracle(t *testing.T) {
+	var out struct {
+		Parse        []oracleParse      `json:"parse"`
+		Drift        []oracleDrift      `json:"drift"`
+		Artifacts    []oracleArtifact   `json:"artifacts"`
+		HelperInputs []oracleHelperInput `json:"helper_inputs"`
+		Redocly      []oracleRedocly    `json:"redocly"`
+	}
+	for _, c := range parseCases {
+		r := oracleParse{oracleFile: c}
+		if perr := parseStructured(c.Rel, c.Data); perr != nil {
+			r.Error = &struct {
+				Rule    string `json:"rule"`
+				Line    int    `json:"line"`
+				Column  int    `json:"column"`
+				Message string `json:"message"`
+			}{perr.rule, perr.line, perr.column, perr.message}
+		}
+		out.Parse = append(out.Parse, r)
+	}
+	for _, c := range driftCases {
+		diff, differs := driftDiff(c[0], []byte(c[1]), []byte(c[2]))
+		out.Drift = append(out.Drift, oracleDrift{c[0], []byte(c[1]), []byte(c[2]), []byte(diff), differs})
+	}
+
+	// Artifacts: one shared used map, as in one package; a long diff over the
+	// cap and one with invalid UTF-8 at the Evidence cut.
+	used := map[string]bool{}
+	var long strings.Builder
+	for i := 0; i < 40000; i++ {
+		long.WriteString("+new line number that is long enough to fill the cap quickly\n")
+	}
+	cutDiff := strings.Repeat("a", 4096-len(driftContinues)-1) + "é" + strings.Repeat("b", 100)
+	badDiff := strings.Repeat("a", 4050) + "\xff\xfe" + strings.Repeat("\xe2\x82", 40) + "\n"
+	for _, a := range [][3]string{
+		{"C-0002", "a/schema.json", "--- a\n+++ b\n"},
+		{"C-0002", "b/schema.json", "--- a\n+++ b\n"},
+		{"C-0002", "c/we ird\"name.json", "x"},
+		{"C-0003", "a/schema.json", "x"},
+		{"C-0002", "d/" + strings.Repeat("ü", 50) + ".json", "x"},
+		{"C-0002", "gen/out.txt", long.String()},
+		{"C-0002", "e.txt", cutDiff},
+		{"C-0002", "f.txt", badDiff},
+		{"C-0002", "g.txt", "<a & b>\u2028\n"},
+	} {
+		art := driftDiffArtifact(a[0], a[1], a[2], used)
+		ev, _ := json.Marshal(driftEvidence(art).Text)
+		r := oracleArtifact{ContextID: a[0], Rel: a[1], Diff: []byte(a[2]), ID: art.ID, Path: art.Path,
+			Content: art.Content, ContentSize: len(art.Content), Truncated: art.Truncated, Evidence: string(ev)}
+		if len(a[2]) > 10000 {
+			// The test builds the long diff itself: 40000 times the line above.
+			sum := sha256.Sum256(art.Content)
+			r.Diff, r.Content, r.ContentSHA256 = nil, nil, hex.EncodeToString(sum[:])
+		}
+		out.Artifacts = append(out.Artifacts, r)
+	}
+
+	// Helper inputs of schema.compile.
+	for _, targets := range [][]oracleFile{
+		{},
+		{{"-x.json", []byte(`{"$schema":"http://json-schema.org/draft-07/schema#","type":"object"}`)}},
+		{
+			{"a <b> & c.json", []byte("{\n  \"$schema\" : \"http://json-schema.org/draft-07/schema#\",\n\t\"d\": \"<x> & y \u2028 \u2029 \\u003c \\\" \\\\ é\",\r\n \"n\": [1.0E+2, -0, 1e400]\n}\n")},
+			{"y.yaml", []byte(`{"$schema":"https://json-schema.org/draft/2020-12/schema","x":"\u003c"}`)},
+			{"bad.json", []byte("{\"$schema\":\"http://json-schema.org/draft-07/schema#\",\"s\":\"\xff\xfe ok\"}")},
+		},
+	} {
+		var st []schemaTarget
+		var drafts []string
+		for _, tg := range targets {
+			st = append(st, schemaTarget{Path: tg.Rel, Draft: "draft-07", Schema: tg.Data})
+			drafts = append(drafts, "draft-07")
+		}
+		out.HelperInputs = append(out.HelperInputs, oracleHelperInput{targets, drafts, schemaHelperInput(st)})
+	}
+
+	// Redocly output.
+	dir := t.TempDir()
+	in := &Input{OriginalPath: "/orig", SnapshotDir: dir,
+		Context: &discovery.Context{Context: resultset.Context{ID: "C-0001", Kind: "project", Path: "."}}}
+	for _, r := range []oracleRedocly{
+		{Path: "weird [1]/api.yaml", Stdout: []byte(`{"totals":{"errors":1,"warnings":1,"ignored":0},"version":"2.70.0","problems":[
+{"ruleId":"struct","severity":"error","location":[{"source":{"ref":"api.yaml"},"pointer":"#/info","reportOnKey":true,"start":{"line":2,"col":1},"end":{"line":2,"col":5}}],"message":"The field ` + "`title`" + ` must be present on this level.","suggest":[]},
+{"ruleId":"no-empty-servers","severity":"warn","location":[{"start":{"line":1,"col":1}}],"message":"Servers <must> & should be present."},
+{"ruleId":"x","severity":"info","message":"no location","location":null},
+{"RULEID":"case","Severity":"error","message":"mixed case keys","location":[]}]}`)},
+		{Path: "remote.yaml", RemoteRef: true, Stdout: []byte(`{"problems":[{"ruleId":"no-unresolved-refs","severity":"error","location":[{"start":{"line":7,"col":5}}],"message":"Can't resolve $ref: fetch failed"}]}`)},
+		{Path: "remote.yaml", Stdout: []byte(`{"problems":[{"ruleId":"no-unresolved-refs","severity":"error","location":[{"start":{"line":7,"col":5}}],"message":"Can't resolve $ref: fetch failed"}]}`)},
+		{Path: "a.yaml", Stderr: []byte("Failed to parse a.yaml: unexpected character\n")},
+		{Path: "a.yaml", Stdout: []byte("No APIs were provided." + strings.Repeat("x", 300))},
+		{Path: "a.yaml", Stdout: []byte("  \n"), Stderr: []byte(" \t")},
+		{Path: "a.yaml", Stdout: []byte(`{"problems":[{"ruleId":1}]}`), Stderr: []byte("\xff\xfe " + strings.Repeat("é", 150))},
+	} {
+		found, err := redoclyFindings(in, openAPITarget{Path: r.Path, RemoteRef: r.RemoteRef}, r.Stdout, r.Stderr)
+		if err != nil {
+			r.Error = err.Error()
+		}
+		for _, f := range found {
+			line, col := 0, 0
+			if f.Locations[0].Start != nil {
+				line = f.Locations[0].Start.Line
+				if f.Locations[0].Start.Column != nil {
+					col = *f.Locations[0].Start.Column
+				}
+			}
+			r.Findings = append(r.Findings, struct {
+				Rule     string `json:"rule"`
+				Title    string `json:"title"`
+				Message  string `json:"message"`
+				Line     int    `json:"line"`
+				Column   int    `json:"column"`
+				Evidence string `json:"evidence"`
+				Gate     bool   `json:"gate"`
+				Severity string `json:"severity"`
+			}{*f.RuleID, f.Title, f.Message, line, col, f.Evidence[0].Text, f.Gate, string(f.Severity)})
+		}
+		out.Redocly = append(out.Redocly, r)
+	}
+
+	data, err := json.MarshalIndent(out, "", " ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/parse-oracle.json", append(data, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
