@@ -226,6 +226,98 @@ export function durationString(d: Duration): string {
   return neg ? "-" + out : out;
 }
 
+/**
+ * hours is Go's Duration.Hours: the whole hours plus the rest as a fraction,
+ * computed on the integer nanoseconds as Go does (not ms / 3.6e6).
+ */
+export function hours(d: Duration): number {
+  return Number(d / hour) + Number(d % hour) / 3.6e12;
+}
+
+/**
+ * sub is Go's t.Sub(u) for two instants in Unix nanoseconds: the Duration
+ * between them, saturated to the int64 range.
+ */
+export function sub(t: bigint, u: bigint): Duration {
+  const d = t - u;
+  if (d > two63 - 1n) return two63 - 1n;
+  if (d < -two63) return -two63;
+  return d;
+}
+
+function daysIn(month: number, year: number): number {
+  if (month === 2) {
+    const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+    return leap ? 29 : 28;
+  }
+  return [4, 6, 9, 11].includes(month) ? 30 : 31;
+}
+
+// daysFromCivil counts the days from 1970-01-01 to a proleptic Gregorian
+// date (Howard Hinnant's algorithm), for any year Go's parser accepts.
+function daysFromCivil(year: number, month: number, day: number): number {
+  const y = month <= 2 ? year - 1 : year;
+  const era = Math.floor(y / 400);
+  const yoe = y - era * 400;
+  const doy =
+    Math.floor((153 * (month + (month > 2 ? -3 : 9)) + 2) / 5) + day - 1;
+  const doe = yoe * 365 + Math.floor(yoe / 4) - Math.floor(yoe / 100) + doy;
+  return era * 146097 + doe - 719468;
+}
+
+/**
+ * parseRFC3339 is the RFC 3339 fast path of Go's time.Parse(RFC3339Nano, s)
+ * and of time.Time's JSON decoding: the instant in Unix nanoseconds, or
+ * undefined for a string the fast path rejects. Go then tries its general
+ * layout parser, which also accepts a one-digit hour, a comma before the
+ * fraction and a zone hour of 24; those count as no time here.
+ */
+export function parseRFC3339(s: string): bigint | undefined {
+  // The fast path's shape: fixed digits and separators, a fraction only
+  // when a digit follows the dot, then Z or a ±hh:mm offset.
+  const m =
+    /^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(?:\.([0-9]+))?(?:Z|([+-])([0-9]{2}):([0-9]{2}))$/.exec(
+      s,
+    );
+  if (m === null) {
+    return undefined;
+  }
+  const [year, month, day, hr, min, sec] = m.slice(1, 7).map(Number) as [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+  ];
+  if (
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > daysIn(month, year) ||
+    hr > 23 ||
+    min > 59 ||
+    sec > 59
+  ) {
+    return undefined;
+  }
+  // Go reads nine digits of the fraction and ignores the rest.
+  const nsec = BigInt((m[7] ?? "").slice(0, 9).padEnd(9, "0"));
+  let offset = 0;
+  if (m[8] !== undefined) {
+    const oh = Number(m[9]);
+    const om = Number(m[10]);
+    if (oh > 23 || om > 59) {
+      return undefined;
+    }
+    offset = (oh * 60 + om) * 60 * (m[8] === "-" ? -1 : 1);
+  }
+  const secs =
+    BigInt(daysFromCivil(year, month, day)) * 86400n +
+    BigInt(hr * 3600 + min * 60 + sec - offset);
+  return secs * second + nsec;
+}
+
 /** milliseconds converts a Duration to whole milliseconds, truncated. */
 export function milliseconds(d: Duration): number {
   return Number(d / millisecond);
