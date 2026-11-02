@@ -1,0 +1,149 @@
+// Generator of go-oracle-neturl.json: what url.Parse, strconv.Atoi and
+// strconv.ParseFloat of the freeze commit's toolchain (go 1.27, so the strict
+// colon rule of url is on, as for go.mod's go 1.27.1) return on hostile input.
+// Kept as text; regenerate with:
+// mkdir /tmp/x && cp go-oracle-neturl.go.txt /tmp/x/main.go && (cd /tmp/x && go run main.go) > go-oracle-neturl.json
+package main
+
+import (
+	"encoding/json"
+	"math"
+	"net/url"
+	"os"
+	"strconv"
+)
+
+type urlCase struct {
+	In          string `json:"in"`
+	Err         bool   `json:"err"`
+	Scheme      string `json:"scheme"`
+	Opaque      string `json:"opaque"`
+	User        string `json:"user"`
+	HasUser     bool   `json:"hasUser"`
+	Host        string `json:"host"`
+	Path        string `json:"path"`
+	RawPath     string `json:"rawPath"`
+	RawQuery    string `json:"rawQuery"`
+	Fragment    string `json:"fragment"`
+	RawFragment string `json:"rawFragment"`
+	Hostname    string `json:"hostname"`
+	String      string `json:"string"`
+	// Clean is url.URL{Scheme, Host, Path, Fragment}.String(), as
+	// security.integrity rebuilds a URL.
+	Clean string `json:"clean"`
+}
+
+type atoiCase struct {
+	In  string `json:"in"`
+	Err bool   `json:"err"`
+	Out string `json:"out"`
+}
+
+type floatCase struct {
+	In  string `json:"in"`
+	Err bool   `json:"err"`
+	// Out is the value as strconv.FormatFloat(x, 'g', -1, 64), or NaN/+Inf/-Inf.
+	Out string `json:"out"`
+}
+
+var urls = []string{
+	"https://registry.npmjs.org/a/-/a-1.0.0.tgz", "http://x", "HTTPS://Reg.Example.COM:8443/p?q#f",
+	"git+ssh://git@github.com/x/y.git#abc", "git@gitlab.example:x/scp.git", "github:acme/shorthand#0123",
+	"file:vendor/c-1.0.0.tgz", "file:s3cret@vendor/d.tgz", "file:///abs/path.tgz", "file://host/p", "file:",
+	"https:s3cret@downloads.example.org/a.tgz", "git+ssh:s3cret@github.com:acme/b.git",
+	"https://user:pa ss@h/", "https://user:p%41ss@h/", "https://u@h@i/", "https://u:p@ss@h/", "https://us{er@h/",
+	"https://h/a%20b", "https://h/a%zz", "https://h/a b", "https://h/%", "https://h/%4", "https://h/a%2fb", "https://h/%2F",
+	"https://[::1]:8080/x", "https://[fe80::1%25en0]/x", "https://[::1/x", "https://[1.2.3.4]/x", "https://[::ffff:1.2.3.4]/x",
+	"https://[::]/", "https://[1:2:3:4:5:6:7:8]/", "https://[1:2:3:4:5:6:7:8:9]/", "https://[1::2::3]/", "https://[12345::]/",
+	"https://[::1]x/", "https://a[::1]/", "https://[fe80::1%25]/", "https://[fe80::1%25%41]/", "https://[1:2:3:4:5:6:1.2.3.4]/",
+	"https://[::01.2.3.4]/", "https://[g::]/", "https://[::1]:/",
+	"https://h:abc/x", "https://h:/x", "https://h:8080", "https://:8080/", "https://h:1:2/", "ssh://h:1:2/", "git+ssh://a:b:22/x",
+	"https://h%41/x", "https://h%c3%a9/x", "https://hé/x", "https://h x/", "https://h\"/", "https://h</", "https://h{/", "https://h|/",
+	"https://h%25/", "https://h_x/", "https://H.EXAMPLE/",
+	"//h/p", "///p", "/p", "p:q", "a/b:c", "1http://x", "+x:y", ":x", "", "*", "a:", "a:/", "a://", "A1+-.:x",
+	"https://h/p?", "https://h/p??", "https://h/p?a?", "https://h/p#a#b", "https://h/p#%zz", "https://h/p#%41", "https://h/p#a b",
+	"https://h/p#", "#frag", "?q", "https://h/p#<>", "https://h/p#!$&'()*+,;=",
+	"http://h\x01/", "http://h\x7f", "http://h/\x00", "http://h/p\tq",
+	"mailto:x@y", "https://h/p;x", "https://h/p?x=1#0123456789abcdef", "HTTP://H/", "git://h/p", "bitbucket:a/b", "ssh://h/p",
+	"https://h/../a", "https://h/日本", "https://h/p#日本", "https://Ü.example/", "https://@h/", "https://u:@h/", "https://h/p\\q",
+	"https://h//double", "https:////x", "a:////x", "x//y", "./a:b", "\xff://h", "https://h/\xff", "https://\xff/",
+	"https://user:%zz@h/", "https://%41@h/", "https://u%3Ap@h/",
+}
+
+var ints = []string{
+	"0", "1", "-1", "+1", "01", "", "+", "-", " 1", "1 ", "1_0", "0x10", "9223372036854775807", "9223372036854775808",
+	"-9223372036854775808", "-9223372036854775809", "99999999999999999999", "١", "1.0", "1e3", "00000000000000000000000001",
+}
+
+var floats = []string{
+	"9.8", "7.5", "5.0", "3.1", "0", "-1", "", "x", " 9 ", "9.", ".5", "5.", "+5", "-0", "9e0", "9E0", "9e", "9e+", "9e-1",
+	"0x1p3", "0x10", "0x1.8p1", "0X1P-2", "0x_1p3", "0x1_0p0", "0x.p1", "0xp1", "0x1p", "inf", "Inf", "+Inf", "-inf", "INFINITY",
+	"infinity", "+infinity", "-Infinity", "infin", "NaN", "nan", "+nan", "-NaN", "1_0", "1__0", "_1", "1_", "1_.5", "1._5",
+	"1e1_0", "0b1", "0o7", "1,5", "١", "1e400", "-1e400", "1e-400", "1e308", "1.7976931348623157e308", "1.7976931348623159e308",
+	"4.9e-324", "2e-324", "3.9999999999999999", "8.99999999999999999999", "6.9999999999999999999999", "0x1p1024", "0x1p-1080",
+	"00.5", "0.05", "1e99999", "0e99999", "..5", "5..", "1.2.3", "1e2e3", "0x1.fffffffffffff8p1023", "123456789012345678901234567890",
+}
+
+func formatFloat(f float64) string {
+	switch {
+	case math.IsNaN(f):
+		return "NaN"
+	case math.IsInf(f, 1):
+		return "+Inf"
+	case math.IsInf(f, -1):
+		return "-Inf"
+	}
+	return strconv.FormatFloat(f, 'g', -1, 64)
+}
+
+// bs writes a Go string as a byte string: one character (U+0000 to U+00FF)
+// per byte, so that bytes that are no UTF-8 survive the JSON file.
+func bs(s string) string {
+	r := make([]rune, len(s))
+	for i := 0; i < len(s); i++ {
+		r[i] = rune(s[i])
+	}
+	return string(r)
+}
+
+func main() {
+	var us []urlCase
+	for _, in := range urls {
+		c := urlCase{In: bs(in)}
+		u, err := url.Parse(in)
+		if err != nil {
+			c.Err = true
+		} else {
+			c.Scheme, c.Opaque, c.Host, c.Path, c.RawPath = bs(u.Scheme), bs(u.Opaque), bs(u.Host), bs(u.Path), bs(u.RawPath)
+			c.RawQuery, c.Fragment, c.RawFragment = bs(u.RawQuery), bs(u.Fragment), bs(u.RawFragment)
+			c.HasUser = u.User != nil
+			c.User = bs(u.User.String())
+			c.Hostname = bs(u.Hostname())
+			c.String = bs(u.String())
+			clean := url.URL{Scheme: u.Scheme, Host: u.Host, Path: u.Path, Fragment: u.Fragment}
+			c.Clean = bs(clean.String())
+		}
+		us = append(us, c)
+	}
+	var is []atoiCase
+	for _, in := range ints {
+		n, err := strconv.Atoi(in)
+		is = append(is, atoiCase{In: in, Err: err != nil, Out: strconv.Itoa(n)})
+	}
+	var fs []floatCase
+	for _, in := range floats {
+		f, err := strconv.ParseFloat(in, 64)
+		fs = append(fs, floatCase{In: in, Err: err != nil, Out: formatFloat(f)})
+	}
+	out := map[string]any{
+		"recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8 (go1.27.3)",
+		"url":          us,
+		"atoi":         is,
+		"parseFloat":   fs,
+	}
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	if err := enc.Encode(out); err != nil {
+		panic(err)
+	}
+}
