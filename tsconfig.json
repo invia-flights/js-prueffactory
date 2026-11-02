@@ -1,6 +1,6 @@
 {
-  // Type check only: Node runs the sources directly. The packaging step
-  // (ticket 24 of the port) adds the emit settings.
+  // Type check only: Node runs the sources directly. tsconfig.build.json adds
+  // the emit settings for the packaging step (dev/pack).
   "compilerOptions": {
     "target": "es2024",
     "lib": ["es2024"],

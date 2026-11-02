@@ -1,7 +1,7 @@
-# Checks every pull request and every push to main: the pre-commit hooks, the
-# fast tests with the race detector, the Docker tests and govulncheck for the Go
-# build; lint, format check, type check, the fast tests on every supported
-# Node major and the Docker tests for the TypeScript port next to it.
+# Checks every pull request and every push to main: the pre-commit hooks (file
+# hygiene, actionlint, zizmor, ESLint, Prettier, the type check and the
+# lockfile check), the fast tests on every supported Node major, the Docker
+# tests and a vulnerability scan of the package lockfile.
 name: ci
 
 on:
@@ -26,80 +26,16 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version-file: go.mod
-      - name: Run every hook on every file
-        run: pipx run pre-commit==4.7.0 run --all-files --show-diff-on-failure
-        env:
-          # They need node_modules; the ts-lint job runs them.
-          SKIP: eslint,prettier-check,tsc
-
-  test:
-    name: go test -race
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    permissions:
-      contents: read # check out the repository
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version-file: go.mod
-      - run: go test -race ./...
-
-  docker-test:
-    name: go test -tags docker
-    runs-on: ubuntu-latest
-    timeout-minutes: 75
-    permissions:
-      contents: read # check out the repository
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version-file: go.mod
-      - run: go test -tags docker -timeout 60m ./...
-
-  govulncheck:
-    name: govulncheck
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read # check out the repository
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        with:
-          go-version-file: go.mod
-      - run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
-
-  ts-lint:
-    name: TypeScript lint, format check, type check
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read # check out the repository
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
+      # The ESLint, Prettier and type check hooks run the package's own tools.
       - run: npm ci --ignore-scripts
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm run typecheck
+      - name: Run every hook on every file
+        run: pipx run pre-commit==4.7.0 run --all-files --show-diff-on-failure
 
-  ts-test:
-    name: TypeScript npm test (Node ${{ matrix.node }})
+  test:
+    name: npm test (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -118,8 +54,8 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm test
 
-  ts-docker-test:
-    name: TypeScript npm run test:docker
+  docker-test:
+    name: npm run test:docker
     runs-on: ubuntu-latest
     timeout-minutes: 75
     permissions:
@@ -133,3 +69,22 @@ jobs:
           node-version: 24
       - run: npm ci --ignore-scripts
       - run: npm run test:docker
+
+  osv-scanner:
+    name: osv-scanner (package-lock.json)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The image the tool itself pins (internal/toolset/osvscanner.ts), by
+      # digest. Exit code 1 means the lockfile has a known vulnerability.
+      - name: Scan the lockfile
+        env:
+          OSV_SCANNER_IMAGE: ghcr.io/google/osv-scanner@sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0 # v2.7.0
+        run: |
+          docker run --rm --volume "$GITHUB_WORKSPACE:/work:ro" "$OSV_SCANNER_IMAGE" \
+            scan --lockfile /work/package-lock.json
