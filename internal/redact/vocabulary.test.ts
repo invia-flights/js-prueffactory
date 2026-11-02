@@ -2,12 +2,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 
-import type { Shape } from "../gocompat/json.ts";
+import { marshal, type Shape } from "../gocompat/json.ts";
 import { sortStrings, utf8Length } from "../gocompat/strings.ts";
 import { goldenScored } from "../resultset/helpers.testutil.ts";
 import { populated } from "../resultset/resultsettest/populated.testutil.ts";
 import { ReportShape, type Set as ResultSet } from "../resultset/types.ts";
 import { validate } from "../resultset/validate.ts";
+import { validate as validateSchema } from "../schema/schema.ts";
 import {
   closedField,
   MinLength,
@@ -133,15 +134,19 @@ function assertIntact(
     [],
     `${context}: the redacted Report is inconsistent`,
   );
+  assert.deepEqual(
+    validateSchema(Buffer.from(marshal(s, ReportShape), "utf8")),
+    [],
+    `${context}: the redacted Report fails the schema`,
+  );
 }
 
 describe("schema words", () => {
   // Go: TestNoRegisteredSchemaWordMakesTheReportInvalid. A registered value
   // that is also a word of the schema, such as root, pass or info, must not
-  // turn a field with a closed vocabulary into something else. Go validated
-  // the redacted Report against the schema; until the schema validator is
-  // ported (ticket 05) this checks the cause directly: no closed field
-  // changes, and the result set rules still hold.
+  // turn a field with a closed vocabulary into something else. As in Go, the
+  // redacted Report is validated against the schema; the test also checks the
+  // cause directly: no closed field changes, and the result set rules hold.
   const words = schemaWords();
   for (const [mode, build] of Object.entries(reports)) {
     test(`${mode}: no registered schema word changes a closed field`, () => {

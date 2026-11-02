@@ -24,6 +24,7 @@ import {
   type Severity,
   StatusBlocked,
   StatusCompleted,
+  StatusUnsupported,
   type TestCase,
   type TestOutcome,
   TrustUntrusted,
@@ -212,12 +213,15 @@ export function at<T>(list: readonly T[], i: number): T {
 
 /**
  * goldenScored builds the benchmark mode fixture behind a golden report folder
- * ("benchmark-pass" or "benchmark-fail"), as the writer's Go golden test does,
+ * ("benchmark-pass", "benchmark-fail" or "benchmark-incomplete"), as the
+ * writer's Go golden test does,
  * and takes its Benchmark section from that folder's report.json, which the Go
  * scorer wrote. Until the scorer is ported (ticket 06) this stands in for
  * benchmark.Apply.
  */
-export function goldenScored(name: "benchmark-pass" | "benchmark-fail"): Set {
+export function goldenScored(
+  name: "benchmark-pass" | "benchmark-fail" | "benchmark-incomplete",
+): Set {
   const p = scoredProject();
   const advisory = (severity: string, scope: string) => [
     scoredEvidence("advisory_severity", severity),
@@ -263,11 +267,19 @@ export function goldenScored(name: "benchmark-pass" | "benchmark-fail"): Set {
         non_blank_lines: 1000,
       },
     ];
-  } else {
+  } else if (name === "benchmark-fail") {
     p.add("package.install", "lockfile-out-of-sync", true);
     p.status("tests.existing", StatusBlocked, "prerequisite_failed_project");
     p.status("deps.tree", StatusBlocked, "prerequisite_failed_project");
     p.testFiles();
+  } else {
+    p.status(
+      "tests.existing",
+      StatusUnsupported,
+      "test_runner_not_implemented",
+    );
+    p.deselect("security.secrets");
+    p.add("tests.smells", "mocha/no-pending-tests", false);
   }
   const s = p.done();
   const report = JSON.parse(

@@ -1,0 +1,49 @@
+package writer_test
+
+// Generator of go-oracle.json: the message of the error the frozen Go writer
+// returned for broken result sets (the text the CLI printed on stderr after
+// "js-prueffactory: " before it exited with 3). The Go code is frozen, so this
+// is kept as text. To regenerate at the freeze commit: copy it to
+// internal/writer/zz_oracle_test.go, run
+// go test -count=1 -run TestZZOracle ./internal/writer, delete the copy.
+// The report folder is written as <DIR>.
+
+import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"testing"
+
+	"github.com/invia-flights/jscript-bench/internal/resultset"
+	"github.com/invia-flights/jscript-bench/internal/resultset/resultsettest"
+	"github.com/invia-flights/jscript-bench/internal/writer"
+)
+
+var pointers = regexp.MustCompile(`0x[0-9a-f]+`)
+
+func TestZZOracle(t *testing.T) {
+	cases := []struct {
+		name   string
+		mutate func(s *resultset.Set)
+	}{
+		{"gates contradict the Findings", func(s *resultset.Set) { s.Summary.Gates = 5 }},
+		{"made-up budget source", func(s *resultset.Set) { s.Run.BudgetSource = "made-up" }},
+		{"both", func(s *resultset.Set) { s.Summary.Gates = 5; s.Run.BudgetSource = "made-up"; s.Checks[0].Status = "weird" }},
+	}
+	out := map[string]any{"recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8"}
+	var list []map[string]any
+	for _, c := range cases {
+		s := resultsettest.Minimal()
+		c.mutate(s)
+		dir := filepath.Join(t.TempDir(), "run")
+		err := writer.Write(dir, s, writer.Formats{JSON: true, Markdown: true})
+		list = append(list, map[string]any{"name": c.name, "message": pointers.ReplaceAllString(strings.ReplaceAll(err.Error(), dir, "<DIR>"), "<pointer>")})
+	}
+	out["invalid"] = list
+	b, _ := json.MarshalIndent(out, "", "  ")
+	if err := os.WriteFile("testdata/go-oracle.json", append(b, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
