@@ -5,7 +5,7 @@
 // that implementation, not the historical v1 decoder.
 //
 // Only the Go types the port decodes are modelled: string, bool, int,
-// json.RawMessage, interface{}, pointers, map[string]T, []T and structs with
+// float64, json.RawMessage, interface{}, pointers, map[string]T, []T and structs with
 // json names.
 import { quoteBytes, quoteRune } from "./fmt.ts";
 import { isPrint, isSpace } from "./strings.ts";
@@ -52,6 +52,7 @@ export type Schema =
   | { readonly kind: "string" }
   | { readonly kind: "bool" }
   | { readonly kind: "int" }
+  | { readonly kind: "float" }
   | { readonly kind: "raw" }
   | { readonly kind: "any" }
   | { readonly kind: "pointer"; readonly elem: Schema }
@@ -76,7 +77,7 @@ export class GoSlice {
   }
 }
 
-// Decoded values: string -> string, bool -> boolean, int -> bigint,
+// Decoded values: string -> string, bool -> boolean, int -> bigint, float -> number,
 // raw -> Uint8Array | null, any -> AnyValue, pointer -> value | null, map -> Map | null,
 // slice -> GoSlice | null, struct -> a record keyed by json name.
 export type Value = unknown;
@@ -94,6 +95,8 @@ export function zeroValue(schema: Schema): Value {
       return false;
     case "int":
       return 0n;
+    case "float":
+      return 0;
     case "raw":
     case "any":
     case "pointer":
@@ -563,6 +566,11 @@ class Decoder {
           return this.fail("int", current, pos, end, path);
         }
         return [this.decodeInt(current, pos, end, path), end];
+      case "float":
+        if (c !== 0x2d && !isDigit(c)) {
+          return this.fail("float64", current, pos, end, path);
+        }
+        return [this.decodeFloat(current, pos, end, path), end];
       case "raw":
         return [b.slice(pos, end), end];
       case "any":
@@ -681,6 +689,21 @@ class Decoder {
       if (n >= int64Min && n <= int64Max) return n;
     }
     this.record("number " + literal, "int", end, path);
+    return current;
+  }
+
+  // decodeFloat parses a number literal into a float64 (strconv.ParseFloat);
+  // one out of its range is a type error that names the literal.
+  private decodeFloat(
+    current: Value,
+    pos: number,
+    end: number,
+    path: readonly string[],
+  ): Value {
+    const literal = text(this.b.subarray(pos, end));
+    const f = Number(literal);
+    if (Number.isFinite(f)) return f;
+    this.record("number " + literal, "float64", end, path);
     return current;
   }
 
