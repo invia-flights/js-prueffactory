@@ -12,13 +12,11 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import type { TestContext } from "node:test";
 
-import {
-  type Context,
-  discover,
-  type Project,
-} from "../discovery/discovery.ts";
+import { type Context, discover, Project } from "../discovery/discovery.ts";
+import { newContext } from "../resultset/zero.ts";
 import "./all.ts";
 import { type Check, implementation } from "./check.ts";
+import { Input } from "./input.ts";
 
 /** tempDir is a temporary folder, removed when the test ends. */
 export function tempDir(t: TestContext): string {
@@ -67,4 +65,21 @@ export function impl(id: string): Check {
   const c = implementation(id);
   assert.ok(c, `${id} is not registered`);
   return c;
+}
+
+/** repoInput is the Input of a project Context over files in a new folder. */
+export function repoInput(
+  t: TestContext,
+  files: Record<string, string>,
+): Input {
+  const dir = writeTree(t, files);
+  return new Input({
+    project: new Project(dir),
+    context: {
+      ...newContext({ id: "C-0001", kind: "project", path: "." }),
+      package: null,
+    },
+    originalPath: "/orig",
+    snapshotDir: dir,
+  });
 }

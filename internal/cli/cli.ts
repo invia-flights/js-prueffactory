@@ -25,6 +25,7 @@ import {
   ExitOK,
 } from "../resultset/exitcode.ts";
 import { newRunID, randomSuffix } from "../runid/runid.ts";
+import { cleanOtherVersions } from "../toolvolume/toolvolume.ts";
 import { resolveBudget } from "./budget.ts";
 import { cacheDir } from "./cachedir.ts";
 import { hardStop } from "./interrupt.ts";
@@ -224,10 +225,8 @@ function interrupted(stderr: Writable): number {
   return ExitInterrupted;
 }
 
-// startRun sweeps what dead Runs left in Docker and runs the engine (Go: the
-// rest of runTest). The toolset volumes of other toolset versions are
-// removed here in Go (toolvolume.CleanOtherVersions); that part arrives with
-// the toolset volume itself (ticket 13 of the port).
+// startRun sweeps what dead Runs left in Docker, removes the toolset volumes
+// of other toolset versions and runs the engine (Go: the rest of runTest).
 async function startRun(plan: RunPlan, io: RunIO): Promise<number> {
   const { getenv, stdout, stderr, signal, log } = io;
   const host = hostname();
@@ -243,6 +242,14 @@ async function startRun(plan: RunPlan, io: RunIO): Promise<number> {
   if (signal.aborted) {
     return interrupted(stderr);
   }
+  // Toolset volumes of other toolset versions go at the start of every Run.
+  await cleanOtherVersions(signal, {
+    docker: scoped,
+    cacheDir: cacheDir(getenv),
+    logf: (line) => {
+      log.print(line);
+    },
+  });
   const tmp = getenv("TMPDIR") || tempDir();
   let res;
   try {

@@ -2,13 +2,10 @@
 import { compareBytes, sortStrings } from "../gocompat/strings.ts";
 import type { RunState } from "./engine.ts";
 import { probeIsolation } from "./isolation.ts";
+import { prepareKubernetesSchemas } from "./kubernetesschemas.ts";
 import { runnable } from "./plan.ts";
 import { serviceImages } from "./services.ts";
-import {
-  prepareAdvisoryDB,
-  prepareKubernetesSchemas,
-  prepareToolset,
-} from "./toolset.ts";
+import { prepareAdvisoryDB, prepareToolset } from "./toolset.ts";
 import { makeWorkingCopy } from "./workingcopy.ts";
 
 function message(err: unknown): string {
@@ -70,9 +67,9 @@ export async function prepare(r: RunState, signal: AbortSignal): Promise<void> {
     await makeWorkingCopy(r, signal, workImage);
   }
   r.network = await drv.createNetwork(signal, "net", true);
-  await prepareToolset(r);
+  await prepareToolset(r, signal);
   await prepareAdvisoryDB(r);
-  await prepareKubernetesSchemas(r);
+  await prepareKubernetesSchemas(r, signal);
   // The Execution phase starts here: its first step proves the network is closed.
   await probeIsolation(r, signal);
   r.dockerReady = true;
