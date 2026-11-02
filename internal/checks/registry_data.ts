@@ -2,7 +2,7 @@
 // it asks the registry about (Go: registry_data.go). How the answer is
 // fetched and read is in registry_fetch.ts and registry_answers.ts.
 import { compareBytes, utf8Length } from "../gocompat/strings.ts";
-import { parse as parseURL } from "../gocompat/url.ts";
+import { parseText } from "../gocompat/neturl.ts";
 import { Entry, type Lock } from "../lockfile/lockfile.ts";
 import type { Manifest } from "../lockfile/manifest.ts";
 import { compareVersions, packageName } from "./security_dependencies_osv.ts";
@@ -202,11 +202,12 @@ export function fromRegistry(e: Entry): boolean {
   if (e.resolved === "") {
     return true;
   }
-  const parsed = parseURL(e.resolved);
-  return (
-    "url" in parsed &&
-    (parsed.url.scheme === "http" || parsed.url.scheme === "https")
-  );
+  try {
+    const { scheme } = parseText(e.resolved);
+    return scheme === "http" || scheme === "https";
+  } catch {
+    return false;
+  }
 }
 
 /**

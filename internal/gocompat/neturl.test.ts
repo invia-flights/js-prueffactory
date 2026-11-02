@@ -6,7 +6,7 @@ import { atoi, parseFloat } from "./strconv.ts";
 import * as url from "./neturl.ts";
 
 // Recorded from Go 1.27.3 by testdata/go-oracle-neturl.go.txt. Strings are byte
-// strings: one character per byte, as url.ts holds them.
+// strings: one character per byte, as neturl.ts holds them.
 interface URLCase {
   in: string;
   err: boolean;
@@ -139,4 +139,52 @@ test("url.Parse is linear on long hostile input", () => {
     // refused, as Go refuses it
   }
   assert.ok(performance.now() - start < 2000);
+});
+
+// What Go's url.Parse said for the inputs of go-oracle-url.json (ticket 20's
+// lockfile `resolved` values and hosts; the JSON Schema formats of ticket 5 and
+// 18 use the same module): whether it parses, Go's error text, scheme and host.
+interface TextRow {
+  in: string;
+  ok: boolean;
+  err: string;
+  scheme: string;
+  host: string;
+  hostname: string;
+}
+
+const textOracle = JSON.parse(
+  readFileSync(
+    new globalThis.URL("testdata/go-oracle-url.json", import.meta.url),
+    "utf8",
+  ),
+) as { parse: TextRow[] };
+
+test("parseText accepts and rejects what Go's url.Parse does, with Go's text, scheme and host", () => {
+  assert.ok(textOracle.parse.length > 90);
+  for (const want of textOracle.parse) {
+    let got: TextRow;
+    try {
+      const r = url.parseText(want.in);
+      got = {
+        in: want.in,
+        ok: true,
+        err: "",
+        scheme: r.scheme,
+        host: url.fromByteString(r.host),
+        hostname: url.fromByteString(r.hostname()),
+      };
+    } catch (err) {
+      assert.ok(err instanceof url.URLError);
+      got = {
+        in: want.in,
+        ok: false,
+        err: err.message,
+        scheme: "",
+        host: "",
+        hostname: "",
+      };
+    }
+    assert.deepEqual(got, want);
+  }
 });

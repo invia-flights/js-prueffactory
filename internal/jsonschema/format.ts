@@ -5,7 +5,12 @@
 // Each check returns undefined for a valid value and the error text after
 // "is not valid <format>: " otherwise.
 import { compileError } from "../gocompat/regexp.ts";
-import { hostname, parse, parseAddr, type URL } from "../gocompat/url.ts";
+import {
+  parseAddr,
+  parseText,
+  URLError,
+  type URL,
+} from "../gocompat/neturl.ts";
 import { goFormats } from "../schema/format.ts";
 
 export type FormatCheck = (value: string) => string | undefined;
@@ -13,15 +18,19 @@ export type FormatCheck = (value: string) => string | undefined;
 // parseURL is the library's parseURL: url.Parse, then a host with a colon
 // must be a bracketed IPv6 address without a zone.
 function parseURL(s: string): { url: URL } | { error: string } {
-  const r = parse(s);
-  if ("error" in r) return r;
-  const host = hostname(r.url);
+  let url: URL;
+  try {
+    url = parseText(s);
+  } catch (err) {
+    if (err instanceof URLError) return { error: err.message };
+    throw err;
+  }
+  const host = url.hostname();
   if (host.includes(":")) {
-    if (!r.url.host.includes("[") || !r.url.host.includes("]")) {
+    if (!url.host.includes("[") || !url.host.includes("]")) {
       return { error: "ipv6 address not enclosed in brackets" };
     }
-    const bytes = Buffer.from(host, "utf8").toString("latin1");
-    const addr = parseAddr(bytes);
+    const addr = parseAddr(host);
     if (addr.error !== undefined) {
       return { error: `invalid ipv6 address: ${addr.error}` };
     }
@@ -31,7 +40,7 @@ function parseURL(s: string): { url: URL } | { error: string } {
       };
     }
   }
-  return r;
+  return { url };
 }
 
 const uri: FormatCheck = (s) => {
