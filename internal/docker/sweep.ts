@@ -8,6 +8,7 @@ import {
 } from "./common.ts";
 import type { Driver } from "./driver.ts";
 import { errorMessage } from "../gocompat/errors.ts";
+import { atoiOrZero } from "../gocompat/strconv.ts";
 
 // PidAlive says whether a process of this host runs.
 export type PidAlive = (pid: number) => boolean;
@@ -104,7 +105,7 @@ export async function sweepLeftovers(
       }
       if (
         abandoned(
-          { host: ownerHost, pid: atoi(pid), deadline },
+          { host: ownerHost, pid: atoiOrZero(pid), deadline },
           now,
           host,
           pidAlive,
@@ -176,16 +177,6 @@ function parseRFC3339(s: string): number | undefined {
   }
   const t = Date.parse(s);
   return Number.isNaN(t) ? undefined : t;
-}
-
-// atoi is Go's strconv.Atoi with the error dropped: 0 for anything that is not
-// a decimal integer in range.
-function atoi(s: string): number {
-  if (!/^[+-]?\d+$/.test(s)) {
-    return 0;
-  }
-  const n = Number(s);
-  return Number.isSafeInteger(n) ? n : 0;
 }
 
 // processRunning reports whether a process with the given ID exists. A process

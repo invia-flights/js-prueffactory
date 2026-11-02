@@ -37,7 +37,7 @@ import { type OpenAPITarget, openAPITargets } from "./repo_targets.ts";
 import {
   projectImages,
   snapshotMount,
-  toolContainer,
+  snapshotToolContainer,
   toolInfo,
   toolRef,
 } from "./repo_tools.ts";
@@ -179,7 +179,7 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
     try {
       c = await docker.runContainer(
         signal,
-        toolContainer(
+        snapshotToolContainer(
           input,
           `redocly-${String(i + 1)}`,
           Redocly,

@@ -15,6 +15,7 @@ import { formatFloatF } from "../gocompat/strconv.ts";
 import { checkValid } from "../gocompat/unmarshal.ts";
 import { goString } from "../gocompat/utf8.ts";
 import { goFormats } from "./format.ts";
+import { unescapePointerToken } from "../gocompat/jsonpointer.ts";
 
 /** Leaf is one violation, as a leaf of the Go library's error tree. */
 export interface Leaf {
@@ -104,13 +105,9 @@ export function parse(
 // tests them in this order and returns at the first that fails.
 const shortCircuit = ["type", "const", "enum", "format"];
 
-function unescapeToken(t: string): string {
-  return t.replaceAll("~1", "/").replaceAll("~0", "~");
-}
-
 function instanceOf(e: ErrorObject): string {
   return (
-    "/" + e.instancePath.split("/").slice(1).map(unescapeToken).join("/")
+    "/" + e.instancePath.split("/").slice(1).map(unescapePointerToken).join("/")
   );
 }
 

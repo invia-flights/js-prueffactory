@@ -38,6 +38,7 @@ import {
   type TestErr,
   type TestRecord,
 } from "./test_events.ts";
+import { atoiOrZero } from "../gocompat/strconv.ts";
 
 const testsExistingID = "tests.existing";
 
@@ -382,15 +383,6 @@ export function stackFrameMatches(text: string): [string, string, string][] {
   return out;
 }
 
-/** atoi is Go's strconv.Atoi with the error dropped: 0 when it fails. */
-function atoi(s: string): number {
-  if (s === "") {
-    return 0;
-  }
-  const n = Number(s);
-  return Number.isSafeInteger(n) ? n : 0;
-}
-
 /**
  * projectFrames lists the frames of a stack trace or error output that lie
  * in the project's own files, outside node_modules, in order. Mocha shortens
@@ -421,7 +413,7 @@ export function projectFrames(input: Input, text: string): Frame[] {
     if (rel.startsWith("node_modules/") || rel.includes("/node_modules/")) {
       continue;
     }
-    out.push({ path: rel, line: atoi(m2), col: atoi(m3) });
+    out.push({ path: rel, line: atoiOrZero(m2), col: atoiOrZero(m3) });
   }
   return out;
 }

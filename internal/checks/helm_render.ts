@@ -8,7 +8,7 @@ import { goString } from "../gocompat/utf8.ts";
 import { HelmRunner } from "../toolset/helm.ts";
 import { MountPath } from "../toolvolume/toolvolume.ts";
 import type { Input } from "./input.ts";
-import { toolContainer } from "./repo_tools.ts";
+import { snapshotToolContainer } from "./repo_tools.ts";
 import {
   type HelmChart,
   helmCharts,
@@ -69,7 +69,7 @@ export function renderHelmCharts(
       throw new Error("no Docker driver is configured");
     }
     n++;
-    const spec = toolContainer(
+    const spec = snapshotToolContainer(
       input,
       `helm-render-${String(n)}`,
       HelmRunner,

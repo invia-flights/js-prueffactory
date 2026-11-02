@@ -1,3 +1,4 @@
+import { zeroPad } from "../gocompat/strings.ts";
 // GoTime is the time.Time a YAML timestamp decodes to in yaml.v3: a wall
 // clock in UTC or in a fixed zone of the given offset (time.FixedZone with
 // an empty name).
@@ -41,11 +42,11 @@ export class GoTime {
   }
 
   date(): string {
-    return `${pad(this.year, 4)}-${pad(this.month, 2)}-${pad(this.day, 2)}`;
+    return `${zeroPad(this.year, 4)}-${zeroPad(this.month, 2)}-${zeroPad(this.day, 2)}`;
   }
 
   clock(): string {
-    return `${pad(this.hour, 2)}:${pad(this.minute, 2)}:${pad(this.second, 2)}`;
+    return `${zeroPad(this.hour, 2)}:${zeroPad(this.minute, 2)}:${zeroPad(this.second, 2)}`;
   }
 }
 
@@ -55,19 +56,15 @@ export function formatRFC3339Nano(t: GoTime): string {
   return `${t.date()}T${t.clock()}${fraction(t.nanosecond)}${zone}`;
 }
 
-function pad(n: number, width: number): string {
-  return String(n).padStart(width, "0");
-}
-
 // fraction is ".999999999": the nanoseconds without trailing zeros, nothing
 // when they are zero.
 function fraction(ns: number): string {
   if (ns === 0) return "";
-  return "." + pad(ns, 9).replace(/0+$/, "");
+  return "." + zeroPad(ns, 9).replace(/0+$/, "");
 }
 
 function numericZone(offset: number, colon: boolean): string {
   const sign = offset < 0 ? "-" : "+";
   const m = Math.floor(Math.abs(offset) / 60);
-  return `${sign}${pad(Math.floor(m / 60), 2)}${colon ? ":" : ""}${pad(m % 60, 2)}`;
+  return `${sign}${zeroPad(Math.floor(m / 60), 2)}${colon ? ":" : ""}${zeroPad(m % 60, 2)}`;
 }

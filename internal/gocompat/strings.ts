@@ -237,3 +237,17 @@ export function toLower(s: string): string {
     (c) => (c === 0x130 ? 0x69 : c),
   );
 }
+
+/** zeroPad is n written in decimal and padded with zeros to width digits (Go's %0*d). */
+export function zeroPad(n: number, width: number): string {
+  return String(n).padStart(width, "0");
+}
+
+/** stringsOf returns the strings of a string or of a list that holds strings; anything else gives none. */
+export function stringsOf(v: unknown): string[] {
+  if (typeof v === "string") return [v];
+  if (Array.isArray(v)) {
+    return v.filter((e): e is string => typeof e === "string");
+  }
+  return [];
+}

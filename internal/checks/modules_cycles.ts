@@ -61,7 +61,11 @@ import {
   unsupportedInstallReason,
   workPath,
 } from "./package_install.ts";
-import { toolContainer, toolImage, toolRun } from "./quality_unused.ts";
+import {
+  workingCopyToolContainer,
+  toolImage,
+  toolRun,
+} from "./quality_unused.ts";
 import { lstatRegular, maxProjectFileBytes, readCapped } from "./readcap.ts";
 
 export const cyclesID = "modules.cycles";
@@ -316,7 +320,7 @@ async function runCycles(signal: AbortSignal, input: Input): Promise<Result> {
   try {
     c = await docker.runContainer(
       signal,
-      toolContainer(
+      workingCopyToolContainer(
         input,
         "cruise",
         res.command ?? [],

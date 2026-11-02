@@ -1,3 +1,4 @@
+import { zeroPad } from "./strings.ts";
 // Go's time.Duration: an int64 count of nanoseconds, here a bigint so that
 // every Go value and Go's overflow rules survive. time.ParseDuration reads what
 // users pass to --budget; Duration.String is every %s of a Duration.
@@ -327,20 +328,16 @@ export function milliseconds(d: Duration): number {
   return Number(d / millisecond);
 }
 
-function pad(n: number, width: number): string {
-  return String(n).padStart(width, "0");
-}
-
 /** formatCompactUTC is Go's t.UTC().Format("20060102T150405Z"). */
 export function formatCompactUTC(t: Date): string {
   return (
-    pad(t.getUTCFullYear(), 4) +
-    pad(t.getUTCMonth() + 1, 2) +
-    pad(t.getUTCDate(), 2) +
+    zeroPad(t.getUTCFullYear(), 4) +
+    zeroPad(t.getUTCMonth() + 1, 2) +
+    zeroPad(t.getUTCDate(), 2) +
     "T" +
-    pad(t.getUTCHours(), 2) +
-    pad(t.getUTCMinutes(), 2) +
-    pad(t.getUTCSeconds(), 2) +
+    zeroPad(t.getUTCHours(), 2) +
+    zeroPad(t.getUTCMinutes(), 2) +
+    zeroPad(t.getUTCSeconds(), 2) +
     "Z"
   );
 }
@@ -387,7 +384,8 @@ function getnum(s: string, fixed: boolean): [number, string] | undefined {
   return [Number(s.slice(0, 2)), s.slice(2)];
 }
 
-function daysIn(month: number, year: number): number {
+/** daysIn is the number of days of a month (1 to 12) of a year in the proleptic Gregorian calendar. */
+export function daysIn(month: number, year: number): number {
   if (month === 2) {
     const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
     return leap ? 29 : 28;

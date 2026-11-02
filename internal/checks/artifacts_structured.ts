@@ -36,6 +36,7 @@ import {
 import { shownPath } from "./shown_text.ts";
 import { buildOutputRoot } from "./syntax_parse.ts";
 import { errorMessage } from "../gocompat/errors.ts";
+import { atoiClamped } from "../gocompat/strconv.ts";
 
 export const structuredID = "artifacts.structured";
 export const ruleInvalidJSON = "invalid-json";
@@ -315,7 +316,7 @@ export function yamlParseError(data: Uint8Array, text: string): ParseError {
   let column = 0;
   const m = yamlLine.exec(msg);
   if (m !== null) {
-    line = atoi(m[1] ?? "0");
+    line = atoiClamped(m[1] ?? "0");
     msg = msg.replace(yamlLineAll, "");
   } else if (msg.includes("control characters are not allowed")) {
     // The reader of the parser does not say where. A UTF-8 text that was
@@ -327,13 +328,6 @@ export function yamlParseError(data: Uint8Array, text: string): ParseError {
     }
   }
   return { rule: ruleInvalidYAML, line, column, message: msg };
-}
-
-/** atoi is strconv.Atoi of a run of ASCII digits, clamped as Go clamps it. */
-function atoi(digits: string): number {
-  const n = BigInt(digits);
-  const max = 2n ** 63n - 1n;
-  return Number(n > max ? max : n);
 }
 
 /**

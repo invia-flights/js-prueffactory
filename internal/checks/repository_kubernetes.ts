@@ -47,7 +47,7 @@ import {
   recordedCommand,
   runChunks,
   snapshotPath,
-  toolContainer,
+  snapshotToolContainer,
   toolRef,
 } from "./repo_tools.ts";
 import {
@@ -225,7 +225,7 @@ async function runKubernetes(
             copies.push({ path: i.file, mode: 0o644, content: i.content });
           }
         }
-        const spec = toolContainer(
+        const spec = snapshotToolContainer(
           input,
           `kubeconform-${String(n)}`,
           Kubeconform,

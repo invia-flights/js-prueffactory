@@ -74,11 +74,11 @@ export function recordedCommand(
 }
 
 /**
- * toolContainer is the container a repository tool runs in: the Snapshot
+ * snapshotToolContainer is the container a repository tool runs in: the Snapshot
  * read-only at /snapshot, the Run's internal network, the standard limits and
  * no variables of the host. Callers add mounts by spreading the spec.
  */
-export function toolContainer(
+export function snapshotToolContainer(
   input: Input,
   name: string,
   t: PinnedTool,

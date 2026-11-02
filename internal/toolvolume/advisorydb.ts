@@ -13,10 +13,11 @@ import { isDeadline, withTimeout } from "../gocompat/context.ts";
 import { formatRFC3339 } from "../gocompat/json.ts";
 import { trimSpace } from "../gocompat/strings.ts";
 import {
-  type Duration,
+  daysIn,
   durationString,
   hour,
   minute,
+  type Duration,
 } from "../gocompat/time.ts";
 import { goString } from "../gocompat/utf8.ts";
 import { acquire } from "./lock.ts";
@@ -135,14 +136,6 @@ export function parseDBDate(s: string): Date | null {
   date.setUTCFullYear(year, month - 1, day);
   date.setUTCHours(Number(h), Number(mi), Number(sec), ms);
   return new Date(date.getTime() - offset * 60_000);
-}
-
-function daysIn(month: number, year: number): number {
-  if (month === 2) {
-    const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-    return leap ? 29 : 28;
-  }
-  return [4, 6, 9, 11].includes(month) ? 30 : 31;
 }
 
 /**

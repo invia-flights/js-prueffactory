@@ -4,6 +4,7 @@ import type { Value } from "../jsonschema/jsonschema.ts";
 import * as yaml from "../yamlv3/yaml.ts";
 import { Decoder as ValueDecoder, anySchema } from "../yamlv3/decode.ts";
 import { errorMessage } from "../gocompat/errors.ts";
+import { unescapePointerToken } from "../gocompat/jsonpointer.ts";
 
 /**
  * maxCINodes bounds the nodes one file expands to, so that nested aliases
@@ -44,10 +45,6 @@ class Ptr {
   }
 }
 
-function unescapeToken(t: string): string {
-  return t.replaceAll("~1", "/").replaceAll("~0", "~");
-}
-
 /** CIDoc is one CI file after reading. */
 export class CIDoc {
   /**
@@ -69,7 +66,7 @@ export class CIDoc {
     yield at;
     if (ptr === "") return;
     for (const token of ptr.slice(1).split("/")) {
-      at = at.children.get(unescapeToken(token));
+      at = at.children.get(unescapePointerToken(token));
       if (at === undefined) return;
       yield at;
     }

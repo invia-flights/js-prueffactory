@@ -1,7 +1,7 @@
 import { join as joinPath } from "node:path";
 
 import { clean, ext, isAbs, match } from "../gocompat/path.ts";
-import { trimSpace } from "../gocompat/strings.ts";
+import { stringsOf, trimSpace } from "../gocompat/strings.ts";
 import * as json from "../gocompat/unmarshal.ts";
 import * as yaml from "../yamlv3/yaml.ts";
 import { Source, TestCode } from "./classify.ts";
@@ -318,14 +318,6 @@ class MochaSelection {
     }
     if (get("recursive") === true) this.recursive = true;
   }
-}
-
-function stringsOf(v: unknown): string[] {
-  if (typeof v === "string") return [v];
-  if (Array.isArray(v)) {
-    return v.filter((e): e is string => typeof e === "string");
-  }
-  return [];
 }
 
 // loadedByMocha returns the project paths of the files Mocha loads in a

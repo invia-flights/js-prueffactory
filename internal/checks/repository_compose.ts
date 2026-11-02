@@ -36,7 +36,7 @@ import {
   projectImages,
   snapshotMount,
   snapshotPath,
-  toolContainer,
+  snapshotToolContainer,
   toolInfo,
   toolRef,
 } from "./repo_tools.ts";
@@ -115,7 +115,7 @@ async function runCompose(signal: AbortSignal, input: Input): Promise<Result> {
     try {
       c = await docker.runContainer(
         signal,
-        toolContainer(
+        snapshotToolContainer(
           input,
           `compose-${String(n + 1)}`,
           DockerCLI,

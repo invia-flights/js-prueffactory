@@ -43,7 +43,7 @@ import {
   projectImages,
   snapshotMount,
   snapshotPath,
-  toolContainer,
+  snapshotToolContainer,
   toolInfo,
 } from "./repo_tools.ts";
 
@@ -327,7 +327,7 @@ async function runHelm(signal: AbortSignal, input: Input): Promise<Result> {
       throw new Error("no Docker driver is configured");
     }
     n++;
-    const spec = toolContainer(
+    const spec = snapshotToolContainer(
       input,
       `helm-${String(n)}`,
       HelmRunner,

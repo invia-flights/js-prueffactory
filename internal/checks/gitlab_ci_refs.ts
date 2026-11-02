@@ -2,10 +2,10 @@
 // pipeline names exist somewhere in the files the Check resolved (Go:
 // gitlab_ci_refs.go).
 import { TestData } from "../discovery/discovery.ts";
-import { sortStrings } from "../gocompat/strings.ts";
+import { sortStrings, stringsOf } from "../gocompat/strings.ts";
 import type { Value } from "../jsonschema/jsonschema.ts";
 import type { Finding } from "../resultset/types.ts";
-import { type CIResolution, stringsOf } from "./gitlab_ci_includes.ts";
+import { type CIResolution } from "./gitlab_ci_includes.ts";
 import { jsonPointerToken } from "./gitlab_ci_yaml.ts";
 import type { Input } from "./input.ts";
 import { gitlabFinding } from "./repository_gitlab_ci.ts";

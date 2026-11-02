@@ -7,6 +7,7 @@ import { TestCode } from "./classify.ts";
 import { dotEnvValue } from "./compose_env.ts";
 import type { File, Package, Project } from "./discovery.ts";
 import { cut } from "./nodetestargs.ts";
+import { quoteMeta } from "../gocompat/quotemeta.ts";
 
 // ServiceRef says that a package's test environment refers to a compose
 // Service the Run does not start, so that tests which need it will fail for
@@ -136,9 +137,4 @@ function lineRefersTo(
 // its `$` without (?m) is the end of the text.
 function urlHost(name: string): RegExp {
   return new RegExp("://" + quoteMeta(name) + "(?:[:/?#'\"`\\t\\n\\f\\r ]|$)");
-}
-
-// quoteMeta is regexp.QuoteMeta, which escapes exactly \.+*?()|[]{}^$.
-function quoteMeta(s: string): string {
-  return s.replace(/[\\.+*?()|[\]{}^$]/g, "\\$&");
 }

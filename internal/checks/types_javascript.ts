@@ -43,6 +43,7 @@ import {
 } from "./package_install.ts";
 import { lstatRegular } from "./readcap.ts";
 import { rawJSON, repoFinding } from "./repo_findings.ts";
+import { atoiClamped } from "../gocompat/strconv.ts";
 
 export const typesJavascriptID = "types.javascript";
 
@@ -407,15 +408,6 @@ const tscFileDiagnostic =
 const tscGlobalDiagnostic = /^(?:error|warning) TS[0-9]+: [^\n]*$/;
 
 /**
- * atoi is strconv.Atoi with the error ignored: a number that does not fit is
- * the largest int64 (which a JavaScript number holds rounded up).
- */
-function atoi(digits: string): number {
-  const n = BigInt(digits);
-  return Number(n <= (1n << 63n) - 1n ? n : (1n << 63n) - 1n);
-}
-
-/**
  * parseTSC reads the text output of tsc. A diagnostic without a file, which is
  * a problem with the configuration or the run, goes into global as it was
  * printed.
@@ -449,8 +441,8 @@ export function parseTSC(out: string): {
     if (m !== null) {
       diags.push({
         path: m[1] ?? "",
-        line: atoi(m[2] ?? "0"),
-        column: atoi(m[3] ?? "0"),
+        line: atoiClamped(m[2] ?? "0"),
+        column: atoiClamped(m[3] ?? "0"),
         category: m[4] ?? "",
         code: m[5] ?? "",
         message: m[6] ?? "",

@@ -42,7 +42,7 @@ import {
   recordedCommand,
   runChunks,
   snapshotPath,
-  toolContainer,
+  snapshotToolContainer,
   toolInfo,
   toolRef,
 } from "./repo_tools.ts";
@@ -134,7 +134,7 @@ async function runGithubActions(
     paths,
     (n, chunk) =>
       // The image's entrypoint is actionlint.
-      toolContainer(
+      snapshotToolContainer(
         input,
         `actionlint-${String(n)}`,
         Actionlint,
@@ -221,7 +221,7 @@ async function runZizmor(
       // The image's entrypoint is zizmor.
       c = await docker.runContainer(
         signal,
-        toolContainer(
+        snapshotToolContainer(
           input,
           `zizmor-${String(n + 1)}`,
           Zizmor,
