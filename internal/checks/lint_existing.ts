@@ -6,13 +6,28 @@ import { dir as pathDir } from "../gocompat/path.ts";
 import { type Schema, unmarshal } from "../gocompat/unmarshal.ts";
 import { Applicable, NotApplicable } from "../resultset/types.ts";
 import { type Check, register } from "./check.ts";
-import { unsupportedInstallReason } from "./package_install.ts";
+import { lintExistingID } from "./lint_existing_parse.ts";
+import { runLintExisting } from "./lint_existing_run.ts";
+import {
+  nodeImages,
+  packageInstallID,
+  unsupportedInstallReason,
+} from "./package_install.ts";
 import { lstatRegular, readUpTo } from "./readcap.ts";
 
-export const lintExistingID = "lint.existing";
+export { lintExistingID };
 
-// lintExisting runs the project's own ESLint or Biome configuration,
-// check-only. The run arrives with ticket 21 of the port.
+// lintExisting runs the project's own linter, ESLint or Biome, at the version
+// the lockfile locked, from the package's node_modules in the Working copy,
+// with the project's own configuration and check-only. A project with both
+// linters gets both. Diagnostics of error level are Gates, warnings are
+// warnings (Go: lint_existing.go, lint_existing_run.go,
+// lint_existing_parse.go).
+//
+// Unlike the combined ESLint run, this Check executes the project's own
+// configuration, which is JavaScript and therefore project code. It runs in
+// the package's Node image on the Run's internal network, with the Working
+// copy mounted read-only.
 export const lintExisting: Check = {
   applicability(p, c) {
     if (c.package === null) {
@@ -36,6 +51,21 @@ export const lintExisting: Check = {
     }
     return [Applicable, unsupportedInstallReason(c)];
   },
+
+  prerequisites() {
+    return [packageInstallID];
+  },
+
+  usesWorkingCopy() {
+    return true;
+  },
+
+  /** images tells the engine which image run will use. */
+  images(c) {
+    return nodeImages(c);
+  },
+
+  run: runLintExisting,
 };
 
 register(lintExistingID, lintExisting);
