@@ -4,6 +4,7 @@ import { lstatSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 
 import { compareBytes, trimSpace } from "../gocompat/strings.ts";
+import { goString } from "../gocompat/utf8.ts";
 
 const base64Alphabet =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -74,11 +75,11 @@ function trimChars(s: string, chars: string): string {
  * so their decoded text counts as well, and for `_auth` its password half,
  * which is what shows up if a tool prints the credentials it decoded. A value
  * that is only a reference to an environment variable, such as ${NPM_TOKEN},
- * is no secret and is left out. Bytes that are not UTF-8 are read as U+FFFD.
+ * is no secret and is left out. A byte that is not UTF-8 is read as U+FFFD,
+ * one per byte as Go's decoders do (goString).
  */
 export function npmrcValues(data: Uint8Array | string): string[] {
-  const text =
-    typeof data === "string" ? data : Buffer.from(data).toString("utf8");
+  const text = typeof data === "string" ? data : goString(data);
   const out: string[] = [];
   const add = (v: string | null): void => {
     if (v !== null && v !== "") {
