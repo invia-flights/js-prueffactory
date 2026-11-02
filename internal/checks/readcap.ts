@@ -8,6 +8,8 @@ import { createHash } from "node:crypto";
 import { closeSync, lstatSync, openSync, readSync } from "node:fs";
 
 import { pathError } from "../gocompat/os.ts";
+import type { Limitation } from "../resultset/types.ts";
+import { cutList } from "./cut_text.ts";
 
 /**
  * maxProjectFileBytes is the size above which a native Check does not read a
@@ -20,6 +22,27 @@ export const maxProjectFileBytes = 16 << 20;
  * maxProjectFileBytes.
  */
 export const reasonTooLarge = "files_too_large_to_read";
+
+/**
+ * tooLargeLimitation names the files a Check left unread because of their
+ * size, at most 20 of them, or returns nothing when there are none.
+ */
+export function tooLargeLimitation(
+  checkID: string,
+  paths: readonly string[],
+): Limitation[] {
+  if (paths.length === 0) {
+    return [];
+  }
+  return [
+    {
+      reason_code: reasonTooLarge,
+      message: `${String(paths.length)} file(s) are over ${String(maxProjectFileBytes >> 20)} MiB and were not read: ${cutList(paths, 20).join(", ")}`,
+      check_id: checkID,
+      path: null,
+    },
+  ];
+}
 
 /**
  * errNotRegular marks a project file that is a symlink or another special
