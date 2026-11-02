@@ -1,0 +1,1581 @@
+{
+  "bases": {
+    "populated": "{\"format\":\"js-prueffactory.report\",\"schema_version\":\"0.4.0\",\"producer\":{\"name\":\"js-prueffactory\",\"version\":\"0.1.0\",\"vcs_revision\":\"abc\"},\"run\":{\"id\":\"20261025T101500Z-x-aaaa\",\"command\":\"test\",\"started_at\":\"2026-10-25T10:15:00Z\",\"finished_at\":\"2026-10-25T10:16:00Z\",\"duration_ms\":60000,\"budget_seconds\":1800,\"budget_source\":\"default\",\"status\":\"completed\",\"registry_data_date\":null,\"exit_code\":1,\"host\":{\"os\":\"darwin\",\"arch\":\"arm64\"},\"docker\":{\"server_version\":\"29.4.0\",\"api_version\":\"1.56\",\"cpus\":8,\"memory_bytes\":8589934592}},\"source\":{\"original_path\":\"/p\",\"snapshot_algorithm\":\"sorted-path-sha256-v1\",\"snapshot_hash\":\"abababababababababababababababababababababababababababababababab\",\"file_count\":3,\"git\":{\"commit\":\"deadbeef\",\"dirty\":\"unknown\"},\"original_unchanged\":true,\"changed_paths\":[],\"excluded_paths\":[]},\"profiles\":{\"catalog_version\":\"1\",\"execution_profile\":\"execution-v0\",\"benchmark_profile\":null,\"toolset_version\":\"abc\"},\"selection\":{\"only\":[\"syntax\"],\"exclude\":[],\"effective_checks\":[\"syntax.parse\"],\"deselected_checks\":[],\"prerequisites_run\":[],\"is_standard_scope\":false,\"fast\":false},\"contexts\":[{\"id\":\"C-0001\",\"kind\":\"project\",\"path\":\".\",\"node\":null,\"npm_version\":null,\"tools\":[],\"limits\":{\"cpus\":0,\"memory_mb\":0}},{\"id\":\"C-0002\",\"kind\":\"package\",\"path\":\".\",\"node\":{\"version\":\"24\",\"source\":\"default\",\"image\":\"node@sha256:abababababababababababababababababababababababababababababababab\",\"image_digest\":\"sha256:abababababababababababababababababababababababababababababababab\",\"variant\":\"debian\",\"not_checked_versions\":[]},\"npm_version\":\"11.0.0\",\"tools\":[{\"name\":\"node\",\"version\":\"24.22.1\",\"digest\":\"sha256:abababababababababababababababababababababababababababababababab\"}],\"limits\":{\"cpus\":2,\"memory_mb\":4096}}],\"services\":[{\"family\":\"valkey\",\"compose_service\":\"redis\",\"image\":\"valkey\",\"image_digest\":\"sha256:x\",\"declared_image\":\"valkey/valkey:8\",\"context_ids\":[\"C-0002\"],\"status\":\"started\",\"reason\":null}],\"summary\":{\"findings_by_severity\":{\"error\":1,\"warning\":0,\"note\":0},\"gates\":1,\"test_cases\":{\"passed\":4,\"failed\":1,\"skipped\":0,\"todo\":0,\"never_run\":0},\"scope_completeness\":{\"required\":1,\"completed\":1,\"ratio\":1},\"standard_completeness\":{\"required\":1,\"completed\":1,\"ratio\":1},\"network_isolation\":\"not_probed\"},\"benchmark\":{\"status\":\"not_requested\",\"profile_id\":null,\"score\":null,\"range\":null,\"verdict\":null},\"checks\":[{\"id\":\"E-0001\",\"check_id\":\"tests.existing\",\"family\":\"tests\",\"context_id\":\"C-0002\",\"selected\":true,\"applicability\":\"applicable\",\"status\":\"completed\",\"outcome\":\"failed\",\"reason_code\":null,\"reason\":null,\"gate\":1,\"finding_ids\":[\"F-0001\"],\"started_at\":\"2026-10-25T10:15:00Z\",\"duration_ms\":5,\"tool\":{\"name\":\"mocha\",\"version\":\"10.8.2\",\"exit_code\":1},\"command\":[\"mocha\"],\"artifact_ids\":[\"A-0001\"]}],\"test_cases\":[{\"id\":\"T-0001\",\"execution_id\":\"E-0001\",\"file\":\"test/a.js\",\"suite\":\"scripts.test\",\"full_title\":\"a b\",\"suite_path\":[\"a\"],\"outcome\":\"failed\",\"never_run_reason\":null,\"flaky\":false,\"attempts\":[{\"outcome\":\"failed\",\"duration_ms\":3,\"error\":\"boom\"}],\"finding_ids\":[\"F-0001\"]}],\"findings\":[{\"id\":\"F-0001\",\"check_id\":\"tests.existing\",\"execution_id\":\"E-0001\",\"context_id\":\"C-0002\",\"rule_id\":\"assertion\",\"fingerprint\":{\"algorithm\":\"v1\",\"value\":\"71b2535e38d19b6d9f4bd26451f8a6ee7d7cbc7cb956393ac433eed39147de02\"},\"kind\":\"defect\",\"severity\":\"error\",\"confidence\":\"confirmed\",\"gate\":true,\"in_test_data\":false,\"in_test_code\":false,\"title\":\"t\",\"message\":\"m\",\"locations\":[{\"role\":\"primary\",\"path_base\":\"project_root\",\"path\":\"test/a.js\",\"start\":{\"line\":3,\"column\":5},\"end\":{\"line\":3,\"column\":null},\"file_sha256\":\"abababababababababababababababababababababababababababababababab\",\"snippet\":{\"start_line\":3,\"text\":\"x\"}}],\"expected\":\"1\",\"actual\":\"2\",\"evidence\":[{\"kind\":\"stack\",\"text\":\"x\",\"origin\":\"mocha\",\"trust\":\"untrusted_data\",\"original_size\":9000,\"artifact_id\":\"A-0001\"}],\"reproduction\":{\"rerun_command\":[\"js-prueffactory\",\"test\",\"/p\"],\"test\":{\"runner\":\"mocha\",\"file\":\"test/a.js\",\"full_title\":\"a b\",\"native_command\":[\"mocha\",\"--fgrep\",\"a b\"]},\"verified_by\":[\"tests.existing\"]},\"limitations\":[\"x\"],\"suite\":\"scripts.test\"}],\"metrics\":[{\"id\":\"M-0001\",\"check_id\":\"quality.size\",\"context_id\":\"C-0001\",\"name\":\"lines\",\"value\":10,\"reason\":null,\"unit\":\"lines\"}],\"inventory\":{\"tests\":[{\"context_id\":\"C-0002\",\"found\":5,\"run\":0,\"passed\":0,\"failed\":0,\"skipped\":0,\"todo\":0,\"focused\":0,\"never_run\":0}],\"test_suites\":[{\"context_id\":\"C-0002\",\"suite\":\"scripts.test\",\"found\":5,\"run\":0,\"passed\":0,\"failed\":0,\"skipped\":0,\"todo\":0,\"focused\":0,\"never_run\":0}],\"test_files\":[{\"context_id\":\"C-0002\",\"suite\":\"scripts.test\",\"file\":\"test/a.js\",\"found\":5,\"passed\":0,\"passed_focused\":0}],\"suppressions\":[{\"kind\":\"eslint-disable\",\"file_class\":\"source\",\"count\":1}],\"file_hashes\":[{\"path\":\"package.json\",\"role\":\"manifest\",\"sha256\":\"abababababababababababababababababababababababababababababababab\"}],\"size\":[{\"group\":\"extension\",\"name\":\".js\",\"lines\":3,\"non_blank_lines\":2}],\"moved_test_files\":[{\"context_id\":\"C-0002\",\"path\":\"src/a.spec.js\",\"suite\":\"scripts.test\",\"kind\":\"spec\"}]},\"limitations\":[{\"reason_code\":\"x\",\"message\":\"m\",\"check_id\":\"syntax.parse\",\"path\":\"a\"}],\"artifacts\":[{\"id\":\"A-0001\",\"path\":\"artifacts/a.json\",\"media_type\":\"application/json\",\"sha256\":\"abababababababababababababababababababababababababababababababab\",\"size\":1,\"check_id\":\"tests.existing\",\"redacted\":false,\"truncated\":false}],\"report_completeness\":{\"all_findings_included\":true,\"truncated_evidence_items\":1,\"missing_artifacts\":[],\"redaction\":{\"applied\":false,\"count\":0,\"reason\":\"secrets scan not run\"}}}"
+  },
+  "cases": [
+    {
+      "name": "valid populated",
+      "base": "populated",
+      "ops": null,
+      "problems": [],
+      "leaves": []
+    },
+    {
+      "name": "valid benchmark",
+      "base": "benchmark-pass",
+      "ops": null,
+      "problems": [],
+      "leaves": []
+    },
+    {
+      "name": "unknown status",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/checks/0/status",
+          "value": "weird"
+        }
+      ],
+      "problems": [
+        "/checks/0/status: value must be one of 'not_started', 'completed', 'partial', 'blocked', 'unsupported', 'timed_out', 'budget_exhausted', 'cancelled', 'tool_error', 'infrastructure_error'"
+      ],
+      "leaves": [
+        {
+          "instance": "/checks/0/status",
+          "keyword": "enum",
+          "kind": "*kind.Enum",
+          "message": "value must be one of 'not_started', 'completed', 'partial', 'blocked', 'unsupported', 'timed_out', 'budget_exhausted', 'cancelled', 'tool_error', 'infrastructure_error'"
+        }
+      ]
+    },
+    {
+      "name": "trust marker is wrong",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/findings/0/evidence/0/trust",
+          "value": "trusted"
+        }
+      ],
+      "problems": [
+        "/findings/0/evidence/0/trust: value must be 'untrusted_data'"
+      ],
+      "leaves": [
+        {
+          "instance": "/findings/0/evidence/0/trust",
+          "keyword": "const",
+          "kind": "*kind.Const",
+          "message": "value must be 'untrusted_data'"
+        }
+      ]
+    },
+    {
+      "name": "bad fingerprint",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/findings/0/fingerprint/value",
+          "value": "nope"
+        }
+      ],
+      "problems": [
+        "/findings/0/fingerprint/value: 'nope' does not match pattern '^[0-9a-f]{64}$'"
+      ],
+      "leaves": [
+        {
+          "instance": "/findings/0/fingerprint/value",
+          "keyword": "pattern",
+          "kind": "*kind.Pattern",
+          "message": "'nope' does not match pattern '^[0-9a-f]{64}$'"
+        }
+      ]
+    },
+    {
+      "name": "test case without a suite",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/test_cases/0/suite",
+          "value": ""
+        }
+      ],
+      "problems": [
+        "/test_cases/0/suite: minLength: got 0, want 1"
+      ],
+      "leaves": [
+        {
+          "instance": "/test_cases/0/suite",
+          "keyword": "minLength",
+          "kind": "*kind.MinLength",
+          "message": "minLength: got 0, want 1"
+        }
+      ]
+    },
+    {
+      "name": "suite row without a suite",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/inventory/test_suites/0/suite",
+          "value": ""
+        }
+      ],
+      "problems": [
+        "/inventory/test_suites/0/suite: minLength: got 0, want 1"
+      ],
+      "leaves": [
+        {
+          "instance": "/inventory/test_suites/0/suite",
+          "keyword": "minLength",
+          "kind": "*kind.MinLength",
+          "message": "minLength: got 0, want 1"
+        }
+      ]
+    },
+    {
+      "name": "test file without a suite",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/inventory/test_files/0/suite",
+          "value": ""
+        }
+      ],
+      "problems": [
+        "/inventory/test_files/0/suite: minLength: got 0, want 1"
+      ],
+      "leaves": [
+        {
+          "instance": "/inventory/test_files/0/suite",
+          "keyword": "minLength",
+          "kind": "*kind.MinLength",
+          "message": "minLength: got 0, want 1"
+        }
+      ]
+    },
+    {
+      "name": "relative path base",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/findings/0/locations/0/path_base",
+          "value": "cwd"
+        }
+      ],
+      "problems": [
+        "/findings/0/locations/0/path_base: value must be 'project_root'"
+      ],
+      "leaves": [
+        {
+          "instance": "/findings/0/locations/0/path_base",
+          "keyword": "const",
+          "kind": "*kind.Const",
+          "message": "value must be 'project_root'"
+        }
+      ]
+    },
+    {
+      "name": "zero-based line",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/findings/0/locations/0/start/line",
+          "value": 0
+        }
+      ],
+      "problems": [
+        "/findings/0/locations/0/start/line: minimum: got 0, want 1",
+        "/findings/0/locations/0/start: got object, want null"
+      ],
+      "leaves": [
+        {
+          "instance": "/findings/0/locations/0/start",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got object, want null"
+        },
+        {
+          "instance": "/findings/0/locations/0/start/line",
+          "keyword": "minimum",
+          "kind": "*kind.Minimum",
+          "message": "minimum: got 0, want 1"
+        }
+      ]
+    },
+    {
+      "name": "empty re-run command",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/findings/0/reproduction/rerun_command",
+          "value": []
+        }
+      ],
+      "problems": [
+        "/findings/0/reproduction/rerun_command: minItems: got 0, want 1"
+      ],
+      "leaves": [
+        {
+          "instance": "/findings/0/reproduction/rerun_command",
+          "keyword": "minItems",
+          "kind": "*kind.MinItems",
+          "message": "minItems: got 0, want 1"
+        }
+      ]
+    },
+    {
+      "name": "fraction over the maximum",
+      "base": "benchmark-pass",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/benchmark/areas/0/parts/0/score",
+          "value": 100.5
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/parts/0/score: maximum: got 100.5, want 100"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark/areas/0/parts/0/score",
+          "keyword": "maximum",
+          "kind": "*kind.Maximum",
+          "message": "maximum: got 100.5, want 100"
+        }
+      ]
+    },
+    {
+      "name": "large number over the maximum",
+      "base": "benchmark-pass",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/benchmark/areas/0/parts/0/score",
+          "value": 123456
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/parts/0/score: maximum: got 123,456, want 100"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark/areas/0/parts/0/score",
+          "keyword": "maximum",
+          "kind": "*kind.Maximum",
+          "message": "maximum: got 123,456, want 100"
+        }
+      ]
+    },
+    {
+      "name": "tiny negative number",
+      "base": "benchmark-pass",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/benchmark/areas/0/parts/0/score",
+          "value": -0.00001
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/parts/0/score: minimum: got -1×10⁻⁰⁵, want 0"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark/areas/0/parts/0/score",
+          "keyword": "minimum",
+          "kind": "*kind.Minimum",
+          "message": "minimum: got -1×10⁻⁰⁵, want 0"
+        }
+      ]
+    },
+    {
+      "name": "huge number",
+      "base": "benchmark-pass",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/benchmark/areas/0/parts/0/score",
+          "value": 1e+21
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/parts/0/score: maximum: got 1×10²¹, want 100"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark/areas/0/parts/0/score",
+          "keyword": "maximum",
+          "kind": "*kind.Maximum",
+          "message": "maximum: got 1×10²¹, want 100"
+        }
+      ]
+    },
+    {
+      "name": "long text over the limit",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/findings/0/evidence/0/text",
+          "value": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+        }
+      ],
+      "problems": [
+        "/findings/0/evidence/0/text: maxLength: got 12,345, want 4,096"
+      ],
+      "leaves": [
+        {
+          "instance": "/findings/0/evidence/0/text",
+          "keyword": "maxLength",
+          "kind": "*kind.MaxLength",
+          "message": "maxLength: got 12,345, want 4,096"
+        }
+      ]
+    },
+    {
+      "name": "enum with null",
+      "base": "benchmark-pass",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/benchmark/status",
+          "value": "nope"
+        }
+      ],
+      "problems": [
+        "/benchmark/profile_id: got string, want null",
+        "/benchmark/range: got object, want null",
+        "/benchmark/score: got number, want null",
+        "/benchmark/status: value must be one of 'not_requested', 'computed', 'incomplete'",
+        "/benchmark/verdict: got string, want null",
+        "/benchmark: 'not' failed"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark/status",
+          "keyword": "enum",
+          "kind": "*kind.Enum",
+          "message": "value must be one of 'not_requested', 'computed', 'incomplete'"
+        },
+        {
+          "instance": "/benchmark/profile_id",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got string, want null"
+        },
+        {
+          "instance": "/benchmark/range",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got object, want null"
+        },
+        {
+          "instance": "/benchmark/verdict",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got string, want null"
+        },
+        {
+          "instance": "/benchmark/score",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got number, want null"
+        },
+        {
+          "instance": "/benchmark",
+          "keyword": "",
+          "kind": "*kind.Not",
+          "message": "'not' failed"
+        }
+      ]
+    },
+    {
+      "name": "wrong format id",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/format",
+          "value": "other"
+        }
+      ],
+      "problems": [
+        "/format: value must be 'js-prueffactory.report'"
+      ],
+      "leaves": [
+        {
+          "instance": "/format",
+          "keyword": "const",
+          "kind": "*kind.Const",
+          "message": "value must be 'js-prueffactory.report'"
+        }
+      ]
+    },
+    {
+      "name": "evidence over 4 KiB",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/findings/0/evidence/0/text",
+          "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      ],
+      "problems": [
+        "/findings/0/evidence/0/text: maxLength: got 5,000, want 4,096"
+      ],
+      "leaves": [
+        {
+          "instance": "/findings/0/evidence/0/text",
+          "keyword": "maxLength",
+          "kind": "*kind.MaxLength",
+          "message": "maxLength: got 5,000, want 4,096"
+        }
+      ]
+    },
+    {
+      "name": "unknown top-level field",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/surprise",
+          "value": 1
+        }
+      ],
+      "problems": [
+        "/: additional properties 'surprise' not allowed"
+      ],
+      "leaves": [
+        {
+          "instance": "/",
+          "keyword": "additionalProperties",
+          "kind": "*kind.AdditionalProperties",
+          "message": "additional properties 'surprise' not allowed"
+        }
+      ]
+    },
+    {
+      "name": "unknown field in a finding",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/findings/0/surprise",
+          "value": true
+        }
+      ],
+      "problems": [
+        "/findings/0: additional properties 'surprise' not allowed"
+      ],
+      "leaves": [
+        {
+          "instance": "/findings/0",
+          "keyword": "additionalProperties",
+          "kind": "*kind.AdditionalProperties",
+          "message": "additional properties 'surprise' not allowed"
+        }
+      ]
+    },
+    {
+      "name": "two unknown fields",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/zz",
+          "value": 1
+        },
+        {
+          "op": "set",
+          "path": "/aa",
+          "value": 2
+        }
+      ],
+      "problems": [
+        "/: additional properties 'zz', 'aa' not allowed"
+      ],
+      "leaves": [
+        {
+          "instance": "/",
+          "keyword": "additionalProperties",
+          "kind": "*kind.AdditionalProperties",
+          "message": "additional properties 'aa', 'zz' not allowed"
+        }
+      ]
+    },
+    {
+      "name": "one missing field",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "delete",
+          "path": "/run/id"
+        }
+      ],
+      "problems": [
+        "/run: missing property 'id'"
+      ],
+      "leaves": [
+        {
+          "instance": "/run",
+          "keyword": "required",
+          "kind": "*kind.Required",
+          "message": "missing property 'id'"
+        }
+      ]
+    },
+    {
+      "name": "two missing fields",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "delete",
+          "path": "/run/id"
+        },
+        {
+          "op": "delete",
+          "path": "/run/command"
+        }
+      ],
+      "problems": [
+        "/run: missing properties 'id', 'command'"
+      ],
+      "leaves": [
+        {
+          "instance": "/run",
+          "keyword": "required",
+          "kind": "*kind.Required",
+          "message": "missing properties 'id', 'command'"
+        }
+      ]
+    },
+    {
+      "name": "string for an integer",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/duration_ms",
+          "value": "90000"
+        }
+      ],
+      "problems": [
+        "/run/duration_ms: got string, want integer"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/duration_ms",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got string, want integer"
+        }
+      ]
+    },
+    {
+      "name": "fraction for an integer",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/duration_ms",
+          "value": 1.5
+        }
+      ],
+      "problems": [
+        "/run/duration_ms: got number, want integer"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/duration_ms",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got number, want integer"
+        }
+      ]
+    },
+    {
+      "name": "negative integer",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/duration_ms",
+          "value": -1000000
+        }
+      ],
+      "problems": [
+        "/run/duration_ms: minimum: got -1×10⁰⁶, want 0"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/duration_ms",
+          "keyword": "minimum",
+          "kind": "*kind.Minimum",
+          "message": "minimum: got -1×10⁰⁶, want 0"
+        }
+      ]
+    },
+    {
+      "name": "large negative count",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/source/file_count",
+          "value": -1234567
+        }
+      ],
+      "problems": [
+        "/source/file_count: minimum: got -1.234567×10⁰⁶, want 0"
+      ],
+      "leaves": [
+        {
+          "instance": "/source/file_count",
+          "keyword": "minimum",
+          "kind": "*kind.Minimum",
+          "message": "minimum: got -1.234567×10⁰⁶, want 0"
+        }
+      ]
+    },
+    {
+      "name": "null for a string",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/id"
+        }
+      ],
+      "problems": [
+        "/run/id: got null, want string"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/id",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got null, want string"
+        }
+      ]
+    },
+    {
+      "name": "array for an object",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run",
+          "value": []
+        }
+      ],
+      "problems": [
+        "/run: got array, want object"
+      ],
+      "leaves": [
+        {
+          "instance": "/run",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got array, want object"
+        }
+      ]
+    },
+    {
+      "name": "bool for an array",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/findings",
+          "value": true
+        }
+      ],
+      "problems": [
+        "/findings: got boolean, want array"
+      ],
+      "leaves": [
+        {
+          "instance": "/findings",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got boolean, want array"
+        }
+      ]
+    },
+    {
+      "name": "enum with a wrong type",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/findings/0/severity",
+          "value": 3
+        }
+      ],
+      "problems": [
+        "/findings/0/severity: value must be one of 'error', 'warning', 'note'"
+      ],
+      "leaves": [
+        {
+          "instance": "/findings/0/severity",
+          "keyword": "enum",
+          "kind": "*kind.Enum",
+          "message": "value must be one of 'error', 'warning', 'note'"
+        }
+      ]
+    },
+    {
+      "name": "date without T",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-10-25 10:15:00Z"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-10-25 10:15:00Z' is not valid date-time: 11th character must be t or T"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2026-10-25 10:15:00Z' is not valid date-time: 11th character must be t or T"
+        }
+      ]
+    },
+    {
+      "name": "date too short",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "yesterday"
+        }
+      ],
+      "problems": [
+        "/run/started_at: 'yesterday' is not valid date-time: less than 20 characters long"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'yesterday' is not valid date-time: less than 20 characters long"
+        }
+      ]
+    },
+    {
+      "name": "month out of range",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-13-01T00:00:00Z"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-13-01T00:00:00Z' is not valid date-time: invalid date element: parsing time \"2026-13-01\": month out of range"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2026-13-01T00:00:00Z' is not valid date-time: invalid date element: parsing time \"2026-13-01\": month out of range"
+        }
+      ]
+    },
+    {
+      "name": "leap second at noon",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-10-25T12:00:60Z"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-10-25T12:00:60Z' is not valid date-time: invalid time element: invalid leap second"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2026-10-25T12:00:60Z' is not valid date-time: invalid time element: invalid leap second"
+        }
+      ]
+    },
+    {
+      "name": "leap second at midnight",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-12-31T23:59:60Z"
+        }
+      ],
+      "problems": [],
+      "leaves": []
+    },
+    {
+      "name": "bad offset",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-10-25T10:15:00+0100"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-10-25T10:15:00+0100' is not valid date-time: invalid time element: offset must be 6 characters long"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2026-10-25T10:15:00+0100' is not valid date-time: invalid time element: offset must be 6 characters long"
+        }
+      ]
+    },
+    {
+      "name": "lower case t and z",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-10-25t10:15:00.5z"
+        }
+      ],
+      "problems": [],
+      "leaves": []
+    },
+    {
+      "name": "day out of range",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2027-02-29T00:00:00Z"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2027-02-29T00:00:00Z' is not valid date-time: invalid date element: parsing time \"2027-02-29\": day out of range"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2027-02-29T00:00:00Z' is not valid date-time: invalid date element: parsing time \"2027-02-29\": day out of range"
+        }
+      ]
+    },
+    {
+      "name": "day 32",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-01-32T00:00:00Z"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-01-32T00:00:00Z' is not valid date-time: invalid date element: parsing time \"2026-01-32\": day out of range"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2026-01-32T00:00:00Z' is not valid date-time: invalid date element: parsing time \"2026-01-32\": day out of range"
+        }
+      ]
+    },
+    {
+      "name": "month not digits",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-1x-01T00:00:00Z"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-1x-01T00:00:00Z' is not valid date-time: invalid date element: parsing time \"2026-1x-01\" as \"2006-01-02\": cannot parse \"1x-01\" as \"01\""
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2026-1x-01T00:00:00Z' is not valid date-time: invalid date element: parsing time \"2026-1x-01\" as \"2006-01-02\": cannot parse \"1x-01\" as \"01\""
+        }
+      ]
+    },
+    {
+      "name": "year not digits",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "20x6-01-01T00:00:00Z"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '20x6-01-01T00:00:00Z' is not valid date-time: invalid date element: parsing time \"20x6-01-01\" as \"2006-01-02\": cannot parse \"20x6-01-01\" as \"2006\""
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'20x6-01-01T00:00:00Z' is not valid date-time: invalid date element: parsing time \"20x6-01-01\" as \"2006-01-02\": cannot parse \"20x6-01-01\" as \"2006\""
+        }
+      ]
+    },
+    {
+      "name": "slashes in the date",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026/01/01T00:00:00Z"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026/01/01T00:00:00Z' is not valid date-time: invalid date element: parsing time \"2026/01/01\" as \"2006-01-02\": cannot parse \"/01/01\" as \"-\""
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2026/01/01T00:00:00Z' is not valid date-time: invalid date element: parsing time \"2026/01/01\" as \"2006-01-02\": cannot parse \"/01/01\" as \"-\""
+        }
+      ]
+    },
+    {
+      "name": "hour out of range",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-01-01T25:00:00Z"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-01-01T25:00:00Z' is not valid date-time: invalid time element: hour/min/sec out of range"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2026-01-01T25:00:00Z' is not valid date-time: invalid time element: hour/min/sec out of range"
+        }
+      ]
+    },
+    {
+      "name": "fraction without digits",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-01-01T10:15:00.Z"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-01-01T10:15:00.Z' is not valid date-time: invalid time element: no digits in second fraction"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2026-01-01T10:15:00.Z' is not valid date-time: invalid time element: no digits in second fraction"
+        }
+      ]
+    },
+    {
+      "name": "minute not digits",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-01-01T10:1x:00Z"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-01-01T10:1x:00Z' is not valid date-time: invalid time element: invalid hour/min/sec"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2026-01-01T10:1x:00Z' is not valid date-time: invalid time element: invalid hour/min/sec"
+        }
+      ]
+    },
+    {
+      "name": "valid offset",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-01-01T10:15:00+01:00"
+        }
+      ],
+      "problems": [],
+      "leaves": []
+    },
+    {
+      "name": "leap second shifted by the offset",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-01-01T00:29:60+00:30"
+        }
+      ],
+      "problems": [],
+      "leaves": []
+    },
+    {
+      "name": "leap second wrong after the offset",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-01-01T00:30:60+00:30"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-01-01T00:30:60+00:30' is not valid date-time: invalid time element: invalid leap second"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2026-01-01T00:30:60+00:30' is not valid date-time: invalid time element: invalid leap second"
+        }
+      ]
+    },
+    {
+      "name": "offset out of range",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-01-01T00:30:00+24:00"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-01-01T00:30:00+24:00' is not valid date-time: invalid time element: hour/min in offset out of range"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2026-01-01T00:30:00+24:00' is not valid date-time: invalid time element: hour/min in offset out of range"
+        }
+      ]
+    },
+    {
+      "name": "wide digits",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "２０２６-01-01T00:00:00Z"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '２０２６-01-01T00:00:00Z' is not valid date-time: 11th character must be t or T"
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'２０２６-01-01T00:00:00Z' is not valid date-time: 11th character must be t or T"
+        }
+      ]
+    },
+    {
+      "name": "quote in a date",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/started_at",
+          "value": "2026-0\"-01T00:00:00Z"
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-0\"-01T00:00:00Z' is not valid date-time: invalid date element: parsing time \"2026-0\\\"-01\" as \"2006-01-02\": cannot parse \"0\\\"-01\" as \"01\""
+      ],
+      "leaves": [
+        {
+          "instance": "/run/started_at",
+          "keyword": "format",
+          "kind": "*kind.Format",
+          "message": "'2026-0\"-01T00:00:00Z' is not valid date-time: invalid date element: parsing time \"2026-0\\\"-01\" as \"2006-01-02\": cannot parse \"0\\\"-01\" as \"01\""
+        }
+      ]
+    },
+    {
+      "name": "node variant unknown",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/contexts/1/node/variant",
+          "value": "windows"
+        }
+      ],
+      "problems": [
+        "/contexts/1/node/variant: value must be one of 'debian', 'alpine'",
+        "/contexts/1/node: got object, want null"
+      ],
+      "leaves": [
+        {
+          "instance": "/contexts/1/node",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got object, want null"
+        },
+        {
+          "instance": "/contexts/1/node/variant",
+          "keyword": "enum",
+          "kind": "*kind.Enum",
+          "message": "value must be one of 'debian', 'alpine'"
+        }
+      ]
+    },
+    {
+      "name": "node is a string",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/contexts/1/node",
+          "value": "24"
+        }
+      ],
+      "problems": [
+        "/contexts/1/node: got string, want null",
+        "/contexts/1/node: got string, want object"
+      ],
+      "leaves": [
+        {
+          "instance": "/contexts/1/node",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got string, want null"
+        },
+        {
+          "instance": "/contexts/1/node",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got string, want object"
+        }
+      ]
+    },
+    {
+      "name": "html in a field name",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/findings/0/\u003cb\u003e",
+          "value": 1
+        }
+      ],
+      "problems": [
+        "/findings/0: additional properties '\u003cb\u003e' not allowed"
+      ],
+      "leaves": [
+        {
+          "instance": "/findings/0",
+          "keyword": "additionalProperties",
+          "kind": "*kind.AdditionalProperties",
+          "message": "additional properties '\u003cb\u003e' not allowed"
+        }
+      ]
+    },
+    {
+      "name": "slash in a field name",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/run/a~1b",
+          "value": 1
+        }
+      ],
+      "problems": [
+        "/run: additional properties 'a/b' not allowed"
+      ],
+      "leaves": [
+        {
+          "instance": "/run",
+          "keyword": "additionalProperties",
+          "kind": "*kind.AdditionalProperties",
+          "message": "additional properties 'a/b' not allowed"
+        }
+      ]
+    },
+    {
+      "name": "test mode with areas",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/benchmark/areas",
+          "value": []
+        }
+      ],
+      "problems": [
+        "/benchmark: 'not' failed"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark",
+          "keyword": "",
+          "kind": "*kind.Not",
+          "message": "'not' failed"
+        }
+      ]
+    },
+    {
+      "name": "test mode with a verdict",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/benchmark/verdict",
+          "value": "pass"
+        }
+      ],
+      "problems": [
+        "/benchmark/verdict: got string, want null"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark/verdict",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got string, want null"
+        }
+      ]
+    },
+    {
+      "name": "computed without fingerprint",
+      "base": "benchmark-pass",
+      "ops": [
+        {
+          "op": "delete",
+          "path": "/benchmark/fingerprint"
+        }
+      ],
+      "problems": [
+        "/benchmark: missing property 'fingerprint'"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark",
+          "keyword": "required",
+          "kind": "*kind.Required",
+          "message": "missing property 'fingerprint'"
+        }
+      ]
+    },
+    {
+      "name": "computed without areas",
+      "base": "benchmark-pass",
+      "ops": [
+        {
+          "op": "delete",
+          "path": "/benchmark/areas"
+        }
+      ],
+      "problems": [
+        "/benchmark: missing property 'areas'"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark",
+          "keyword": "required",
+          "kind": "*kind.Required",
+          "message": "missing property 'areas'"
+        }
+      ]
+    },
+    {
+      "name": "unknown field in a part",
+      "base": "benchmark-pass",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/benchmark/areas/0/parts/0/surprise",
+          "value": 1
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/parts/0: additional properties 'surprise' not allowed"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark/areas/0/parts/0",
+          "keyword": "additionalProperties",
+          "kind": "*kind.AdditionalProperties",
+          "message": "additional properties 'surprise' not allowed"
+        }
+      ]
+    },
+    {
+      "name": "unknown part state",
+      "base": "benchmark-pass",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/benchmark/areas/0/parts/0/state",
+          "value": "weird"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/parts/0/state: value must be one of 'measured', 'not_applicable', 'project_fault', 'unknown'"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark/areas/0/parts/0/state",
+          "keyword": "enum",
+          "kind": "*kind.Enum",
+          "message": "value must be one of 'measured', 'not_applicable', 'project_fault', 'unknown'"
+        }
+      ]
+    },
+    {
+      "name": "part score over 100",
+      "base": "benchmark-pass",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/benchmark/areas/0/parts/0/score",
+          "value": 101
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/parts/0/score: maximum: got 101, want 100"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark/areas/0/parts/0/score",
+          "keyword": "maximum",
+          "kind": "*kind.Maximum",
+          "message": "maximum: got 101, want 100"
+        }
+      ]
+    },
+    {
+      "name": "short hash not hex",
+      "base": "benchmark-pass",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/benchmark/fingerprint/hash",
+          "value": "zz"
+        }
+      ],
+      "problems": [
+        "/benchmark/fingerprint/hash: 'zz' does not match pattern '^[0-9a-f]{12}$'"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark/fingerprint/hash",
+          "keyword": "pattern",
+          "kind": "*kind.Pattern",
+          "message": "'zz' does not match pattern '^[0-9a-f]{12}$'"
+        }
+      ]
+    },
+    {
+      "name": "computed verdict null",
+      "base": "benchmark-pass",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/benchmark/verdict"
+        }
+      ],
+      "problems": [
+        "/benchmark/verdict: value must be one of 'pass', 'fail', 'incomplete'"
+      ],
+      "leaves": [
+        {
+          "instance": "/benchmark/verdict",
+          "keyword": "enum",
+          "kind": "*kind.Enum",
+          "message": "value must be one of 'pass', 'fail', 'incomplete'"
+        }
+      ]
+    },
+    {
+      "name": "weight zero",
+      "base": "benchmark-pass",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/benchmark/areas/0/weight",
+          "value": 0
+        }
+      ],
+      "problems": [],
+      "leaves": []
+    },
+    {
+      "name": "several problems",
+      "base": "populated",
+      "ops": [
+        {
+          "op": "set",
+          "path": "/checks/0/status",
+          "value": "weird"
+        },
+        {
+          "op": "delete",
+          "path": "/run/id"
+        },
+        {
+          "op": "set",
+          "path": "/findings/0/locations/0/start/line",
+          "value": 0
+        },
+        {
+          "op": "set",
+          "path": "/surprise",
+          "value": 1
+        }
+      ],
+      "problems": [
+        "/: additional properties 'surprise' not allowed",
+        "/checks/0/status: value must be one of 'not_started', 'completed', 'partial', 'blocked', 'unsupported', 'timed_out', 'budget_exhausted', 'cancelled', 'tool_error', 'infrastructure_error'",
+        "/findings/0/locations/0/start/line: minimum: got 0, want 1",
+        "/findings/0/locations/0/start: got object, want null",
+        "/run: missing property 'id'"
+      ],
+      "leaves": [
+        {
+          "instance": "/findings/0/locations/0/start",
+          "keyword": "type",
+          "kind": "*kind.Type",
+          "message": "got object, want null"
+        },
+        {
+          "instance": "/findings/0/locations/0/start/line",
+          "keyword": "minimum",
+          "kind": "*kind.Minimum",
+          "message": "minimum: got 0, want 1"
+        },
+        {
+          "instance": "/checks/0/status",
+          "keyword": "enum",
+          "kind": "*kind.Enum",
+          "message": "value must be one of 'not_started', 'completed', 'partial', 'blocked', 'unsupported', 'timed_out', 'budget_exhausted', 'cancelled', 'tool_error', 'infrastructure_error'"
+        },
+        {
+          "instance": "/run",
+          "keyword": "required",
+          "kind": "*kind.Required",
+          "message": "missing property 'id'"
+        },
+        {
+          "instance": "/",
+          "keyword": "additionalProperties",
+          "kind": "*kind.AdditionalProperties",
+          "message": "additional properties 'surprise' not allowed"
+        }
+      ]
+    }
+  ],
+  "raw": [
+    {
+      "doc": "",
+      "name": "empty",
+      "problems": [
+        "not valid JSON: EOF"
+      ]
+    },
+    {
+      "doc": "  \n",
+      "name": "blank",
+      "problems": [
+        "not valid JSON: EOF"
+      ]
+    },
+    {
+      "doc": "{\"a\": [1, 2",
+      "name": "truncated",
+      "problems": [
+        "not valid JSON: unexpected EOF"
+      ]
+    },
+    {
+      "doc": "{\"a\": tru}",
+      "name": "bad token",
+      "problems": [
+        "not valid JSON: invalid character '}' in literal true (expecting 'e')"
+      ]
+    },
+    {
+      "doc": "{} {}",
+      "name": "trailing value",
+      "problems": [
+        "not valid JSON: invalid character after top-level value"
+      ]
+    },
+    {
+      "doc": "{} x",
+      "name": "trailing garbage",
+      "problems": [
+        "not valid JSON: invalid character after top-level value"
+      ]
+    },
+    {
+      "doc": "[]",
+      "name": "not an object",
+      "problems": [
+        "/: got array, want object"
+      ]
+    }
+  ],
+  "recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8"
+}

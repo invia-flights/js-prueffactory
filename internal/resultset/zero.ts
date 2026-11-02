@@ -47,6 +47,7 @@ function zeroValue(shape: Shape): unknown {
     case "time":
       return new Date(ZeroTime);
     case "nullable":
+    case "map":
       return null;
     case "array":
       return [];
