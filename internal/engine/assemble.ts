@@ -1,4 +1,6 @@
 // Building the result set from what the Run collected (Go: assemble.go).
+import { readFileSync } from "node:fs";
+
 import { CatalogVersion, ExecutionProfile } from "../checks/catalog.ts";
 import type { Selection } from "../checks/selection.ts";
 import type { Project } from "../discovery/discovery.ts";
@@ -24,16 +26,29 @@ import { reportServices } from "./services.ts";
 import { markTestCode, probedTestFilesOf } from "./testcode.ts";
 import { recordContextTools } from "./tools.ts";
 
-/** Version is the version of the build. */
-export const Version = "0.1.0-dev";
+let build: Producer | undefined;
 
 /**
- * producer names the build. Go read the commit from the binary's build
- * information; the TypeScript build has none to read, so vcs_revision is
- * null.
+ * producer names the build from the package's own package.json: its version,
+ * and as vcs_revision the commit the packaging step stamped into it (Go read
+ * it from the binary's build information). Sources run directly carry no
+ * stamp, so vcs_revision is null there.
  */
 export function producer(): Producer {
-  return { name: "js-prueffactory", version: Version, vcs_revision: null };
+  if (build === undefined) {
+    const manifest = JSON.parse(
+      readFileSync(new URL("../../package.json", import.meta.url), "utf8"),
+    ) as { version?: unknown; vcsRevision?: unknown };
+    build = {
+      name: "js-prueffactory",
+      version: String(manifest.version),
+      vcs_revision:
+        typeof manifest.vcsRevision === "string" && manifest.vcsRevision !== ""
+          ? manifest.vcsRevision
+          : null,
+    };
+  }
+  return { ...build };
 }
 
 // Go's runtime.GOOS and runtime.GOARCH for Node's names.

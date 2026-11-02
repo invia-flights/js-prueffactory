@@ -12,7 +12,7 @@ repos:
       - id: check-merge-conflict
       - id: check-json
         # JSON with comments, read by tsc.
-        exclude: ^tsconfig\.json$
+        exclude: ^tsconfig(\.build)?\.json$
       - id: check-yaml
       # internal/checks/data/ keeps upstream files byte for byte.
       - id: end-of-file-fixer
