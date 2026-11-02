@@ -1,0 +1,292 @@
+{
+  "lookups": [
+    {
+      "name": "a multi-arch index",
+      "kind": "image",
+      "repo": "alpine",
+      "tag": "3.24.3",
+      "answer": {},
+      "result": "sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a",
+      "err": ""
+    },
+    {
+      "name": "an index without arm64",
+      "kind": "image",
+      "repo": "alpine",
+      "tag": "3.24.3",
+      "answer": {
+        "manifests": {
+          "/v2/library/alpine/manifests/3.24.3": "testdata/index-alpine-without-arm64.json"
+        }
+      },
+      "result": "",
+      "err": "alpine:3.24.3 has no linux/arm64 entry in its index"
+    },
+    {
+      "name": "a single manifest",
+      "kind": "image",
+      "repo": "alpine",
+      "tag": "3.24.3",
+      "answer": {
+        "manifests": {
+          "/v2/library/alpine/manifests/3.24.3": "testdata/single-manifest.json"
+        }
+      },
+      "result": "",
+      "err": "alpine:3.24.3 is not a multi-arch index, so its digest would not work on both arm64 and amd64"
+    },
+    {
+      "name": "a manifest that is not JSON",
+      "kind": "image",
+      "repo": "alpine",
+      "tag": "3.24.3",
+      "answer": {
+        "manifests": {
+          "/v2/library/alpine/manifests/3.24.3": "testdata/go-oracle.go.txt"
+        }
+      },
+      "result": "",
+      "err": "alpine:3.24.3: the manifest is not JSON: invalid character 'p' looking for beginning of value"
+    },
+    {
+      "name": "a missing tag",
+      "kind": "image",
+      "repo": "alpine",
+      "tag": "3.24.3",
+      "answer": {
+        "manifests": {
+          "/v2/library/alpine/manifests/3.24.3": ""
+        }
+      },
+      "result": "",
+      "err": "alpine:3.24.3: the registry answered 404 Not Found"
+    },
+    {
+      "name": "a GitHub registry image",
+      "kind": "image",
+      "repo": "ghcr.io/gitleaks/gitleaks",
+      "tag": "v8.30.1",
+      "answer": {},
+      "result": "sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a",
+      "err": ""
+    },
+    {
+      "name": "a tag that needs escaping",
+      "kind": "image",
+      "repo": "vendor/tool",
+      "tag": "v1+build",
+      "answer": {},
+      "result": "sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a",
+      "err": ""
+    },
+    {
+      "name": "without a token round",
+      "kind": "image",
+      "repo": "alpine",
+      "tag": "3.24.3",
+      "answer": {
+        "noAuth": true
+      },
+      "result": "sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a",
+      "err": ""
+    },
+    {
+      "name": "a Basic challenge",
+      "kind": "image",
+      "repo": "alpine",
+      "tag": "3.24.3",
+      "answer": {
+        "challenge": "Basic realm=\"registry\""
+      },
+      "result": "",
+      "err": "alpine:3.24.3: the registry asked for \"Basic\" authentication"
+    },
+    {
+      "name": "a challenge without a realm",
+      "kind": "image",
+      "repo": "alpine",
+      "tag": "3.24.3",
+      "answer": {
+        "challenge": "Bearer service=\"fake\""
+      },
+      "result": "",
+      "err": "alpine:3.24.3: the registry's token challenge has no usable realm"
+    },
+    {
+      "name": "a token endpoint that fails",
+      "kind": "image",
+      "repo": "alpine",
+      "tag": "3.24.3",
+      "answer": {
+        "tokenStatus": 500
+      },
+      "result": "",
+      "err": "alpine:3.24.3: the token endpoint answered 500 Internal Server Error"
+    },
+    {
+      "name": "a token endpoint without a token",
+      "kind": "image",
+      "repo": "alpine",
+      "tag": "3.24.3",
+      "answer": {
+        "token": "{}"
+      },
+      "result": "",
+      "err": "alpine:3.24.3: the token endpoint gave no token"
+    },
+    {
+      "name": "an access token",
+      "kind": "image",
+      "repo": "alpine",
+      "tag": "3.24.3",
+      "answer": {
+        "token": "{\"access_token\":\"anon\"}"
+      },
+      "result": "sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a",
+      "err": ""
+    },
+    {
+      "name": "a token that is not accepted",
+      "kind": "image",
+      "repo": "alpine",
+      "tag": "3.24.3",
+      "answer": {
+        "token": "{\"token\":\"wrong\"}"
+      },
+      "result": "",
+      "err": "alpine:3.24.3: the registry answered 401 Unauthorized"
+    },
+    {
+      "name": "a release checksum",
+      "kind": "checksum",
+      "url": "https://get.helm.sh/helm-v3.22.1-linux-amd64.tar.gz",
+      "answer": {},
+      "result": "ee2b8809db0db9daa70f28823209049057d54d0e0f5ab7e95d5c417c5fc6467e",
+      "err": ""
+    },
+    {
+      "name": "a missing release checksum",
+      "kind": "checksum",
+      "url": "https://get.helm.sh/a.missing",
+      "answer": {},
+      "result": "",
+      "err": "https://get.helm.sh/a.missing.sha256sum: the release server answered 404 Not Found"
+    },
+    {
+      "name": "a release checksum that is not a SHA-256",
+      "kind": "checksum",
+      "url": "https://get.helm.sh/moved.html",
+      "answer": {},
+      "result": "",
+      "err": "https://get.helm.sh/moved.html.sha256sum: the answer does not start with a SHA-256"
+    },
+    {
+      "name": "a plain file",
+      "kind": "file",
+      "url": "https://raw.githubusercontent.com/x/pod-v1.json",
+      "answer": {},
+      "result": "1e9bd5478ab09c6d43b8b7bc0a946fe6d03c34f8aa90fc206470ef66df074531",
+      "err": ""
+    },
+    {
+      "name": "a missing plain file",
+      "kind": "file",
+      "url": "https://raw.githubusercontent.com/x/missing.json",
+      "answer": {},
+      "result": "",
+      "err": "https://raw.githubusercontent.com/x/missing.json: the server answered 404 Not Found"
+    }
+  ],
+  "recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8",
+  "runs": [
+    {
+      "name": "dry run of the real table",
+      "args": [
+        "-dry-run",
+        "-dir",
+        "../../internal/toolset"
+      ],
+      "manifests": null,
+      "exitCode": 0,
+      "stdout": "actionlint.go: rhysd/actionlint:1.7.12: sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\ndockercli.go: docker:29.9.2-cli: sha256:5e6baf67325a79f64ed3bed6863954d5e05d0f3d4e57cbdb14809346814bbfdb -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\ngitleaks.go: ghcr.io/gitleaks/gitleaks:v8.30.1: sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nhadolint.go: hadolint/hadolint:v2.15.1: sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nhelm.go: https://get.helm.sh/helm-v3.22.1-linux-amd64.tar.gz: 896cf63684a42a723d61c980369d6e588330927deb13676ca0d85006dd6da0ea -\u003e ee2b8809db0db9daa70f28823209049057d54d0e0f5ab7e95d5c417c5fc6467e\nhelm.go: https://get.helm.sh/helm-v3.22.1-linux-arm64.tar.gz: 4c29e286b279d170fa048ddfc3e4e83dcd069ca9c52102766ba672d7149e694d -\u003e a3953d43d8761ed6ff53d0db9144d557f8a161f7747bf378106cad378e19b6fb\nkubeconform.go: ghcr.io/yannh/kubeconform:v0.8.0: sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/deployment-apps-v1.json: 92b7a333a49124f5300095d3e7786ca2038b7d6e602c309f73e90631377e4b0a -\u003e 9970be05dc5e1d42460cc9840286a6929ec421e7f65cd6f64cee9aa8abf577f6\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/statefulset-apps-v1.json: e095a9d88776fbb2e9c9312baac322c992a9f5188f81ae690bb7dc00fc3915fa -\u003e 70596ac8838bacc5978ec5f95a38fa3bcc902203c815cc316f5204dbc00db466\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/daemonset-apps-v1.json: 7cd418f81561c60d06fabe9b6d1145f2aeff8ed192c0c9dc2fb2802a51f78c21 -\u003e d49d8ab4e2dbee8c58673b51ab2dbf68e0a648ac6e357086fbd6bf568af3c1b3\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/replicaset-apps-v1.json: e7e1d5b5ba58abdf69323f040bfb32a4cf795d2e27d3d7bb5f418b22d1a50df7 -\u003e 8a286e0209f6f3d0dfdb0ecd7b6ee299fa61320f9b3e9a5c0f995171fe7ec89e\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/pod-v1.json: 6527f19e223c564c2364920c7d0bfac7ec7145fc39dd317dc738482f2c16a3a2 -\u003e b39b829afa622bc1dea56ecbb7ba129ec989131b78bbcd19232bf9ddf96ad559\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/job-batch-v1.json: 967234ab9eb5477fd8e5538c83c85817a560aecc1aaf886fafbe8a4ac0972023 -\u003e c62e106e9fee0e3a235ba214b52a5e1cf46ec3c4371809ac5267332d830aaec3\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/cronjob-batch-v1.json: fb921edacc3ded080ca322233197727f8c110254ba3514e6faade5fa06513ae4 -\u003e d2dff26ccf522436cf148335c7a2278073dc4787f1482c9f016a81448ae5e7dc\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/service-v1.json: 8bf019854daed511e7c174896a898173fa65d88ec5937c687a37303d4cc9351b -\u003e 2ea33776d04da41986f41f690fb19d13280f9f9197bfbe787c19dd4097f246de\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/ingress-networking-v1.json: 4e0f63ad84c2bf22565e489d1f4b885ddaa9f6bf7cff1ddd562553760afe4d79 -\u003e d661a27c72bbca7ff68967ca8ad6b259906fac6f27d843e920db568e53ffcaf4\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/configmap-v1.json: e0eaddebd677c08aa092b2da2264d86ac4fc34eed112b9fac2945b3f00c1e9b1 -\u003e 56b0d32d92ad5c5d6fb402cb61248916cd94fbafceba5d3a6de5738f3e6c3f08\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/secret-v1.json: de761ccb06bd1d2c641fb57397f61b68e7ff53a384f0817ce40e5ded8cee86f3 -\u003e 58d0dcb49b09181ce31dbc6e05cd60910d7f35cef995156787da998ddd3d06d8\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/serviceaccount-v1.json: 8193d6c3561475c6d3d5c44e1faedb1df53905373d904bc17015694326d659cf -\u003e 9e2cd2dc2d408a71c137861e463a61fc94afe96ec92cfa7dc3b9019d7a57d98b\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/role-rbac-v1.json: dfe8fb03b1642f985b57b12edd1727b6867c13ed4b6761ef81bdd51b1d236711 -\u003e 6f706eca16def25524dabc4ffeae080cb2d33e1c1f494cfbacc8fc198aed18ca\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/rolebinding-rbac-v1.json: 87ab620d0adddcd2803b92357fce2854af752326df8c5408a7588aae98b3031d -\u003e 8845073cd23a95469953167aa3fadb47198756195b59d8eeee51475821f886d5\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/clusterrole-rbac-v1.json: 0777f91c4fa08bd3989b6db8c59dad0429a63dec8f59e883ff55c947a14d0d5f -\u003e 004be62603c8cd61c32ea307d541e4d5027caeaceab822451279a84dca7e8623\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/clusterrolebinding-rbac-v1.json: e2d0471b444cf7ea4fd69d7eba1b16e06215503bfbc650450c2b6ad9b40f863c -\u003e 90a415d35c631cf795a634838bca0b9b9c8ea6ef1d2a4ff8aec00d605d369c0f\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/horizontalpodautoscaler-autoscaling-v1.json: 22e50f236d9b04cfb2f53e46f67c3789b0b002688bbce10cd20bdddeccc09fc3 -\u003e c4374bcb4c73a7c2eb6be64a0b09e89fbd5d235f6554beb9af13613f792eca92\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/horizontalpodautoscaler-autoscaling-v2.json: 613e60f54bc1d70776eb3e75fbdbc2f1250b5c1a92c88f54846c5fabd02f6f3e -\u003e 0e5e6136888a9eed56be867264dd6dae6221b1adf63621cde1175ff5e321a9a7\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/poddisruptionbudget-policy-v1.json: da73f50ad0264d73f668eecaa9959da65afe2846602a7a5c8fd51f7799d6a258 -\u003e c5fa105d60be474ddc71d193cab42d7dd5209679da2064bcb413b931f1d3767c\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/networkpolicy-networking-v1.json: f6324cc464f62228b0418f438d167208e4f86c7e3677ba30f608e79a8b26ba79 -\u003e da58fae8c20fbddd5c1bd487a53bfae8eb1b075065f68d8173c93f1b4c57975a\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/persistentvolumeclaim-v1.json: 5ec592cb5f004c0e24fa080dd84f48b9339cd0c82248a78d37b6a3e1b4d7ab34 -\u003e b4e04d504177e0fc0be0578b10b3f5139bc1310ea31f92293be40a9245171c02\nkubeconform.go: https://raw.githubusercontent.com/yannh/kubernetes-json-schema/f7d855e49c34b039c9ef2196444910275e31e09e/v1.34.1-standalone-strict/namespace-v1.json: 324fae677b98d1a6d54340db0c334d053e8ffbafceb3f73326e41de2610d5843 -\u003e 9361381f853c62ded16358fa03df6438b468e50c5f1c92c9443a9833525ee986\nnjsscan.go: opensecurity/njsscan:1.0.1: sha256:f071932db202631d7834930f9f9ec9ce40c4a73e94dcd8b1dcbfb1520adfe597 -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nnode.go: node:22.23.4: sha256:63538dfe497cc29dfafdda25ada09b46db68a3f4cc205abf1f5d6bf0913f3384 -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nnode.go: node:22.23.4-alpine: sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914 -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nnode.go: node:24.22.1: sha256:6449e19d8184d84062525b6a7524def03146c2cb04a7f08b076680d0e8e4240a -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nnode.go: node:24.22.1-alpine: sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nnode.go: node:26.12.1: sha256:a98e6fda54fdbb22d4238054cca9a2a113bcd1191c09193a535aae22f400aa8e -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nnode.go: node:26.12.1-alpine: sha256:40cd011b55415bc894e45b02fdd5a5dfde056921b7d23a64c74f80497af48797 -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nosvscanner.go: ghcr.io/google/osv-scanner:v2.7.0: sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0 -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nredocly.go: redocly/cli:2.70.0: sha256:f09828706881234790394d0f4032b2956c902f093e80ef08ab6ba3234c1aca7a -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nservices.go: valkey/valkey:8.1-alpine: sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507 -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nservices.go: redis:8.2-alpine: sha256:d1389b3f3f981460b9b0918c4d7390c6e9decb8c69b9f09a02e1b6fd7554ade7 -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nservices.go: postgres:17-alpine: sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nservices.go: mysql:8.4: sha256:76f0358884cb92d9a086d24e5671c38048d3fef40f2588703d73eb55392d6b69 -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nservices.go: mariadb:11.4: sha256:250e1609e93c0e6aecf64bfbab2d84d5e89d2481540fe77447ff6c855c3b1873 -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nservices.go: mongo:8.0: sha256:4a4ab5d4834207389e0d7270fac988e21ffedccecba77991a552f755df229907 -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nservices.go: rabbitmq:4.1-alpine: sha256:3dd4ce7606f9fbf2e2dbca90a02f29c19c5cdf66bf15cdf5237430e3614128ca -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nshellcheck.go: koalaman/shellcheck:v0.11.0: sha256:61862eba1fcf09a484ebcc6feea46f1782532571a34ed51fedf90dd25f925a8d -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\nzizmor.go: ghcr.io/zizmorcore/zizmor:1.31.1: sha256:42d409dbb851d4c5d35a058cf042b828bea1e3f2884378c526eb0974780e18d9 -\u003e sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a\n47 values would change\n",
+      "stderr": ""
+    },
+    {
+      "name": "dry run with refused images",
+      "args": [
+        "-dry-run",
+        "-dir",
+        "../../internal/toolset"
+      ],
+      "manifests": {
+        "/v2/hadolint/hadolint/manifests/v2.15.1": "testdata/single-manifest.json",
+        "/v2/library/node/manifests/24.22.1": "testdata/index-alpine-without-arm64.json"
+      },
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "toolsetupdate: nothing was written:\nhadolint/hadolint:v2.15.1 is not a multi-arch index, so its digest would not work on both arm64 and amd64\nnode:24.22.1 has no linux/arm64 entry in its index\n"
+    },
+    {
+      "name": "an unknown flag",
+      "args": [
+        "-x"
+      ],
+      "manifests": null,
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "flag provided but not defined: -x\nUsage of toolsetupdate:\n  -dir string\n    \tfolder of the toolset table (default \"internal/toolset\")\n  -dry-run\n    \tlist the changes without writing them\n"
+    },
+    {
+      "name": "help",
+      "args": [
+        "-h"
+      ],
+      "manifests": null,
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "Usage of toolsetupdate:\n  -dir string\n    \tfolder of the toolset table (default \"internal/toolset\")\n  -dry-run\n    \tlist the changes without writing them\n"
+    },
+    {
+      "name": "a flag without its value",
+      "args": [
+        "-dir"
+      ],
+      "manifests": null,
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "flag needs an argument: -dir\nUsage of toolsetupdate:\n  -dir string\n    \tfolder of the toolset table (default \"internal/toolset\")\n  -dry-run\n    \tlist the changes without writing them\n"
+    },
+    {
+      "name": "a bad boolean",
+      "args": [
+        "-dry-run=nope"
+      ],
+      "manifests": null,
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "invalid boolean value \"nope\" for -dry-run: parse error\nUsage of toolsetupdate:\n  -dir string\n    \tfolder of the toolset table (default \"internal/toolset\")\n  -dry-run\n    \tlist the changes without writing them\n"
+    },
+    {
+      "name": "a folder without a table",
+      "args": [
+        "-dir",
+        "testdata"
+      ],
+      "manifests": null,
+      "exitCode": 0,
+      "stdout": "the table is up to date\n",
+      "stderr": ""
+    },
+    {
+      "name": "a folder that does not exist",
+      "args": [
+        "-dir",
+        "testdata/nothing-here"
+      ],
+      "manifests": null,
+      "exitCode": 0,
+      "stdout": "the table is up to date\n",
+      "stderr": ""
+    }
+  ]
+}

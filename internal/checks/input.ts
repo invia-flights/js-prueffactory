@@ -4,8 +4,10 @@
 import type { Writable } from "node:stream";
 
 import type { Context, Project } from "../discovery/discovery.ts";
+import type { Suite } from "../discovery/testcommand.ts";
 import type { Driver } from "../docker/driver.ts";
 import { join } from "../gocompat/path.ts";
+import { toLower } from "../gocompat/strings.ts";
 import type {
   Artifact,
   Evidence,
@@ -103,6 +105,11 @@ export class Input implements InputFields {
   redactText: ((s: string) => string) | null = null;
   selection: Selection | null = null;
   shared: Shared | null = null;
+  /**
+   * suiteIndex says which suite of the package's tests the Input is bound to
+   * (see forSuite). Zero for an Input that was not bound.
+   */
+  suiteIndex = 0;
 
   constructor(
     fields: Partial<InputFields> & Pick<InputFields, "project" | "context">,
@@ -139,6 +146,44 @@ export class Input implements InputFields {
       loc.start = { line, column: column > 0 ? column : null };
     }
     return loc;
+  }
+
+  /**
+   * forSuite returns a copy of the Input bound to the package's suite i
+   * (Go: test_suites.go).
+   */
+  forSuite(i: number): Input {
+    const bound = new Input(this);
+    bound.suiteIndex = i;
+    return bound;
+  }
+
+  /**
+   * suite is the suite the Input is bound to, or null when the package has
+   * none (no tests, or tests this release cannot run).
+   */
+  suite(): Suite | null {
+    return this.context.package?.tests?.suites[this.suiteIndex] ?? null;
+  }
+
+  /**
+   * suiteSuffix names the containers of the suite the Input is bound to: the
+   * Context ID, and the suite's place when it is not the first.
+   */
+  suiteSuffix(): string {
+    let suffix = toLower(this.context.id);
+    if (this.suiteIndex > 0) {
+      suffix += `-s${String(this.suiteIndex + 1)}`;
+    }
+    return suffix;
+  }
+
+  /** manifestPath is the project path of the package's package.json. */
+  manifestPath(): string {
+    const pkg = this.context.package;
+    return pkg !== null && pkg.path !== "."
+      ? pkg.path + "/package.json"
+      : "package.json";
   }
 
   /**

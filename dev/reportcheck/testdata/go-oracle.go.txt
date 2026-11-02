@@ -1,0 +1,395 @@
+package main
+
+// Generator of go-oracle.json: what the frozen Go reportcheck says about
+// report folders and command lines. The Go code is frozen, so this is kept as
+// text. To regenerate at the freeze commit: copy it to
+// dev/reportcheck/zz_oracle_test.go, run
+// go test -count=1 -run TestZZOracle ./dev/reportcheck, delete the copy.
+//
+// Every folder case starts from a golden report folder of internal/writer and
+// applies file operations, so the TypeScript test can build the same folder.
+// The command is built and run as a binary; the folder path in its output is
+// recorded as <dir>.
+
+import (
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
+	"io"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+	"unicode/utf8"
+
+	"github.com/invia-flights/jscript-bench/internal/resultset/resultsettest"
+	"github.com/invia-flights/jscript-bench/internal/writer"
+)
+
+type fileOp struct {
+	Op      string `json:"op"` // "remove", "write", "replace", "mkdir", "splice"
+	File    string `json:"file"`
+	Start   int    `json:"start,omitempty"` // splice: bytes [Start, End) become New
+	End     int    `json:"end,omitempty"`
+	Old     string `json:"old,omitempty"`
+	New     string `json:"new,omitempty"`
+	NewB64  string `json:"newBase64,omitempty"` // New when it is not UTF-8
+	Content string `json:"content,omitempty"`
+}
+
+type folderCase struct {
+	Name     string   `json:"name"`
+	Base     string   `json:"base"`
+	JSONOnly bool     `json:"jsonOnly"`
+	Ops      []fileOp `json:"ops"`
+	Problems []string `json:"problems"`
+	ExitCode int      `json:"exitCode"`
+	Stdout   string   `json:"stdout"`
+	Stderr   string   `json:"stderr"`
+}
+
+type usageCase struct {
+	Name     string   `json:"name"`
+	Args     []string `json:"args"`
+	ExitCode int      `json:"exitCode"`
+	Stdout   string   `json:"stdout"`
+	Stderr   string   `json:"stderr"`
+}
+
+func splice(start, end int, new string) fileOp {
+	return fileOp{Op: "splice", File: "report.json", Start: start, End: end, New: new}
+}
+
+// numberLeaf is a number literal of a report.json: its path (object keys
+// joined by ".", array indices left out) and its bytes.
+type numberLeaf struct {
+	path       string
+	start, end int
+}
+
+func numberLeaves(t *testing.T, data []byte) []numberLeaf {
+	dec := json.NewDecoder(bytes.NewReader(data))
+	dec.UseNumber()
+	type frame struct {
+		obj       bool
+		key       string
+		expectKey bool
+	}
+	var stack []*frame
+	path := func() string {
+		var keys []string
+		for _, f := range stack {
+			if f.obj {
+				keys = append(keys, f.key)
+			}
+		}
+		return strings.Join(keys, ".")
+	}
+	valueDone := func() {
+		if n := len(stack); n > 0 && stack[n-1].obj {
+			stack[n-1].expectKey = true
+		}
+	}
+	var out []numberLeaf
+	for {
+		tok, err := dec.Token()
+		if errors.Is(err, io.EOF) {
+			return out
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		switch v := tok.(type) {
+		case json.Delim:
+			if v == '{' || v == '[' {
+				stack = append(stack, &frame{obj: v == '{', expectKey: v == '{'})
+			} else {
+				stack = stack[:len(stack)-1]
+				valueDone()
+			}
+		case string:
+			if f := stack[len(stack)-1]; f.obj && f.expectKey {
+				f.key, f.expectKey = v, false
+				continue
+			}
+			valueDone()
+		case json.Number:
+			end := int(dec.InputOffset())
+			out = append(out, numberLeaf{path: path(), start: end - len(v), end: end})
+			valueDone()
+		default:
+			valueDone()
+		}
+	}
+}
+
+func rm(file string) fileOp            { return fileOp{Op: "remove", File: file} }
+func mkdir(file string) fileOp         { return fileOp{Op: "mkdir", File: file} }
+func write(file, content string) fileOp { return fileOp{Op: "write", File: file, Content: content} }
+func replace(old, new string) fileOp {
+	if !utf8.ValidString(new) {
+		return fileOp{Op: "replace", File: "report.json", Old: old, NewB64: base64.StdEncoding.EncodeToString([]byte(new))}
+	}
+	return fileOp{Op: "replace", File: "report.json", Old: old, New: new}
+}
+
+func TestZZOracle(t *testing.T) {
+	bin := filepath.Join(t.TempDir(), "reportcheck")
+	if out, err := exec.Command("go", "build", "-o", bin, ".").CombinedOutput(); err != nil {
+		t.Fatalf("go build: %v\n%s", err, out)
+	}
+	golden := "../../internal/writer/testdata/golden"
+	exec1 := func(args ...string) (int, string, string) {
+		cmd := exec.Command(bin, args...)
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout, cmd.Stderr = &stdout, &stderr
+		err := cmd.Run()
+		code := 0
+		var exit *exec.ExitError
+		if errors.As(err, &exit) {
+			code = exit.ExitCode()
+		} else if err != nil {
+			t.Fatal(err)
+		}
+		return code, stdout.String(), stderr.String()
+	}
+
+	var cases []folderCase
+	for _, base := range []string{"benchmark-fail", "benchmark-incomplete", "benchmark-pass", "clean", "hostile", "large"} {
+		cases = append(cases, folderCase{Name: "golden " + base, Base: base})
+		cases = append(cases, folderCase{Name: "golden " + base + ", JSON only", Base: base, JSONOnly: true})
+	}
+	cases = append(cases,
+		folderCase{Name: "report.md missing", Base: "clean", Ops: []fileOp{rm("report.md")}},
+		folderCase{Name: "report.md missing, JSON only", Base: "clean", JSONOnly: true, Ops: []fileOp{rm("report.md")}},
+		folderCase{Name: "report.json missing", Base: "clean", Ops: []fileOp{rm("report.json")}},
+		folderCase{Name: "report.json missing, JSON only", Base: "clean", JSONOnly: true, Ops: []fileOp{rm("report.json")}},
+		folderCase{Name: "both files missing", Base: "clean", Ops: []fileOp{rm("report.json"), rm("report.md")}},
+		folderCase{Name: "report.md is a folder", Base: "clean", Ops: []fileOp{rm("report.md"), mkdir("report.md")}},
+		folderCase{Name: "report.json is a folder", Base: "clean", Ops: []fileOp{rm("report.json"), mkdir("report.json")}},
+		folderCase{Name: "report.json is empty", Base: "clean", Ops: []fileOp{write("report.json", "")}},
+		folderCase{Name: "report.json is blank", Base: "clean", Ops: []fileOp{write("report.json", " \n")}},
+		folderCase{Name: "report.json is not JSON", Base: "clean", Ops: []fileOp{write("report.json", "not json")}},
+		folderCase{Name: "report.json is cut short", Base: "clean", Ops: []fileOp{write("report.json", `{"format":`)}},
+		folderCase{Name: "report.json has trailing data", Base: "clean", Ops: []fileOp{replace("\n}\n", "\n}\n{}")}},
+		folderCase{Name: "report.json starts with a byte order mark", Base: "clean", Ops: []fileOp{replace(`{`+"\n"+`  "format"`, "\ufeff{\n  \"format\"")}},
+		folderCase{Name: "report.json breaks the schema", Base: "clean", Ops: []fileOp{write("report.json", `{"format":"nope"}`)}},
+		folderCase{Name: "report.json is an array", Base: "clean", Ops: []fileOp{write("report.json", `[]`)}},
+		folderCase{Name: "a wrong format value", Base: "clean", Ops: []fileOp{replace(`"js-prueffactory.report"`, `"js-prueffactory.other"`)}},
+		folderCase{Name: "an unknown field", Base: "clean", Ops: []fileOp{replace(`"format":`, `"surprise": 1, "format":`)}},
+		folderCase{Name: "two Contexts with one ID", Base: "clean", Ops: []fileOp{replace(`"C-0002"`, `"C-0001"`)}},
+		folderCase{Name: "an exit code that does not fit the Report", Base: "clean", Ops: []fileOp{replace(`"exit_code": 0`, `"exit_code": 1`)}},
+		folderCase{Name: "a consistency violation in a JSON-only folder", Base: "clean", JSONOnly: true, Ops: []fileOp{rm("report.md"), replace(`"C-0002"`, `"C-0001"`)}},
+		folderCase{Name: "a consistency violation with report.md missing", Base: "clean", Ops: []fileOp{rm("report.md"), replace(`"C-0002"`, `"C-0001"`)}},
+		folderCase{Name: "a schema violation with report.md missing", Base: "clean", Ops: []fileOp{rm("report.md"), write("report.json", `{"format":"nope"}`)}},
+		folderCase{Name: "a repeated key, last one wins", Base: "clean", Ops: []fileOp{replace(`"exit_code": 0`, `"exit_code": 1, "exit_code": 0`)}},
+		folderCase{Name: "a repeated key, last one breaks", Base: "clean", Ops: []fileOp{replace(`"exit_code": 0`, `"exit_code": 0, "exit_code": 1`)}},
+		folderCase{Name: "a time with a lower-case t", Base: "clean", Ops: []fileOp{replace(`"2026-10-25T10:15:00Z"`, `"2026-10-25t10:15:00Z"`)}},
+		folderCase{Name: "a time with a lower-case z", Base: "clean", Ops: []fileOp{replace(`"2026-10-25T10:15:00Z"`, `"2026-10-25T10:15:00z"`)}},
+		folderCase{Name: "a leap second", Base: "clean", Ops: []fileOp{replace(`"2026-10-25T10:15:00Z"`, `"2026-12-31T23:59:60Z"`)}},
+		folderCase{Name: "a time with an offset", Base: "clean", Ops: []fileOp{replace(`"2026-10-25T10:15:00Z"`, `"2026-10-25T11:15:00+01:00"`)}},
+		folderCase{Name: "a time with nine fraction digits", Base: "clean", Ops: []fileOp{replace(`"2026-10-25T10:15:00Z"`, `"2026-10-25T10:15:00.123456789Z"`)}},
+		folderCase{Name: "a time with ten fraction digits", Base: "clean", Ops: []fileOp{replace(`"2026-10-25T10:15:00Z"`, `"2026-10-25T10:15:00.1234567891Z"`)}},
+		folderCase{Name: "a time at hour 24", Base: "clean", Ops: []fileOp{replace(`"2026-10-25T10:15:00Z"`, `"2026-10-25T24:00:00Z"`)}},
+		folderCase{Name: "a time on February 30", Base: "clean", Ops: []fileOp{replace(`"2026-10-25T10:15:00Z"`, `"2026-02-30T10:15:00Z"`)}},
+		folderCase{Name: "a time with a signed year", Base: "clean", Ops: []fileOp{replace(`"2026-10-25T10:15:00Z"`, `"+026-10-25T10:15:00Z"`)}},
+		folderCase{Name: "a time with a one-digit hour", Base: "clean", Ops: []fileOp{replace(`"2026-10-25T10:15:00Z"`, `"2026-10-25T+1:15:00Z"`)}},
+		folderCase{Name: "a time with a signed offset minute", Base: "clean", Ops: []fileOp{replace(`"2026-10-25T10:15:00Z"`, `"2026-10-25T10:15:00+01:+1"`)}},
+		folderCase{Name: "a time with an offset of 24 hours", Base: "clean", Ops: []fileOp{replace(`"2026-10-25T10:15:00Z"`, `"2026-10-25T10:15:00+24:00"`)}},
+		folderCase{Name: "a time with an escaped character", Base: "clean", Ops: []fileOp{replace(`"2026-10-25T10:15:00Z"`, `"2026-10-25T10:15:00\u005a"`)}},
+		folderCase{Name: "an integer written as 1000.0", Base: "clean", Ops: []fileOp{replace(`"duration_ms": 1000`, `"duration_ms": 1000.0`)}},
+		folderCase{Name: "an integer written as 1e3", Base: "clean", Ops: []fileOp{replace(`"duration_ms": 1000`, `"duration_ms": 1e3`)}},
+		folderCase{Name: "an integer written as 1E3", Base: "clean", Ops: []fileOp{replace(`"duration_ms": 1000`, `"duration_ms": 1E3`)}},
+		folderCase{Name: "an integer beyond int64", Base: "clean", Ops: []fileOp{replace(`"duration_ms": 1000`, `"duration_ms": 1e30`)}},
+		folderCase{Name: "an integer just beyond int64", Base: "clean", Ops: []fileOp{replace(`"memory_bytes": 8589934592`, `"memory_bytes": 9223372036854775808`)}},
+		folderCase{Name: "a fraction where an integer belongs", Base: "clean", Ops: []fileOp{replace(`"duration_ms": 1000`, `"duration_ms": 1000.5`)}},
+		folderCase{Name: "negative zero", Base: "clean", Ops: []fileOp{replace(`"exit_code": 0`, `"exit_code": -0`)}},
+		folderCase{Name: "a string with a lone surrogate", Base: "clean", Ops: []fileOp{replace(`"/work/demo"`, `"/work/\ud800"`)}},
+		folderCase{Name: "a string with invalid UTF-8", Base: "clean", Ops: []fileOp{replace(`"/work/demo"`, "\"/work/\xff\"")}},
+	)
+
+	cases = append(cases,
+		folderCase{Name: "an integer error before a time error", Base: "clean", Ops: []fileOp{
+			replace(`"duration_ms": 1000`, `"duration_ms": 1.0`), replace(`"2026-10-25T10:15:01Z"`, `"2026-10-25t10:15:01Z"`)}},
+		folderCase{Name: "a time error before an integer error", Base: "clean", Ops: []fileOp{
+			replace(`"2026-10-25T10:15:00Z"`, `"2026-10-25t10:15:00Z"`), replace(`"exit_code": 0`, `"exit_code": 0.0`)}},
+		folderCase{Name: "two integer errors", Base: "clean", Ops: []fileOp{
+			replace(`"duration_ms": 1000`, `"duration_ms": 1.0`), replace(`"exit_code": 0`, `"exit_code": 0.0`)}},
+	)
+
+	// The populated test mode Report is a base of its own (stored in the
+	// oracle); with the benchmark-pass golden it has a value at every number
+	// field of the Report. Each field, at its first place, gets a number Go
+	// may not store there.
+	popDir := filepath.Join(t.TempDir(), "populated")
+	if err := writer.Write(popDir, resultsettest.Populated(), writer.Formats{JSON: true, Markdown: true}); err != nil {
+		t.Fatal(err)
+	}
+	populated, err := os.ReadFile(filepath.Join(popDir, "report.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseDir := func(base string) string {
+		if base == "populated" {
+			return popDir
+		}
+		return filepath.Join(golden, base)
+	}
+	seen := map[string]bool{}
+	for _, base := range []string{"populated", "benchmark-pass"} {
+		data, err := os.ReadFile(filepath.Join(baseDir(base), "report.json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, l := range numberLeaves(t, data) {
+			if seen[l.path] {
+				continue
+			}
+			seen[l.path] = true
+			for _, lit := range []string{"1.0", "1e400", "-1e400"} {
+				cases = append(cases, folderCase{Name: base + " " + l.path + " = " + lit, Base: base,
+					Ops: []fileOp{splice(l.start, l.end, lit)}})
+			}
+		}
+	}
+
+	for i := range cases {
+		c := &cases[i]
+		dir := filepath.Join(t.TempDir(), "run")
+		if err := os.CopyFS(dir, os.DirFS(baseDir(c.Base))); err != nil {
+			t.Fatal(err)
+		}
+		for _, op := range c.Ops {
+			p := filepath.Join(dir, op.File)
+			switch op.Op {
+			case "remove":
+				if err := os.Remove(p); err != nil {
+					t.Fatal(err)
+				}
+			case "mkdir":
+				if err := os.Mkdir(p, 0o755); err != nil {
+					t.Fatal(err)
+				}
+			case "write":
+				if err := os.WriteFile(p, []byte(op.Content), 0o644); err != nil {
+					t.Fatal(err)
+				}
+			case "splice":
+				data, err := os.ReadFile(p)
+				if err != nil {
+					t.Fatal(err)
+				}
+				out := append(append(append([]byte(nil), data[:op.Start]...), op.New...), data[op.End:]...)
+				if err := os.WriteFile(p, out, 0o644); err != nil {
+					t.Fatal(err)
+				}
+			case "replace":
+				data, err := os.ReadFile(p)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if !bytes.Contains(data, []byte(op.Old)) {
+					t.Fatalf("%s: %q not in %s", c.Name, op.Old, op.File)
+				}
+				repl := []byte(op.New)
+				if op.NewB64 != "" {
+					repl, _ = base64.StdEncoding.DecodeString(op.NewB64)
+				}
+				if err := os.WriteFile(p, bytes.Replace(data, []byte(op.Old), repl, 1), 0o644); err != nil {
+					t.Fatal(err)
+				}
+			}
+		}
+		c.Problems = CheckFiles(dir, !c.JSONOnly)
+		for j, p := range c.Problems {
+			c.Problems[j] = strings.ReplaceAll(p, dir, "<dir>")
+		}
+		args := []string{dir}
+		if c.JSONOnly {
+			args = []string{"-json-only", dir}
+		}
+		code, stdout, stderr := exec1(args...)
+		c.ExitCode, c.Stdout, c.Stderr = code, stdout, strings.ReplaceAll(stderr, dir, "<dir>")
+	}
+
+	someDir := filepath.Join(golden, "clean")
+	var usage []usageCase
+	for _, u := range []struct {
+		name string
+		args []string
+	}{
+		{"no folder", nil},
+		{"two folders", []string{someDir, someDir}},
+		{"a flag after the folder", []string{someDir, "-json-only"}},
+		{"an unknown flag", []string{"-x", someDir}},
+		{"help", []string{"-h"}},
+		{"help with two dashes", []string{"--help"}},
+		{"two dashes", []string{"--json-only", someDir}},
+		{"json-only=false", []string{"-json-only=false", someDir}},
+		{"json-only=nope", []string{"-json-only=nope", someDir}},
+		{"a double dash", []string{"--", someDir}},
+		{"a missing folder", []string{"/nonexistent/reportcheck-oracle"}},
+	} {
+		code, stdout, stderr := exec1(u.args...)
+		args := make([]string, len(u.args))
+		for i, a := range u.args {
+			if a == someDir {
+				a = "<golden clean>"
+			}
+			args[i] = a
+		}
+		usage = append(usage, usageCase{Name: u.name, Args: args, ExitCode: code, Stdout: stdout,
+			Stderr: strings.ReplaceAll(stderr, someDir, "<golden clean>")})
+	}
+
+	// What json.Unmarshal says about a time.Time, the only field of a Report
+	// with a decoder of its own.
+	type timeCase struct {
+		In        string `json:"in"`
+		Err       string `json:"err"`
+		UnixMilli int64  `json:"unixMilli"`
+	}
+	var times []timeCase
+	for _, in := range []string{
+		"2026-10-25T10:15:00Z", "2026-10-25t10:15:00Z", "2026-10-25T10:15:00z", "2026-12-31T23:59:60Z",
+		"2026-10-25T24:00:00Z", "2026-02-30T10:15:00Z", "2028-02-29T10:15:00Z", "2026-10-25T10:15:00+24:00",
+		"2026-10-25T10:15:00+23:60", "2026-10-25T10:15:00+23:59", "2026-10-25T10:15:00+01:+1",
+		"+026-10-25T10:15:00Z", "2026-10-25T+1:15:00Z", "2026-10-25T1:15:00Z", "2026-10-25T10:15:00,5Z",
+		"2026-10-25T10:15:00.Z", "2026-10-25T10:15:00.123456789123Z", "2026-10-25T10:15:00", "", "x",
+		"2026-10-25T10:15:00Zextra", "2026-10-25 10:15:00Z", "0000-01-01T00:00:00Z",
+		"9999-12-31T23:59:59.999999999Z", "2026-10-25T10:15:00-00:00", "2026-10-25T10:15:00+00:30",
+		"2026-1-25T10:15:00Z", "2026-10-5T10:15:00Z", "2026-13-01T00:00:00Z", "2026-00-01T00:00:00Z",
+		"2026-10-25T10:60:00Z", "2026-10-25T10:15:61Z", "2026-10-25T10:15:00+0100",
+		"2026-10-25T10:15:00+01:00:00", "-001-10-25T10:15:00Z", "2026-10-25T10:15:00\u00e9",
+		"2026-10-25T10:15:00.5+01:00", "2026-10-25T10:15:00.123-02:30", "1969-12-31T23:59:59.999Z",
+		"2026-10-25T10:1:00Z", "2026-10-25T10:15:0Z", "2026-10-25T10:15:00+1:00", "2026-10-25T10:15:00+01:0",
+		"2026-10-25T10:15:00.1a", "2026-10-25T10:15:00+01-00", "2026-10-25T10:15:00 Z", "20261025T101500Z",
+	} {
+		var tm time.Time
+		c := timeCase{In: in}
+		if err := json.Unmarshal([]byte(strconv.Quote(in)), &tm); err != nil {
+			c.Err = err.Error()
+		} else {
+			c.UnixMilli = tm.UnixMilli()
+		}
+		times = append(times, c)
+	}
+
+	out, err := json.MarshalIndent(map[string]any{
+		"recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8",
+		"bases":        map[string]string{"populated": string(populated)},
+		"folders":      cases,
+		"usage":        usage,
+		"times":        times,
+	}, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/go-oracle.json", append(out, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}

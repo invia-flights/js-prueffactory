@@ -348,10 +348,28 @@ describe("allowlist", () => {
     );
   });
 
-  test("the committed allowlist is empty", async () => {
+  // Every accepted difference names its reason. The npm log entries are the
+  // only ones so far (tickets 13 and 16): npm writes its log in a different
+  // order, with timings, in two Runs of the same build.
+  test("every committed allowlist entry is a whole-file entry with a reason", async () => {
     const committed = JSON.parse(
       await readFile(new URL("allowlist.json", import.meta.url), "utf8"),
-    ) as unknown;
-    assert.deepEqual(committed, []);
+    ) as { case: string; file: string; reason: string }[];
+    assert.deepEqual(
+      committed.map((e) => [e.case, e.file]),
+      [
+        [
+          "runs/*package.install*",
+          "artifacts/package.install/*/npm-install.log",
+        ],
+        [
+          "runs/*/schema-drift/*",
+          "artifacts/package.install/*/npm-install.log",
+        ],
+      ],
+    );
+    for (const e of committed) {
+      assert.ok(e.reason.length > 40, `${e.file}: the reason is missing`);
+    }
   });
 });
