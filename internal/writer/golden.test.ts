@@ -26,9 +26,8 @@ import { write } from "./writer.ts";
 // UPDATE_GOLDEN=1 rewrites them from the TypeScript build:
 //   UPDATE_GOLDEN=1 node --test internal/writer/golden.test.ts
 // (npm run test:golden-update). Review git diff internal/writer/testdata/golden
-// before committing. Until the Benchmark scorer is ported (ticket 06), the
-// benchmark folders take their Benchmark section from their own report.json,
-// so an update cannot change that section.
+// before committing. The benchmark folders are scored by the TypeScript
+// scorer, so their Benchmark section and fingerprint are compared too.
 const update = process.env.UPDATE_GOLDEN === "1";
 
 const goldenRoot = fileURLToPath(new URL("testdata/golden/", import.meta.url));

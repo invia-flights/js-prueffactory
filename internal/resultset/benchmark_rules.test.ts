@@ -11,11 +11,10 @@ import {
 } from "./types.ts";
 import { validate } from "./validate.ts";
 
-// The Go tests score the scored project with benchmark.Apply. Until the scorer
-// is ported (ticket 06), the baselines are the golden benchmark-pass Report
-// (no Gate) and benchmark-fail Report (one Gate), whose Benchmark sections the
-// Go scorer wrote; the oracle recorded the Go messages from the same
-// baselines.
+// The Go tests score the scored project with benchmark.Apply. The baselines
+// are the golden benchmark-pass set (no Gate) and benchmark-fail set (one
+// Gate), scored the same way; the oracle recorded the Go messages from the
+// same baselines.
 
 test("a scored set is valid", () => {
   assert.deepEqual(validate(goldenScored("benchmark-pass")), [], "pass");
