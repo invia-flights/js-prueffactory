@@ -1,0 +1,2998 @@
+{
+ "biomeLines": [
+  [
+   2,
+   2
+  ],
+  [
+   1,
+   9
+  ],
+  [
+   1,
+   4
+  ],
+  [
+   0,
+   0
+  ],
+  [
+   0,
+   0
+  ],
+  [
+   1,
+   2
+  ],
+  [
+   3,
+   3
+  ],
+  [
+   3,
+   3
+  ],
+  [
+   1,
+   1
+  ],
+  [
+   2,
+   1
+  ]
+ ],
+ "configHashes": [
+  "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+  "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+  "7742bc8be61cd4f69af1bad5928988cf3c15b9b4a0dd15fb14fd2dd23e4a1e1e",
+  "3501b2688bbbd7bb7ae9078361caff6fec434f4a5f2a58e24b972357462b56de",
+  "5228eb79f1e1d8a42f2cc832566605b640e657d5ba41d14f90077fa1e33bef3f"
+ ],
+ "engineVersions": [
+  "24.22.1",
+  "22.23.4",
+  "26.12.1",
+  "22.11",
+  "22.11.0",
+  "24.22.1",
+  "24.22.1",
+  "24.22.1",
+  "99",
+  "7",
+  "9223372036854775807",
+  "9223372036854775808",
+  "24"
+ ],
+ "existing": [
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"eslint\",\n      \"version\": \"9.39.0\",\n      \"command\": [\n        \"node\",\n        \"node_modules/eslint/bin/eslint.js\",\n        \"--format\",\n        \"json\",\n        \".\"\n      ],\n      \"exit_code\": 1\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/eslint/bin/eslint.js",
+    "--format",
+    "json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/eslint/bin/eslint.js",
+     "--format",
+     "json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "column": 1,
+     "confidence": "confirmed",
+     "evidence": "{\"column\":1,\"file\":\"src/a.js\",\"line\":1,\"message\":\"x is not defined.\",\"rule\":\"no-undef\",\"severity\":2}",
+     "fingerprint": "1f1b051dc0b1dad3619645b2983d3e04ab00e7dfe8fdfdd648da1c721c19f2ac",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 1,
+     "message": "eslint reports error no-undef: x is not defined.",
+     "origin": "eslint",
+     "path": "src/a.js",
+     "rule": "no-undef",
+     "severity": "error",
+     "sha": "",
+     "title": "no-undef: x is not defined.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 2,
+     "confidence": "likely",
+     "evidence": "{\"column\":2,\"file\":\"src/a.js\",\"line\":2,\"message\":\"w\",\"rule\":\"eqeqeq\",\"severity\":1}",
+     "fingerprint": "a6856f97b35fbaa443841e75a0ab8714dc2b18d3ef5715a5cc99cf8d1c20fb7e",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 2,
+     "message": "eslint reports warning eqeqeq: w",
+     "origin": "eslint",
+     "path": "src/a.js",
+     "rule": "eqeqeq",
+     "severity": "warning",
+     "sha": "",
+     "title": "eqeqeq: w",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 1,
+    "name": "eslint",
+    "version": "9.39.0"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"eslint\",\n      \"version\": \"9.39.0\",\n      \"command\": [\n        \"node\",\n        \"node_modules/eslint/bin/eslint.js\",\n        \"--format\",\n        \"json\",\n        \".\"\n      ],\n      \"exit_code\": 0\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/eslint/bin/eslint.js",
+    "--format",
+    "json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/eslint/bin/eslint.js",
+     "--format",
+     "json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 0,
+    "name": "eslint",
+    "version": "9.39.0"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"eslint\",\n      \"version\": \"10.13.0\",\n      \"command\": [\n        \"node\",\n        \"node_modules/eslint/bin/eslint.js\",\n        \"--format\",\n        \"json\",\n        \".\"\n      ],\n      \"exit_code\": 2\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/eslint/bin/eslint.js",
+    "--format",
+    "json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/eslint/bin/eslint.js",
+     "--format",
+     "json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "confidence": "confirmed",
+     "evidence": "Oops! Something went wrong! :(\n\nESLint: 10.13.0\n\nESLint couldn't find an eslint.config.* file.",
+     "fingerprint": "02ca4c3e99fec9f5f41102171dd222bff0876d9a92fbf15d83d706b0d748a180",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "The package has the legacy ESLint configuration .eslintrc.json and ESLint 10.13.0 installed. ESLint reads only an eslint.config.* file since version 9 (the legacy format needs ESLINT_USE_FLAT_CONFIG=false up to version 9 and is gone in version 10), so the project's own lint fails: no eslint.config.* file was found.",
+     "origin": "eslint",
+     "path": ".eslintrc.json",
+     "rule": "eslint-legacy-config",
+     "severity": "error",
+     "sha": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+     "title": "The ESLint configuration is in a format the installed ESLint no longer reads",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 2,
+    "name": "eslint",
+    "version": "10.13.0"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"eslint\",\n      \"version\": \"10.0.0-beta.1\",\n      \"command\": [\n        \"node\",\n        \"node_modules/eslint/bin/eslint.js\",\n        \"--format\",\n        \"json\",\n        \".\"\n      ],\n      \"exit_code\": 2\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/eslint/bin/eslint.js",
+    "--format",
+    "json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/eslint/bin/eslint.js",
+     "--format",
+     "json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "confidence": "confirmed",
+     "evidence": "ESLint couldn't find an eslint.config.* file.",
+     "fingerprint": "a47352c7c77ad376ab27e38728606956b353eb2926e54f655d612c5bc27b39f6",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "The package has the legacy ESLint configuration .eslintrc.json and ESLint 10.0.0-beta.1 installed. ESLint reads only an eslint.config.* file since version 9 (the legacy format needs ESLINT_USE_FLAT_CONFIG=false up to version 9 and is gone in version 10), so the project's own lint fails: no eslint.config.* file was found.",
+     "origin": "eslint",
+     "path": ".eslintrc.json",
+     "rule": "eslint-legacy-config",
+     "severity": "error",
+     "sha": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+     "title": "The ESLint configuration is in a format the installed ESLint no longer reads",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 2,
+    "name": "eslint",
+    "version": "10.0.0-beta.1"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"eslint\",\n      \"version\": \"9.39.0\",\n      \"command\": [\n        \"node\",\n        \"node_modules/eslint/bin/eslint.js\",\n        \"--format\",\n        \"json\",\n        \".\"\n      ],\n      \"exit_code\": 2\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/eslint/bin/eslint.js",
+    "--format",
+    "json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/eslint/bin/eslint.js",
+     "--format",
+     "json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "confidence": "confirmed",
+     "evidence": "Error: Cannot read config file",
+     "fingerprint": "56e9966c39d365ba431ac3979a76bd233e882172b0fbffa8b2ffd1ae79abc734",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "ESLint 9.39.0 exited with 2, its code for a configuration or internal error: Error: Cannot read config file",
+     "origin": "eslint",
+     "path": "package.json",
+     "rule": "eslint-failed",
+     "severity": "error",
+     "sha": "a20969ec840e0672f4f1cdc2bb230e8584cc8f82fa4fcb6f9ea1afa003ed4d7a",
+     "title": "ESLint failed with the project's configuration",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 2,
+    "name": "eslint",
+    "version": "9.39.0"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"eslint\",\n      \"version\": \"9.39.0\",\n      \"command\": [\n        \"node\",\n        \"node_modules/eslint/bin/eslint.js\",\n        \"--format\",\n        \"json\",\n        \".\"\n      ],\n      \"exit_code\": 2\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/eslint/bin/eslint.js",
+    "--format",
+    "json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/eslint/bin/eslint.js",
+     "--format",
+     "json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "confidence": "confirmed",
+     "evidence": "Oops! Something went wrong! :(\n   Error: Cannot find module 'eslint-plugin-x'\n at \u003canonymous\u003e \u0026 more",
+     "fingerprint": "f8a3b64e9f07501d79ffa8d7d9054e96da4f5fabfb0b98391b67770f106997f8",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "ESLint 9.39.0 exited with 2, its code for a configuration or internal error: Error: Cannot find module 'eslint-plugin-x'",
+     "origin": "eslint",
+     "path": "package.json",
+     "rule": "eslint-failed",
+     "severity": "error",
+     "sha": "2abd0e29e0f5b07c2dc3211fb57e5137f527825ec49fd6e8eef38427e5f4179e",
+     "title": "ESLint failed with the project's configuration",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 2,
+    "name": "eslint",
+    "version": "9.39.0"
+   }
+  },
+  {
+   "artifacts": null,
+   "command": null,
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "confidence": "confirmed",
+     "evidence": "",
+     "fingerprint": "863e98db52167382472b6737a39a52cf66ca7a4f973fd927db424f1fd851cac6",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "The package lists eslint as a dependency, but `node_modules/eslint` is not there after the install, so the project's own lint could not run in CI either.",
+     "origin": "eslint",
+     "path": "package.json",
+     "rule": "eslint-not-installed",
+     "severity": "error",
+     "sha": "2abd0e29e0f5b07c2dc3211fb57e5137f527825ec49fd6e8eef38427e5f4179e",
+     "title": "eslint is a dependency but not installed",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed"
+  },
+  {
+   "artifacts": null,
+   "command": [
+    "node",
+    "node_modules/eslint/bin/eslint.js",
+    "--format",
+    "json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/eslint/bin/eslint.js",
+     "--format",
+     "json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [],
+   "limitations": null,
+   "metrics": null,
+   "reason": "eslint: the lint run ran out of memory: ",
+   "reasonCode": "linter_failed",
+   "status": "tool_error"
+  },
+  {
+   "artifacts": null,
+   "command": [
+    "node",
+    "node_modules/eslint/bin/eslint.js",
+    "--format",
+    "json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/eslint/bin/eslint.js",
+     "--format",
+     "json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [],
+   "limitations": null,
+   "metrics": null,
+   "reason": "eslint: the lint run exited with 126: permission denied",
+   "reasonCode": "linter_failed",
+   "status": "tool_error"
+  },
+  {
+   "artifacts": null,
+   "command": [
+    "node",
+    "node_modules/eslint/bin/eslint.js",
+    "--format",
+    "json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/eslint/bin/eslint.js",
+     "--format",
+     "json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [],
+   "limitations": null,
+   "metrics": null,
+   "reason": "eslint: the lint run (its output is no JSON report) exited with 1: tail",
+   "reasonCode": "linter_failed",
+   "status": "tool_error"
+  },
+  {
+   "artifacts": null,
+   "command": null,
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ]
+   ],
+   "contextTools": null,
+   "findings": [],
+   "limitations": null,
+   "metrics": null,
+   "reason": "eslint: the version query exited with 127: node: not found",
+   "reasonCode": "linter_failed",
+   "status": "tool_error"
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"biome\",\n      \"version\": \"2.1.2\",\n      \"command\": [\n        \"node\",\n        \"node_modules/@biomejs/biome/bin/biome\",\n        \"lint\",\n        \"--reporter=json\",\n        \".\"\n      ],\n      \"exit_code\": 1\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/@biomejs/biome/bin/biome",
+    "lint",
+    "--reporter=json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/@biomejs/biome/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/@biomejs/biome/bin/biome",
+     "lint",
+     "--reporter=json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "column": 3,
+     "confidence": "likely",
+     "evidence": "{\"category\":\"lint/suspicious/noConsole\",\"description\":\"Don't use console.\",\"file\":\"src/index.js\",\"severity\":\"warning\",\"span\":[47,58]}",
+     "fingerprint": "1635da0a9ffc1dc970258dcd5882167c907b7f725b02d5878296a6cedc0fc71d",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 5,
+     "message": "biome reports warning lint/suspicious/noConsole: Don't use console.",
+     "origin": "biome",
+     "path": "src/index.js",
+     "rule": "lint/suspicious/noConsole",
+     "severity": "warning",
+     "sha": "",
+     "title": "lint/suspicious/noConsole: Don't use console.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 3,
+     "confidence": "confirmed",
+     "evidence": "{\"category\":\"lint/suspicious/noDebugger\",\"description\":\"This is an unexpected use of the debugger statement.\",\"file\":\"src/index.js\",\"severity\":\"error\",\"span\":[35,44]}",
+     "fingerprint": "4c710fee361fb4ffdc3e5c2b9814277352ceac9896e5069dc4585be399e5dd6d",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 4,
+     "message": "biome reports error lint/suspicious/noDebugger: This is an unexpected use of the debugger statement.",
+     "origin": "biome",
+     "path": "src/index.js",
+     "rule": "lint/suspicious/noDebugger",
+     "severity": "error",
+     "sha": "",
+     "title": "lint/suspicious/noDebugger: This is an unexpected use of the debugger statement.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 9,
+     "confidence": "suspected",
+     "evidence": "{\"category\":\"lint/style/useConst\",\"description\":\"Use const \\u0026 \\u003cso\\u003e on.\",\"file\":\"src/ü.js\",\"severity\":\"information\",\"span\":[9,12]}",
+     "fingerprint": "eab9c3a66fd8ce5b264a224d9df449c0a7b7c7e36424117926be725a442b316f",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "hint",
+     "limitations": [],
+     "line": 1,
+     "message": "biome reports info lint/style/useConst: Use const \u0026 \u003cso\u003e on.",
+     "origin": "biome",
+     "path": "src/ü.js",
+     "rule": "lint/style/useConst",
+     "severity": "note",
+     "sha": "",
+     "title": "lint/style/useConst: Use const \u0026 \u003cso\u003e on.",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "confirmed",
+     "evidence": "{\"category\":\"\",\"description\":\"No location\",\"severity\":\"fatal\"}",
+     "fingerprint": "a2294948bc457fc7c64cbae6910675f681457ba16a6cf6968f9369303c42f612",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "biome reports error biome-diagnostic: No location",
+     "origin": "biome",
+     "path": "package.json",
+     "rule": "biome-diagnostic",
+     "severity": "error",
+     "sha": "711f3bb10e42c14c3b07a7c4c29ae2b73dd4e34172c87ead77c1bc63231fee12",
+     "title": "biome-diagnostic: No location",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "suspected",
+     "evidence": "{\"category\":\"lint/x\",\"description\":\"Outside span\",\"file\":\"../../etc/x.js\",\"severity\":\"hint\",\"span\":[900,901]}",
+     "fingerprint": "0421b856a4a4bdfd08dc0f213df2873819687f377e9fec7f0d70e716dc252688",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "hint",
+     "limitations": [],
+     "message": "biome reports info lint/x: Outside span",
+     "origin": "biome",
+     "path": "etc/x.js",
+     "rule": "lint/x",
+     "severity": "note",
+     "sha": "",
+     "title": "lint/x: Outside span",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "likely",
+     "evidence": "{\"category\":\"lint/y\",\"description\":\"One-element span\",\"file\":\"a b.js\",\"severity\":\"warning\"}",
+     "fingerprint": "8075ae7b8826cfe00b2f02b9eaf9b6a414a5c36c93d0ffc9e8e9824a6c22505f",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "biome reports warning lint/y: One-element span",
+     "origin": "biome",
+     "path": "a b.js",
+     "rule": "lint/y",
+     "severity": "warning",
+     "sha": "",
+     "title": "lint/y: One-element span",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 1,
+    "name": "biome",
+    "version": "2.1.2"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"biome\",\n      \"version\": \"2.1.2\",\n      \"command\": [\n        \"node\",\n        \"node_modules/@biomejs/biome/bin/biome\",\n        \"lint\",\n        \"--vcs-enabled=false\",\n        \"--reporter=json\",\n        \".\"\n      ],\n      \"exit_code\": 1,\n      \"override\": \"VCS integration was switched off with --vcs-enabled=false, because the configuration failed without the .git folder, which the Snapshot does not contain\"\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/@biomejs/biome/bin/biome",
+    "lint",
+    "--vcs-enabled=false",
+    "--reporter=json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/@biomejs/biome/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/@biomejs/biome/bin/biome",
+     "lint",
+     "--reporter=json",
+     "."
+    ],
+    [
+     "node",
+     "node_modules/@biomejs/biome/bin/biome",
+     "lint",
+     "--vcs-enabled=false",
+     "--reporter=json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "column": 3,
+     "confidence": "likely",
+     "evidence": "{\"category\":\"lint/suspicious/noConsole\",\"description\":\"Don't use console.\",\"file\":\"src/index.js\",\"severity\":\"warning\",\"span\":[47,58]}",
+     "fingerprint": "1635da0a9ffc1dc970258dcd5882167c907b7f725b02d5878296a6cedc0fc71d",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 5,
+     "message": "biome reports warning lint/suspicious/noConsole: Don't use console.",
+     "origin": "biome",
+     "path": "src/index.js",
+     "rule": "lint/suspicious/noConsole",
+     "severity": "warning",
+     "sha": "",
+     "title": "lint/suspicious/noConsole: Don't use console.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 3,
+     "confidence": "confirmed",
+     "evidence": "{\"category\":\"lint/suspicious/noDebugger\",\"description\":\"This is an unexpected use of the debugger statement.\",\"file\":\"src/index.js\",\"severity\":\"error\",\"span\":[35,44]}",
+     "fingerprint": "4c710fee361fb4ffdc3e5c2b9814277352ceac9896e5069dc4585be399e5dd6d",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 4,
+     "message": "biome reports error lint/suspicious/noDebugger: This is an unexpected use of the debugger statement.",
+     "origin": "biome",
+     "path": "src/index.js",
+     "rule": "lint/suspicious/noDebugger",
+     "severity": "error",
+     "sha": "",
+     "title": "lint/suspicious/noDebugger: This is an unexpected use of the debugger statement.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 9,
+     "confidence": "suspected",
+     "evidence": "{\"category\":\"lint/style/useConst\",\"description\":\"Use const \\u0026 \\u003cso\\u003e on.\",\"file\":\"src/ü.js\",\"severity\":\"information\",\"span\":[9,12]}",
+     "fingerprint": "eab9c3a66fd8ce5b264a224d9df449c0a7b7c7e36424117926be725a442b316f",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "hint",
+     "limitations": [],
+     "line": 1,
+     "message": "biome reports info lint/style/useConst: Use const \u0026 \u003cso\u003e on.",
+     "origin": "biome",
+     "path": "src/ü.js",
+     "rule": "lint/style/useConst",
+     "severity": "note",
+     "sha": "",
+     "title": "lint/style/useConst: Use const \u0026 \u003cso\u003e on.",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "confirmed",
+     "evidence": "{\"category\":\"\",\"description\":\"No location\",\"severity\":\"fatal\"}",
+     "fingerprint": "a2294948bc457fc7c64cbae6910675f681457ba16a6cf6968f9369303c42f612",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "biome reports error biome-diagnostic: No location",
+     "origin": "biome",
+     "path": "package.json",
+     "rule": "biome-diagnostic",
+     "severity": "error",
+     "sha": "711f3bb10e42c14c3b07a7c4c29ae2b73dd4e34172c87ead77c1bc63231fee12",
+     "title": "biome-diagnostic: No location",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "suspected",
+     "evidence": "{\"category\":\"lint/x\",\"description\":\"Outside span\",\"file\":\"../../etc/x.js\",\"severity\":\"hint\",\"span\":[900,901]}",
+     "fingerprint": "0421b856a4a4bdfd08dc0f213df2873819687f377e9fec7f0d70e716dc252688",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "hint",
+     "limitations": [],
+     "message": "biome reports info lint/x: Outside span",
+     "origin": "biome",
+     "path": "etc/x.js",
+     "rule": "lint/x",
+     "severity": "note",
+     "sha": "",
+     "title": "lint/x: Outside span",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "likely",
+     "evidence": "{\"category\":\"lint/y\",\"description\":\"One-element span\",\"file\":\"a b.js\",\"severity\":\"warning\"}",
+     "fingerprint": "8075ae7b8826cfe00b2f02b9eaf9b6a414a5c36c93d0ffc9e8e9824a6c22505f",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "biome reports warning lint/y: One-element span",
+     "origin": "biome",
+     "path": "a b.js",
+     "rule": "lint/y",
+     "severity": "warning",
+     "sha": "",
+     "title": "lint/y: One-element span",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": [
+    {
+     "check": "lint.existing",
+     "code": "biome_vcs_disabled",
+     "message": "Biome's configuration failed without the project's .git folder, so the adapter ran it once more with --vcs-enabled=false. Diagnostics that depend on the VCS integration, such as files the VCS ignores, may differ from the project's own run."
+    }
+   ],
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 1,
+    "name": "biome",
+    "version": "2.1.2"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"biome\",\n      \"version\": \"2.1.2\",\n      \"command\": [\n        \"node\",\n        \"node_modules/@biomejs/biome/bin/biome\",\n        \"lint\",\n        \"--vcs-enabled=false\",\n        \"--reporter=json\",\n        \".\"\n      ],\n      \"exit_code\": 1\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/@biomejs/biome/bin/biome",
+    "lint",
+    "--vcs-enabled=false",
+    "--reporter=json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/@biomejs/biome/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/@biomejs/biome/bin/biome",
+     "lint",
+     "--reporter=json",
+     "."
+    ],
+    [
+     "node",
+     "node_modules/@biomejs/biome/bin/biome",
+     "lint",
+     "--vcs-enabled=false",
+     "--reporter=json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "confidence": "confirmed",
+     "evidence": "/work internalError/fs ━━━━\n\n  × Biome couldn't find an ignore file in the following folder: /work\n\nconfiguration ━━━━\n\n  × Biome exited because the configuration resulted in errors. Please fix them.",
+     "fingerprint": "caee1edb2a0f631bd6b438d549c664cead83177a87d618ac0771af1aa9a4ab1e",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "Biome 2.1.2 exited with 1 before it could lint: Biome couldn't find an ignore file in the following folder: /work",
+     "origin": "biome",
+     "path": "package.json",
+     "rule": "biome-config-error",
+     "severity": "error",
+     "sha": "711f3bb10e42c14c3b07a7c4c29ae2b73dd4e34172c87ead77c1bc63231fee12",
+     "title": "Biome failed with the project's configuration",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 1,
+    "name": "biome",
+    "version": "2.1.2"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"biome\",\n      \"version\": \"2.1.2\",\n      \"command\": [\n        \"node\",\n        \"node_modules/@biomejs/biome/bin/biome\",\n        \"lint\",\n        \"--reporter=json\",\n        \".\"\n      ],\n      \"exit_code\": 1\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/@biomejs/biome/bin/biome",
+    "lint",
+    "--reporter=json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/@biomejs/biome/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/@biomejs/biome/bin/biome",
+     "lint",
+     "--reporter=json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "confidence": "confirmed",
+     "evidence": "biome.json:3:5 deserialize ━━━\n\n  × Found an unknown key `linterr`.",
+     "fingerprint": "51a47a54e0613802c7520568e8b213ef22918bf74a2b4a018464ac547a27bf99",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "Biome 2.1.2 exited with 1 before it could lint: Found an unknown key `linterr`.",
+     "origin": "biome",
+     "path": "biome.jsonc",
+     "rule": "biome-config-error",
+     "severity": "error",
+     "sha": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+     "title": "Biome failed with the project's configuration",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 1,
+    "name": "biome",
+    "version": "2.1.2"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"biome\",\n      \"version\": \"2.1.2\",\n      \"command\": [\n        \"node\",\n        \"node_modules/@biomejs/biome/bin/biome\",\n        \"lint\",\n        \"--reporter=json\",\n        \".\"\n      ],\n      \"exit_code\": 1\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/@biomejs/biome/bin/biome",
+    "lint",
+    "--reporter=json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/@biomejs/biome/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/@biomejs/biome/bin/biome",
+     "lint",
+     "--reporter=json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "confidence": "confirmed",
+     "evidence": "Oops! something\n  Plain failure \u0026 \u003cx\u003e",
+     "fingerprint": "c72db58f6273f3e0e860be382eb21fadcf3bb905353f2cef5475052a02dd718c",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "Biome 2.1.2 exited with 1 before it could lint: Plain failure \u0026 \u003cx\u003e",
+     "origin": "biome",
+     "path": "package.json",
+     "rule": "biome-config-error",
+     "severity": "error",
+     "sha": "711f3bb10e42c14c3b07a7c4c29ae2b73dd4e34172c87ead77c1bc63231fee12",
+     "title": "Biome failed with the project's configuration",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 1,
+    "name": "biome",
+    "version": "2.1.2"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"biome\",\n      \"version\": \"2.5.0\",\n      \"command\": [\n        \"node\",\n        \"node_modules/@biomejs/biome/bin/biome\",\n        \"lint\",\n        \"--reporter=json\",\n        \".\"\n      ],\n      \"exit_code\": 1\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/@biomejs/biome/bin/biome",
+    "lint",
+    "--reporter=json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/@biomejs/biome/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/@biomejs/biome/bin/biome",
+     "lint",
+     "--reporter=json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "confidence": "confirmed",
+     "evidence": "err",
+     "fingerprint": "821a577461f2b5bc4246fb31a77430b8bbd4214c36697ab6ba52c9b01de1eba4",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "Biome 2.5.0 exited with 1 before it could lint: err",
+     "origin": "biome",
+     "path": "package.json",
+     "rule": "biome-config-error",
+     "severity": "error",
+     "sha": "711f3bb10e42c14c3b07a7c4c29ae2b73dd4e34172c87ead77c1bc63231fee12",
+     "title": "Biome failed with the project's configuration",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 1,
+    "name": "biome",
+    "version": "2.5.0"
+   }
+  },
+  {
+   "artifacts": null,
+   "command": [
+    "node",
+    "node_modules/@biomejs/biome/bin/biome",
+    "lint",
+    "--reporter=json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/@biomejs/biome/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/@biomejs/biome/bin/biome",
+     "lint",
+     "--reporter=json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [],
+   "limitations": null,
+   "metrics": null,
+   "reason": "biome: the lint run ran out of memory: ",
+   "reasonCode": "linter_failed",
+   "status": "tool_error"
+  },
+  {
+   "artifacts": null,
+   "command": null,
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/@biomejs/biome/package.json').version"
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "confidence": "confirmed",
+     "evidence": "",
+     "fingerprint": "13c641dd4134d8c47c3a0c68daf20a512a99e56aa7b2db4e380f51eb795c0ef0",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "The package lists @biomejs/biome as a dependency, but `node_modules/@biomejs/biome` is not there after the install, so the project's own lint could not run in CI either.",
+     "origin": "biome",
+     "path": "package.json",
+     "rule": "biome-not-installed",
+     "severity": "error",
+     "sha": "711f3bb10e42c14c3b07a7c4c29ae2b73dd4e34172c87ead77c1bc63231fee12",
+     "title": "biome is a dependency but not installed",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed"
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"eslint\",\n      \"version\": \"9.39.0\",\n      \"command\": [\n        \"node\",\n        \"node_modules/eslint/bin/eslint.js\",\n        \"--format\",\n        \"json\",\n        \".\"\n      ],\n      \"exit_code\": 1\n    },\n    {\n      \"name\": \"biome\",\n      \"version\": \"2.1.2\",\n      \"command\": [\n        \"node\",\n        \"node_modules/@biomejs/biome/bin/biome\",\n        \"lint\",\n        \"--reporter=json\",\n        \".\"\n      ],\n      \"exit_code\": 1\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/eslint/bin/eslint.js",
+    "--format",
+    "json",
+    ".",
+    "\u0026\u0026",
+    "node",
+    "node_modules/@biomejs/biome/bin/biome",
+    "lint",
+    "--reporter=json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/eslint/bin/eslint.js",
+     "--format",
+     "json",
+     "."
+    ],
+    [
+     "node",
+     "-p",
+     "require('./node_modules/@biomejs/biome/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/@biomejs/biome/bin/biome",
+     "lint",
+     "--reporter=json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "column": 1,
+     "confidence": "confirmed",
+     "evidence": "{\"column\":1,\"file\":\"a.js\",\"line\":1,\"message\":\"m\",\"rule\":\"no-undef\",\"severity\":2}",
+     "fingerprint": "b3bc1dafdba5896c455407d54d7e235996e0ebeadc3554db26755ed8eabc2d27",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 1,
+     "message": "eslint reports error no-undef: m",
+     "origin": "eslint",
+     "path": "a.js",
+     "rule": "no-undef",
+     "severity": "error",
+     "sha": "",
+     "title": "no-undef: m",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 3,
+     "confidence": "likely",
+     "evidence": "{\"category\":\"lint/suspicious/noConsole\",\"description\":\"Don't use console.\",\"file\":\"src/index.js\",\"severity\":\"warning\",\"span\":[47,58]}",
+     "fingerprint": "1635da0a9ffc1dc970258dcd5882167c907b7f725b02d5878296a6cedc0fc71d",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 5,
+     "message": "biome reports warning lint/suspicious/noConsole: Don't use console.",
+     "origin": "biome",
+     "path": "src/index.js",
+     "rule": "lint/suspicious/noConsole",
+     "severity": "warning",
+     "sha": "",
+     "title": "lint/suspicious/noConsole: Don't use console.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 3,
+     "confidence": "confirmed",
+     "evidence": "{\"category\":\"lint/suspicious/noDebugger\",\"description\":\"This is an unexpected use of the debugger statement.\",\"file\":\"src/index.js\",\"severity\":\"error\",\"span\":[35,44]}",
+     "fingerprint": "4c710fee361fb4ffdc3e5c2b9814277352ceac9896e5069dc4585be399e5dd6d",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 4,
+     "message": "biome reports error lint/suspicious/noDebugger: This is an unexpected use of the debugger statement.",
+     "origin": "biome",
+     "path": "src/index.js",
+     "rule": "lint/suspicious/noDebugger",
+     "severity": "error",
+     "sha": "",
+     "title": "lint/suspicious/noDebugger: This is an unexpected use of the debugger statement.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 9,
+     "confidence": "suspected",
+     "evidence": "{\"category\":\"lint/style/useConst\",\"description\":\"Use const \\u0026 \\u003cso\\u003e on.\",\"file\":\"src/ü.js\",\"severity\":\"information\",\"span\":[9,12]}",
+     "fingerprint": "eab9c3a66fd8ce5b264a224d9df449c0a7b7c7e36424117926be725a442b316f",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "hint",
+     "limitations": [],
+     "line": 1,
+     "message": "biome reports info lint/style/useConst: Use const \u0026 \u003cso\u003e on.",
+     "origin": "biome",
+     "path": "src/ü.js",
+     "rule": "lint/style/useConst",
+     "severity": "note",
+     "sha": "",
+     "title": "lint/style/useConst: Use const \u0026 \u003cso\u003e on.",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "confirmed",
+     "evidence": "{\"category\":\"\",\"description\":\"No location\",\"severity\":\"fatal\"}",
+     "fingerprint": "a2294948bc457fc7c64cbae6910675f681457ba16a6cf6968f9369303c42f612",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "biome reports error biome-diagnostic: No location",
+     "origin": "biome",
+     "path": "package.json",
+     "rule": "biome-diagnostic",
+     "severity": "error",
+     "sha": "37623251161d4d861a5da4611176c99d7dec50f2a137e91678a9290ea7f04432",
+     "title": "biome-diagnostic: No location",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "suspected",
+     "evidence": "{\"category\":\"lint/x\",\"description\":\"Outside span\",\"file\":\"../../etc/x.js\",\"severity\":\"hint\",\"span\":[900,901]}",
+     "fingerprint": "0421b856a4a4bdfd08dc0f213df2873819687f377e9fec7f0d70e716dc252688",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "hint",
+     "limitations": [],
+     "message": "biome reports info lint/x: Outside span",
+     "origin": "biome",
+     "path": "etc/x.js",
+     "rule": "lint/x",
+     "severity": "note",
+     "sha": "",
+     "title": "lint/x: Outside span",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "likely",
+     "evidence": "{\"category\":\"lint/y\",\"description\":\"One-element span\",\"file\":\"a b.js\",\"severity\":\"warning\"}",
+     "fingerprint": "8075ae7b8826cfe00b2f02b9eaf9b6a414a5c36c93d0ffc9e8e9824a6c22505f",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "biome reports warning lint/y: One-element span",
+     "origin": "biome",
+     "path": "a b.js",
+     "rule": "lint/y",
+     "severity": "warning",
+     "sha": "",
+     "title": "lint/y: One-element span",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 1,
+    "name": "eslint",
+    "version": "9.39.0"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"eslint\",\n      \"version\": \"1.0.0\",\n      \"command\": [\n        \"node\",\n        \"node_modules/eslint/bin/eslint.js\",\n        \"--format\",\n        \"json\",\n        \".\"\n      ],\n      \"exit_code\": 137\n    },\n    {\n      \"name\": \"biome\",\n      \"version\": \"1.0.0\",\n      \"command\": [\n        \"node\",\n        \"node_modules/@biomejs/biome/bin/biome\",\n        \"lint\",\n        \"--reporter=json\",\n        \".\"\n      ],\n      \"exit_code\": 1\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/eslint/bin/eslint.js",
+    "--format",
+    "json",
+    ".",
+    "\u0026\u0026",
+    "node",
+    "node_modules/@biomejs/biome/bin/biome",
+    "lint",
+    "--reporter=json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/eslint/bin/eslint.js",
+     "--format",
+     "json",
+     "."
+    ],
+    [
+     "node",
+     "-p",
+     "require('./node_modules/@biomejs/biome/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/@biomejs/biome/bin/biome",
+     "lint",
+     "--reporter=json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [
+    {
+     "column": 3,
+     "confidence": "likely",
+     "evidence": "{\"category\":\"lint/suspicious/noConsole\",\"description\":\"Don't use console.\",\"file\":\"src/index.js\",\"severity\":\"warning\",\"span\":[47,58]}",
+     "fingerprint": "1635da0a9ffc1dc970258dcd5882167c907b7f725b02d5878296a6cedc0fc71d",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 5,
+     "message": "biome reports warning lint/suspicious/noConsole: Don't use console.",
+     "origin": "biome",
+     "path": "src/index.js",
+     "rule": "lint/suspicious/noConsole",
+     "severity": "warning",
+     "sha": "",
+     "title": "lint/suspicious/noConsole: Don't use console.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 3,
+     "confidence": "confirmed",
+     "evidence": "{\"category\":\"lint/suspicious/noDebugger\",\"description\":\"This is an unexpected use of the debugger statement.\",\"file\":\"src/index.js\",\"severity\":\"error\",\"span\":[35,44]}",
+     "fingerprint": "4c710fee361fb4ffdc3e5c2b9814277352ceac9896e5069dc4585be399e5dd6d",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 4,
+     "message": "biome reports error lint/suspicious/noDebugger: This is an unexpected use of the debugger statement.",
+     "origin": "biome",
+     "path": "src/index.js",
+     "rule": "lint/suspicious/noDebugger",
+     "severity": "error",
+     "sha": "",
+     "title": "lint/suspicious/noDebugger: This is an unexpected use of the debugger statement.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 9,
+     "confidence": "suspected",
+     "evidence": "{\"category\":\"lint/style/useConst\",\"description\":\"Use const \\u0026 \\u003cso\\u003e on.\",\"file\":\"src/ü.js\",\"severity\":\"information\",\"span\":[9,12]}",
+     "fingerprint": "eab9c3a66fd8ce5b264a224d9df449c0a7b7c7e36424117926be725a442b316f",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "hint",
+     "limitations": [],
+     "line": 1,
+     "message": "biome reports info lint/style/useConst: Use const \u0026 \u003cso\u003e on.",
+     "origin": "biome",
+     "path": "src/ü.js",
+     "rule": "lint/style/useConst",
+     "severity": "note",
+     "sha": "",
+     "title": "lint/style/useConst: Use const \u0026 \u003cso\u003e on.",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "confirmed",
+     "evidence": "{\"category\":\"\",\"description\":\"No location\",\"severity\":\"fatal\"}",
+     "fingerprint": "a2294948bc457fc7c64cbae6910675f681457ba16a6cf6968f9369303c42f612",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "biome reports error biome-diagnostic: No location",
+     "origin": "biome",
+     "path": "package.json",
+     "rule": "biome-diagnostic",
+     "severity": "error",
+     "sha": "37623251161d4d861a5da4611176c99d7dec50f2a137e91678a9290ea7f04432",
+     "title": "biome-diagnostic: No location",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "suspected",
+     "evidence": "{\"category\":\"lint/x\",\"description\":\"Outside span\",\"file\":\"../../etc/x.js\",\"severity\":\"hint\",\"span\":[900,901]}",
+     "fingerprint": "0421b856a4a4bdfd08dc0f213df2873819687f377e9fec7f0d70e716dc252688",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "hint",
+     "limitations": [],
+     "message": "biome reports info lint/x: Outside span",
+     "origin": "biome",
+     "path": "etc/x.js",
+     "rule": "lint/x",
+     "severity": "note",
+     "sha": "",
+     "title": "lint/x: Outside span",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "likely",
+     "evidence": "{\"category\":\"lint/y\",\"description\":\"One-element span\",\"file\":\"a b.js\",\"severity\":\"warning\"}",
+     "fingerprint": "8075ae7b8826cfe00b2f02b9eaf9b6a414a5c36c93d0ffc9e8e9824a6c22505f",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "biome reports warning lint/y: One-element span",
+     "origin": "biome",
+     "path": "a b.js",
+     "rule": "lint/y",
+     "severity": "warning",
+     "sha": "",
+     "title": "lint/y: One-element span",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "eslint: the lint run ran out of memory: ",
+   "reasonCode": "linter_could_not_run",
+   "status": "partial",
+   "tool": {
+    "exit": 137,
+    "name": "eslint",
+    "version": "1.0.0"
+   }
+  },
+  {
+   "artifacts": null,
+   "command": [
+    "node",
+    "node_modules/eslint/bin/eslint.js",
+    "--format",
+    "json",
+    ".",
+    "\u0026\u0026",
+    "node",
+    "node_modules/@biomejs/biome/bin/biome",
+    "lint",
+    "--reporter=json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/eslint/bin/eslint.js",
+     "--format",
+     "json",
+     "."
+    ],
+    [
+     "node",
+     "-p",
+     "require('./node_modules/@biomejs/biome/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/@biomejs/biome/bin/biome",
+     "lint",
+     "--reporter=json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": [],
+   "limitations": null,
+   "metrics": null,
+   "reason": "eslint: the lint run ran out of memory: ",
+   "reasonCode": "linter_failed",
+   "status": "tool_error"
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.existing\",\n  \"context_id\": \"C-0002\",\n  \"linters\": [\n    {\n      \"name\": \"eslint\",\n      \"version\": \"9.39.0\",\n      \"command\": [\n        \"node\",\n        \"node_modules/eslint/bin/eslint.js\",\n        \"--format\",\n        \"json\",\n        \".\"\n      ],\n      \"exit_code\": 1\n    }\n  ]\n}\n",
+     "id": "linters-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.existing/C-0002/linters.json"
+    }
+   ],
+   "command": [
+    "node",
+    "node_modules/eslint/bin/eslint.js",
+    "--format",
+    "json",
+    "."
+   ],
+   "commands": [
+    [
+     "node",
+     "-p",
+     "require('./node_modules/eslint/package.json').version"
+    ],
+    [
+     "node",
+     "node_modules/eslint/bin/eslint.js",
+     "--format",
+     "json",
+     "."
+    ]
+   ],
+   "contextTools": null,
+   "findings": {
+    "count": 2000,
+    "first": [
+     {
+      "column": 1,
+      "confidence": "confirmed",
+      "evidence": "{\"column\":1,\"file\":\"a.js\",\"line\":1,\"message\":\"e\",\"rule\":\"no-undef\",\"severity\":2}",
+      "fingerprint": "2a976795e49eda11d1b3fbf135b7706258401ddce29daf8a4c57a171e50ee824",
+      "gate": true,
+      "in_test_code": false,
+      "kind": "defect",
+      "limitations": [],
+      "line": 1,
+      "message": "eslint reports error no-undef: e",
+      "origin": "eslint",
+      "path": "a.js",
+      "rule": "no-undef",
+      "severity": "error",
+      "sha": "",
+      "title": "no-undef: e",
+      "trust": "untrusted_data"
+     },
+     {
+      "column": 1,
+      "confidence": "likely",
+      "evidence": "{\"column\":1,\"file\":\"a.js\",\"line\":1,\"message\":\"w\",\"rule\":\"eqeqeq\",\"severity\":1}",
+      "fingerprint": "69c032ff8f08d505022742a9668b06a9dc3aaf95ea340a731cbb7faaa2fd59a4",
+      "gate": false,
+      "in_test_code": false,
+      "kind": "defect",
+      "limitations": [],
+      "line": 1,
+      "message": "eslint reports warning eqeqeq: w",
+      "origin": "eslint",
+      "path": "a.js",
+      "rule": "eqeqeq",
+      "severity": "warning",
+      "sha": "",
+      "title": "eqeqeq: w",
+      "trust": "untrusted_data"
+     }
+    ],
+    "last": [
+     {
+      "column": 1,
+      "confidence": "likely",
+      "evidence": "{\"column\":1,\"file\":\"a.js\",\"line\":1,\"message\":\"w\",\"rule\":\"eqeqeq\",\"severity\":1}",
+      "fingerprint": "69c032ff8f08d505022742a9668b06a9dc3aaf95ea340a731cbb7faaa2fd59a4",
+      "gate": false,
+      "in_test_code": false,
+      "kind": "defect",
+      "limitations": [],
+      "line": 1,
+      "message": "eslint reports warning eqeqeq: w",
+      "origin": "eslint",
+      "path": "a.js",
+      "rule": "eqeqeq",
+      "severity": "warning",
+      "sha": "",
+      "title": "eqeqeq: w",
+      "trust": "untrusted_data"
+     },
+     {
+      "column": 1,
+      "confidence": "likely",
+      "evidence": "{\"column\":1,\"file\":\"a.js\",\"line\":1,\"message\":\"w\",\"rule\":\"eqeqeq\",\"severity\":1}",
+      "fingerprint": "69c032ff8f08d505022742a9668b06a9dc3aaf95ea340a731cbb7faaa2fd59a4",
+      "gate": false,
+      "in_test_code": false,
+      "kind": "defect",
+      "limitations": [],
+      "line": 1,
+      "message": "eslint reports warning eqeqeq: w",
+      "origin": "eslint",
+      "path": "a.js",
+      "rule": "eqeqeq",
+      "severity": "warning",
+      "sha": "",
+      "title": "eqeqeq: w",
+      "trust": "untrusted_data"
+     }
+    ]
+   },
+   "limitations": [
+    {
+     "check": "lint.existing",
+     "code": "findings_cut",
+     "message": "The Report keeps the first 2000 diagnostics of the project's linters, every error first; 51 more were found and are left out."
+    }
+   ],
+   "metrics": null,
+   "reason": "some diagnostics are missing from this Check; see the Limitations",
+   "reasonCode": "check_could_not_run_on_some_files",
+   "status": "partial",
+   "tool": {
+    "exit": 1,
+    "name": "eslint",
+    "version": "9.39.0"
+   }
+  },
+  {
+   "artifacts": null,
+   "command": null,
+   "commands": null,
+   "contextTools": null,
+   "findings": [],
+   "limitations": null,
+   "metrics": null,
+   "reason": "npm workspaces",
+   "reasonCode": "workspaces_unsupported",
+   "status": "unsupported"
+  }
+ ],
+ "helperInputs": [
+  "{\"eslint\":\"/toolset/node_modules/eslint\",\"globals\":\"/toolset/node_modules/globals\",\"tools\":\"/toolset/node_modules\",\"root\":\"/snapshot\",\"groups\":[{\"id\":\"deps.engines\",\"core_problem\":false,\"except\":[],\"core_options\":{},\"plugins\":[\"n\"],\"rules\":[{\"name\":\"n/no-deprecated-api\",\"options\":null},{\"name\":\"n/no-unsupported-features/es-builtins\",\"options\":null},{\"name\":\"n/no-unsupported-features/es-syntax\",\"options\":null},{\"name\":\"n/no-unsupported-features/node-builtins\",\"options\":null}],\"test_only\":false,\"source_only\":false,\"settings\":{\"n\":{\"version\":\"22.11.0\"}}},{\"id\":\"lint.correctness\",\"core_problem\":true,\"except\":[\"no-await-in-loop\",\"no-use-before-define\"],\"core_options\":{\"no-unused-vars\":[{\"argsIgnorePattern\":\"^_\",\"caughtErrorsIgnorePattern\":\"^_\",\"destructuredArrayIgnorePattern\":\"^_\",\"varsIgnorePattern\":\"^_\"}]},\"plugins\":[],\"rules\":[],\"test_only\":false,\"source_only\":false,\"settings\":{}},{\"id\":\"tests.smells\",\"core_problem\":false,\"except\":[],\"core_options\":{},\"plugins\":[\"mocha\"],\"rules\":[{\"name\":\"mocha/handle-done-callback\",\"options\":null},{\"name\":\"mocha/no-async-and-done\",\"options\":null},{\"name\":\"mocha/no-async-in-sync-tests\",\"options\":null},{\"name\":\"mocha/no-async-suite\",\"options\":null},{\"name\":\"mocha/no-code-after-done\",\"options\":null},{\"name\":\"mocha/no-conditional-tests\",\"options\":null},{\"name\":\"mocha/no-done-twice\",\"options\":null},{\"name\":\"mocha/no-empty-title\",\"options\":null},{\"name\":\"mocha/no-exclusive-tests\",\"options\":null},{\"name\":\"mocha/no-identical-title\",\"options\":null},{\"name\":\"mocha/no-nested-tests\",\"options\":null},{\"name\":\"mocha/no-pending-tests\",\"options\":null},{\"name\":\"mocha/no-return-and-done\",\"options\":null}],\"test_only\":true,\"source_only\":false,\"settings\":{\"mocha/additionalCustomNames\":[{\"interface\":\"BDD\",\"name\":\"test\",\"type\":\"testCase\"},{\"interface\":\"require\",\"name\":\"test\",\"type\":\"testCase\"},{\"interface\":\"require\",\"name\":\"it\",\"type\":\"testCase\"},{\"interface\":\"require\",\"name\":\"describe\",\"type\":\"suite\"},{\"interface\":\"require\",\"name\":\"suite\",\"type\":\"suite\"}]}}],\"files\":[{\"path\":\"src/esm.mjs\",\"source_type\":\"module\"},{\"path\":\"src/handler.js\",\"source_type\":\"commonjs\"},{\"path\":\"src/index.js\",\"source_type\":\"commonjs\"},{\"path\":\"src/silenced.js\",\"source_type\":\"commonjs\"},{\"path\":\"test/index.test.js\",\"source_type\":\"commonjs\"}],\"test_files\":[\"test/index.test.js\"],\"source_files\":[\"src/esm.mjs\",\"src/handler.js\",\"src/index.js\",\"src/silenced.js\"],\"mocha\":true}",
+  "{\"eslint\":\"/toolset/node_modules/eslint\",\"globals\":\"/toolset/node_modules/globals\",\"tools\":\"/toolset/node_modules\",\"root\":\"/snapshot\",\"groups\":[{\"id\":\"tests.smells\",\"core_problem\":false,\"except\":[],\"core_options\":{},\"plugins\":[\"mocha\"],\"rules\":[{\"name\":\"mocha/handle-done-callback\",\"options\":null},{\"name\":\"mocha/no-async-and-done\",\"options\":null},{\"name\":\"mocha/no-async-in-sync-tests\",\"options\":null},{\"name\":\"mocha/no-async-suite\",\"options\":null},{\"name\":\"mocha/no-code-after-done\",\"options\":null},{\"name\":\"mocha/no-conditional-tests\",\"options\":null},{\"name\":\"mocha/no-done-twice\",\"options\":null},{\"name\":\"mocha/no-empty-title\",\"options\":null},{\"name\":\"mocha/no-exclusive-tests\",\"options\":null},{\"name\":\"mocha/no-identical-title\",\"options\":null},{\"name\":\"mocha/no-nested-tests\",\"options\":null},{\"name\":\"mocha/no-pending-tests\",\"options\":null},{\"name\":\"mocha/no-return-and-done\",\"options\":null}],\"test_only\":true,\"source_only\":false,\"settings\":{\"mocha/additionalCustomNames\":[{\"interface\":\"BDD\",\"name\":\"test\",\"type\":\"testCase\"},{\"interface\":\"require\",\"name\":\"test\",\"type\":\"testCase\"},{\"interface\":\"require\",\"name\":\"it\",\"type\":\"testCase\"},{\"interface\":\"require\",\"name\":\"describe\",\"type\":\"suite\"},{\"interface\":\"require\",\"name\":\"suite\",\"type\":\"suite\"}]}}],\"files\":[{\"path\":\"src/esm.mjs\",\"source_type\":\"module\"},{\"path\":\"src/handler.js\",\"source_type\":\"commonjs\"},{\"path\":\"src/index.js\",\"source_type\":\"commonjs\"},{\"path\":\"src/silenced.js\",\"source_type\":\"commonjs\"},{\"path\":\"test/index.test.js\",\"source_type\":\"commonjs\"}],\"test_files\":[\"test/index.test.js\"],\"source_files\":[\"src/esm.mjs\",\"src/handler.js\",\"src/index.js\",\"src/silenced.js\"],\"mocha\":true}",
+  "{\"eslint\":\"/toolset/node_modules/eslint\",\"globals\":\"/toolset/node_modules/globals\",\"tools\":\"/toolset/node_modules\",\"root\":\"/snapshot\",\"groups\":[{\"id\":\"lint.correctness\",\"core_problem\":true,\"except\":[\"no-await-in-loop\",\"no-use-before-define\"],\"core_options\":{\"no-unused-vars\":[{\"argsIgnorePattern\":\"^_\",\"caughtErrorsIgnorePattern\":\"^_\",\"destructuredArrayIgnorePattern\":\"^_\",\"varsIgnorePattern\":\"^_\"}]},\"plugins\":[],\"rules\":[],\"test_only\":false,\"source_only\":false,\"settings\":{}}],\"files\":[{\"path\":\"src/a.js\",\"source_type\":\"module\"},{\"path\":\"src/b.cjs\",\"source_type\":\"commonjs\"},{\"path\":\"test/a.test.js\",\"source_type\":\"module\"}],\"test_files\":[\"test/a.test.js\"],\"source_files\":[\"src/a.js\",\"src/b.cjs\"],\"mocha\":true}"
+ ],
+ "hits": [
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.correctness\",\n  \"context_id\": \"C-0002\",\n  \"eslint_version\": \"10.13.0\",\n  \"rules\": [\n    \"no-self-assign\",\n    \"no-undef\"\n  ],\n  \"excluded_rules\": [\n    \"no-await-in-loop\",\n    \"no-use-before-define\"\n  ],\n  \"config_sha256\": \"a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5\"\n}\n",
+     "id": "rules-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.correctness/C-0002-rules.json"
+    }
+   ],
+   "command": [
+    "node",
+    "/toolset/node_modules/eslint/bin/eslint.js",
+    "(3 files)"
+   ],
+   "configSHA256": "a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5",
+   "contextTools": [
+    {
+     "digest": "sha512-UohDjD4zSzEwhf58M3O7vc/ycc8O1I7dNlhtD0WxE8Px8EHNJKtUwzBqrzeGhisRuv2ag4sAYswszCJRgKXYUg==",
+     "name": "eslint",
+     "version": "10.13.0"
+    },
+    {
+     "digest": "a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5",
+     "name": "eslint-config",
+     "version": "a202b24f632c"
+    }
+   ],
+   "findings": [
+    {
+     "column": 3,
+     "confidence": "likely",
+     "evidence": "{\"rule_id\":\"no-self-assign\",\"message\":\"'state.count' is assigned to itself. \\u003cx\\u003e \\u0026 y\",\"line\":5,\"column\":3,\"end_line\":5,\"end_column\":28,\"fatal\":false}",
+     "fingerprint": "24cb276021dcb63646e5625b9187850bdcf433c4121be2ce994106914594e5e4",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 5,
+     "message": "eslint reports warning no-self-assign: 'state.count' is assigned to itself. \u003cx\u003e \u0026 y",
+     "origin": "eslint",
+     "path": "src/index.js",
+     "rule": "no-self-assign",
+     "severity": "warning",
+     "sha": "5b27fa13c2ca182a911feb1f8ac300832826d2cfb58df34b06dc45547e7a4101",
+     "title": "no-self-assign: 'state.count' is assigned to itself. \u003cx\u003e \u0026 y",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 1,
+     "confidence": "likely",
+     "evidence": "{\"rule_id\":\"no-undef\",\"message\":\"'aü' is not defined.\",\"line\":6,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false}",
+     "fingerprint": "77d5728feb6fcda2f582d3aa91239abb3dcf2ab04d75aa7d4c0b146545f35c2f",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 6,
+     "message": "eslint reports warning no-undef: 'aü' is not defined.",
+     "origin": "eslint",
+     "path": "src/index.js",
+     "rule": "no-undef",
+     "severity": "warning",
+     "sha": "5b27fa13c2ca182a911feb1f8ac300832826d2cfb58df34b06dc45547e7a4101",
+     "title": "no-undef: 'aü' is not defined.",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": [
+    {
+     "check": "lint.correctness",
+     "code": "files_not_parsed",
+     "message": "ESLint could not parse these files with the source type of their package and did not lint them: src/esm.mjs"
+    }
+   ],
+   "metrics": null,
+   "reason": "ESLint could not parse 1 file in this Check's scope, so what they hold was not checked; see the Limitation files_not_parsed",
+   "reasonCode": "files_not_parsed",
+   "status": "partial",
+   "tool": {
+    "exit": 1,
+    "name": "eslint",
+    "version": "10.13.0"
+   }
+  },
+  {
+   "artifacts": null,
+   "command": [
+    "node",
+    "/toolset/node_modules/eslint/bin/eslint.js",
+    "(3 files)"
+   ],
+   "configSHA256": "a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5",
+   "contextTools": [
+    {
+     "digest": "sha512-UohDjD4zSzEwhf58M3O7vc/ycc8O1I7dNlhtD0WxE8Px8EHNJKtUwzBqrzeGhisRuv2ag4sAYswszCJRgKXYUg==",
+     "name": "eslint",
+     "version": "10.13.0"
+    },
+    {
+     "digest": "a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5",
+     "name": "eslint-config",
+     "version": "a202b24f632c"
+    }
+   ],
+   "findings": [
+    {
+     "column": 3,
+     "confidence": "likely",
+     "evidence": "{\"rule_id\":\"mocha/no-pending-tests\",\"message\":\"Unexpected pending mocha test.\",\"line\":8,\"column\":3,\"end_line\":0,\"end_column\":0,\"fatal\":false}",
+     "fingerprint": "c66582400a7ea1169995aa4d1f531131d655ee06eb61210f489ca4d65f209981",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 8,
+     "message": "eslint reports warning mocha/no-pending-tests: Unexpected pending mocha test.",
+     "origin": "eslint",
+     "path": "test/index.test.js",
+     "rule": "mocha/no-pending-tests",
+     "severity": "warning",
+     "sha": "ac7627f095d97f6cbd82e411a1f18fbaf54b631e51c4604b2da1527b1dbf1505",
+     "title": "mocha/no-pending-tests: Unexpected pending mocha test.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 1,
+     "confidence": "confirmed",
+     "evidence": "{\"rule_id\":\"mocha/no-exclusive-tests\",\"message\":\"Unexpected exclusive mocha test.\",\"line\":6,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false}",
+     "fingerprint": "39c70f685781d43e017b50397842ec6b54a8ab768238e64a0ca3d6e4f2b80b66",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 6,
+     "message": "eslint reports error mocha/no-exclusive-tests: Unexpected exclusive mocha test.",
+     "origin": "eslint",
+     "path": "test/index.test.js",
+     "rule": "mocha/no-exclusive-tests",
+     "severity": "error",
+     "sha": "ac7627f095d97f6cbd82e411a1f18fbaf54b631e51c4604b2da1527b1dbf1505",
+     "title": "mocha/no-exclusive-tests: Unexpected exclusive mocha test.",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": [
+    {
+     "check": "tests.smells",
+     "code": "files_not_parsed",
+     "message": "ESLint could not parse these files with the source type of their package and did not lint them: src/esm.mjs"
+    }
+   ],
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 1,
+    "name": "eslint",
+    "version": "10.13.0"
+   }
+  },
+  {
+   "artifacts": null,
+   "command": [
+    "node",
+    "/toolset/node_modules/eslint/bin/eslint.js",
+    "(3 files)"
+   ],
+   "configSHA256": "a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5",
+   "contextTools": [
+    {
+     "digest": "sha512-UohDjD4zSzEwhf58M3O7vc/ycc8O1I7dNlhtD0WxE8Px8EHNJKtUwzBqrzeGhisRuv2ag4sAYswszCJRgKXYUg==",
+     "name": "eslint",
+     "version": "10.13.0"
+    },
+    {
+     "digest": "a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5",
+     "name": "eslint-config",
+     "version": "a202b24f632c"
+    }
+   ],
+   "findings": [
+    {
+     "column": 10,
+     "confidence": "likely",
+     "evidence": "{\"rule_id\":\"n/no-deprecated-api\",\"message\":\"'new Buffer()' was deprecated since v6.0.0.\",\"line\":4,\"column\":10,\"end_line\":0,\"end_column\":0,\"fatal\":false}",
+     "fingerprint": "4d9d24b1b350362332311202b9aa3c55086942fca0817af501ddedfe00e12aa9",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 4,
+     "message": "eslint reports warning n/no-deprecated-api: 'new Buffer()' was deprecated since v6.0.0.",
+     "origin": "eslint",
+     "path": "test/index.test.js",
+     "rule": "n/no-deprecated-api",
+     "severity": "warning",
+     "sha": "ac7627f095d97f6cbd82e411a1f18fbaf54b631e51c4604b2da1527b1dbf1505",
+     "title": "n/no-deprecated-api: 'new Buffer()' was deprecated since v6.0.0.",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": [
+    {
+     "check": "deps.engines",
+     "code": "files_not_parsed",
+     "message": "ESLint could not parse these files with the source type of their package and did not lint them: src/esm.mjs"
+    }
+   ],
+   "metrics": null,
+   "reason": "ESLint could not parse 1 file in this Check's scope, so what they hold was not checked; see the Limitation files_not_parsed",
+   "reasonCode": "files_not_parsed",
+   "status": "partial",
+   "tool": {
+    "exit": 1,
+    "name": "eslint",
+    "version": "10.13.0"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.correctness\",\n  \"context_id\": \"C-0002\",\n  \"eslint_version\": \"10.13.0\",\n  \"rules\": [\n    \"no-self-assign\",\n    \"no-undef\"\n  ],\n  \"excluded_rules\": [\n    \"no-await-in-loop\",\n    \"no-use-before-define\"\n  ],\n  \"config_sha256\": \"a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5\"\n}\n",
+     "id": "rules-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.correctness/C-0002-rules.json"
+    }
+   ],
+   "command": [
+    "node",
+    "/toolset/node_modules/eslint/bin/eslint.js",
+    "(3 files)"
+   ],
+   "configSHA256": "a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5",
+   "contextTools": [
+    {
+     "digest": "sha512-UohDjD4zSzEwhf58M3O7vc/ycc8O1I7dNlhtD0WxE8Px8EHNJKtUwzBqrzeGhisRuv2ag4sAYswszCJRgKXYUg==",
+     "name": "eslint",
+     "version": "10.13.0"
+    },
+    {
+     "digest": "a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5",
+     "name": "eslint-config",
+     "version": "a202b24f632c"
+    }
+   ],
+   "findings": [
+    {
+     "column": 3,
+     "confidence": "likely",
+     "evidence": "{\"rule_id\":\"no-self-assign\",\"message\":\"'state.count' is assigned to itself. \\u003cx\\u003e \\u0026 y\",\"line\":5,\"column\":3,\"end_line\":5,\"end_column\":28,\"fatal\":false}",
+     "fingerprint": "24cb276021dcb63646e5625b9187850bdcf433c4121be2ce994106914594e5e4",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 5,
+     "message": "eslint reports warning no-self-assign: 'state.count' is assigned to itself. \u003cx\u003e \u0026 y",
+     "origin": "eslint",
+     "path": "src/index.js",
+     "rule": "no-self-assign",
+     "severity": "warning",
+     "sha": "5b27fa13c2ca182a911feb1f8ac300832826d2cfb58df34b06dc45547e7a4101",
+     "title": "no-self-assign: 'state.count' is assigned to itself. \u003cx\u003e \u0026 y",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 1,
+     "confidence": "likely",
+     "evidence": "{\"rule_id\":\"no-undef\",\"message\":\"'aü' is not defined.\",\"line\":6,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false}",
+     "fingerprint": "77d5728feb6fcda2f582d3aa91239abb3dcf2ab04d75aa7d4c0b146545f35c2f",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 6,
+     "message": "eslint reports warning no-undef: 'aü' is not defined.",
+     "origin": "eslint",
+     "path": "src/index.js",
+     "rule": "no-undef",
+     "severity": "warning",
+     "sha": "5b27fa13c2ca182a911feb1f8ac300832826d2cfb58df34b06dc45547e7a4101",
+     "title": "no-undef: 'aü' is not defined.",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": [
+    {
+     "check": "lint.correctness",
+     "code": "findings_cut",
+     "message": "The Report keeps the first 2000 hits of this Check's rules; 7 more were found and are left out."
+    },
+    {
+     "check": "lint.correctness",
+     "code": "files_too_large",
+     "message": "These files are over 2097152 bytes and were not linted: src/big.js, src/other-big.js"
+    }
+   ],
+   "metrics": null,
+   "reason": "some hits and files are missing from this Check; see the Limitations",
+   "reasonCode": "check_could_not_run_on_some_files",
+   "status": "partial",
+   "tool": {
+    "exit": 1,
+    "name": "eslint",
+    "version": "10.13.0"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.correctness\",\n  \"context_id\": \"C-0002\",\n  \"eslint_version\": \"10.13.0\",\n  \"rules\": [\n    \"no-self-assign\",\n    \"no-undef\"\n  ],\n  \"excluded_rules\": [\n    \"no-await-in-loop\",\n    \"no-use-before-define\"\n  ],\n  \"config_sha256\": \"a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5\"\n}\n",
+     "id": "rules-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.correctness/C-0002-rules.json"
+    }
+   ],
+   "command": [
+    "node",
+    "/toolset/node_modules/eslint/bin/eslint.js",
+    "(3 files)"
+   ],
+   "configSHA256": "a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5",
+   "contextTools": [
+    {
+     "digest": "sha512-UohDjD4zSzEwhf58M3O7vc/ycc8O1I7dNlhtD0WxE8Px8EHNJKtUwzBqrzeGhisRuv2ag4sAYswszCJRgKXYUg==",
+     "name": "eslint",
+     "version": "10.13.0"
+    },
+    {
+     "digest": "a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5",
+     "name": "eslint-config",
+     "version": "a202b24f632c"
+    }
+   ],
+   "findings": {
+    "count": 2000,
+    "first": [
+     {
+      "column": 1,
+      "confidence": "likely",
+      "evidence": "{\"rule_id\":\"no-self-assign\",\"message\":\"hit 1\",\"line\":1,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false}",
+      "fingerprint": "fd6ca5b0693656e99ea6fcc200bde7a7e2781e06d0d396c1b4cccfa7f5eb7653",
+      "gate": false,
+      "in_test_code": false,
+      "kind": "defect",
+      "limitations": [],
+      "line": 1,
+      "message": "eslint reports warning no-self-assign: hit 1",
+      "origin": "eslint",
+      "path": "src/index.js",
+      "rule": "no-self-assign",
+      "severity": "warning",
+      "sha": "5b27fa13c2ca182a911feb1f8ac300832826d2cfb58df34b06dc45547e7a4101",
+      "title": "no-self-assign: hit 1",
+      "trust": "untrusted_data"
+     },
+     {
+      "column": 1,
+      "confidence": "likely",
+      "evidence": "{\"rule_id\":\"no-self-assign\",\"message\":\"hit 2\",\"line\":2,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false}",
+      "fingerprint": "6584b7b07b4f5a3c6042196d5ae2eb5c6f6ecbb27c056fe795f6b9c8ab24c79a",
+      "gate": false,
+      "in_test_code": false,
+      "kind": "defect",
+      "limitations": [],
+      "line": 2,
+      "message": "eslint reports warning no-self-assign: hit 2",
+      "origin": "eslint",
+      "path": "src/index.js",
+      "rule": "no-self-assign",
+      "severity": "warning",
+      "sha": "5b27fa13c2ca182a911feb1f8ac300832826d2cfb58df34b06dc45547e7a4101",
+      "title": "no-self-assign: hit 2",
+      "trust": "untrusted_data"
+     }
+    ],
+    "last": [
+     {
+      "column": 1,
+      "confidence": "likely",
+      "evidence": "{\"rule_id\":\"no-self-assign\",\"message\":\"hit 1999\",\"line\":1999,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false}",
+      "fingerprint": "1994a89e2114c075aa7924f70b46474b82370fd6fca0b3895bb8e7df7ed8b578",
+      "gate": false,
+      "in_test_code": false,
+      "kind": "defect",
+      "limitations": [],
+      "line": 1999,
+      "message": "eslint reports warning no-self-assign: hit 1999",
+      "origin": "eslint",
+      "path": "src/index.js",
+      "rule": "no-self-assign",
+      "severity": "warning",
+      "sha": "5b27fa13c2ca182a911feb1f8ac300832826d2cfb58df34b06dc45547e7a4101",
+      "title": "no-self-assign: hit 1999",
+      "trust": "untrusted_data"
+     },
+     {
+      "column": 1,
+      "confidence": "likely",
+      "evidence": "{\"rule_id\":\"no-self-assign\",\"message\":\"hit 2000\",\"line\":2000,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false}",
+      "fingerprint": "ef3d20726cece42deb3092fb8af1494e1dd04f0e877b277449b8b6d097033ac5",
+      "gate": false,
+      "in_test_code": false,
+      "kind": "defect",
+      "limitations": [],
+      "line": 2000,
+      "message": "eslint reports warning no-self-assign: hit 2000",
+      "origin": "eslint",
+      "path": "src/index.js",
+      "rule": "no-self-assign",
+      "severity": "warning",
+      "sha": "5b27fa13c2ca182a911feb1f8ac300832826d2cfb58df34b06dc45547e7a4101",
+      "title": "no-self-assign: hit 2000",
+      "trust": "untrusted_data"
+     }
+    ]
+   },
+   "limitations": [
+    {
+     "check": "lint.correctness",
+     "code": "findings_cut",
+     "message": "The Report keeps the first 2000 hits of this Check's rules; 5 more were found and are left out."
+    }
+   ],
+   "metrics": null,
+   "reason": "some hits are missing from this Check; see the Limitations",
+   "reasonCode": "check_could_not_run_on_some_files",
+   "status": "partial",
+   "tool": {
+    "exit": 1,
+    "name": "eslint",
+    "version": "10.13.0"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.correctness\",\n  \"context_id\": \"C-0002\",\n  \"eslint_version\": \"10.13.0\",\n  \"rules\": [\n    \"no-self-assign\",\n    \"no-undef\"\n  ],\n  \"excluded_rules\": [\n    \"no-await-in-loop\",\n    \"no-use-before-define\"\n  ],\n  \"config_sha256\": \"74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b\"\n}\n",
+     "id": "rules-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.correctness/C-0002-rules.json"
+    }
+   ],
+   "command": [
+    "node",
+    "/toolset/node_modules/eslint/bin/eslint.js",
+    "(3 files)"
+   ],
+   "configSHA256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+   "contextTools": [
+    {
+     "digest": "sha512-UohDjD4zSzEwhf58M3O7vc/ycc8O1I7dNlhtD0WxE8Px8EHNJKtUwzBqrzeGhisRuv2ag4sAYswszCJRgKXYUg==",
+     "name": "eslint",
+     "version": "10.13.0"
+    },
+    {
+     "digest": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+     "name": "eslint-config",
+     "version": "74234e98afe7"
+    }
+   ],
+   "findings": [],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 1,
+    "name": "eslint",
+    "version": "10.13.0"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.correctness\",\n  \"context_id\": \"C-0003\",\n  \"eslint_version\": \"10.13.0\",\n  \"rules\": [\n    \"no-self-assign\",\n    \"no-undef\"\n  ],\n  \"excluded_rules\": [\n    \"no-await-in-loop\",\n    \"no-use-before-define\"\n  ],\n  \"config_sha256\": \"a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5\"\n}\n",
+     "id": "rules-C-0003",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.correctness/C-0003-rules.json"
+    }
+   ],
+   "command": [
+    "node",
+    "/toolset/node_modules/eslint/bin/eslint.js",
+    "(3 files)"
+   ],
+   "configSHA256": "a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5",
+   "contextTools": [
+    {
+     "digest": "sha512-UohDjD4zSzEwhf58M3O7vc/ycc8O1I7dNlhtD0WxE8Px8EHNJKtUwzBqrzeGhisRuv2ag4sAYswszCJRgKXYUg==",
+     "name": "eslint",
+     "version": "10.13.0"
+    },
+    {
+     "digest": "a202b24f632ce7fac5b363ee43098f8d5abddc3327929d37a060a0987ca921a5",
+     "name": "eslint-config",
+     "version": "a202b24f632c"
+    }
+   ],
+   "findings": [
+    {
+     "column": 1,
+     "confidence": "likely",
+     "evidence": "{\"rule_id\":\"no-self-assign\",\"message\":\"x\",\"line\":1,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false}",
+     "fingerprint": "ab4e75368e8b25081b2f573e8f9e262a13b08bd6ed7cd57f51d7b5de864a34e4",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 1,
+     "message": "eslint reports warning no-self-assign: x",
+     "origin": "eslint",
+     "path": "packages/inner/src/in.js",
+     "rule": "no-self-assign",
+     "severity": "warning",
+     "sha": "454d96a909ca234bd6bec6f88b50ff0df67608302f3c1d18113b4a424801de59",
+     "title": "no-self-assign: x",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": null,
+   "metrics": null,
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 1,
+    "name": "eslint",
+    "version": "10.13.0"
+   }
+  }
+ ],
+ "parsing": [
+  {
+   "error": false,
+   "evidence": [
+    "{\"category\":\"lint/suspicious/noConsole\",\"description\":\"Don't use console.\",\"file\":\"src/index.js\",\"severity\":\"warning\",\"span\":[47,58]}",
+    "{\"category\":\"lint/suspicious/noDebugger\",\"description\":\"This is an unexpected use of the debugger statement.\",\"file\":\"src/index.js\",\"severity\":\"error\",\"span\":[35,44]}",
+    "{\"category\":\"lint/style/useConst\",\"description\":\"Use const \\u0026 \\u003cso\\u003e on.\",\"file\":\"src/ü.js\",\"severity\":\"information\",\"span\":[9,12]}",
+    "{\"category\":\"\",\"description\":\"No location\",\"severity\":\"fatal\"}",
+    "{\"category\":\"lint/x\",\"description\":\"Outside span\",\"file\":\"../../etc/x.js\",\"severity\":\"hint\",\"span\":[900,901]}",
+    "{\"category\":\"lint/y\",\"description\":\"One-element span\",\"file\":\"a b.js\",\"severity\":\"warning\"}"
+   ],
+   "findings": [
+    {
+     "column": 3,
+     "confidence": "likely",
+     "evidence": "{\"category\":\"lint/suspicious/noConsole\",\"description\":\"Don't use console.\",\"file\":\"src/index.js\",\"severity\":\"warning\",\"span\":[47,58]}",
+     "fingerprint": "1f8844521fc152fc35280ddd547b2db525b93036511efac66ffb094e9631bc19",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 5,
+     "message": "biome reports warning lint/suspicious/noConsole: Don't use console.",
+     "origin": "biome",
+     "path": "packages/inner/src/index.js",
+     "rule": "lint/suspicious/noConsole",
+     "severity": "warning",
+     "sha": "97a18ae8e28c3a8e24dc4a46fbb47a8106f7ca3e9e7a2015212caa44bf64db43",
+     "title": "lint/suspicious/noConsole: Don't use console.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 3,
+     "confidence": "confirmed",
+     "evidence": "{\"category\":\"lint/suspicious/noDebugger\",\"description\":\"This is an unexpected use of the debugger statement.\",\"file\":\"src/index.js\",\"severity\":\"error\",\"span\":[35,44]}",
+     "fingerprint": "56a6525bfc4569d3e390d8e448ebca9da9dcddc2cccf68ad6586e04477e52684",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 4,
+     "message": "biome reports error lint/suspicious/noDebugger: This is an unexpected use of the debugger statement.",
+     "origin": "biome",
+     "path": "packages/inner/src/index.js",
+     "rule": "lint/suspicious/noDebugger",
+     "severity": "error",
+     "sha": "97a18ae8e28c3a8e24dc4a46fbb47a8106f7ca3e9e7a2015212caa44bf64db43",
+     "title": "lint/suspicious/noDebugger: This is an unexpected use of the debugger statement.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 9,
+     "confidence": "suspected",
+     "evidence": "{\"category\":\"lint/style/useConst\",\"description\":\"Use const \\u0026 \\u003cso\\u003e on.\",\"file\":\"src/ü.js\",\"severity\":\"information\",\"span\":[9,12]}",
+     "fingerprint": "c764b2a413490481ca9ae239b035d539dc3793cc94e774bb09542eab6fc3e720",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "hint",
+     "limitations": [],
+     "line": 1,
+     "message": "biome reports info lint/style/useConst: Use const \u0026 \u003cso\u003e on.",
+     "origin": "biome",
+     "path": "packages/inner/src/ü.js",
+     "rule": "lint/style/useConst",
+     "severity": "note",
+     "sha": "",
+     "title": "lint/style/useConst: Use const \u0026 \u003cso\u003e on.",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "confirmed",
+     "evidence": "{\"category\":\"\",\"description\":\"No location\",\"severity\":\"fatal\"}",
+     "fingerprint": "f4c4917965d63c4a0dedbc037b51e48e05ca648b934d62ad6e3522c48eddc657",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "biome reports error biome-diagnostic: No location",
+     "origin": "biome",
+     "path": "packages/inner/package.json",
+     "rule": "biome-diagnostic",
+     "severity": "error",
+     "sha": "711f3bb10e42c14c3b07a7c4c29ae2b73dd4e34172c87ead77c1bc63231fee12",
+     "title": "biome-diagnostic: No location",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "suspected",
+     "evidence": "{\"category\":\"lint/x\",\"description\":\"Outside span\",\"file\":\"../../etc/x.js\",\"severity\":\"hint\",\"span\":[900,901]}",
+     "fingerprint": "0421b856a4a4bdfd08dc0f213df2873819687f377e9fec7f0d70e716dc252688",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "hint",
+     "limitations": [],
+     "message": "biome reports info lint/x: Outside span",
+     "origin": "biome",
+     "path": "etc/x.js",
+     "rule": "lint/x",
+     "severity": "note",
+     "sha": "",
+     "title": "lint/x: Outside span",
+     "trust": "untrusted_data"
+    },
+    {
+     "confidence": "likely",
+     "evidence": "{\"category\":\"lint/y\",\"description\":\"One-element span\",\"file\":\"a b.js\",\"severity\":\"warning\"}",
+     "fingerprint": "13d23238fef68006c2d19d6d5b1d453ab4a83e097d75179930bf66d92b9e45cf",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "message": "biome reports warning lint/y: One-element span",
+     "origin": "biome",
+     "path": "packages/inner/a b.js",
+     "rule": "lint/y",
+     "severity": "warning",
+     "sha": "",
+     "title": "lint/y: One-element span",
+     "trust": "untrusted_data"
+    }
+   ]
+  },
+  {
+   "error": true,
+   "errorText": "Biome printed no JSON report: unexpected end of JSON input",
+   "evidence": [],
+   "findings": []
+  },
+  {
+   "error": false,
+   "evidence": [],
+   "findings": []
+  },
+  {
+   "error": true,
+   "errorText": "Biome printed no JSON report: json: cannot unmarshal number into Go struct field .diagnostics.0.category of type string",
+   "evidence": [],
+   "findings": []
+  },
+  {
+   "error": true,
+   "errorText": "Biome printed no JSON report: json: cannot unmarshal number 1.5 into .diagnostics.0.location.span.0 of type int",
+   "evidence": [],
+   "findings": []
+  },
+  {
+   "error": true,
+   "errorText": "Biome printed no JSON report: json: cannot unmarshal object into Go struct field .diagnostics.0.location.span of type []int",
+   "evidence": [],
+   "findings": []
+  },
+  {
+   "error": false,
+   "evidence": [
+    "{\"column\":7,\"file\":\"src/index.js\",\"line\":3,\"message\":\"'unused' is assigned a value but never used.\",\"rule\":\"no-unused-vars\",\"severity\":2}",
+    "{\"column\":9,\"file\":\"src/index.js\",\"line\":5,\"message\":\"Expected '===' and instead saw '=='. \\u003cb\\u003e\\u0026\",\"rule\":\"eqeqeq\",\"severity\":1}",
+    "{\"column\":8,\"file\":\"src/broken.js\",\"line\":1,\"message\":\"Parsing error: Unexpected token )\",\"rule\":\"parse-error\",\"severity\":2}",
+    "{\"column\":1,\"file\":\"src/old.js\",\"line\":2,\"message\":\"Unused eslint-disable directive.\",\"rule\":\"eslint-directive\",\"severity\":1}",
+    "{\"column\":1,\"file\":\"src/../../../up.js\",\"line\":1,\"message\":\"up\",\"rule\":\"x\",\"severity\":2}"
+   ],
+   "findings": [
+    {
+     "column": 7,
+     "confidence": "confirmed",
+     "evidence": "{\"column\":7,\"file\":\"src/index.js\",\"line\":3,\"message\":\"'unused' is assigned a value but never used.\",\"rule\":\"no-unused-vars\",\"severity\":2}",
+     "fingerprint": "b4f1317eaa2b4f47a0791058307a0037de42d3d6c34e223a5e5f1206b11b58cc",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 3,
+     "message": "eslint reports error no-unused-vars: 'unused' is assigned a value but never used.",
+     "origin": "eslint",
+     "path": "packages/inner/src/index.js",
+     "rule": "no-unused-vars",
+     "severity": "error",
+     "sha": "97a18ae8e28c3a8e24dc4a46fbb47a8106f7ca3e9e7a2015212caa44bf64db43",
+     "title": "no-unused-vars: 'unused' is assigned a value but never used.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 9,
+     "confidence": "likely",
+     "evidence": "{\"column\":9,\"file\":\"src/index.js\",\"line\":5,\"message\":\"Expected '===' and instead saw '=='. \\u003cb\\u003e\\u0026\",\"rule\":\"eqeqeq\",\"severity\":1}",
+     "fingerprint": "c444aaf4f7cf9d44a49ee866417ede612ac0cfb837fa596187525992e1915cea",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 5,
+     "message": "eslint reports warning eqeqeq: Expected '===' and instead saw '=='. \u003cb\u003e\u0026",
+     "origin": "eslint",
+     "path": "packages/inner/src/index.js",
+     "rule": "eqeqeq",
+     "severity": "warning",
+     "sha": "97a18ae8e28c3a8e24dc4a46fbb47a8106f7ca3e9e7a2015212caa44bf64db43",
+     "title": "eqeqeq: Expected '===' and instead saw '=='. \u003cb\u003e\u0026",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 8,
+     "confidence": "confirmed",
+     "evidence": "{\"column\":8,\"file\":\"src/broken.js\",\"line\":1,\"message\":\"Parsing error: Unexpected token )\",\"rule\":\"parse-error\",\"severity\":2}",
+     "fingerprint": "8a7e4acc66dfef1b77a8fe1d8c8f6c7ce8fb44df8eefb1588bb7c33f3e9106d2",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 1,
+     "message": "eslint reports error parse-error: Parsing error: Unexpected token )",
+     "origin": "eslint",
+     "path": "packages/inner/src/broken.js",
+     "rule": "parse-error",
+     "severity": "error",
+     "sha": "",
+     "title": "parse-error: Parsing error: Unexpected token )",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 1,
+     "confidence": "likely",
+     "evidence": "{\"column\":1,\"file\":\"src/old.js\",\"line\":2,\"message\":\"Unused eslint-disable directive.\",\"rule\":\"eslint-directive\",\"severity\":1}",
+     "fingerprint": "e37204a2fed4d5bbdfe49452d5a9201a41fb1e41f283b58ded89fb693f6d5ff6",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 2,
+     "message": "eslint reports warning eslint-directive: Unused eslint-disable directive.",
+     "origin": "eslint",
+     "path": "packages/inner/src/old.js",
+     "rule": "eslint-directive",
+     "severity": "warning",
+     "sha": "",
+     "title": "eslint-directive: Unused eslint-disable directive.",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 1,
+     "confidence": "confirmed",
+     "evidence": "{\"column\":1,\"file\":\"src/../../../up.js\",\"line\":1,\"message\":\"up\",\"rule\":\"x\",\"severity\":2}",
+     "fingerprint": "4ce6bed8cf2d46aec6c8629ee7c5201e39de36e90c605d0bba0fc0afd56ef2ea",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 1,
+     "message": "eslint reports error x: up",
+     "origin": "eslint",
+     "path": "up.js",
+     "rule": "x",
+     "severity": "error",
+     "sha": "",
+     "title": "x: up",
+     "trust": "untrusted_data"
+    }
+   ]
+  },
+  {
+   "error": false,
+   "evidence": [],
+   "findings": []
+  },
+  {
+   "error": false,
+   "evidence": [],
+   "findings": []
+  },
+  {
+   "error": true,
+   "errorText": "ESLint printed no JSON report: json: cannot unmarshal object into Go value of type []struct { FilePath string \"json:\\\"filePath\\\"\"; Messages []struct { RuleID *string \"json:\\\"ruleId\\\"\"; Severity int \"json:\\\"severity\\\"\"; Message string \"json:\\\"message\\\"\"; Line int \"json:\\\"line\\\"\"; Column int \"json:\\\"column\\\"\"; Fatal bool \"json:\\\"fatal\\\"\" } \"json:\\\"messages\\\"\" }",
+   "evidence": [],
+   "findings": []
+  },
+  {
+   "error": true,
+   "errorText": "ESLint printed no JSON report: json: cannot unmarshal string into Go struct field .0.messages.0.severity of type int",
+   "evidence": [],
+   "findings": []
+  },
+  {
+   "error": false,
+   "evidence": [
+    "{\"column\":2,\"file\":\"a.js\",\"line\":1,\"message\":\"m\",\"rule\":\"r\",\"severity\":2}"
+   ],
+   "findings": [
+    {
+     "column": 2,
+     "confidence": "confirmed",
+     "evidence": "{\"column\":2,\"file\":\"a.js\",\"line\":1,\"message\":\"m\",\"rule\":\"r\",\"severity\":2}",
+     "fingerprint": "bd3bb11952ef6d1e7e24bf75206db8ed9fa53a38b5d53a32262046698968da58",
+     "gate": true,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 1,
+     "message": "eslint reports error r: m",
+     "origin": "eslint",
+     "path": "packages/inner/a.js",
+     "rule": "r",
+     "severity": "error",
+     "sha": "",
+     "title": "r: m",
+     "trust": "untrusted_data"
+    }
+   ]
+  }
+ ],
+ "tsTargets": [
+  "es2024",
+  "es2024",
+  "es2024",
+  "es2023",
+  "es2023",
+  "es2022",
+  "es2021",
+  "es2020",
+  "es2019",
+  "es2024",
+  "es2019",
+  "es2024",
+  "es2024",
+  "es2024",
+  "es2024"
+ ],
+ "tscOutputs": [
+  {
+   "diagnostics": [
+    {
+     "category": "error",
+     "code": "TS2322",
+     "column": 1,
+     "line": 1,
+     "message": "Type 'string' is not assignable to type 'number'.\nType 'x' is not y.\ndeeper",
+     "path": "src/a.js"
+    },
+    {
+     "category": "warning",
+     "code": "TS6133",
+     "column": 7,
+     "line": 2,
+     "message": "unused.",
+     "path": "src/b.ts"
+    },
+    {
+     "category": "message",
+     "code": "TS6385",
+     "column": 4,
+     "line": 3,
+     "message": "info",
+     "path": "src/c.js"
+    },
+    {
+     "category": "error",
+     "code": "TS1",
+     "column": 2,
+     "line": 1,
+     "message": "x (y)",
+     "path": "src/(d).js"
+    },
+    {
+     "category": "error",
+     "code": "TS2",
+     "column": 2,
+     "line": 9223372036854775807,
+     "message": "huge",
+     "path": "src/e.js"
+    }
+   ],
+   "global": [
+    "error TS2688: Cannot find type definition file for 'mocha'.\nmore about it",
+    "warning TS0: global warning"
+   ]
+  },
+  {
+   "diagnostics": null,
+   "global": null
+  },
+  {
+   "diagnostics": null,
+   "global": null
+  },
+  {
+   "diagnostics": [
+    {
+     "category": "error",
+     "code": "TS9",
+     "column": 2,
+     "line": 1,
+     "message": "m(1,2): error TS8: nested",
+     "path": "a"
+    }
+   ],
+   "global": null
+  }
+ ],
+ "tsconfigs": [
+  "{\n  \"compilerOptions\": {\n    \"allowJs\": true,\n    \"checkJs\": true,\n    \"jsx\": \"preserve\",\n    \"module\": \"nodenext\",\n    \"noEmit\": true,\n    \"noImplicitAny\": false,\n    \"resolveJsonModule\": true,\n    \"skipLibCheck\": true,\n    \"strict\": false,\n    \"target\": \"es2024\",\n    \"typeRoots\": [\n      \"/work/node_modules/@types\",\n      \"/toolset/node_modules/@types\"\n    ],\n    \"types\": [\n      \"node\",\n      \"mocha\"\n    ]\n  },\n  \"files\": [\n    \"/work/src/a.js\",\n    \"/work/src/b.ts\"\n  ]\n}",
+  "{\n  \"compilerOptions\": {\n    \"allowJs\": true,\n    \"checkJs\": true,\n    \"jsx\": \"preserve\",\n    \"module\": \"nodenext\",\n    \"noEmit\": true,\n    \"noImplicitAny\": true,\n    \"resolveJsonModule\": true,\n    \"skipLibCheck\": true,\n    \"strict\": true,\n    \"target\": \"es2024\",\n    \"typeRoots\": [\n      \"/work/packages/inner/node_modules/@types\",\n      \"/work/packages/node_modules/@types\",\n      \"/work/node_modules/@types\",\n      \"/toolset/node_modules/@types\"\n    ],\n    \"types\": [\n      \"node\"\n    ]\n  },\n  \"files\": []\n}",
+  "{\n  \"compilerOptions\": {\n    \"allowJs\": true,\n    \"checkJs\": true,\n    \"jsx\": \"preserve\",\n    \"module\": \"nodenext\",\n    \"noEmit\": true,\n    \"noImplicitAny\": true,\n    \"resolveJsonModule\": true,\n    \"skipLibCheck\": true,\n    \"strict\": true,\n    \"target\": \"es2021\",\n    \"typeRoots\": [\n      \"/work/packages/a/b/node_modules/@types\",\n      \"/work/packages/a/node_modules/@types\",\n      \"/work/packages/node_modules/@types\",\n      \"/work/node_modules/@types\",\n      \"/toolset/node_modules/@types\"\n    ],\n    \"types\": [\n      \"node\",\n      \"mocha\"\n    ]\n  },\n  \"files\": [\n    \"/work/packages/a/b/a.js\"\n  ]\n}",
+  "{\n  \"compilerOptions\": {\n    \"allowJs\": true,\n    \"checkJs\": true,\n    \"jsx\": \"preserve\",\n    \"module\": \"nodenext\",\n    \"noEmit\": true,\n    \"noImplicitAny\": false,\n    \"resolveJsonModule\": true,\n    \"skipLibCheck\": true,\n    \"strict\": false,\n    \"target\": \"es2024\",\n    \"typeRoots\": [\n      \"/work/node_modules/@types\",\n      \"/toolset/node_modules/@types\"\n    ],\n    \"types\": [\n      \"node\"\n    ]\n  },\n  \"files\": [\n    \"/work/src/\\u003ca\\u003e\\u0026b.js\"\n  ]\n}"
+ ],
+ "typed": [
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.typed\",\n  \"context_id\": \"C-0002\",\n  \"eslint_version\": \"10.13.0\",\n  \"typescript_eslint_version\": \"8.72.0\",\n  \"rules\": [\n    \"@typescript-eslint/await-thenable\",\n    \"@typescript-eslint/no-floating-promises\",\n    \"@typescript-eslint/no-misused-promises\"\n  ],\n  \"rules_sha256\": \"1c8a1d857e9aaac0d6f56c303fe77303d12a5c3e41c3fb3a5ebbf529584ccd1f\",\n  \"options\": {\n    \"@typescript-eslint/await-thenable\": \"default\",\n    \"@typescript-eslint/no-floating-promises\": \"default, and a chain that ends in .catch(handler) or .then(onFulfilled, handler) counts as handled, whatever the type of the handler; the registration functions of node:test (test, it, describe, suite, before, after, beforeEach, afterEach, skip, only, todo) are known safe calls\",\n    \"@typescript-eslint/no-misused-promises\": \"default\"\n  }\n}\n",
+     "id": "rules-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.typed/C-0002-rules.json"
+    }
+   ],
+   "command": null,
+   "contextTools": [
+    {
+     "digest": "sha512-UohDjD4zSzEwhf58M3O7vc/ycc8O1I7dNlhtD0WxE8Px8EHNJKtUwzBqrzeGhisRuv2ag4sAYswszCJRgKXYUg==",
+     "name": "eslint",
+     "version": "10.13.0"
+    },
+    {
+     "digest": "sha512-r26Fkc8As+mZvqp7SLsMmNFyYUup/6CjK7/eHBHmhOw6GH6n6YFxHVFrG0jN1c5CMpDzelLPxvgeCOzx7BjN+A==",
+     "name": "typescript-eslint",
+     "version": "8.72.0"
+    },
+    {
+     "digest": "sha512-mbCddXd+jm7hfx7w2YU64/Av4/NqqeG3GoRZgxPcgoTxYjhrcfJRw9ULch71SS4G+Q3bOXFhRvPqjguN0Hyp5w==",
+     "name": "typescript6",
+     "version": "6.0.2"
+    },
+    {
+     "digest": "sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ==",
+     "name": "@types/node",
+     "version": "24.19.2"
+    },
+    {
+     "digest": "sha512-xPyYSz1cMPnJQhl0CLMH68j3gprKZaTjG3s5Vi+fDgx+uhG9NOXwbVt52eFS8ECyXhyKcjDLCBEqBExKuiZb7Q==",
+     "name": "@types/mocha",
+     "version": "10.0.10"
+    },
+    {
+     "digest": "1c8a1d857e9aaac0d6f56c303fe77303d12a5c3e41c3fb3a5ebbf529584ccd1f",
+     "name": "typed-lint-rules",
+     "version": "1c8a1d857e9a"
+    }
+   ],
+   "findings": [
+    {
+     "column": 3,
+     "confidence": "likely",
+     "evidence": "{\"path\":\"src/a.js\",\"rule_id\":\"@typescript-eslint/no-floating-promises\",\"message\":\"Promises \\u003cmust\\u003e be awaited \\u0026 more.\",\"line\":4,\"column\":3,\"fatal\":false}",
+     "fingerprint": "41a4db9fedfd062e58600bc6c83d2ed1f38b6be0e354d0d31790bd8169f07e5d",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 4,
+     "message": "typescript-eslint reports warning @typescript-eslint/no-floating-promises: a promise is neither awaited nor handled, so its result and a rejection are lost",
+     "origin": "eslint",
+     "path": "src/a.js",
+     "rule": "@typescript-eslint/no-floating-promises",
+     "severity": "warning",
+     "sha": "97a18ae8e28c3a8e24dc4a46fbb47a8106f7ca3e9e7a2015212caa44bf64db43",
+     "title": "@typescript-eslint/no-floating-promises: a promise is neither awaited nor handled, so its result and a rejection are los...",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 3,
+     "confidence": "likely",
+     "evidence": "{\"path\":\"src/a.js\",\"rule_id\":\"@typescript-eslint/no-misused-promises\",\"message\":\"m\",\"line\":9,\"column\":3,\"fatal\":false}",
+     "fingerprint": "a361c532e3a9eda54c6d37248c6ffeae3c8f7e648f45770dcc03d5e88ae160ae",
+     "gate": false,
+     "in_test_code": false,
+     "kind": "defect",
+     "limitations": [],
+     "line": 9,
+     "message": "typescript-eslint reports warning @typescript-eslint/no-misused-promises: a promise is used where a plain value or a callback that returns nothing is expected",
+     "origin": "eslint",
+     "path": "src/a.js",
+     "rule": "@typescript-eslint/no-misused-promises",
+     "severity": "warning",
+     "sha": "97a18ae8e28c3a8e24dc4a46fbb47a8106f7ca3e9e7a2015212caa44bf64db43",
+     "title": "@typescript-eslint/no-misused-promises: a promise is used where a plain value or a callback that returns nothing is expe...",
+     "trust": "untrusted_data"
+    },
+    {
+     "column": 3,
+     "confidence": "likely",
+     "evidence": "{\"path\":\"test/a.test.js\",\"rule_id\":\"@typescript-eslint/await-thenable\",\"message\":\"Unexpected await.\",\"line\":2,\"column\":3,\"fatal\":false}",
+     "fingerprint": "70cb3000b26cdfd8d478840b31df38fbd9d7315467d8fa7aedb2e9a70625b37a",
+     "gate": false,
+     "in_test_code": true,
+     "kind": "defect",
+     "limitations": [],
+     "line": 2,
+     "message": "typescript-eslint reports warning @typescript-eslint/await-thenable: await is applied to a value that is not a promise",
+     "origin": "eslint",
+     "path": "test/a.test.js",
+     "rule": "@typescript-eslint/await-thenable",
+     "severity": "warning",
+     "sha": "97a18ae8e28c3a8e24dc4a46fbb47a8106f7ca3e9e7a2015212caa44bf64db43",
+     "title": "@typescript-eslint/await-thenable: await is applied to a value that is not a promise",
+     "trust": "untrusted_data"
+    }
+   ],
+   "limitations": [
+    {
+     "check": "lint.typed",
+     "code": "files_not_parsed",
+     "message": "typescript-eslint could not parse these files and did not lint them: src/b.ts"
+    },
+    {
+     "check": "lint.typed",
+     "code": "files_too_large",
+     "message": "These files are over 2097152 bytes and were not linted: src/huge.js"
+    }
+   ],
+   "metrics": [
+    {
+     "name": "resolution_errors",
+     "unit": "errors",
+     "value": 1
+    }
+   ],
+   "reason": "some files are missing from this Check; see the Limitations",
+   "reasonCode": "check_could_not_run_on_some_files",
+   "status": "partial",
+   "tool": {
+    "exit": 0,
+    "name": "eslint",
+    "version": "10.13.0"
+   }
+  },
+  {
+   "artifacts": null,
+   "command": null,
+   "contextTools": [
+    {
+     "digest": "sha512-UohDjD4zSzEwhf58M3O7vc/ycc8O1I7dNlhtD0WxE8Px8EHNJKtUwzBqrzeGhisRuv2ag4sAYswszCJRgKXYUg==",
+     "name": "eslint",
+     "version": "10.13.0"
+    },
+    {
+     "digest": "sha512-r26Fkc8As+mZvqp7SLsMmNFyYUup/6CjK7/eHBHmhOw6GH6n6YFxHVFrG0jN1c5CMpDzelLPxvgeCOzx7BjN+A==",
+     "name": "typescript-eslint",
+     "version": "8.72.0"
+    },
+    {
+     "digest": "sha512-mbCddXd+jm7hfx7w2YU64/Av4/NqqeG3GoRZgxPcgoTxYjhrcfJRw9ULch71SS4G+Q3bOXFhRvPqjguN0Hyp5w==",
+     "name": "typescript6",
+     "version": "6.0.2"
+    },
+    {
+     "digest": "sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ==",
+     "name": "@types/node",
+     "version": "24.19.2"
+    },
+    {
+     "digest": "sha512-xPyYSz1cMPnJQhl0CLMH68j3gprKZaTjG3s5Vi+fDgx+uhG9NOXwbVt52eFS8ECyXhyKcjDLCBEqBExKuiZb7Q==",
+     "name": "@types/mocha",
+     "version": "10.0.10"
+    },
+    {
+     "digest": "1c8a1d857e9aaac0d6f56c303fe77303d12a5c3e41c3fb3a5ebbf529584ccd1f",
+     "name": "typed-lint-rules",
+     "version": "1c8a1d857e9a"
+    }
+   ],
+   "findings": [],
+   "limitations": null,
+   "metrics": null,
+   "reason": "ESLint printed no JSON document",
+   "reasonCode": "eslint_failed",
+   "status": "tool_error",
+   "tool": {
+    "exit": 2,
+    "name": "eslint",
+    "version": "10.13.0"
+   }
+  },
+  {
+   "artifacts": [
+    {
+     "content": "{\n  \"check\": \"lint.typed\",\n  \"context_id\": \"C-0002\",\n  \"eslint_version\": \"10.13.0\",\n  \"typescript_eslint_version\": \"8.72.0\",\n  \"rules\": [\n    \"@typescript-eslint/await-thenable\",\n    \"@typescript-eslint/no-floating-promises\",\n    \"@typescript-eslint/no-misused-promises\"\n  ],\n  \"rules_sha256\": \"1c8a1d857e9aaac0d6f56c303fe77303d12a5c3e41c3fb3a5ebbf529584ccd1f\",\n  \"options\": {\n    \"@typescript-eslint/await-thenable\": \"default\",\n    \"@typescript-eslint/no-floating-promises\": \"default, and a chain that ends in .catch(handler) or .then(onFulfilled, handler) counts as handled, whatever the type of the handler; the registration functions of node:test (test, it, describe, suite, before, after, beforeEach, afterEach, skip, only, todo) are known safe calls\",\n    \"@typescript-eslint/no-misused-promises\": \"default\"\n  }\n}\n",
+     "id": "rules-C-0002",
+     "mediaType": "application/json",
+     "path": "artifacts/lint.typed/C-0002-rules.json"
+    }
+   ],
+   "command": null,
+   "contextTools": [
+    {
+     "digest": "sha512-UohDjD4zSzEwhf58M3O7vc/ycc8O1I7dNlhtD0WxE8Px8EHNJKtUwzBqrzeGhisRuv2ag4sAYswszCJRgKXYUg==",
+     "name": "eslint",
+     "version": "10.13.0"
+    },
+    {
+     "digest": "sha512-r26Fkc8As+mZvqp7SLsMmNFyYUup/6CjK7/eHBHmhOw6GH6n6YFxHVFrG0jN1c5CMpDzelLPxvgeCOzx7BjN+A==",
+     "name": "typescript-eslint",
+     "version": "8.72.0"
+    },
+    {
+     "digest": "sha512-mbCddXd+jm7hfx7w2YU64/Av4/NqqeG3GoRZgxPcgoTxYjhrcfJRw9ULch71SS4G+Q3bOXFhRvPqjguN0Hyp5w==",
+     "name": "typescript6",
+     "version": "6.0.2"
+    },
+    {
+     "digest": "sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ==",
+     "name": "@types/node",
+     "version": "24.19.2"
+    },
+    {
+     "digest": "sha512-xPyYSz1cMPnJQhl0CLMH68j3gprKZaTjG3s5Vi+fDgx+uhG9NOXwbVt52eFS8ECyXhyKcjDLCBEqBExKuiZb7Q==",
+     "name": "@types/mocha",
+     "version": "10.0.10"
+    },
+    {
+     "digest": "1c8a1d857e9aaac0d6f56c303fe77303d12a5c3e41c3fb3a5ebbf529584ccd1f",
+     "name": "typed-lint-rules",
+     "version": "1c8a1d857e9a"
+    }
+   ],
+   "findings": [],
+   "limitations": [
+    {
+     "check": "lint.typed",
+     "code": "project_tsconfig_not_used",
+     "message": "30 of 40 type errors say TypeScript cannot find a module, namespace or global type (TS2307 and similar). The likely cause is that the Check ran without the project's own tsconfig: path aliases, `paths`, project references, a custom `lib` or `types` setting and project-specific global types are not known to it. The type-aware rules see an unresolved import as `any` and report less there. Treat these results with care."
+    }
+   ],
+   "metrics": [
+    {
+     "name": "resolution_errors",
+     "unit": "errors",
+     "value": 30
+    }
+   ],
+   "reason": "",
+   "reasonCode": "",
+   "status": "completed",
+   "tool": {
+    "exit": 0,
+    "name": "eslint",
+    "version": "10.13.0"
+   }
+  }
+ ],
+ "typedConfigs": [
+  {
+   "command": [
+    "node",
+    "/toolset/node_modules/eslint/bin/eslint.js",
+    "--no-config-lookup",
+    "--no-inline-config",
+    "--config",
+    "/jspf/eslint.config.mjs",
+    "--format",
+    "json",
+    "--",
+    "./src/a.js",
+    "./-x.js"
+   ],
+   "hash": "1c8a1d857e9aaac0d6f56c303fe77303d12a5c3e41c3fb3a5ebbf529584ccd1f",
+   "module": "import loaded from \"/toolset/node_modules/typescript-eslint/dist/index.js\";\nconst tseslint = loaded.default ?? loaded;\n// js-prueffactory's changes to the rules of typescript-eslint for lint.typed.\n// This text is part of the generated ESLint config module and runs inside it.\n\n// no-floating-promises accepts a rejection handler only if the type of the\n// argument has a call signature. In JavaScript without types the handler is\n// often `any` or `Function` (`.catch(next)` in Express), so that a chain that\n// does end in `.catch(handler)` or `.then(onFulfilled, handler)` is reported\n// as unhandled. The rule says so with these message IDs, and only then: a chain\n// with no handler at all gets other IDs. The reports about the handler are\n// dropped; the rule is otherwise untouched and keeps its ID.\nconst uselessHandlerReports = ['floatingUselessRejectionHandler', 'floatingUselessRejectionHandlerVoid'];\n\nfunction trustRejectionHandlers(rule) {\n  return {\n    ...rule,\n    create(context) {\n      const filtered = Object.create(context, {\n        report: {\n          value(descriptor) {\n            if (!uselessHandlerReports.includes(descriptor.messageId)) context.report(descriptor);\n          },\n        },\n      });\n      return rule.create(filtered);\n    },\n  };\n}\n\nconst plugin = {\n  ...tseslint.plugin,\n  rules: { ...tseslint.plugin.rules, 'no-floating-promises': trustRejectionHandlers(tseslint.plugin.rules['no-floating-promises']) },\n};\nconst config = [{\"files\":[\"**/*.js\",\"**/*.cjs\",\"**/*.mjs\",\"**/*.ts\",\"**/*.tsx\",\"**/*.mts\",\"**/*.cts\"],\"languageOptions\":{\"parser\":\"typescript-eslint parser\",\"parserOptions\":{\"project\":[\"/jspf/tsconfig.json\"],\"tsconfigRootDir\":\"/jspf\"}},\"linterOptions\":{\"noInlineConfig\":true,\"reportUnusedDisableDirectives\":\"off\"},\"plugins\":{\"@typescript-eslint\":\"typescript-eslint plugin\"},\"rules\":{\"@typescript-eslint/await-thenable\":\"warn\",\"@typescript-eslint/no-floating-promises\":[\"warn\",{\"allowForKnownSafeCalls\":[{\"from\":\"package\",\"name\":[\"test\",\"it\",\"describe\",\"suite\",\"before\",\"after\",\"beforeEach\",\"afterEach\",\"skip\",\"only\",\"todo\"],\"package\":\"node:test\"}]}],\"@typescript-eslint/no-misused-promises\":\"warn\"}},{\"files\":[\"**/*.js\"],\"languageOptions\":{\"sourceType\":\"commonjs\"}},{\"files\":[\"**/*.mjs\"],\"languageOptions\":{\"sourceType\":\"module\"}},{\"files\":[\"**/*.cjs\"],\"languageOptions\":{\"sourceType\":\"commonjs\"}}];\nfor (const c of config) {\n  if (c.languageOptions \u0026\u0026 c.languageOptions.parser) c.languageOptions.parser = tseslint.parser;\n  if (c.plugins) c.plugins = { '@typescript-eslint': plugin };\n}\nexport default config;\n",
+   "ruleList": "{\n  \"check\": \"lint.typed\",\n  \"context_id\": \"C-0002\",\n  \"eslint_version\": \"10.13.0\",\n  \"typescript_eslint_version\": \"8.72.0\",\n  \"rules\": [\n    \"@typescript-eslint/await-thenable\",\n    \"@typescript-eslint/no-floating-promises\",\n    \"@typescript-eslint/no-misused-promises\"\n  ],\n  \"rules_sha256\": \"1c8a1d857e9aaac0d6f56c303fe77303d12a5c3e41c3fb3a5ebbf529584ccd1f\",\n  \"options\": {\n    \"@typescript-eslint/await-thenable\": \"default\",\n    \"@typescript-eslint/no-floating-promises\": \"default, and a chain that ends in .catch(handler) or .then(onFulfilled, handler) counts as handled, whatever the type of the handler; the registration functions of node:test (test, it, describe, suite, before, after, beforeEach, afterEach, skip, only, todo) are known safe calls\",\n    \"@typescript-eslint/no-misused-promises\": \"default\"\n  }\n}\n"
+  },
+  {
+   "command": [
+    "node",
+    "/toolset/node_modules/eslint/bin/eslint.js",
+    "--no-config-lookup",
+    "--no-inline-config",
+    "--config",
+    "/jspf/eslint.config.mjs",
+    "--format",
+    "json",
+    "--",
+    "./src/a.js",
+    "./-x.js"
+   ],
+   "hash": "1c8a1d857e9aaac0d6f56c303fe77303d12a5c3e41c3fb3a5ebbf529584ccd1f",
+   "module": "import loaded from \"/toolset/node_modules/typescript-eslint/dist/index.js\";\nconst tseslint = loaded.default ?? loaded;\n// js-prueffactory's changes to the rules of typescript-eslint for lint.typed.\n// This text is part of the generated ESLint config module and runs inside it.\n\n// no-floating-promises accepts a rejection handler only if the type of the\n// argument has a call signature. In JavaScript without types the handler is\n// often `any` or `Function` (`.catch(next)` in Express), so that a chain that\n// does end in `.catch(handler)` or `.then(onFulfilled, handler)` is reported\n// as unhandled. The rule says so with these message IDs, and only then: a chain\n// with no handler at all gets other IDs. The reports about the handler are\n// dropped; the rule is otherwise untouched and keeps its ID.\nconst uselessHandlerReports = ['floatingUselessRejectionHandler', 'floatingUselessRejectionHandlerVoid'];\n\nfunction trustRejectionHandlers(rule) {\n  return {\n    ...rule,\n    create(context) {\n      const filtered = Object.create(context, {\n        report: {\n          value(descriptor) {\n            if (!uselessHandlerReports.includes(descriptor.messageId)) context.report(descriptor);\n          },\n        },\n      });\n      return rule.create(filtered);\n    },\n  };\n}\n\nconst plugin = {\n  ...tseslint.plugin,\n  rules: { ...tseslint.plugin.rules, 'no-floating-promises': trustRejectionHandlers(tseslint.plugin.rules['no-floating-promises']) },\n};\nconst config = [{\"files\":[\"**/*.js\",\"**/*.cjs\",\"**/*.mjs\",\"**/*.ts\",\"**/*.tsx\",\"**/*.mts\",\"**/*.cts\"],\"languageOptions\":{\"parser\":\"typescript-eslint parser\",\"parserOptions\":{\"project\":[\"/jspf/tsconfig.json\"],\"tsconfigRootDir\":\"/jspf\"}},\"linterOptions\":{\"noInlineConfig\":true,\"reportUnusedDisableDirectives\":\"off\"},\"plugins\":{\"@typescript-eslint\":\"typescript-eslint plugin\"},\"rules\":{\"@typescript-eslint/await-thenable\":\"warn\",\"@typescript-eslint/no-floating-promises\":[\"warn\",{\"allowForKnownSafeCalls\":[{\"from\":\"package\",\"name\":[\"test\",\"it\",\"describe\",\"suite\",\"before\",\"after\",\"beforeEach\",\"afterEach\",\"skip\",\"only\",\"todo\"],\"package\":\"node:test\"}]}],\"@typescript-eslint/no-misused-promises\":\"warn\"}},{\"files\":[\"**/*.js\"],\"languageOptions\":{\"sourceType\":\"module\"}},{\"files\":[\"**/*.mjs\"],\"languageOptions\":{\"sourceType\":\"module\"}},{\"files\":[\"**/*.cjs\"],\"languageOptions\":{\"sourceType\":\"commonjs\"}}];\nfor (const c of config) {\n  if (c.languageOptions \u0026\u0026 c.languageOptions.parser) c.languageOptions.parser = tseslint.parser;\n  if (c.plugins) c.plugins = { '@typescript-eslint': plugin };\n}\nexport default config;\n",
+   "ruleList": "{\n  \"check\": \"lint.typed\",\n  \"context_id\": \"C-0002\",\n  \"eslint_version\": \"10.13.0\",\n  \"typescript_eslint_version\": \"8.72.0\",\n  \"rules\": [\n    \"@typescript-eslint/await-thenable\",\n    \"@typescript-eslint/no-floating-promises\",\n    \"@typescript-eslint/no-misused-promises\"\n  ],\n  \"rules_sha256\": \"1c8a1d857e9aaac0d6f56c303fe77303d12a5c3e41c3fb3a5ebbf529584ccd1f\",\n  \"options\": {\n    \"@typescript-eslint/await-thenable\": \"default\",\n    \"@typescript-eslint/no-floating-promises\": \"default, and a chain that ends in .catch(handler) or .then(onFulfilled, handler) counts as handled, whatever the type of the handler; the registration functions of node:test (test, it, describe, suite, before, after, beforeEach, afterEach, skip, only, todo) are known safe calls\",\n    \"@typescript-eslint/no-misused-promises\": \"default\"\n  }\n}\n"
+  }
+ ]
+}

@@ -4,9 +4,9 @@
 // can say which files are tests (Go: colocated_tests_docker_test.go).
 //
 // The probe runs inside package.install, so these tests select it. The Go
-// tests also read lint.correctness (ticket 21), quality.suppressions (ticket
-// 22) and tests.coverage (ticket 15) over the moved files; those tickets add
-// the parts that need their Checks.
+// tests also read lint.correctness, quality.suppressions and tests.coverage over
+// the moved files; colocated_tests_lint, colocated_tests_inventory and
+// colocated_tests_coverage have those parts.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 

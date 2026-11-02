@@ -1,0 +1,429 @@
+// Generator of lint-oracle.json: what the Go build of the freeze commit
+// (238e07f66d8cafab24ef363cb79e207bd48babd8) answers for the lint Checks'
+// functions on the inputs of lint-oracle-cases.json: the helper input of the
+// combined ESLint run, the config hash, the generated tsconfig, tsc's output,
+// the typed-lint config module, Biome's byte offsets, the readers of the
+// linters' output and what lint.correctness, tests.smells, deps.engines,
+// lint.typed and lint.existing make of runs. Kept as text, because the
+// functions are unexported; regenerate from the repository root with:
+//
+//	cp internal/checks/testdata/lint-oracle.go.txt internal/checks/zz_lint_oracle_test.go
+//	go test ./internal/checks -run TestZZLintOracle -count=1 && rm internal/checks/zz_lint_oracle_test.go
+package checks
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"strings"
+	"testing"
+
+	"github.com/invia-flights/jscript-bench/internal/discovery"
+	"github.com/invia-flights/jscript-bench/internal/docker"
+	"github.com/invia-flights/jscript-bench/internal/resultset"
+)
+
+type lintAnswer struct {
+	Exit   int    `json:"exit"`
+	Stdout string `json:"stdout"`
+	Stderr string `json:"stderr"`
+	OOM    bool   `json:"oom"`
+	// Many generates an ESLint report of Count eqeqeq warnings and Gates no-undef errors.
+	Many *struct {
+		Count int `json:"count"`
+		Gates int `json:"gates"`
+	} `json:"many"`
+}
+
+type lintCases struct {
+	HelperInputs []struct {
+		Name    string            `json:"name"`
+		Project string            `json:"project"`
+		Files   map[string]string `json:"files"`
+		Node    string            `json:"node"`
+		Variant string            `json:"variant"`
+		Groups  []string          `json:"groups"`
+	} `json:"helperInputs"`
+	ConfigHashes []string `json:"configHashes"`
+	Tsconfigs    []struct {
+		Files   []string `json:"files"`
+		PkgPath string   `json:"pkgPath"`
+		Node    string   `json:"node"`
+		Mocha   bool     `json:"mocha"`
+		Strict  bool     `json:"strict"`
+	} `json:"tsconfigs"`
+	TsTargets   []string `json:"tsTargets"`
+	TscOutputs  []string `json:"tscOutputs"`
+	TypedConfig []struct {
+		Files map[string]string `json:"files"`
+	} `json:"typedConfigs"`
+	BiomeLines []struct {
+		Src    string `json:"src"`
+		Offset int    `json:"offset"`
+	} `json:"biomeLines"`
+	Parsing []struct {
+		Name   string            `json:"name"`
+		Kind   string            `json:"kind"`
+		Files  map[string]string `json:"files"`
+		Pkg    string            `json:"pkg"`
+		Stdout string            `json:"stdout"`
+	} `json:"parsing"`
+	Hits []struct {
+		Name      string            `json:"name"`
+		Check     string            `json:"check"`
+		Project   string            `json:"project"`
+		Files     map[string]string `json:"files"`
+		Pkg       string            `json:"pkg"`
+		Output    string            `json:"output"`
+		Oversized []string          `json:"oversized"`
+		// Many adds a file with Count hits of Rule to the output.
+		Many *struct {
+			Path  string `json:"path"`
+			Rule  string `json:"rule"`
+			Count int    `json:"count"`
+		} `json:"many"`
+	} `json:"hits"`
+	Typed []struct {
+		Name      string            `json:"name"`
+		Files     map[string]string `json:"files"`
+		ESLint    string            `json:"eslint"`
+		Oversized []string          `json:"oversized"`
+		Failed    string            `json:"failed"`
+		Exit      int               `json:"exit"`
+		TSC       string            `json:"tsc"`
+		TSCExit   int               `json:"tscExit"`
+	} `json:"typed"`
+	EngineVersions []struct {
+		Version string `json:"version"`
+		Variant string `json:"variant"`
+	} `json:"engineVersions"`
+	Existing []struct {
+		Name        string                `json:"name"`
+		Files       map[string]string     `json:"files"`
+		Answers     map[string]lintAnswer `json:"answers"`
+		Unsupported *struct {
+			Code   string `json:"code"`
+			Reason string `json:"reason"`
+		} `json:"unsupported"`
+	} `json:"existing"`
+}
+
+func zzFindings(fs []resultset.Finding) any {
+	if len(fs) > 20 {
+		return map[string]any{"count": len(fs), "first": zzFindings(fs[:2]), "last": zzFindings(fs[len(fs)-2:])}
+	}
+	out := []map[string]any{}
+	for _, f := range fs {
+		m := map[string]any{
+			"rule": *f.RuleID, "title": f.Title, "message": f.Message, "gate": f.Gate, "severity": f.Severity,
+			"confidence": f.Confidence, "kind": f.Kind, "in_test_code": f.InTestCode,
+			"fingerprint": f.Fingerprint.Value, "limitations": f.Limitations,
+		}
+		if len(f.Locations) > 0 {
+			l := f.Locations[0]
+			m["path"], m["sha"] = l.Path, l.FileSHA256
+			if l.Start != nil {
+				m["line"] = l.Start.Line
+				if l.Start.Column != nil {
+					m["column"] = *l.Start.Column
+				}
+			}
+		}
+		if len(f.Evidence) > 0 {
+			m["evidence"], m["origin"], m["trust"] = f.Evidence[0].Text, f.Evidence[0].Origin, f.Evidence[0].Trust
+		}
+		out = append(out, m)
+	}
+	return out
+}
+
+func zzResult(res *Result) map[string]any {
+	m := map[string]any{
+		"status": res.Status, "reasonCode": res.ReasonCode, "reason": res.Reason, "command": res.Command,
+		"findings": zzFindings(res.Findings),
+	}
+	if res.Tool != nil {
+		t := map[string]any{"name": res.Tool.Name}
+		if res.Tool.Version != nil {
+			t["version"] = *res.Tool.Version
+		}
+		if res.Tool.ExitCode != nil {
+			t["exit"] = *res.Tool.ExitCode
+		}
+		m["tool"] = t
+	}
+	var lims []map[string]any
+	for _, l := range res.Limitations {
+		c := ""
+		if l.CheckID != nil {
+			c = *l.CheckID
+		}
+		lims = append(lims, map[string]any{"code": l.ReasonCode, "message": l.Message, "check": c})
+	}
+	m["limitations"] = lims
+	var arts []map[string]any
+	for _, a := range res.Artifacts {
+		arts = append(arts, map[string]any{"id": a.ID, "path": a.Path, "mediaType": a.MediaType, "content": string(a.Content)})
+	}
+	m["artifacts"] = arts
+	var tools []map[string]any
+	for _, c := range res.ContextTools {
+		d := ""
+		if c.Digest != nil {
+			d = *c.Digest
+		}
+		tools = append(tools, map[string]any{"name": c.Name, "version": c.Version, "digest": d})
+	}
+	m["contextTools"] = tools
+	var metrics []map[string]any
+	for _, x := range res.Metrics {
+		metrics = append(metrics, map[string]any{"name": x.Name, "unit": x.Unit, "value": *x.Value})
+	}
+	m["metrics"] = metrics
+	return m
+}
+
+func zzInput(t *testing.T, project string, files map[string]string, pkg string) *Input {
+	t.Helper()
+	if pkg == "" {
+		pkg = "."
+	}
+	var proj *discovery.Project
+	var dir string
+	if project != "" {
+		proj, dir = eslintProblems(t)
+	} else {
+		proj, dir = writeTree(t, files)
+	}
+	return &Input{Project: proj, Context: packageContext(t, proj, pkg), OriginalPath: "/original", SnapshotDir: dir}
+}
+
+func TestZZLintOracle(t *testing.T) {
+	raw, err := os.ReadFile("testdata/lint-oracle-cases.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases lintCases
+	if err := json.Unmarshal(raw, &cases); err != nil {
+		t.Fatal(err)
+	}
+	out := map[string]any{}
+
+	var helperInputs []string
+	for _, c := range cases.HelperInputs {
+		in := zzInput(t, c.Project, c.Files, ".")
+		if c.Node != "" {
+			in.Context.Node.Version = c.Node
+		}
+		if c.Variant != "" {
+			in.Context.Node.Variant = c.Variant
+		}
+		var groups []eslintGroup
+		for _, id := range c.Groups {
+			groups = append(groups, eslintGroups[id])
+		}
+		input, err := eslintHelperInput(in, groups)
+		if err != nil {
+			t.Fatal(err)
+		}
+		data, _ := json.Marshal(input)
+		helperInputs = append(helperInputs, string(data))
+	}
+	out["helperInputs"] = helperInputs
+
+	var hashes []string
+	for _, c := range cases.ConfigHashes {
+		var v map[string]any
+		if err := json.Unmarshal([]byte(c), &v); err != nil {
+			t.Fatal(err)
+		}
+		hashes = append(hashes, configHash(v))
+	}
+	out["configHashes"] = hashes
+
+	var tsconfigs []string
+	for _, c := range cases.Tsconfigs {
+		data, err := typesTsconfigFor(c.Files, c.PkgPath, c.Node, c.Mocha, c.Strict)
+		if err != nil {
+			t.Fatal(err)
+		}
+		tsconfigs = append(tsconfigs, string(data))
+	}
+	out["tsconfigs"] = tsconfigs
+
+	var targets []string
+	for _, c := range cases.TsTargets {
+		targets = append(targets, tsTarget(c))
+	}
+	out["tsTargets"] = targets
+
+	var tsc []map[string]any
+	for _, c := range cases.TscOutputs {
+		diags, global := parseTSC(c)
+		var ds []map[string]any
+		for _, d := range diags {
+			ds = append(ds, map[string]any{"path": d.Path, "line": d.Line, "column": d.Column, "category": d.Category, "code": d.Code, "message": d.Message})
+		}
+		tsc = append(tsc, map[string]any{"diagnostics": ds, "global": global})
+	}
+	out["tscOutputs"] = tsc
+
+	var typedConfigs []map[string]any
+	for _, c := range cases.TypedConfig {
+		in := zzInput(t, "", c.Files, ".")
+		list, _ := typedLintRuleList(in)
+		typedConfigs = append(typedConfigs, map[string]any{
+			"module": typedLintConfigModule(in), "hash": typedLintRulesHash(), "ruleList": string(list),
+			"command": typedLintCommand([]string{"src/a.js", "-x.js"}),
+		})
+	}
+	out["typedConfigs"] = typedConfigs
+
+	var lines [][]int
+	for _, c := range cases.BiomeLines {
+		l, col := biomeLineAndColumn(c.Src, c.Offset)
+		lines = append(lines, []int{l, col})
+	}
+	out["biomeLines"] = lines
+
+	var parsing []map[string]any
+	for _, c := range cases.Parsing {
+		in := zzInput(t, "", c.Files, c.Pkg)
+		var fs []resultset.Finding
+		var err error
+		if c.Kind == "biome" {
+			fs, err = biomeFindings(in, []byte(c.Stdout))
+		} else {
+			fs, err = projectESLintFindings(in, []byte(c.Stdout))
+		}
+		m := map[string]any{"findings": zzFindings(fs), "error": err != nil}
+		if err != nil {
+			m["errorText"] = err.Error()
+		}
+		evidence := []string{}
+		for _, f := range fs {
+			evidence = append(evidence, f.Evidence[0].Text)
+		}
+		m["evidence"] = evidence
+		parsing = append(parsing, m)
+	}
+	out["parsing"] = parsing
+
+	var hits []map[string]any
+	for _, c := range cases.Hits {
+		in := zzInput(t, c.Project, c.Files, c.Pkg)
+		var o eslintOutput
+		if err := json.Unmarshal([]byte(c.Output), &o); err != nil {
+			t.Fatal(err)
+		}
+		if c.Many != nil {
+			var msgs []eslintMessage
+			for i := 1; i <= c.Many.Count; i++ {
+				msgs = append(msgs, eslintMessage{RuleID: c.Many.Rule, Message: fmt.Sprintf("hit %d", i), Line: i, Column: 1})
+			}
+			o.Results = append(o.Results, eslintFileResult{Path: c.Many.Path, Messages: msgs})
+		}
+		command := o.Command
+		if len(command) == 0 {
+			command = []string{"node", "/jspf/eslint-run.js", "/jspf/input.json"}
+		}
+		run := &eslintRun{Output: o, ConfigSHA256: configHash(o.Config), ExitCode: o.ExitCode, Command: command, Oversized: c.Oversized}
+		var res *Result
+		switch c.Check {
+		case "lint.correctness":
+			res = interpretLintCorrectness(in, run)
+		case "tests.smells":
+			res = interpretTestsSmells(in, run)
+		case "deps.engines":
+			res = interpretDepsEngines(in, run)
+		}
+		m := zzResult(res)
+		m["configSHA256"] = run.ConfigSHA256
+		hits = append(hits, m)
+	}
+	out["hits"] = hits
+
+	var typed []map[string]any
+	for _, c := range cases.Typed {
+		in := zzInput(t, "", c.Files, ".")
+		msgs, err := parseTypedLintOutput([]byte(c.ESLint), "/work")
+		if err != nil {
+			t.Fatal(err)
+		}
+		run := typedLintRun{Messages: msgs, ExitCode: c.Exit, Oversized: c.Oversized, Failed: c.Failed}
+		if c.TSC != "" {
+			diags, global := parseTSC(c.TSC)
+			run.TSC = &tscRun{Diagnostics: diags, Global: global, Exit: c.TSCExit}
+		}
+		typed = append(typed, zzResult(interpretTypedLint(in, run)))
+	}
+	out["typed"] = typed
+
+	var versions []string
+	for _, c := range cases.EngineVersions {
+		in := zzInput(t, "eslint-problems", nil, ".")
+		in.Context.Node.Version = c.Version
+		if c.Variant != "" {
+			in.Context.Node.Variant = c.Variant
+		}
+		versions = append(versions, engineNodeVersion(in.Context))
+	}
+	out["engineVersions"] = versions
+
+	var existing []map[string]any
+	for _, c := range cases.Existing {
+		in := zzInput(t, "", c.Files, ".")
+		if c.Unsupported != nil {
+			in.Context.Package.InstallUnsupported = &discovery.Unsupported{Code: c.Unsupported.Code, Reason: c.Unsupported.Reason}
+		}
+		var commands [][]string
+		old := runLintContainer
+		runLintContainer = func(_ context.Context, _ *Input, _ string, cmd []string) (*docker.ContainerResult, error) {
+			commands = append(commands, cmd)
+			key := ""
+			joined := strings.Join(cmd, " ")
+			switch {
+			case len(cmd) > 1 && cmd[1] == "-p" && strings.Contains(cmd[2], "eslint"):
+				key = "version:eslint"
+			case len(cmd) > 1 && cmd[1] == "-p":
+				key = "version:biome"
+			case strings.Contains(joined, "--vcs-enabled=false"):
+				key = "biome-novcs"
+			case strings.Contains(joined, "eslint.js"):
+				key = "eslint"
+			default:
+				key = "biome"
+			}
+			a, ok := c.Answers[key]
+			if ok && a.Many != nil {
+				msgs := ""
+				for i := 0; i < a.Many.Count; i++ {
+					msgs += `{"ruleId":"eqeqeq","severity":1,"message":"w","line":1,"column":1},`
+				}
+				for i := 0; i < a.Many.Gates; i++ {
+					msgs += `{"ruleId":"no-undef","severity":2,"message":"e","line":1,"column":1},`
+				}
+				a.Stdout = `[{"filePath":"/work/a.js","messages":[` + strings.TrimSuffix(msgs, ",") + `]}]`
+			}
+			if !ok {
+				t.Fatalf("%s: no answer for %s", c.Name, joined)
+			}
+			return &docker.ContainerResult{ExitCode: a.Exit, Stdout: []byte(a.Stdout), Stderr: []byte(a.Stderr), OOMKilled: a.OOM}, nil
+		}
+		res := lintExisting{}.Run(context.Background(), in)
+		runLintContainer = old
+		m := zzResult(res)
+		m["commands"] = commands
+		existing = append(existing, m)
+	}
+	out["existing"] = existing
+
+	data, err := json.MarshalIndent(out, "", " ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/lint-oracle.json", append(data, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}

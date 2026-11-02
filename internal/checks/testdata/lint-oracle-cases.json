@@ -1,0 +1,863 @@
+{
+ "helperInputs": [
+  {
+   "name": "eslint-problems all groups",
+   "project": "eslint-problems",
+   "node": "22.11.0",
+   "groups": [
+    "deps.engines",
+    "lint.correctness",
+    "tests.smells"
+   ]
+  },
+  {
+   "name": "eslint-problems selection",
+   "project": "eslint-problems",
+   "node": "26",
+   "variant": "alpine",
+   "groups": [
+    "tests.smells"
+   ]
+  },
+  {
+   "name": "module package",
+   "files": {
+    "package.json": "{\"type\":\"module\",\"scripts\":{\"test\":\"mocha\"}}",
+    "src/a.js": "1;\n",
+    "src/b.cjs": "1;\n",
+    "test/a.test.js": "1;\n"
+   },
+   "groups": [
+    "lint.correctness"
+   ]
+  }
+ ],
+ "configHashes": [
+  "{}",
+  "null",
+  "{\"a\":1,\"b\":[1,2,{\"c\":null}],\"z\":\"<&> é\"}",
+  "{\"b\":1.5,\"a\":1e21,\"c\":1e-7,\"d\":-0,\"e\":100000000000000000000,\"f\":123456789.123456789}",
+  "{\"x\":{\"y\":{\"z\":[]}},\"B\":1,\"a\":2}"
+ ],
+ "tsconfigs": [
+  {
+   "files": [
+    "src/a.js",
+    "src/b.ts"
+   ],
+   "pkgPath": ".",
+   "node": "24.22.1",
+   "mocha": true,
+   "strict": false
+  },
+  {
+   "files": [],
+   "pkgPath": "packages/inner",
+   "node": "",
+   "mocha": false,
+   "strict": true
+  },
+  {
+   "files": [
+    "a.js"
+   ],
+   "pkgPath": "packages/a/b",
+   "node": "16.20.0",
+   "mocha": true,
+   "strict": true
+  },
+  {
+   "files": [
+    "src/<a>&b.js"
+   ],
+   "pkgPath": ".",
+   "node": "v22",
+   "mocha": false,
+   "strict": false
+  }
+ ],
+ "tsTargets": [
+  "",
+  "24",
+  "24.22.1",
+  "23",
+  "20.1",
+  "18",
+  "16",
+  "14",
+  "12",
+  "x",
+  "007",
+  "99999999999999999999",
+  "v22",
+  "9223372036854775807",
+  "9223372036854775808"
+ ],
+ "tscOutputs": [
+  "src/a.js(1,1): error TS2322: Type 'string' is not assignable to type 'number'.\n  Type 'x' is not y.\n    deeper\nsrc/b.ts(2,7): warning TS6133: unused.\r\nerror TS2688: Cannot find type definition file for 'mocha'.\n  more about it\nsrc/c.js(3,4): message TS6385: info\nrandom line\n  orphan continuation\nsrc/(d).js(1,2): error TS1: x (y)\n\nsrc/e.js(99999999999999999999,2): error TS2: huge\nwarning TS0: global warning\n",
+  "",
+  "   \n\t\n",
+  "a(1,2): error TS9: m(1,2): error TS8: nested\n"
+ ],
+ "typedConfigs": [
+  {
+   "files": {
+    "package.json": "{\"name\":\"x\"}",
+    "src/a.js": "1;\n"
+   }
+  },
+  {
+   "files": {
+    "package.json": "{\"name\":\"x\",\"type\":\"module\"}",
+    "src/a.js": "1;\n"
+   }
+  }
+ ],
+ "biomeLines": [
+  {
+   "src": "ab\ncd",
+   "offset": 4
+  },
+  {
+   "src": "/* ü */ let x\n",
+   "offset": 9
+  },
+  {
+   "src": "abc",
+   "offset": 3
+  },
+  {
+   "src": "abc",
+   "offset": 4
+  },
+  {
+   "src": "abc",
+   "offset": -1
+  },
+  {
+   "src": "üx",
+   "offset": 1
+  },
+  {
+   "src": "a\n\nb€c",
+   "offset": 7
+  },
+  {
+   "src": "a\n\nb€c",
+   "offset": 5
+  },
+  {
+   "src": "",
+   "offset": 0
+  },
+  {
+   "src": "\r\nx",
+   "offset": 2
+  }
+ ],
+ "parsing": [
+  {
+   "name": "biome",
+   "kind": "biome",
+   "files": {
+    "package.json": "{\"name\":\"root\"}",
+    "packages/inner/package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "packages/inner/src/index.js": "1;\n"
+   },
+   "pkg": "packages/inner",
+   "stdout": "{\"summary\":{\"changed\":0,\"unchanged\":2,\"matches\":0,\"errors\":1,\"warnings\":2},\"diagnostics\":[{\"category\":\"lint/suspicious/noConsole\",\"severity\":\"warning\",\"description\":\"Don't use console.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/index.js\"},\"span\":[47,58],\"sourceCode\":\"'use strict';\\n\\nfunction main() {\\n  debugger;\\n  console.log('x');\\n  return 1;\\n}\\n\"},\"tags\":[],\"source\":null},{\"category\":\"lint/suspicious/noDebugger\",\"severity\":\"error\",\"description\":\"This is an unexpected use of the debugger statement.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/index.js\"},\"span\":[35,44],\"sourceCode\":\"'use strict';\\n\\nfunction main() {\\n  debugger;\\n  console.log('x');\\n  return 1;\\n}\\n\"},\"tags\":[\"fixable\"],\"source\":null},{\"category\":\"lint/style/useConst\",\"severity\":\"information\",\"description\":\"Use const & <so> on.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/ü.js\"},\"span\":[9,12],\"sourceCode\":\"/* ü */ let x\\n\"},\"tags\":[],\"source\":null},{\"category\":\"\",\"severity\":\"fatal\",\"description\":\"No location\",\"location\":null},{\"category\":\"lint/x\",\"severity\":\"hint\",\"description\":\"Outside span\",\"location\":{\"path\":{\"file\":\"../../etc/x.js\"},\"span\":[900,901],\"sourceCode\":\"abc\"}},{\"category\":\"lint/y\",\"severity\":\"warning\",\"description\":\"One-element span\",\"location\":{\"path\":{\"file\":\"a b.js\"},\"span\":[1],\"sourceCode\":\"abc\"}}],\"command\":\"lint\"}"
+  },
+  {
+   "name": "biome empty",
+   "kind": "biome",
+   "files": {
+    "package.json": "{\"name\":\"root\"}",
+    "packages/inner/package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "packages/inner/src/index.js": "1;\n"
+   },
+   "pkg": "packages/inner",
+   "stdout": ""
+  },
+  {
+   "name": "biome null",
+   "kind": "biome",
+   "files": {
+    "package.json": "{\"name\":\"root\"}",
+    "packages/inner/package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "packages/inner/src/index.js": "1;\n"
+   },
+   "pkg": "packages/inner",
+   "stdout": "null"
+  },
+  {
+   "name": "biome type error",
+   "kind": "biome",
+   "files": {
+    "package.json": "{\"name\":\"root\"}",
+    "packages/inner/package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "packages/inner/src/index.js": "1;\n"
+   },
+   "pkg": "packages/inner",
+   "stdout": "{\"diagnostics\":[{\"category\":5}]}"
+  },
+  {
+   "name": "biome span float",
+   "kind": "biome",
+   "files": {
+    "package.json": "{\"name\":\"root\"}",
+    "packages/inner/package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "packages/inner/src/index.js": "1;\n"
+   },
+   "pkg": "packages/inner",
+   "stdout": "{\"diagnostics\":[{\"category\":\"c\",\"location\":{\"path\":{\"file\":\"a.js\"},\"span\":[1.5,2]}}]}"
+  },
+  {
+   "name": "biome 2.5 style",
+   "kind": "biome",
+   "files": {
+    "package.json": "{\"name\":\"root\"}",
+    "packages/inner/package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "packages/inner/src/index.js": "1;\n"
+   },
+   "pkg": "packages/inner",
+   "stdout": "{\"summary\":{},\"diagnostics\":[{\"category\":\"lint/a\",\"severity\":\"error\",\"description\":\"d\",\"location\":{\"path\":{\"file\":\"src/index.js\"},\"span\":{\"start\":1,\"end\":2},\"sourceCode\":\"x\"}}]}"
+  },
+  {
+   "name": "eslint",
+   "kind": "eslint",
+   "files": {
+    "package.json": "{\"name\":\"root\"}",
+    "packages/inner/package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "packages/inner/src/index.js": "1;\n"
+   },
+   "pkg": "packages/inner",
+   "stdout": "[{\"filePath\":\"/work/packages/inner/src/index.js\",\"messages\":[{\"ruleId\":\"no-unused-vars\",\"severity\":2,\"message\":\"'unused' is assigned a value but never used.\",\"line\":3,\"column\":7,\"nodeType\":\"Identifier\",\"endLine\":3,\"endColumn\":13},{\"ruleId\":\"eqeqeq\",\"severity\":1,\"message\":\"Expected '===' and instead saw '=='. <b>&\",\"line\":5,\"column\":9}],\"suppressedMessages\":[{\"ruleId\":\"no-console\",\"severity\":2,\"message\":\"silenced\",\"line\":9,\"column\":1}],\"errorCount\":1,\"warningCount\":1},{\"filePath\":\"/work/packages/inner/src/clean.js\",\"messages\":[]},{\"filePath\":\"/work/packages/inner/src/broken.js\",\"messages\":[{\"ruleId\":null,\"fatal\":true,\"severity\":2,\"message\":\"Parsing error: Unexpected token )\",\"line\":1,\"column\":8}]},{\"filePath\":\"/work/packages/inner/src/old.js\",\"messages\":[{\"ruleId\":null,\"severity\":1,\"message\":\"Unused eslint-disable directive.\",\"line\":2,\"column\":1}]},{\"filePath\":\"/work/packages/inner/src/../../../up.js\",\"messages\":[{\"ruleId\":\"x\",\"severity\":2,\"message\":\"up\",\"line\":1,\"column\":1}]},{\"filePath\":\"/etc/passwd\",\"messages\":[{\"ruleId\":\"x\",\"severity\":2,\"message\":\"outside\",\"line\":1,\"column\":1}]}]"
+  },
+  {
+   "name": "eslint empty",
+   "kind": "eslint",
+   "files": {
+    "package.json": "{\"name\":\"root\"}",
+    "packages/inner/package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "packages/inner/src/index.js": "1;\n"
+   },
+   "pkg": "packages/inner",
+   "stdout": "[]"
+  },
+  {
+   "name": "eslint null",
+   "kind": "eslint",
+   "files": {
+    "package.json": "{\"name\":\"root\"}",
+    "packages/inner/package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "packages/inner/src/index.js": "1;\n"
+   },
+   "pkg": "packages/inner",
+   "stdout": "null"
+  },
+  {
+   "name": "eslint object",
+   "kind": "eslint",
+   "files": {
+    "package.json": "{\"name\":\"root\"}",
+    "packages/inner/package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "packages/inner/src/index.js": "1;\n"
+   },
+   "pkg": "packages/inner",
+   "stdout": "{\"results\":[]}"
+  },
+  {
+   "name": "eslint type error",
+   "kind": "eslint",
+   "files": {
+    "package.json": "{\"name\":\"root\"}",
+    "packages/inner/package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "packages/inner/src/index.js": "1;\n"
+   },
+   "pkg": "packages/inner",
+   "stdout": "[{\"filePath\":\"/work/packages/inner/a.js\",\"messages\":[{\"severity\":\"2\"}]}]"
+  },
+  {
+   "name": "eslint case-insensitive names",
+   "kind": "eslint",
+   "files": {
+    "package.json": "{\"name\":\"root\"}",
+    "packages/inner/package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "packages/inner/src/index.js": "1;\n"
+   },
+   "pkg": "packages/inner",
+   "stdout": "[{\"FILEPATH\":\"/work/packages/inner/a.js\",\"Messages\":[{\"RULEID\":\"r\",\"SEVERITY\":2,\"MESSAGE\":\"m\",\"LINE\":1,\"COLUMN\":2}]}]"
+  }
+ ],
+ "hits": [
+  {
+   "name": "problems",
+   "check": "lint.correctness",
+   "project": "eslint-problems",
+   "output": "{\"version\":\"10.13.0\",\"exit_code\":1,\"command\":[\"node\",\"/toolset/node_modules/eslint/bin/eslint.js\",\"(3 files)\"],\"config\":{\"eslint\":\"10.13.0\",\"limits\":{\"a\":1,\"b\":1.5,\"c\":1e+21,\"d\":\"<&>\",\"e\":null,\"f\":[true,false]},\"groups\":{\"lint.correctness\":[\"no-self-assign\",\"no-undef\"]}},\"groups\":{\"lint.correctness\":[\"no-self-assign\",\"no-undef\"],\"tests.smells\":[\"mocha/no-exclusive-tests\",\"mocha/no-pending-tests\"],\"deps.engines\":[\"n/no-deprecated-api\"]},\"results\":[{\"path\":\"src/index.js\",\"messages\":[{\"rule_id\":\"no-self-assign\",\"message\":\"'state.count' is assigned to itself. <x> & y\",\"line\":5,\"column\":3,\"end_line\":5,\"end_column\":28,\"fatal\":false},{\"rule_id\":\"no-undef\",\"message\":\"'aü' is not defined.\",\"line\":6,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false}]},{\"path\":\"test/index.test.js\",\"messages\":[{\"rule_id\":\"mocha/no-pending-tests\",\"message\":\"Unexpected pending mocha test.\",\"line\":8,\"column\":3,\"end_line\":0,\"end_column\":0,\"fatal\":false},{\"rule_id\":\"mocha/no-exclusive-tests\",\"message\":\"Unexpected exclusive mocha test.\",\"line\":6,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false},{\"rule_id\":\"n/no-deprecated-api\",\"message\":\"'new Buffer()' was deprecated since v6.0.0.\",\"line\":4,\"column\":10,\"end_line\":0,\"end_column\":0,\"fatal\":false}]},{\"path\":\"src/esm.mjs\",\"messages\":[{\"rule_id\":\"\",\"message\":\"Parsing error: Unexpected token\",\"line\":1,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":true}]}],\"measures\":[],\"measures_dropped\":0,\"measures_unreadable\":0,\"dropped_messages\":0}",
+   "oversized": []
+  },
+  {
+   "name": "smells",
+   "check": "tests.smells",
+   "project": "eslint-problems",
+   "output": "{\"version\":\"10.13.0\",\"exit_code\":1,\"command\":[\"node\",\"/toolset/node_modules/eslint/bin/eslint.js\",\"(3 files)\"],\"config\":{\"eslint\":\"10.13.0\",\"limits\":{\"a\":1,\"b\":1.5,\"c\":1e+21,\"d\":\"<&>\",\"e\":null,\"f\":[true,false]},\"groups\":{\"lint.correctness\":[\"no-self-assign\",\"no-undef\"]}},\"groups\":{\"lint.correctness\":[\"no-self-assign\",\"no-undef\"],\"tests.smells\":[\"mocha/no-exclusive-tests\",\"mocha/no-pending-tests\"],\"deps.engines\":[\"n/no-deprecated-api\"]},\"results\":[{\"path\":\"src/index.js\",\"messages\":[{\"rule_id\":\"no-self-assign\",\"message\":\"'state.count' is assigned to itself. <x> & y\",\"line\":5,\"column\":3,\"end_line\":5,\"end_column\":28,\"fatal\":false},{\"rule_id\":\"no-undef\",\"message\":\"'aü' is not defined.\",\"line\":6,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false}]},{\"path\":\"test/index.test.js\",\"messages\":[{\"rule_id\":\"mocha/no-pending-tests\",\"message\":\"Unexpected pending mocha test.\",\"line\":8,\"column\":3,\"end_line\":0,\"end_column\":0,\"fatal\":false},{\"rule_id\":\"mocha/no-exclusive-tests\",\"message\":\"Unexpected exclusive mocha test.\",\"line\":6,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false},{\"rule_id\":\"n/no-deprecated-api\",\"message\":\"'new Buffer()' was deprecated since v6.0.0.\",\"line\":4,\"column\":10,\"end_line\":0,\"end_column\":0,\"fatal\":false}]},{\"path\":\"src/esm.mjs\",\"messages\":[{\"rule_id\":\"\",\"message\":\"Parsing error: Unexpected token\",\"line\":1,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":true}]}],\"measures\":[],\"measures_dropped\":0,\"measures_unreadable\":0,\"dropped_messages\":0}",
+   "oversized": []
+  },
+  {
+   "name": "engines",
+   "check": "deps.engines",
+   "project": "eslint-problems",
+   "output": "{\"version\":\"10.13.0\",\"exit_code\":1,\"command\":[\"node\",\"/toolset/node_modules/eslint/bin/eslint.js\",\"(3 files)\"],\"config\":{\"eslint\":\"10.13.0\",\"limits\":{\"a\":1,\"b\":1.5,\"c\":1e+21,\"d\":\"<&>\",\"e\":null,\"f\":[true,false]},\"groups\":{\"lint.correctness\":[\"no-self-assign\",\"no-undef\"]}},\"groups\":{\"lint.correctness\":[\"no-self-assign\",\"no-undef\"],\"tests.smells\":[\"mocha/no-exclusive-tests\",\"mocha/no-pending-tests\"],\"deps.engines\":[\"n/no-deprecated-api\"]},\"results\":[{\"path\":\"src/index.js\",\"messages\":[{\"rule_id\":\"no-self-assign\",\"message\":\"'state.count' is assigned to itself. <x> & y\",\"line\":5,\"column\":3,\"end_line\":5,\"end_column\":28,\"fatal\":false},{\"rule_id\":\"no-undef\",\"message\":\"'aü' is not defined.\",\"line\":6,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false}]},{\"path\":\"test/index.test.js\",\"messages\":[{\"rule_id\":\"mocha/no-pending-tests\",\"message\":\"Unexpected pending mocha test.\",\"line\":8,\"column\":3,\"end_line\":0,\"end_column\":0,\"fatal\":false},{\"rule_id\":\"mocha/no-exclusive-tests\",\"message\":\"Unexpected exclusive mocha test.\",\"line\":6,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false},{\"rule_id\":\"n/no-deprecated-api\",\"message\":\"'new Buffer()' was deprecated since v6.0.0.\",\"line\":4,\"column\":10,\"end_line\":0,\"end_column\":0,\"fatal\":false}]},{\"path\":\"src/esm.mjs\",\"messages\":[{\"rule_id\":\"\",\"message\":\"Parsing error: Unexpected token\",\"line\":1,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":true}]}],\"measures\":[],\"measures_dropped\":0,\"measures_unreadable\":0,\"dropped_messages\":0}",
+   "oversized": []
+  },
+  {
+   "name": "oversized and dropped",
+   "check": "lint.correctness",
+   "project": "eslint-problems",
+   "output": "{\"version\":\"10.13.0\",\"exit_code\":1,\"command\":[\"node\",\"/toolset/node_modules/eslint/bin/eslint.js\",\"(3 files)\"],\"config\":{\"eslint\":\"10.13.0\",\"limits\":{\"a\":1,\"b\":1.5,\"c\":1e+21,\"d\":\"<&>\",\"e\":null,\"f\":[true,false]},\"groups\":{\"lint.correctness\":[\"no-self-assign\",\"no-undef\"]}},\"groups\":{\"lint.correctness\":[\"no-self-assign\",\"no-undef\"],\"tests.smells\":[\"mocha/no-exclusive-tests\",\"mocha/no-pending-tests\"],\"deps.engines\":[\"n/no-deprecated-api\"]},\"results\":[{\"path\":\"src/index.js\",\"messages\":[{\"rule_id\":\"no-self-assign\",\"message\":\"'state.count' is assigned to itself. <x> & y\",\"line\":5,\"column\":3,\"end_line\":5,\"end_column\":28,\"fatal\":false},{\"rule_id\":\"no-undef\",\"message\":\"'aü' is not defined.\",\"line\":6,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false}]}],\"measures\":[],\"measures_dropped\":0,\"measures_unreadable\":0,\"dropped_messages\":7}",
+   "oversized": [
+    "src/big.js",
+    "src/other-big.js"
+   ]
+  },
+  {
+   "name": "cut",
+   "check": "lint.correctness",
+   "project": "eslint-problems",
+   "output": "{\"version\":\"10.13.0\",\"exit_code\":1,\"command\":[\"node\",\"/toolset/node_modules/eslint/bin/eslint.js\",\"(3 files)\"],\"config\":{\"eslint\":\"10.13.0\",\"limits\":{\"a\":1,\"b\":1.5,\"c\":1e+21,\"d\":\"<&>\",\"e\":null,\"f\":[true,false]},\"groups\":{\"lint.correctness\":[\"no-self-assign\",\"no-undef\"]}},\"groups\":{\"lint.correctness\":[\"no-self-assign\",\"no-undef\"],\"tests.smells\":[\"mocha/no-exclusive-tests\",\"mocha/no-pending-tests\"],\"deps.engines\":[\"n/no-deprecated-api\"]},\"results\":[],\"measures\":[],\"measures_dropped\":0,\"measures_unreadable\":0,\"dropped_messages\":0}",
+   "many": {
+    "path": "src/index.js",
+    "rule": "no-self-assign",
+    "count": 2005
+   },
+   "oversized": []
+  },
+  {
+   "name": "no config",
+   "check": "lint.correctness",
+   "project": "eslint-problems",
+   "output": "{\"version\":\"10.13.0\",\"exit_code\":1,\"command\":[\"node\",\"/toolset/node_modules/eslint/bin/eslint.js\",\"(3 files)\"],\"config\":null,\"groups\":{\"lint.correctness\":[\"no-self-assign\",\"no-undef\"],\"tests.smells\":[\"mocha/no-exclusive-tests\",\"mocha/no-pending-tests\"],\"deps.engines\":[\"n/no-deprecated-api\"]},\"results\":[],\"measures\":[],\"measures_dropped\":0,\"measures_unreadable\":0,\"dropped_messages\":0}",
+   "oversized": []
+  },
+  {
+   "name": "nested",
+   "check": "lint.correctness",
+   "files": {
+    "package.json": "{\"name\":\"root\"}",
+    "packages/inner/package.json": "{\"name\":\"inner\"}",
+    "packages/inner/src/in.js": "x = x;\n"
+   },
+   "pkg": "packages/inner",
+   "output": "{\"version\":\"10.13.0\",\"exit_code\":1,\"command\":[\"node\",\"/toolset/node_modules/eslint/bin/eslint.js\",\"(3 files)\"],\"config\":{\"eslint\":\"10.13.0\",\"limits\":{\"a\":1,\"b\":1.5,\"c\":1e+21,\"d\":\"<&>\",\"e\":null,\"f\":[true,false]},\"groups\":{\"lint.correctness\":[\"no-self-assign\",\"no-undef\"]}},\"groups\":{\"lint.correctness\":[\"no-self-assign\",\"no-undef\"],\"tests.smells\":[\"mocha/no-exclusive-tests\",\"mocha/no-pending-tests\"],\"deps.engines\":[\"n/no-deprecated-api\"]},\"results\":[{\"path\":\"src/in.js\",\"messages\":[{\"rule_id\":\"no-self-assign\",\"message\":\"x\",\"line\":1,\"column\":1,\"end_line\":0,\"end_column\":0,\"fatal\":false}]}],\"measures\":[],\"measures_dropped\":0,\"measures_unreadable\":0,\"dropped_messages\":0}",
+   "oversized": []
+  }
+ ],
+ "typed": [
+  {
+   "name": "hits",
+   "files": {
+    "package.json": "{\"name\":\"x\",\"scripts\":{\"test\":\"mocha\"}}",
+    "src/a.js": "1;\n",
+    "src/b.ts": "export {};\n",
+    "src/types.d.ts": "export {};\n",
+    "test/a.test.js": "1;\n"
+   },
+   "eslint": "[{\"filePath\":\"/work/src/a.js\",\"messages\":[{\"ruleId\":\"@typescript-eslint/no-floating-promises\",\"severity\":1,\"message\":\"Promises <must> be awaited & more.\",\"line\":4,\"column\":3},{\"ruleId\":\"@typescript-eslint/no-misused-promises\",\"message\":\"m\",\"line\":9,\"column\":3},{\"ruleId\":\"no-undef\",\"message\":\"x\",\"line\":1,\"column\":1}]},{\"filePath\":\"/work/test/a.test.js\",\"messages\":[{\"ruleId\":\"@typescript-eslint/await-thenable\",\"message\":\"Unexpected await.\",\"line\":2,\"column\":3}]},{\"filePath\":\"/work/src/b.ts\",\"messages\":[{\"ruleId\":null,\"fatal\":true,\"message\":\"Parsing error\",\"line\":1,\"column\":1}]}]",
+   "oversized": [
+    "src/huge.js"
+   ],
+   "tsc": "src/a.ts(1,1): error TS2307: Cannot find module '@app/m' or its corresponding type declarations.\nsrc/b.ts(1,1): error TS2307: Cannot find module './data' or its corresponding type declarations.\n",
+   "tscExit": 2
+  },
+  {
+   "name": "failed",
+   "files": {
+    "package.json": "{\"name\":\"x\"}",
+    "src/a.js": "1;\n"
+   },
+   "eslint": "[]",
+   "failed": "ESLint printed no JSON document",
+   "exit": 2
+  },
+  {
+   "name": "flood",
+   "files": {
+    "package.json": "{\"name\":\"x\"}",
+    "src/a.ts": "export {};\n",
+    "src/b.js": "1;\n"
+   },
+   "eslint": "[]",
+   "oversized": [],
+   "tsc": "src/a.ts(1,1): error TS2307: Cannot find module '@app/m0' or its corresponding type declarations.\nsrc/a.ts(2,1): error TS2307: Cannot find module '@app/m1' or its corresponding type declarations.\nsrc/a.ts(3,1): error TS2307: Cannot find module '@app/m2' or its corresponding type declarations.\nsrc/a.ts(4,1): error TS2307: Cannot find module '@app/m3' or its corresponding type declarations.\nsrc/a.ts(5,1): error TS2307: Cannot find module '@app/m4' or its corresponding type declarations.\nsrc/a.ts(6,1): error TS2307: Cannot find module '@app/m5' or its corresponding type declarations.\nsrc/a.ts(7,1): error TS2307: Cannot find module '@app/m6' or its corresponding type declarations.\nsrc/a.ts(8,1): error TS2307: Cannot find module '@app/m7' or its corresponding type declarations.\nsrc/a.ts(9,1): error TS2307: Cannot find module '@app/m8' or its corresponding type declarations.\nsrc/a.ts(10,1): error TS2307: Cannot find module '@app/m9' or its corresponding type declarations.\nsrc/a.ts(11,1): error TS2307: Cannot find module '@app/m10' or its corresponding type declarations.\nsrc/a.ts(12,1): error TS2307: Cannot find module '@app/m11' or its corresponding type declarations.\nsrc/a.ts(13,1): error TS2307: Cannot find module '@app/m12' or its corresponding type declarations.\nsrc/a.ts(14,1): error TS2307: Cannot find module '@app/m13' or its corresponding type declarations.\nsrc/a.ts(15,1): error TS2307: Cannot find module '@app/m14' or its corresponding type declarations.\nsrc/a.ts(16,1): error TS2307: Cannot find module '@app/m15' or its corresponding type declarations.\nsrc/a.ts(17,1): error TS2307: Cannot find module '@app/m16' or its corresponding type declarations.\nsrc/a.ts(18,1): error TS2307: Cannot find module '@app/m17' or its corresponding type declarations.\nsrc/a.ts(19,1): error TS2307: Cannot find module '@app/m18' or its corresponding type declarations.\nsrc/a.ts(20,1): error TS2307: Cannot find module '@app/m19' or its corresponding type declarations.\nsrc/a.ts(21,1): error TS2307: Cannot find module '@app/m20' or its corresponding type declarations.\nsrc/a.ts(22,1): error TS2307: Cannot find module '@app/m21' or its corresponding type declarations.\nsrc/a.ts(23,1): error TS2307: Cannot find module '@app/m22' or its corresponding type declarations.\nsrc/a.ts(24,1): error TS2307: Cannot find module '@app/m23' or its corresponding type declarations.\nsrc/a.ts(25,1): error TS2307: Cannot find module '@app/m24' or its corresponding type declarations.\nsrc/a.ts(26,1): error TS2307: Cannot find module '@app/m25' or its corresponding type declarations.\nsrc/a.ts(27,1): error TS2307: Cannot find module '@app/m26' or its corresponding type declarations.\nsrc/a.ts(28,1): error TS2307: Cannot find module '@app/m27' or its corresponding type declarations.\nsrc/a.ts(29,1): error TS2307: Cannot find module '@app/m28' or its corresponding type declarations.\nsrc/a.ts(30,1): error TS2307: Cannot find module '@app/m29' or its corresponding type declarations.\nsrc/b.js(1,1): error TS2339: Property 'x' does not exist on type '{}'.\nsrc/b.js(1,1): error TS2339: Property 'x' does not exist on type '{}'.\nsrc/b.js(1,1): error TS2339: Property 'x' does not exist on type '{}'.\nsrc/b.js(1,1): error TS2339: Property 'x' does not exist on type '{}'.\nsrc/b.js(1,1): error TS2339: Property 'x' does not exist on type '{}'.\nsrc/b.js(1,1): error TS2339: Property 'x' does not exist on type '{}'.\nsrc/b.js(1,1): error TS2339: Property 'x' does not exist on type '{}'.\nsrc/b.js(1,1): error TS2339: Property 'x' does not exist on type '{}'.\nsrc/b.js(1,1): error TS2339: Property 'x' does not exist on type '{}'.\nsrc/b.js(1,1): error TS2339: Property 'x' does not exist on type '{}'.\n",
+   "tscExit": 2
+  }
+ ],
+ "engineVersions": [
+  {
+   "version": "24"
+  },
+  {
+   "version": "22"
+  },
+  {
+   "version": "26",
+   "variant": "alpine"
+  },
+  {
+   "version": "22.11"
+  },
+  {
+   "version": "22.11.0"
+  },
+  {
+   "version": "22.11.0.1"
+  },
+  {
+   "version": ">=18"
+  },
+  {
+   "version": ""
+  },
+  {
+   "version": "99"
+  },
+  {
+   "version": "007"
+  },
+  {
+   "version": "9223372036854775807"
+  },
+  {
+   "version": "9223372036854775808"
+  },
+  {
+   "version": "24",
+   "variant": "weird"
+  }
+ ],
+ "existing": [
+  {
+   "name": "eslint gate",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\"}}",
+    "eslint.config.js": "export default [];\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 0,
+     "stdout": "9.39.0\n"
+    },
+    "eslint": {
+     "exit": 1,
+     "stdout": "[{\"filePath\":\"/work/src/a.js\",\"messages\":[{\"ruleId\":\"no-undef\",\"severity\":2,\"message\":\"x is not defined.\",\"line\":1,\"column\":1},{\"ruleId\":\"eqeqeq\",\"severity\":1,\"message\":\"w\",\"line\":2,\"column\":2}]}]"
+    }
+   }
+  },
+  {
+   "name": "eslint clean",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\"}}",
+    "eslint.config.js": "export default [];\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 0,
+     "stdout": "9.39.0\n"
+    },
+    "eslint": {
+     "exit": 0,
+     "stdout": "[]"
+    }
+   }
+  },
+  {
+   "name": "eslint legacy",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^10\"}}",
+    ".eslintrc.json": "{}\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 0,
+     "stdout": "10.13.0\n"
+    },
+    "eslint": {
+     "exit": 2,
+     "stderr": "\nOops! Something went wrong! :(\n\nESLint: 10.13.0\n\nESLint couldn't find an eslint.config.* file.\n"
+    }
+   }
+  },
+  {
+   "name": "eslint legacy beta version",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^10\"}}",
+    ".eslintrc.json": "{}\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 0,
+     "stdout": "10.0.0-beta.1\n"
+    },
+    "eslint": {
+     "exit": 2,
+     "stderr": "ESLint couldn't find an eslint.config.* file.\n"
+    }
+   }
+  },
+  {
+   "name": "eslint failed",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\"},\"eslintConfig\":{\"extends\":\"nope\"}}"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 0,
+     "stdout": "9.39.0\n"
+    },
+    "eslint": {
+     "exit": 2,
+     "stderr": "Error: Cannot read config file"
+    }
+   }
+  },
+  {
+   "name": "eslint config fails to load",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\"}}",
+    "eslint.config.js": "x\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 0,
+     "stdout": "9.39.0\n"
+    },
+    "eslint": {
+     "exit": 2,
+     "stderr": "\n\nOops! Something went wrong! :(\n   Error: Cannot find module 'eslint-plugin-x'\n at <anonymous> & more"
+    }
+   }
+  },
+  {
+   "name": "eslint not installed",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\"}}",
+    "eslint.config.js": "module.exports = [];\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 1,
+     "stderr": "Error: Cannot find module"
+    }
+   }
+  },
+  {
+   "name": "eslint oom",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\"}}",
+    "eslint.config.js": "export default [];\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 0,
+     "stdout": "9.39.0\n"
+    },
+    "eslint": {
+     "exit": 137,
+     "oom": true
+    }
+   }
+  },
+  {
+   "name": "eslint cannot execute",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\"}}",
+    "eslint.config.js": "export default [];\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 0,
+     "stdout": "9.39.0\n"
+    },
+    "eslint": {
+     "exit": 126,
+     "stderr": "permission denied"
+    }
+   }
+  },
+  {
+   "name": "eslint not json",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\"}}",
+    "eslint.config.js": "export default [];\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 0,
+     "stdout": "9.39.0\n"
+    },
+    "eslint": {
+     "exit": 1,
+     "stdout": "Oops",
+     "stderr": "tail"
+    }
+   }
+  },
+  {
+   "name": "eslint version query fails",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\"}}",
+    "eslint.config.js": "export default [];\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 127,
+     "stderr": "node: not found"
+    }
+   }
+  },
+  {
+   "name": "biome",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "biome.json": "{}\n"
+   },
+   "answers": {
+    "version:biome": {
+     "exit": 0,
+     "stdout": "2.1.2\n"
+    },
+    "biome": {
+     "exit": 1,
+     "stdout": "{\"summary\":{\"changed\":0,\"unchanged\":2,\"matches\":0,\"errors\":1,\"warnings\":2},\"diagnostics\":[{\"category\":\"lint/suspicious/noConsole\",\"severity\":\"warning\",\"description\":\"Don't use console.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/index.js\"},\"span\":[47,58],\"sourceCode\":\"'use strict';\\n\\nfunction main() {\\n  debugger;\\n  console.log('x');\\n  return 1;\\n}\\n\"},\"tags\":[],\"source\":null},{\"category\":\"lint/suspicious/noDebugger\",\"severity\":\"error\",\"description\":\"This is an unexpected use of the debugger statement.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/index.js\"},\"span\":[35,44],\"sourceCode\":\"'use strict';\\n\\nfunction main() {\\n  debugger;\\n  console.log('x');\\n  return 1;\\n}\\n\"},\"tags\":[\"fixable\"],\"source\":null},{\"category\":\"lint/style/useConst\",\"severity\":\"information\",\"description\":\"Use const & <so> on.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/ü.js\"},\"span\":[9,12],\"sourceCode\":\"/* ü */ let x\\n\"},\"tags\":[],\"source\":null},{\"category\":\"\",\"severity\":\"fatal\",\"description\":\"No location\",\"location\":null},{\"category\":\"lint/x\",\"severity\":\"hint\",\"description\":\"Outside span\",\"location\":{\"path\":{\"file\":\"../../etc/x.js\"},\"span\":[900,901],\"sourceCode\":\"abc\"}},{\"category\":\"lint/y\",\"severity\":\"warning\",\"description\":\"One-element span\",\"location\":{\"path\":{\"file\":\"a b.js\"},\"span\":[1],\"sourceCode\":\"abc\"}}],\"command\":\"lint\"}"
+    }
+   }
+  },
+  {
+   "name": "biome retry ok",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "biome.json": "{}\n"
+   },
+   "answers": {
+    "version:biome": {
+     "exit": 0,
+     "stdout": "2.1.2\n"
+    },
+    "biome": {
+     "exit": 1,
+     "stderr": "/work internalError/fs ━━━━\n\n  × Biome couldn't find an ignore file in the following folder: /work\n\nconfiguration ━━━━\n\n  × Biome exited because the configuration resulted in errors. Please fix them.\n"
+    },
+    "biome-novcs": {
+     "exit": 1,
+     "stdout": "{\"summary\":{\"changed\":0,\"unchanged\":2,\"matches\":0,\"errors\":1,\"warnings\":2},\"diagnostics\":[{\"category\":\"lint/suspicious/noConsole\",\"severity\":\"warning\",\"description\":\"Don't use console.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/index.js\"},\"span\":[47,58],\"sourceCode\":\"'use strict';\\n\\nfunction main() {\\n  debugger;\\n  console.log('x');\\n  return 1;\\n}\\n\"},\"tags\":[],\"source\":null},{\"category\":\"lint/suspicious/noDebugger\",\"severity\":\"error\",\"description\":\"This is an unexpected use of the debugger statement.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/index.js\"},\"span\":[35,44],\"sourceCode\":\"'use strict';\\n\\nfunction main() {\\n  debugger;\\n  console.log('x');\\n  return 1;\\n}\\n\"},\"tags\":[\"fixable\"],\"source\":null},{\"category\":\"lint/style/useConst\",\"severity\":\"information\",\"description\":\"Use const & <so> on.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/ü.js\"},\"span\":[9,12],\"sourceCode\":\"/* ü */ let x\\n\"},\"tags\":[],\"source\":null},{\"category\":\"\",\"severity\":\"fatal\",\"description\":\"No location\",\"location\":null},{\"category\":\"lint/x\",\"severity\":\"hint\",\"description\":\"Outside span\",\"location\":{\"path\":{\"file\":\"../../etc/x.js\"},\"span\":[900,901],\"sourceCode\":\"abc\"}},{\"category\":\"lint/y\",\"severity\":\"warning\",\"description\":\"One-element span\",\"location\":{\"path\":{\"file\":\"a b.js\"},\"span\":[1],\"sourceCode\":\"abc\"}}],\"command\":\"lint\"}"
+    }
+   }
+  },
+  {
+   "name": "biome retry fails",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}"
+   },
+   "answers": {
+    "version:biome": {
+     "exit": 0,
+     "stdout": "2.1.2\n"
+    },
+    "biome": {
+     "exit": 1,
+     "stderr": "/work internalError/fs ━━━━\n\n  × Biome couldn't find an ignore file in the following folder: /work\n\nconfiguration ━━━━\n\n  × Biome exited because the configuration resulted in errors. Please fix them.\n"
+    },
+    "biome-novcs": {
+     "exit": 1,
+     "stderr": "/work internalError/fs ━━━━\n\n  × Biome couldn't find an ignore file in the following folder: /work\n\nconfiguration ━━━━\n\n  × Biome exited because the configuration resulted in errors. Please fix them.\n"
+    }
+   }
+  },
+  {
+   "name": "biome config problem",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}",
+    "biome.jsonc": "{}\n"
+   },
+   "answers": {
+    "version:biome": {
+     "exit": 0,
+     "stdout": "2.1.2\n"
+    },
+    "biome": {
+     "exit": 1,
+     "stderr": "biome.json:3:5 deserialize ━━━\n\n  × Found an unknown key `linterr`.\n"
+    }
+   }
+  },
+  {
+   "name": "biome config problem without a marker",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}"
+   },
+   "answers": {
+    "version:biome": {
+     "exit": 0,
+     "stdout": "2.1.2\n"
+    },
+    "biome": {
+     "exit": 1,
+     "stderr": "\nOops! something\n  Plain failure & <x>\n"
+    }
+   }
+  },
+  {
+   "name": "biome 2.5 style output",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}"
+   },
+   "answers": {
+    "version:biome": {
+     "exit": 0,
+     "stdout": "2.5.0\n"
+    },
+    "biome": {
+     "exit": 1,
+     "stdout": "{\"summary\":{},\"diagnostics\":[{\"category\":\"lint/a\",\"severity\":\"error\",\"description\":\"d\",\"location\":{\"path\":{\"file\":\"src/index.js\"},\"span\":{\"start\":1,\"end\":2},\"sourceCode\":\"x\"}}]}",
+     "stderr": "err"
+    }
+   }
+  },
+  {
+   "name": "biome oom",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}"
+   },
+   "answers": {
+    "version:biome": {
+     "exit": 0,
+     "stdout": "2.1.2\n"
+    },
+    "biome": {
+     "exit": 137,
+     "oom": true
+    }
+   }
+  },
+  {
+   "name": "biome not installed",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"@biomejs/biome\":\"2.1.2\"}}"
+   },
+   "answers": {
+    "version:biome": {
+     "exit": 1,
+     "stderr": "x"
+    }
+   }
+  },
+  {
+   "name": "both",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\",\"@biomejs/biome\":\"2.1.2\"}}",
+    "eslint.config.js": "module.exports = [];\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 0,
+     "stdout": "9.39.0\n"
+    },
+    "version:biome": {
+     "exit": 0,
+     "stdout": "2.1.2\n"
+    },
+    "eslint": {
+     "exit": 1,
+     "stdout": "[{\"filePath\":\"/work/a.js\",\"messages\":[{\"ruleId\":\"no-undef\",\"severity\":2,\"message\":\"m\",\"line\":1,\"column\":1}]}]"
+    },
+    "biome": {
+     "exit": 1,
+     "stdout": "{\"summary\":{\"changed\":0,\"unchanged\":2,\"matches\":0,\"errors\":1,\"warnings\":2},\"diagnostics\":[{\"category\":\"lint/suspicious/noConsole\",\"severity\":\"warning\",\"description\":\"Don't use console.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/index.js\"},\"span\":[47,58],\"sourceCode\":\"'use strict';\\n\\nfunction main() {\\n  debugger;\\n  console.log('x');\\n  return 1;\\n}\\n\"},\"tags\":[],\"source\":null},{\"category\":\"lint/suspicious/noDebugger\",\"severity\":\"error\",\"description\":\"This is an unexpected use of the debugger statement.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/index.js\"},\"span\":[35,44],\"sourceCode\":\"'use strict';\\n\\nfunction main() {\\n  debugger;\\n  console.log('x');\\n  return 1;\\n}\\n\"},\"tags\":[\"fixable\"],\"source\":null},{\"category\":\"lint/style/useConst\",\"severity\":\"information\",\"description\":\"Use const & <so> on.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/ü.js\"},\"span\":[9,12],\"sourceCode\":\"/* ü */ let x\\n\"},\"tags\":[],\"source\":null},{\"category\":\"\",\"severity\":\"fatal\",\"description\":\"No location\",\"location\":null},{\"category\":\"lint/x\",\"severity\":\"hint\",\"description\":\"Outside span\",\"location\":{\"path\":{\"file\":\"../../etc/x.js\"},\"span\":[900,901],\"sourceCode\":\"abc\"}},{\"category\":\"lint/y\",\"severity\":\"warning\",\"description\":\"One-element span\",\"location\":{\"path\":{\"file\":\"a b.js\"},\"span\":[1],\"sourceCode\":\"abc\"}}],\"command\":\"lint\"}"
+    }
+   }
+  },
+  {
+   "name": "one of two fails",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\",\"@biomejs/biome\":\"2.1.2\"}}",
+    "eslint.config.js": "export default [];\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 0,
+     "stdout": "1.0.0\n"
+    },
+    "version:biome": {
+     "exit": 0,
+     "stdout": "1.0.0\n"
+    },
+    "eslint": {
+     "exit": 137,
+     "oom": true
+    },
+    "biome": {
+     "exit": 1,
+     "stdout": "{\"summary\":{\"changed\":0,\"unchanged\":2,\"matches\":0,\"errors\":1,\"warnings\":2},\"diagnostics\":[{\"category\":\"lint/suspicious/noConsole\",\"severity\":\"warning\",\"description\":\"Don't use console.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/index.js\"},\"span\":[47,58],\"sourceCode\":\"'use strict';\\n\\nfunction main() {\\n  debugger;\\n  console.log('x');\\n  return 1;\\n}\\n\"},\"tags\":[],\"source\":null},{\"category\":\"lint/suspicious/noDebugger\",\"severity\":\"error\",\"description\":\"This is an unexpected use of the debugger statement.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/index.js\"},\"span\":[35,44],\"sourceCode\":\"'use strict';\\n\\nfunction main() {\\n  debugger;\\n  console.log('x');\\n  return 1;\\n}\\n\"},\"tags\":[\"fixable\"],\"source\":null},{\"category\":\"lint/style/useConst\",\"severity\":\"information\",\"description\":\"Use const & <so> on.\",\"message\":[],\"advices\":{\"advices\":[]},\"location\":{\"path\":{\"file\":\"src/ü.js\"},\"span\":[9,12],\"sourceCode\":\"/* ü */ let x\\n\"},\"tags\":[],\"source\":null},{\"category\":\"\",\"severity\":\"fatal\",\"description\":\"No location\",\"location\":null},{\"category\":\"lint/x\",\"severity\":\"hint\",\"description\":\"Outside span\",\"location\":{\"path\":{\"file\":\"../../etc/x.js\"},\"span\":[900,901],\"sourceCode\":\"abc\"}},{\"category\":\"lint/y\",\"severity\":\"warning\",\"description\":\"One-element span\",\"location\":{\"path\":{\"file\":\"a b.js\"},\"span\":[1],\"sourceCode\":\"abc\"}}],\"command\":\"lint\"}"
+    }
+   }
+  },
+  {
+   "name": "both fail",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\",\"@biomejs/biome\":\"2.1.2\"}}",
+    "eslint.config.js": "export default [];\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 0,
+     "stdout": "1.0.0\n"
+    },
+    "version:biome": {
+     "exit": 0,
+     "stdout": "1.0.0\n"
+    },
+    "eslint": {
+     "exit": 137,
+     "oom": true
+    },
+    "biome": {
+     "exit": 126,
+     "stderr": "no"
+    }
+   }
+  },
+  {
+   "name": "many findings",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\"}}",
+    "eslint.config.js": "export default [];\n"
+   },
+   "answers": {
+    "version:eslint": {
+     "exit": 0,
+     "stdout": "9.39.0\n"
+    },
+    "eslint": {
+     "exit": 1,
+     "many": {
+      "count": 2050,
+      "gates": 1
+     }
+    }
+   }
+  },
+  {
+   "name": "install unsupported",
+   "files": {
+    "package.json": "{\"devDependencies\":{\"eslint\":\"^9\"}}",
+    "eslint.config.js": "export default [];\n"
+   },
+   "unsupported": {
+    "code": "workspaces_unsupported",
+    "reason": "npm workspaces"
+   },
+   "answers": {}
+  }
+ ]
+}

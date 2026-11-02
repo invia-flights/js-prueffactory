@@ -392,6 +392,14 @@ describe("allowlist", () => {
           "runs/*only=*sbom.generate*",
           "artifacts/sbom.generate/*-sbom.cdx.json",
         ],
+        [
+          "runs/*only=lint,tests.smells,deps.engines",
+          "artifacts/package.install/*/npm-install.log",
+        ],
+        [
+          "runs/*only=types,quality.suppressions,quality.size,quality.metrics",
+          "artifacts/package.install/*/npm-install.log",
+        ],
       ],
     );
     for (const e of committed) {

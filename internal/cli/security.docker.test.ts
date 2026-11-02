@@ -433,8 +433,8 @@ function patternHitsAt(r: DockerRun): Map<string, string[]> {
 
 test("security.patterns finds insecure Source code from both rule sets and no suppression hides a Finding", async (t) => {
   // Go: TestSecurityPatternsFindInsecureSourceCodeFromBothRuleSetsAndNoSuppressionHidesAFinding
-  // (without the Suppressions inventory, which is quality.suppressions' and
-  // belongs to ticket 22)
+  // (without the Suppressions inventory, which is quality.suppressions' and is
+  // in security_patterns_inventory.docker.test.ts)
   const original = copyProject(t, "security-patterns");
   const before = treeFingerprint(original);
   const r = await realRun(t, ["test", original, "--only", "security.patterns"]);
