@@ -1,0 +1,290 @@
+package redact
+
+// Generator of go-oracle.json: what the frozen Go build computes for the
+// inputs of the TypeScript port's redaction tests. The Go code is frozen, so
+// this is kept as text. To regenerate at the freeze commit: copy it to
+// internal/redact/zz_oracle_test.go, run
+// go test -count=1 -run TestZZOracle ./internal/redact, delete the copy.
+
+import (
+	"encoding/base64"
+	"encoding/json"
+	"os"
+	"sort"
+	"strings"
+	"testing"
+
+	"github.com/invia-flights/jscript-bench/internal/render"
+	"github.com/invia-flights/jscript-bench/internal/resultset/resultsettest"
+	"github.com/invia-flights/jscript-bench/internal/schema"
+)
+
+type envCase struct {
+	Name, Value string
+	Rule        string
+}
+
+type selectCase struct {
+	Env     map[string]string
+	Values  []string
+	Sources map[string]string
+	Left    []string
+}
+
+type stringCase struct {
+	Text string
+	Out  string
+	N    int
+}
+
+type bytesCase struct {
+	In  string // base64
+	Out string // base64
+	N   int
+}
+
+type npmrcCase struct {
+	In     string   // base64
+	Values []string // base64 each, Go strings may hold any bytes
+}
+
+type artifactOut struct {
+	Path     string
+	Redacted bool
+	Content  string // base64
+}
+
+type caseMap struct {
+	In, Lower, Upper string
+}
+
+func b64(s string) string { return base64.StdEncoding.EncodeToString([]byte(s)) }
+
+func ptrTo[T any](v T) *T { return &v }
+
+func TestZZOracle(t *testing.T) {
+	out := map[string]any{"recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8"}
+
+	// LooksLikeSecret / secretRule on inputs where Go and JavaScript differ:
+	// Unicode case folding, Unicode white space, byte lengths.
+	envInputs := [][2]string{
+		{"API_KEY", "\u017fample"},           // long s folds to s in (?i)
+		{"API_KEY", "SAMPLE"},
+		{"X", "ye\u017f"},                    // plain value with long s
+		{"API_KEY", "moc\u212a"},             // Kelvin sign folds to k
+		{"API_KEY", "\u0130\u0130\u0130\u0130"}, // dotted capital I: Go lowers to i
+		{"API_KEY", "\u03a3\u03a3\u03a3\u03a3"}, // capital sigma
+		{"API_KEY", "\u03c3\u03c2\u03c3\u03c2"}, // sigma and final sigma
+		{"API_KEY", "\u0085token-value\u0085"},  // NEL is white space in Go
+		{"API_KEY", "\ufeffempty"},              // BOM is not white space in Go
+		{"API_KEY", "\u00a0empty\u00a0"},        // NBSP is white space in Go
+		{"API_KEY", "\u3000empty"},
+		{"PA\u00dfWORD", "value12"},             // sharp s has no simple upper case
+		{"pa\u017f\u017fword", "value12"},       // long s upper-cases to S
+		{"TO\ufb00KEN", "value12"},
+		{"\u0131auth", "value12"},               // dotless i upper-cases to I
+		{"X", "\u00e4\u00f6\u00fc\u00e4\u00f6\u00fc\u00e4\u00f6\u00fc\u00e4\u00f6\u00fc"},
+		{"X", "\u00c4bcdefGh1234"},
+		{"X", "Abcdefgh12\u00e9"},               // 11 characters, 12 bytes
+		{"API_KEY", "\u00e4\u00f6"},             // 2 characters, 4 bytes
+		{"API_KEY", "ab"},
+		{"X", "\uff11\uff12\uff13\uff14\uff15"}, // full-width digits
+		{"X", "12345"},
+		{"X", "123456"},
+		{"X", "https://\u00fcser:p\u00e4ssword@host/x"},
+		{"X", "a://b@c"},
+		{"X", "-----BEGIN "},
+		{"X", "abc.def-ghi:jkl_mno1"},
+		{"X", "abc.def-ghi:jkl.mno1"},
+		{"X", "\u2028secret-Token-1234\u2028"},
+		{"X", "aB3dE6gH9jK2mN5p"},
+		{"X", "aB3dE6gH9jK2mN5\U0001F600"},
+		{"X", "\U0001F600\U0001F600\U0001F600\U0001F600"},
+		{"API_KEY", "\U0001F600"},
+		{"X", "eyJhbGciOiJIUzI1NiJ9"},
+		{"X", "abcdefghijklmnop"},
+		{"X", "abcdefghijklmno1"},
+		{"X", "ABCDEFGHIJKLMNO1"},
+		{"X", "line one\nline two"},
+		{"X", "http://a b@c"},
+		{"X", "x://u@h\tmore://v@w"},
+		{"AUTH", "  "},
+		{"auth", "\u0130"},
+		{"X", "TRUE"},
+		{"X", "\u0074\u0072\u0075\u0065"},
+		{"API_KEY", "N/A"},
+		{"API_KEY", "n/a!"},
+		{"API_KEY", "xXxX"},
+		{"X", "Xk9fK3mQx7TzLw2VbN8s"},
+		{"X", "Qm7vR2xKp9LzT4wYb8NcJ3dH"},
+	}
+	var envCases []envCase
+	for _, in := range envInputs {
+		envCases = append(envCases, envCase{Name: in[0], Value: in[1], Rule: secretRule(in[0], in[1])})
+	}
+	out["env"] = envCases
+
+	envMaps := []map[string]string{
+		{
+			"Z": "aB3dE6gH9jK2mN5p", "a": "hello", "\u00e9": "x", "\U0001F600": "y-plain",
+			"\ue000": "aB3dE6gH9jK2mN5q", "API_TOKEN": "aB3dE6gH9jK2mN5p",
+		},
+		{
+			"CERT_PRIVATE_KEY": "line-one-secret\u0085  line-two-secret\r\n\nxy\r",
+			"SPACED_SECRET":    "two \u00a0words\u2028here",
+			"MULTI":            "a\rb\rc\rlonger-line-AB12!",
+		},
+		{
+			"DB_URL":  "postgres://us\u00e9r:p\u00e4ss@db/app?token=abcd1234efgh&x=1#f",
+			"HOOK":    "see https://h.example/T0123Abc9xYz/x?k=v https://u:pw99@m.example/a b",
+			"EMPTYQS": "postgres://u:pw@h/?#",
+		},
+		{
+			"GREETING": "hello", "CACHE_HOST": "store.internal", "PATH_PREFIX": "src/billing/",
+			"REPORT_SIGNING": "Xk9fK3mQx7TzLw2VbN8s",
+		},
+		{"SOME_SECRET_KEY": "empty", "STORE_TOKEN": "Qm7vR2xKp9LzT4wYb8NcJ3dH"},
+		{"DB_PASSWORD": "root", "AUTH_REALM": "confirmed", "SIGNING_KEY": "primary", "SESSION_SECRET": "parse", "API_TOKEN": "syntax"},
+	}
+	var selects []selectCase
+	for _, env := range envMaps {
+		sel := SelectEnv(env)
+		selects = append(selects, selectCase{Env: env, Values: sel.Values, Sources: sel.Sources, Left: sel.Left})
+	}
+	out["selectEnv"] = selects
+
+	// Spellings and the order in which they are replaced.
+	sp := New()
+	sp.Add("pa\"ss\\word-12345", "tab\there-123", "<html>&co", "line\u2028sep", "\U0001F600\U0001F600", "\u00e4\u00f6\u00fc",
+		"ab\u0007cd", "abcd", "abce", "\ue000abc", "\U00010000ab", "\u00e9\u00e9", "new\nline", "a\u2029b")
+	sp.AddTextOnly("dcba", "\u00e4\u00f6\u00fc", "x\ty\tz")
+	var forms []string
+	for _, f := range sp.forms(false) {
+		forms = append(forms, f.text)
+	}
+	var everywhere []string
+	for _, f := range sp.forms(true) {
+		everywhere = append(everywhere, f.text)
+	}
+	out["forms"] = forms
+	out["formsEverywhere"] = everywhere
+
+	// String on texts with multi-byte characters around and inside the values.
+	sr := New()
+	sr.Add("s3cr3t-v\u00e4lue", "\U0001F600\U0001F600", "abab", "token-abcdef", "token-abcdef-extended", "[REDACTED]x", "ACTED]")
+	var strs []stringCase
+	for _, text := range []string{
+		"\u00e4s3cr3t-v\u00e4lue\u00f6",
+		"\U0001F600\U0001F600\U0001F600\U0001F600\U0001F600",
+		"ababab abababab",
+		"x token-abcdef-extended y token-abcdef z",
+		"\U0001F600s3cr3t-v\u00e4lue\U0001F600 s3cr3t-v\\u00e4lue",
+		"[REDACTED]x and [REDACTED]",
+		"nothing here",
+		"",
+	} {
+		o, n := sr.String(text)
+		strs = append(strs, stringCase{Text: text, Out: o, N: n})
+	}
+	out["strings"] = strs
+
+	// Bytes on contents with invalid UTF-8 next to the values.
+	var bs []bytesCase
+	for _, in := range [][]byte{
+		[]byte("\xffs3cr3t-v\u00e4lue\xfe"),
+		[]byte("\xf0\x9f\x98\x80\xf0\x9f\x98\x80\xf0\x9f\x98"),
+		[]byte("\xe4s3cr3t-v\xc3\xa4lue"),
+		[]byte("abab\x00abab\x80abab"),
+		[]byte("{\"v\":\"s3cr3t-v\u00e4lue\"}"),
+		[]byte("clean"),
+	} {
+		o, n := sr.Bytes(append([]byte(nil), in...))
+		bs = append(bs, bytesCase{In: base64.StdEncoding.EncodeToString(in), Out: base64.StdEncoding.EncodeToString(o), N: n})
+	}
+	out["bytes"] = bs
+
+	// NpmrcValues, base64 decoding included.
+	var npm []npmrcCase
+	for _, in := range []string{
+		"//r/:_authToken=tok-abc\n//r/:_password=" + b64("pass\u00e4word") + "\n//r/:_auth=" + b64("u:p\u00e4ss:x") + "\n",
+		"//r/:_password=YWJj\n//r/:_password=YWJjZA\n//r/:_password=YWJjZA==\n//r/:_password=YW Jj\n",
+		"//r/:_password=YW\rJjZA==\n//r/:_auth=dTpw\n//r/:_auth=dXNlcg==\n",
+		"//r/:_password=/w==\n//r/:_password=YWJjZA=\n//r/:_password=YWJjZA===\n//r/:_password=YQ=a\n//r/:_password=YWJ-\n",
+		"//r/:_password=YWJjZB==\n//r/:_auth=\"'dTpw'\"\n  ; c\n\t# c\n//r/:_authToken = ${X}-y\n_authToken\nk=v=w_authToken\n",
+		"//r/:_authToken=\u00a0tok-xyz\u00a0\n\u0085//r/:_authToken=t2\r\n//r/:_authToken=\"\"\n",
+		"\xff//r/:_authToken=bad\xfebytes\n",
+	} {
+		var vals []string
+		for _, v := range NpmrcValues([]byte(in)) {
+			vals = append(vals, b64(v))
+		}
+		npm = append(npm, npmrcCase{In: b64(in), Values: vals})
+	}
+	out["npmrc"] = npm
+
+	// The hostile golden set, redacted.
+	h := resultsettest.Hostile()
+	hr := New()
+	hr.AddFrom("gitleaks", "a|b.js", "\U0001F600\U0001F600\U0001F600", "cdef0123", "test/a.js")
+	hr.AddTextOnlyFrom(".env", "line2\ttabbed", "alert(1)", "scripts.test", "<b>html</b>", "C-0002", "tool_output", "node --check", "``double``", "not a list")
+	count := hr.Apply(h)
+	doc, err := render.JSON(h)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var arts []artifactOut
+	for _, a := range h.Artifacts {
+		arts = append(arts, artifactOut{Path: a.Path, Redacted: a.Redacted, Content: base64.StdEncoding.EncodeToString(a.Content)})
+	}
+	out["hostile"] = map[string]any{"count": count, "report": string(doc), "artifacts": arts,
+		"explain": hr.Explain([]string{
+			"/findings/0/title: x", "/findings/0/locations/0/path: y", "/findings/1/locations/0/path: y",
+			"/findings/0/evidence: z", "/test_cases/0: w", "/artifacts/1/content: q", "/run/status: v", "no pointer",
+			"/findings/0/evidence/0/text: a", "/findings/0/evidence/1/text: a",
+		})}
+
+	// Explain on the populated fixture.
+	pr := New()
+	pr.AddTextOnlyFrom("env-secret-name (.env DB_PASSWORD)", "hunter2-made-up-value")
+	pr.AddFrom("gitleaks", "ghp_madeUpTokenForTheTest0123456789abcd")
+	pr.Add("unnamed-made-up-value")
+	ps := resultsettest.Populated()
+	ps.Findings[0].Title = "login with hunter2-made-up-value"
+	ps.Findings[0].Message = "token ghp_madeUpTokenForTheTest0123456789abcd leaked unnamed-made-up-value"
+	ps.Checks[0].Reason = ptrTo("fine")
+	pcount := pr.Apply(ps)
+	out["populated"] = map[string]any{"count": pcount, "explain": pr.Explain([]string{
+		"/findings/0/title: something is wrong",
+		"/findings/0/locations/0/path_base: value must be 'project_root'",
+		"/checks/0/reason: another problem",
+		"/findings/0: object problem",
+		"/findings/0/message: m",
+		"execution number 1 has ID \"x\", want \"E-0001\"",
+	})}
+
+	// strings.ToLower and strings.ToUpper, for the shared helpers.
+	var cases []caseMap
+	for _, in := range []string{
+		"Hello World", "\u0130stanbul", "\u03a3\u039f\u03a3", "stra\u00dfe", "\ufb00\ufb01", "\u017f\u212a\u0131",
+		"\u0149\u01f0", "\u1f80\u1f88", "\u0345", "\u01c5\u01c4\u01c6", "\U00010400\U00010428", "\u2c65\u023a",
+		"I\u0307", "\u1e9e", "\u0587",
+	} {
+		cases = append(cases, caseMap{In: in, Lower: strings.ToLower(in), Upper: strings.ToUpper(in)})
+	}
+	out["caseMapping"] = cases
+
+	closed := []string{}
+	for p := range schema.ClosedPaths() {
+		closed = append(closed, p)
+	}
+	sort.Strings(closed)
+	out["closedPaths"] = closed
+
+	data, err := json.MarshalIndent(out, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/go-oracle.json", append(data, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
