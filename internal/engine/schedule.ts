@@ -251,7 +251,7 @@ function failedPreparation(
  * execute runs one Check in one Context, inside the Budget and its own time
  * limit.
  */
-async function execute(
+export async function execute(
   r: RunState,
   signal: AbortSignal,
   budget: AbortSignal,

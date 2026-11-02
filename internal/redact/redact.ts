@@ -11,7 +11,7 @@
 import type { Field, Shape } from "../gocompat/json.ts";
 import { quoteJSONString } from "../gocompat/json.ts";
 import { utf8Bytes, utf8Length } from "../gocompat/strings.ts";
-import { decodeRune, text } from "../gocompat/utf8.ts";
+import { decodeRune, goString, text } from "../gocompat/utf8.ts";
 import { ReportShape, type Set as ResultSet } from "../resultset/types.ts";
 import { closedPaths } from "../schema/closed.ts";
 import { MinLength } from "./envvalues.ts";
@@ -36,6 +36,18 @@ function utf8Text(b: Uint8Array): string | null {
   } catch {
     return null;
   }
+}
+
+const lenientUTF8 = new TextDecoder("utf-8", { ignoreBOM: true });
+
+/**
+ * specificEnough says whether the decoded text of a value that is not UTF-8
+ * may be replaced in texts: what remains without the replacement characters
+ * must be at least MinLength bytes, so that a value of mostly invalid bytes
+ * never matches every run of U+FFFD in the Report.
+ */
+function specificEnough(decoded: string): boolean {
+  return utf8Length(decoded.replaceAll("\uFFFD", "")) >= MinLength;
 }
 
 /**
@@ -332,6 +344,17 @@ export class Redactor {
       const esc = jsonSpelling(raw);
       if (!esc.includes("\\u00")) {
         add(esc, sources);
+      }
+      // Go keeps the raw bytes in a string field and replaces them there.
+      // Here such a value reaches a text only after decoding: as Go's
+      // decoders do it (one U+FFFD per invalid byte) or as TextDecoder and
+      // Buffer.toString do it (one per maximal subpart). Both spellings are
+      // replaced, in texts and in artifacts built from texts, unless they are
+      // mostly replacement characters and would match unrelated text.
+      for (const decoded of [goString(raw), lenientUTF8.decode(raw)]) {
+        if (specificEnough(decoded)) {
+          add(decoded, sources);
+        }
       }
     }
     for (const values of sets) {
