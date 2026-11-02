@@ -161,7 +161,15 @@ export interface Report {
     budget_source: string;
     command: string;
   };
-  source: { original_unchanged: boolean; changed_paths: string[] };
+  source: {
+    original_unchanged: boolean;
+    changed_paths: string[];
+    excluded_paths: string[];
+    file_count: number;
+    snapshot_algorithm: string;
+    git: { commit: string; dirty: string } | null;
+  };
+  limitations: { reason_code: string; path: string | null }[];
   selection: { prerequisites_run: string[] };
   contexts: { id: string; tools: { name: string; digest: string | null }[] }[];
   checks: {
@@ -202,6 +210,8 @@ export async function realRun(
   options: {
     signal?: AbortSignal;
     onStderrLine?: (line: string) => void;
+    /** env replaces variables of the Run's environment. */
+    env?: Record<string, string>;
   } = {},
 ): Promise<DockerRun> {
   const tmp = tempDir(t);
@@ -213,6 +223,7 @@ export async function realRun(
     DOCKER_HOST: process.env.DOCKER_HOST ?? "",
     DOCKER_CONTEXT: process.env.DOCKER_CONTEXT ?? "",
     DOCKER_CONFIG: process.env.DOCKER_CONFIG ?? "",
+    ...options.env,
   };
   const out = new LineHook();
   const err = new LineHook(options.onStderrLine);
