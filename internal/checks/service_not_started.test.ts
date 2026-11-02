@@ -3,9 +3,9 @@
 // failures are not Gates, they carry a note, the Gaps say why, and the Pass
 // rate is not measured (tests.existing is partial). A suite is marked by a
 // static reference in env files or Test code, or by a failing test whose
-// Evidence shows a lookup or connection error for the Service's name. The Go
-// tests of the Checks that read a marked suite's runs (tests.flaky,
-// runtime.unhandled-rejections, runtime.warnings) belong to ticket 15.
+// Evidence shows a lookup or connection error for the Service's name. The
+// Findings of the Checks that read a marked suite's runs (tests.flaky,
+// runtime.unhandled-rejections, runtime.warnings) carry the note too.
 import assert from "node:assert/strict";
 import { type TestContext, test } from "node:test";
 
@@ -14,6 +14,7 @@ import {
   ConfidenceConfirmed,
   ConfidenceSuspected,
   type Finding,
+  type Limitation,
   SeverityNote,
   SeverityWarning,
   StatusCompleted,
@@ -21,6 +22,8 @@ import {
 } from "../resultset/types.ts";
 import { newFinding } from "../resultset/zero.ts";
 import type { Input, Result } from "./input.ts";
+import { runtimeUnhandledRejectionsID } from "./runtime_unhandled_rejections.ts";
+import { runtimeWarningsID } from "./runtime_warnings.ts";
 import {
   namesHost,
   noteServicesNotStarted,
@@ -35,12 +38,27 @@ import {
   runTestsExisting,
   mochaNative,
   passedAdd,
+  passedSub,
   results,
+  selectionWithout,
   stubSuite,
   stubSuites,
   suiteInput,
   twoSuiteInput,
 } from "./test_report.testutil.ts";
+import { parseTestEvents } from "./test_events.ts";
+import { testsFlakyID } from "./tests_flaky.ts";
+import {
+  crashedRun,
+  failedAdd,
+  flakyFindings,
+  metricValue,
+  rejectedAdd,
+  ruleOf,
+  runCheck,
+  stubRuns,
+  threeRuns,
+} from "./tests_flaky.testutil.ts";
 
 const minioCompose = `services:
   redis:
@@ -367,5 +385,334 @@ test("a host is named only as a whole host name", () => {
     ["minio.x", false],
   ] as const) {
     assert.equal(namesHost(text, "minio"), want, text);
+  }
+});
+
+// --- the Checks that read a marked suite's runs ---
+//
+// The Findings of the Checks that read a marked suite's runs carry the same
+// note as its failing tests, worded for what they are, and are suspected.
+// They are no Gates anyway, and their scoring does not change.
+
+/**
+ * readableRun is a run of the suite with the events and Findings a real run
+ * gives, for tests.existing and for the Checks that read the run.
+ */
+function readableRun(input: Input, ...events: string[]): Result {
+  const run = suiteRunOf(input, ...events);
+  run.command = ["node", "x"];
+  run.suite = {
+    selected: true,
+    stderr: Buffer.alloc(0),
+    events: parseTestEvents(Buffer.from(events.join("\n") + "\n")),
+    hung: false,
+    runner: input.suite()?.runner ?? "mocha",
+  };
+  return run;
+}
+
+/** openSocketRun is a run of the suite that left a socket open. */
+function openSocketRun(input: Input, ...events: string[]): Result {
+  return readableRun(
+    input,
+    ...events,
+    `{"ev":"end","resources":["TCPSocketWrap"]}`,
+  );
+}
+
+/**
+ * markedFlakyInput is a package with two tests, whose env file refers to the
+ * compose Service minio, which the Run does not start, unless isStatic is
+ * false.
+ */
+function markedFlakyInput(t: TestContext, isStatic: boolean): Input {
+  const files: Record<string, string> = {
+    "test/add.test.js": "x",
+    "src/index.js": "x",
+  };
+  if (isStatic) {
+    files["test/.test.env"] = "HOST=http://minio:9000/x\n";
+  }
+  return serviceInput(t, files);
+}
+
+/** okReadableRun is a first run in which both tests passed. */
+const okReadableRun = (input: Input): Result =>
+  readableRun(input, foundAdd, foundSub, passedAdd, passedSub, endOfSuite);
+
+/**
+ * wantServiceNote fails unless the Finding carries the note for the suite
+ * and the Service, worded for a warning, and is suspected.
+ */
+function wantServiceNote(
+  f: Finding | undefined,
+  suite: string,
+  what: string,
+): void {
+  assert.ok(f);
+  const note = `The suite \`${suite}\` may need the compose Service minio, which the Run did not start, so this ${what} may come from that and not from the project.`;
+  assert.ok(
+    f.message.includes(note),
+    `${ruleOf(f)} lacks the note ${note}: ${f.message}`,
+  );
+  assert.equal(f.confidence, ConfidenceSuspected, ruleOf(f));
+  assert.deepEqual(f.limitations, [serviceNotStarted], ruleOf(f));
+  assert.equal(f.gate, false, `${ruleOf(f)} is a Gate`);
+}
+
+function wantNoServiceNote(
+  f: Finding | undefined,
+  confidence: Finding["confidence"],
+): void {
+  assert.ok(f);
+  assert.ok(
+    !f.message.includes("minio") &&
+      f.confidence === confidence &&
+      f.limitations.length === 0,
+    `${ruleOf(f)} of an unmarked suite changed: ${f.confidence}, ${JSON.stringify(f.limitations)}, ${f.message}`,
+  );
+}
+
+const serviceLimitationsOf = (res: Result): Limitation[] =>
+  limitationsOfCode(res, serviceNotStarted);
+
+/**
+ * wantOwnServiceLimitation fails unless the Check, whose own run marked the
+ * suite of scripts.test, reports the Limitation its Findings refer to: the
+ * first run did not mark the suite, so tests.existing has none.
+ */
+function wantOwnServiceLimitation(res: Result, checkID: string): void {
+  const got = serviceLimitationsOf(res);
+  assert.equal(
+    got.length,
+    1,
+    `${checkID} has ${String(got.length)} service_not_started Limitations: ${JSON.stringify(res.limitations)}`,
+  );
+  const l = got[0];
+  assert.ok(l);
+  assert.equal(l.check_id, checkID);
+  assert.notEqual(l.path, null);
+  for (const want of ["`scripts.test`", "minio", "EAI_AGAIN"]) {
+    assert.ok(
+      l.message.includes(want),
+      `Limitation lacks ${want}: ${l.message}`,
+    );
+  }
+}
+
+const ofRule = (res: Result, rule: string): Finding[] =>
+  (res.findings ?? []).filter((f) => ruleOf(f) === rule);
+
+test("flaky tests and notes of a statically marked suite carry the note", async (t) => {
+  const input = markedFlakyInput(t, true);
+  threeRuns(
+    t,
+    (i) => readableRun(i, foundAdd, foundSub, passedAdd, passedSub, endOfSuite),
+    (i) => readableRun(i, foundAdd, foundSub, failedAdd, passedSub, endOfSuite),
+    (i) => readableRun(i, foundAdd, passedAdd, endOfSuite),
+  );
+
+  const res = await runCheck(testsFlakyID, input);
+
+  assert.equal(res.findings?.length, 2, JSON.stringify(res.findings));
+  const words: Record<string, string> = {
+    "flaky-test": "warning",
+    "test-in-some-runs": "note",
+  };
+  for (const f of res.findings ?? []) {
+    wantServiceNote(f, "scripts.test", words[ruleOf(f)] ?? "");
+  }
+  assert.equal(metricValue(res, "flaky_tests"), 1, "the note changes no count");
+});
+
+test("a flaky test is marked by a lookup error its own repeat run saw", async (t) => {
+  const input = markedFlakyInput(t, false);
+  threeRuns(
+    t,
+    (i) => readableRun(i, foundAdd, foundSub, passedAdd, passedSub, endOfSuite),
+    (i) =>
+      readableRun(i, foundAdd, foundSub, passedAdd, failedLookup, endOfSuite),
+    (i) => readableRun(i, foundAdd, foundSub, passedAdd, passedSub, endOfSuite),
+  );
+
+  const res = await runCheck(testsFlakyID, input);
+
+  const fs = flakyFindings(res);
+  assert.equal(fs.length, 1, JSON.stringify(res.findings));
+  wantServiceNote(fs[0], "scripts.test", "warning");
+  wantOwnServiceLimitation(res, testsFlakyID);
+});
+
+// A Service that the first run marked already has the Limitation of
+// tests.existing, so tests.flaky does not add a second one.
+test("a flaky test of a suite the first run marked adds no second Limitation", async (t) => {
+  const input = markedFlakyInput(t, true);
+  threeRuns(
+    t,
+    okReadableRun,
+    (i) => readableRun(i, foundAdd, foundSub, failedAdd, passedSub, endOfSuite),
+    okReadableRun,
+  );
+
+  const first = await runTestsExisting(input);
+  const res = await runCheck(testsFlakyID, input);
+
+  assert.equal(
+    serviceLimitationsOf(first).length,
+    1,
+    `tests.existing: ${JSON.stringify(first.limitations)}`,
+  );
+  assert.deepEqual(
+    serviceLimitationsOf(res),
+    [],
+    "tests.flaky repeats the Limitation of tests.existing",
+  );
+});
+
+test("a flaky test of an unmarked suite stays as it was", async (t) => {
+  const input = markedFlakyInput(t, false);
+  threeRuns(
+    t,
+    okReadableRun,
+    (i) => readableRun(i, foundAdd, foundSub, failedAdd, passedSub, endOfSuite),
+    okReadableRun,
+  );
+
+  const res = await runCheck(testsFlakyID, input);
+
+  const fs = flakyFindings(res);
+  assert.equal(fs.length, 1, JSON.stringify(res.findings));
+  wantNoServiceNote(fs[0], ConfidenceConfirmed);
+});
+
+test("unhandled rejections of a statically marked suite carry the note", async (t) => {
+  const input = markedFlakyInput(t, true);
+  input.selection = selectionWithout(testsFlakyID);
+  stubRuns(t, (i, n) =>
+    n === 1
+      ? okReadableRun(i)
+      : readableRun(i, foundAdd, foundSub, rejectedAdd, passedSub, endOfSuite),
+  );
+
+  const res = await runCheck(runtimeUnhandledRejectionsID, input);
+
+  const fs = ofRule(res, "unhandled-rejection");
+  assert.equal(fs.length, 1, JSON.stringify(res.findings));
+  wantServiceNote(fs[0], "scripts.test", "warning");
+});
+
+test("a strict run crash of a statically marked suite carries the note", async (t) => {
+  const input = markedFlakyInput(t, true);
+  input.selection = selectionWithout(testsFlakyID);
+  stubRuns(t, (i, n) =>
+    n === 1 ? okReadableRun(i) : crashedRun(i, passedAdd),
+  );
+
+  const res = await runCheck(runtimeUnhandledRejectionsID, input);
+
+  assert.equal(res.findings?.length, 1, JSON.stringify(res.findings));
+  assert.equal(
+    ruleOf(res.findings[0] ?? newFinding()),
+    "unhandled-rejection-crash",
+  );
+  wantServiceNote(res.findings[0], "scripts.test", "warning");
+});
+
+test("an unhandled rejection is marked by a lookup error the strict run saw", async (t) => {
+  const input = markedFlakyInput(t, false);
+  input.selection = selectionWithout(testsFlakyID);
+  stubRuns(t, (i, n) =>
+    n === 1
+      ? okReadableRun(i)
+      : readableRun(i, foundAdd, foundSub, passedAdd, failedLookup, endOfSuite),
+  );
+
+  const res = await runCheck(runtimeUnhandledRejectionsID, input);
+
+  const fs = ofRule(res, "unhandled-rejection");
+  assert.equal(fs.length, 1, JSON.stringify(res.findings));
+  wantServiceNote(fs[0], "scripts.test", "warning");
+  wantOwnServiceLimitation(res, runtimeUnhandledRejectionsID);
+});
+
+test("an unhandled rejection of an unmarked suite stays as it was", async (t) => {
+  const input = markedFlakyInput(t, false);
+  input.selection = selectionWithout(testsFlakyID);
+  stubRuns(t, (i, n) =>
+    n === 1
+      ? okReadableRun(i)
+      : readableRun(i, foundAdd, foundSub, rejectedAdd, passedSub, endOfSuite),
+  );
+
+  const res = await runCheck(runtimeUnhandledRejectionsID, input);
+
+  const fs = ofRule(res, "unhandled-rejection");
+  assert.equal(fs.length, 1, JSON.stringify(res.findings));
+  wantNoServiceNote(fs[0], "likely");
+});
+
+test("open resources of a statically marked suite carry the note", async (t) => {
+  const input = serviceInput(t, {
+    "test/add.test.js": "x",
+    "test/.test.env": "HOST=http://minio:9000/x\n",
+  });
+  stubSuite(t, openSocketRun(input, foundAdd, passedAdd));
+
+  await runTestsExisting(input);
+  const res = await runCheck(runtimeWarningsID, input);
+
+  assert.equal(res.findings?.length, 1, JSON.stringify(res.findings));
+  assert.equal(ruleOf(res.findings[0] ?? newFinding()), "open-resources");
+  wantServiceNote(res.findings[0], "scripts.test", "warning");
+});
+
+test("open resources of an unmarked suite stay as they were", async (t) => {
+  const input = serviceInput(t, { "test/add.test.js": "x" });
+  stubSuite(t, openSocketRun(input, foundAdd, passedAdd));
+
+  const res = await runCheck(runtimeWarningsID, input);
+
+  assert.equal(res.findings?.length, 1, JSON.stringify(res.findings));
+  wantNoServiceNote(res.findings[0], ConfidenceConfirmed);
+});
+
+test("only the suite with the runtime mark gets the note on its warnings", async (t) => {
+  const input = twoSuiteInput(t);
+  assert.ok(input.context.package);
+  input.context.package.serviceRefs = [];
+  input.project.services = [minio];
+  stubSuites(t, (i, ran) =>
+    ran === 0
+      ? openSocketRun(i, foundAdd, foundSub, passedAdd, failedOther)
+      : openSocketRun(i, foundAdd, foundSub, passedAdd, failedLookup),
+  );
+
+  const res = await runCheck(runtimeWarningsID, input);
+
+  assert.equal(res.findings?.length, 2, JSON.stringify(res.findings));
+  wantNoServiceNote(res.findings[0], ConfidenceConfirmed);
+  wantServiceNote(res.findings[1], "test:api", "warning");
+});
+
+test("a marked suite makes only tests.existing partial and not runtime.warnings", async (t) => {
+  const input = serviceInput(t, {
+    "test/add.test.js": "x",
+    "test/.test.env": "HOST=http://minio:9000/x\n",
+  });
+  stubSuite(t, readableRun(input, foundAdd, passedAdd, endOfSuite));
+
+  const tests = await runTestsExisting(input);
+  const warnings = await runCheck(runtimeWarningsID, input);
+
+  assert.equal(tests.status, StatusPartial);
+  assert.equal(tests.reasonCode, "service_not_started");
+  assert.equal(warnings.status, StatusCompleted);
+  assert.equal(warnings.reasonCode, undefined);
+  assert.equal(warnings.reason, undefined);
+  for (const l of warnings.limitations ?? []) {
+    assert.ok(
+      !l.message.includes("Pass rate"),
+      `runtime.warnings talks about the Pass rate: ${l.message}`,
+    );
   }
 });

@@ -14,9 +14,11 @@ import {
 import { background } from "../gocompat/context.ts";
 import type { Finding, Limitation } from "../resultset/types.ts";
 import { StatusCompleted } from "../resultset/types.ts";
+import { catalog } from "./catalog.ts";
 import { writeTree } from "./checks.testutil.ts";
 import { Input, type Result, type SuiteTestCase } from "./input.ts";
 import { useRunTestSuite } from "./runtime_warnings.ts";
+import { resolve } from "./selection.ts";
 import { Shared } from "./shared.ts";
 import { parseTestEvents, type SuiteEvents } from "./test_events.ts";
 import { type SuiteResults, suiteResults } from "./test_report.ts";
@@ -194,4 +196,9 @@ export function chainInput(t: TestContext): Input {
     }),
   ];
   return input;
+}
+
+/** selectionWithout is the Selection of every Check but the named ones. */
+export function selectionWithout(...exclude: string[]) {
+  return resolve(catalog(), [], exclude);
 }

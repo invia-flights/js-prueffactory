@@ -34,6 +34,7 @@ export interface Execution {
   } | null;
   artifact_ids: string[];
   finding_ids: string[];
+  duration_ms: number | null;
 }
 
 export interface Finding {
@@ -124,6 +125,7 @@ export interface Full {
       variant: string;
       image_digest: string;
     } | null;
+    tools: { name: string; version: string }[];
   }[];
   checks: Execution[];
   findings: Finding[];
@@ -152,7 +154,21 @@ export interface Full {
     context_id: string;
     name: string;
     value: number | null;
+    unit: string;
+    reason: string | null;
   }[];
+  benchmark: {
+    areas: {
+      id: string;
+      score: number | null;
+      parts: {
+        id: string;
+        state: string;
+        raw_value: number | null;
+        score: number | null;
+      }[];
+    }[];
+  } | null;
   summary: {
     gates: number;
     network_isolation: string;

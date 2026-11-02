@@ -214,7 +214,7 @@ function count(inv: PackageTests, t: TestRecord, outcome: TestOutcome): void {
  * explainNeverRun sets why a test has no result, and which hook Finding is
  * behind it when a hook is.
  */
-function explainNeverRun(
+export function explainNeverRun(
   input: Input,
   t: TestRecord,
   ev: SuiteEvents,
@@ -582,7 +582,7 @@ function hookFinding(
 }
 
 /** errorEvidence is the error message and stack of a test or hook as Evidence. */
-function errorEvidence(e: TestErr, origin: string): Evidence[] {
+export function errorEvidence(e: TestErr, origin: string): Evidence[] {
   const out: Evidence[] = [];
   const m = trimSpace(e.message);
   if (m !== "") {
@@ -687,7 +687,7 @@ function fileFailureFinding(
  * --option=value form and a file name that does, with ./ in front, so
  * neither can be read as an option.
  */
-function nativeTestCommand(
+export function nativeTestCommand(
   input: Input,
   base: readonly string[],
   file: string,
