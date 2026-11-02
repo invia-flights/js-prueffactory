@@ -1,0 +1,640 @@
+package checks
+
+// Generator of testdata/security-oracle.json (TypeScript port, ticket 19).
+// The Go code is frozen, so this file is kept as text: copy it to
+// internal/checks/zz_security_oracle_test.go, run
+//
+//	go test ./internal/checks -run TestZZSecurityOracle -count=1
+//
+// and delete the copy. It records what the security Checks make of hostile
+// input without Docker: the osv-scanner report reader and its verdict, the
+// version order, the severities, the scanned copy of the lockfile, the
+// coverage Limitation, the dependency Findings, the three native lockfile
+// Checks on inline projects, and the security.patterns readers, rewrite,
+// ignore comments and tar copy.
+//
+// Strings that may hold bytes that are no UTF-8 are written as byte strings
+// (one character U+0000 to U+00FF per byte); file contents are base64.
+
+import (
+	"archive/tar"
+	"bytes"
+	"context"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+	"testing"
+
+	"github.com/invia-flights/jscript-bench/internal/discovery"
+	"github.com/invia-flights/jscript-bench/internal/lockfile"
+	"github.com/invia-flights/jscript-bench/internal/resultset"
+)
+
+func zzBS(s string) string {
+	r := make([]rune, len(s))
+	for i := 0; i < len(s); i++ {
+		r[i] = rune(s[i])
+	}
+	return string(r)
+}
+
+// zzJSON is json.Marshal of v (HTML escaping on), as text.
+func zzJSON(t *testing.T, v any) string {
+	data, err := json.Marshal(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(data)
+}
+
+func zzFindings(fs []resultset.Finding) []resultset.Finding {
+	if fs == nil {
+		return []resultset.Finding{}
+	}
+	return fs
+}
+
+type zzProject struct {
+	Name  string            `json:"name"`
+	Files map[string]string `json:"files"` // path -> base64
+}
+
+func zzWrite(t *testing.T, files map[string]string) (string, map[string]string) {
+	dir := t.TempDir()
+	dir, _ = filepath.EvalSymlinks(dir)
+	enc := map[string]string{}
+	for name, content := range files {
+		p := filepath.Join(dir, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		enc[name] = base64.StdEncoding.EncodeToString([]byte(content))
+	}
+	return dir, enc
+}
+
+func zzInput(t *testing.T, dir, pkgPath string) *Input {
+	proj, err := discovery.Discover(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := range proj.Contexts {
+		if c := &proj.Contexts[i]; c.Package != nil && c.Package.Path == pkgPath {
+			return &Input{Project: proj, Context: c, OriginalPath: "/original", SnapshotDir: dir}
+		}
+	}
+	t.Fatalf("no package %s", pkgPath)
+	return nil
+}
+
+func zzLock(t *testing.T, entries string) *lockfile.Lock {
+	l, err := lockfile.ParseLock([]byte(`{"lockfileVersion": 3, "packages": {"": {"name": "x"}, ` + entries + `}}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return l
+}
+
+type zzFail struct {
+	Status string `json:"status"`
+	Code   string `json:"code"`
+	Reason string `json:"reason"`
+}
+
+type zzJudge struct {
+	Name       string     `json:"name"`
+	Exit       int        `json:"exit"`
+	Report     string     `json:"report"` // byte string
+	Entries    string     `json:"entries"`
+	Advisories []advisory `json:"advisories"`
+	Panic      string     `json:"panic"`
+	Fail       *zzFail    `json:"fail"`
+	Partial    string     `json:"partial"`
+	// Findings are the dependency Findings of the advisories, against a
+	// project with the same lockfile, for the database date below.
+	Findings string `json:"findings"`
+}
+
+const zzDate = "2026-10-26T09:00:00Z"
+
+var zzReports = []struct{ name string; exit int; report, entries string }{
+	{"the recorded minimist report", 1, osvMinimist, minimistEntry},
+	{"empty output", 0, "", minimistEntry},
+	{"white space only", 0, " \n\t", minimistEntry},
+	{"no results", 0, `{"results": []}`, minimistEntry},
+	{"null", 0, `null`, minimistEntry},
+	{"results null", 0, `{"results": null}`, minimistEntry},
+	{"not JSON", 0, "Scanned 1 package", minimistEntry},
+	{"trailing garbage", 0, `{"results": []} x`, minimistEntry},
+	{"a number for a name", 0, `{"results":[{"packages":[{"package":{"name":1,"version":"1.2.5"}}]}]}`, minimistEntry},
+	{"a string for the results", 0, `{"results":"x"}`, minimistEntry},
+	{"an array", 0, `[1]`, minimistEntry},
+	{"a number", 0, `5`, minimistEntry},
+	{"a string for a package", 0, `{"results":[{"packages":["x"]}]}`, minimistEntry},
+	{"a string for the ids", 1, `{"results":[{"packages":[{"package":{"name":"minimist","version":"1.2.5"},"groups":[{"ids":"GHSA-1"}]}]}]}`, minimistEntry},
+	{"a number for the severity", 1, `{"results":[{"packages":[{"package":{"name":"minimist","version":"1.2.5"},"groups":[{"ids":["GHSA-1"],"max_severity":9.8}]}]}]}`, minimistEntry},
+	{"keys in other case", 1, `{"Results":[{"PACKAGES":[{"Package":{"NAME":"minimist","Version":"1.2.5"},"Groups":[{"IDS":["GHSA-1"],"Aliases":["CVE-1"],"Max_Severity":"7.5"}],"Vulnerabilities":[{"ID":"GHSA-1","Summary":"s","Database_Specific":{"SEVERITY":"low"}}]}]}]}`, minimistEntry},
+	{"invalid UTF-8 in a summary", 1, "{\"results\":[{\"packages\":[{\"package\":{\"name\":\"minimist\",\"version\":\"1.2.5\"},\"groups\":[{\"ids\":[\"GHSA-1\"]}],\"vulnerabilities\":[{\"id\":\"GHSA-1\",\"summary\":\"bad \xff\xfe <b>&amp;</b>\"}]}]}]}", minimistEntry},
+	{"a chain of shared aliases", 1, `{"results":[{"packages":[{"package":{"name":"minimist","version":"1.2.5"},"groups":[
+		{"ids":["A"],"aliases":["A","X"],"max_severity":"3"},{"ids":["B"],"aliases":["B","Y"],"max_severity":"9"},{"ids":["C"],"aliases":["C","X","Y"]}],
+		"vulnerabilities":[{"id":"A","summary":"first"},{"id":"B","database_specific":{"severity":"MODERATE"}},{"id":"C","summary":"third"}]}]}]}`, minimistEntry},
+	{"the same package in two results", 1, `{"results":[
+		{"packages":[{"package":{"name":"minimist","version":"1.2.5"},"groups":[{"ids":["GHSA-1"],"aliases":["CVE-1"]}],"vulnerabilities":[{"id":"GHSA-1"}]}]},
+		{"packages":[{"package":{"name":"minimist","version":"1.2.5"},"groups":[{"ids":["CVE-1"],"aliases":["GHSA-2"],"max_severity":"8"}],"vulnerabilities":[]}]}]}`, minimistEntry},
+	{"severity notes merge", 1, `{"results":[
+		{"packages":[{"package":{"name":"minimist","version":"1.2.5"},"groups":[{"ids":["GHSA-1"]}],"vulnerabilities":[]}]},
+		{"packages":[{"package":{"name":"minimist","version":"1.2.5"},"groups":[{"ids":["GHSA-1"],"max_severity":"5"}],"vulnerabilities":[]}]}]}`, minimistEntry},
+	{"sorted by package, version and first ID", 1, `{"results":[{"packages":[
+		{"package":{"name":"b","version":"1.0.0"},"groups":[{"ids":["Z"]},{"ids":["A"]}]},
+		{"package":{"name":"a","version":"2.0.0"},"groups":[{"ids":["M"]}]},
+		{"package":{"name":"a","version":"10.0.0"},"groups":[{"ids":["M"]}]},
+		{"package":{"name":"é","version":"1.0.0"},"groups":[{"ids":["M"]}]},
+		{"package":{"name":"z","version":"1.0.0"},"groups":[{"ids":["M"]}]}]}]}`,
+		`"node_modules/a": {"version": "2.0.0"}, "node_modules/x/node_modules/a": {"version": "10.0.0", "dev": true}, "node_modules/b": {"version": "1.0.0", "dev": true}, "node_modules/é": {"version": "1.0.0"}, "node_modules/z": {"version": "1.0.0"}`},
+	{"fixed versions over several records", 1, `{"results":[{"packages":[{"package":{"name":"minimist","version":"1.2.5"},"groups":[{"ids":["A","B"]}],"vulnerabilities":[
+		{"id":"A","affected":[{"package":{"name":"minimist"},"ranges":[{"type":"SEMVER","events":[{"introduced":"0"},{"fixed":"1.2.6"}]}]},{"package":{"name":"other"},"ranges":[{"type":"SEMVER","events":[{"introduced":"0"},{"fixed":"9.9.9"}]}]}]},
+		{"id":"B","affected":[{"package":{"name":"minimist"},"ranges":[{"type":"GIT","events":[{"introduced":"0"},{"fixed":"5.0.0"}]},{"type":"ECOSYSTEM","events":[{"introduced":"1.2.0"},{"fixed":"1.2.8"},{"introduced":"2.0.0"},{"fixed":"2.0.1"}]}]}]}]}]}]}`, minimistEntry},
+	{"a malware advisory", 1, `{"results":[{"packages":[{"package":{"name":"minimist","version":"1.2.5"},"groups":[{"ids":["MAL-2024-1"],"max_severity":"0"}],"vulnerabilities":[{"id":"MAL-2024-1","database_specific":{"severity":"LOW"}}]}]}]}`, minimistEntry},
+	{"an alias that is a CVE first", 1, `{"results":[{"packages":[{"package":{"name":"minimist","version":"1.2.5"},"groups":[{"ids":["CVE-2"],"aliases":["CVE-1"]}],"vulnerabilities":[]}]}]}`, minimistEntry},
+	{"a group without IDs", 1, `{"results":[{"packages":[{"package":{"name":"minimist","version":"1.2.5"},"groups":[{"ids":[]}],"vulnerabilities":[]}]}]}`, minimistEntry},
+	{"vulnerabilities reported but none readable", 1, `{"results":[{"packages":[{"package":{"name":"minimist","version":"1.2.5"},"groups":[],"vulnerabilities":[]}]}]}`, minimistEntry},
+	{"no packages", 128, ``, minimistEntry},
+	{"no packages in an empty lockfile", 128, ``, `"node_modules/l": {"link": true, "resolved": "../l"}`},
+	{"a package the lockfile lacks and one it has", 0, `{"results":[{"packages":[{"package":{"name":"minimist","version":"1.2.5"}},{"package":{"name":"ghost","version":"1.0.0"}}]}]}`, minimistEntry + `, "node_modules/a": {"version": "1.0.0"}`},
+	{"an aliased package", 0, `{"results":[{"packages":[{"package":{"name":"long-name","version":"1.0.0"}}]}]}`, `"node_modules/short": {"name": "long-name", "version": "1.0.0"}`},
+	{"an advisory for a package in no entry", 1, `{"results":[{"packages":[{"package":{"name":"ghost","version":"1.0.0"},"groups":[{"ids":["GHSA-1"]}]}]}]}`, `"node_modules/ghost": {"version": "2.0.0"}`},
+	{"HTML in names", 1, `{"results":[{"packages":[{"package":{"name":"a<b>&c","version":"1.0.0"},"groups":[{"ids":["GHSA-<1>"]}],"vulnerabilities":[{"id":"GHSA-<1>","summary":"<script>&"}]}]}]}`, `"node_modules/a<b>&c": {"version": "1.0.0"}`},
+}
+
+var zzVersions = []string{
+	"1.2.5", "1.2.6", "1.10.0", "2.0.0-rc.1", "2.0.0", "2.0.0-rc.10", "2.0.0-rc.2", "1.0", "1.0.0+build", "v1.0.1", "1.0.0", "", "v",
+	"1.-1.0", "1.+1.0", "01.2.3", "1.2.3-01", "1.2.3-alpha", "1.2.3-alpha.beta", "1.2.3-alpha.1", "1.2.3-1", "1.2.3--",
+	"99999999999999999999.0.0", "9223372036854775807.0.0", "9223372036854775806.0.0", "1.2.3-9223372036854775808", "1.2.3-+5",
+	"1.2.3-a..b", "1.2.3-", "1.2.3+x-y", "1.2", " 1.2.3", "1.2.3.4", "1.2.3.4.5", "1.2.3-é", "1.2.3-Z", "1.2.3-a", "1.2.3-0", "1.2.3--1",
+}
+
+var zzSeverities = []string{
+	"9.8", "7.5", "5.0", "3.1", "0", "-1", "", "x", " 9 ", "9.", "9e0", "0x1p3", "0x10", "inf", "+Inf", "-inf", "NaN", "nan", "1_0",
+	"1e400", "4", "3.9999999999999999", "7", "\t7\n", "\u00859", " 9", "CRITICAL", "critical", " High ", "MEDIUM", "moderate", "LOW",
+	"none", "hıgh", "crıtıcal", "\u0085HIGH\u0085", "\ufeffHIGH", "ſ", "Low\u200b",
+}
+
+// zzScannable are lockfiles for scannableLockfile.
+var zzScannable = []string{
+	`{"name": "x", "lockfileVersion": 3, "requires": true, "extra": {"kept": "<&>"},
+  "packages": {
+    "": {"name": "x"},
+    "node_modules/a": {"version": "1.0.0", "resolved": "https://registry.npmjs.org/a/-/a-1.0.0.tgz"},
+    "node_modules/gitdep": {"version": "1.0.0", "resolved": "git+ssh://git@github.com/acme/gitdep.git#0123"},
+    "node_modules/shorthand": {"version": "1.0.0", "resolved": "github:acme/shorthand#0123"},
+    "node_modules/filedep": {"version": "1.0.0", "resolved": "file:vendor/filedep-1.0.0.tgz"},
+    "node_modules/bad": {"version": "1.0.0", "resolved": "https://h/%zz"},
+    "node_modules/colon": {"version": "1.0.0", "resolved": "a:b"},
+    "node_modules/HTTPS": {"version": "1.0.0", "resolved": "HTTPS://h/x.tgz"},
+    "node_modules/rel": {"version": "1.0.0", "resolved": "vendor/x.tgz"},
+    "node_modules/num": {"version": "1.0.0", "resolved": 5},
+    "node_modules/upper": {"version": "1.0.0", "RESOLVED": "git://h/x"},
+    "node_modules/linked": {"resolved": "../linked", "link": true}
+  }}`,
+	"\xef\xbb\xbf" + `{"lockfileVersion": 3, "packages": {"": {}, "node_modules/g": {"version": "1.0.0", "resolved": "git://h/g"}}}`,
+	`{"lockfileVersion": 3, "packages": {"": {}, "node_modules/a": {"version": "1.0.0", "resolved": "https://registry.npmjs.org/a/-/a-1.0.0.tgz"}}}`,
+	`{"lockfileVersion": 3, "packages": "x"}`,
+	`{"lockfileVersion": 3}`,
+	`{"lockfileVersion": 3, "packages": {"": {}, "node_modules/g": {"version": "1.0.0", "resolved": "git://h/g"}, "node_modules/g": {"version": "2.0.0", "resolved": "https://registry.npmjs.org/g/-/g-2.0.0.tgz"}}}`,
+	`[1]`,
+}
+
+var zzCoverage = []string{
+	`"node_modules/public": {"version": "1.0.0", "resolved": "https://registry.npmjs.org/public/-/public-1.0.0.tgz"},
+	"node_modules/@acme/a": {"version": "2.0.0", "resolved": "https://deploy:s3cret-token@registry.example.invalid:8443/@acme/a/-/a-2.0.0.tgz?token=abc"},
+	"node_modules/@acme/b": {"version": "2.0.0", "resolved": "https://registry.example.invalid/@acme/b/-/b-2.0.0.tgz"},
+	"node_modules/fromgit": {"version": "1.0.0", "resolved": "git+ssh://git@github.com/x/fromgit.git#abc"},
+	"node_modules/scp": {"version": "1.0.0", "resolved": "git@gitlab.example:x/scp.git"},
+	"node_modules/mirror": {"version": "1.0.0", "resolved": "https://registry.yarnpkg.com/mirror/-/mirror-1.0.0.tgz"},
+	"node_modules/lookalike": {"version": "1.0.0", "resolved": "https://registry.npmjs.org.evil.invalid/x.tgz"},
+	"node_modules/withauth": {"version": "1.0.0", "resolved": "https://user@registry.npmjs.org/withauth/-/withauth-1.0.0.tgz"},
+	"node_modules/upper": {"version": "1.0.0", "resolved": "https://REGISTRY.NPMJS.ORG/u/-/u-1.0.0.tgz"},
+	"node_modules/ipv6": {"version": "1.0.0", "resolved": "https://[::1]:8080/x.tgz"},
+	"node_modules/bad": {"version": "1.0.0", "resolved": "https://h/%zz"},
+	"node_modules/html": {"version": "1.0.0", "resolved": "https://a<b>.example/x.tgz"},
+	"node_modules/linked": {"resolved": "packages/linked", "link": true},
+	"node_modules/nowhere": {"version": "1.0.0"}`,
+	`"node_modules/one": {"version": "1.0.0", "resolved": "https://registry.example.invalid/one/-/one-1.0.0.tgz"}`,
+	`"node_modules/p": {"version": "1.0.0", "resolved": "https://registry.npmjs.org/p/-/p-1.0.0.tgz"}`,
+}
+
+var zzLockfileProjects = []struct {
+	name  string
+	files map[string]string
+}{
+	{"hostile resolved values", map[string]string{
+		"package.json": `{"name": "x"}`,
+		".npmrc":       "registry=https://Reg.Example.COM/\n//Auth.Example.ORG/:_authToken=${T}\n@s:registry = \"https://scoped.example.net/npm/\"\n//${HOST}/:x=1\nregistry=${R}\n  # registry=https://comment.example/\n\xef\xbb\xbfregistry=https://bom.example/\nnoequals\n",
+		"package-lock.json": `{"lockfileVersion": 3, "packages": {"": {},
+  "node_modules/a": {"version": "1.0.0", "resolved": "https://reg.example.com/a/-/a-1.0.0.tgz", "integrity": "sha512-x"},
+  "node_modules/b": {"version": "1.0.0", "resolved": "HTTP://AUTH.example.org/b/-/b.tgz", "integrity": "SHA512-x"},
+  "node_modules/c": {"version": "1.0.0", "resolved": "https://scoped.example.net/c.tgz", "integrity": "sha256-x sha384-y"},
+  "node_modules/d": {"version": "1.0.0", "resolved": "https://user:s3cret@other.example/d/-/d.tgz?token=s3cret#s3cret", "integrity": "  "},
+  "node_modules/e": {"version": "1.0.0", "resolved": "git+https://h/e.git#ABCDEF0123", "integrity": ""},
+  "node_modules/f": {"version": "1.0.0", "resolved": "git+https://h/f.git#abcdef"},
+  "node_modules/g": {"version": "1.0.0", "resolved": "git+https://h/g.git#0123456789abcdef0123456789abcdef012345678"},
+  "node_modules/h": {"version": "1.0.0", "resolved": "file:///abs/h.tgz"},
+  "node_modules/i": {"version": "1.0.0", "resolved": "file://host/i.tgz"},
+  "node_modules/j": {"version": "1.0.0", "resolved": "file:"},
+  "node_modules/k": {"version": "1.0.0", "resolved": "ftp://h/k.tgz"},
+  "node_modules/l": {"version": "1.0.0", "resolved": "https://h/%zz"},
+  "node_modules/m": {"version": "1.0.0", "resolved": "vendor/m.tgz"},
+  "node_modules/n": {"version": "1.0.0", "resolved": "https://h/a%20b/-/n.tgz"},
+  "node_modules/o": {"version": "1.0.0", "resolved": "https://Ü.example/o.tgz", "integrity": "sha512-x"},
+  "node_modules/p": {"version": "1.0.0", "resolved": "https://h:8080/p.tgz", "integrity": "sha512-x"},
+  "node_modules/q": {"version": "1.0.0", "resolved": "ssh://h/q", "integrity": "sha1-x"},
+  "node_modules/r": {"version": "1.0.0", "resolved": "bitbucket:a/r"},
+  "node_modules/s": {"version": "1.0.0", "resolved": "https://h/s.tgz#0123456", "integrity": "sha512-x"},
+  "node_modules/u": {"version": "1.0.0", "resolved": "https://registry.npmjs.org/u/-/u.tgz", "integrity": "sha512-x", "inBundle": true},
+  "node_modules/v": {"version": "1.0.0", "resolved": "git://h/v", "link": true},
+  "node_modules/w": {"version": "1.0.0", "license": ["MIT", "ISC"], "hasInstallScript": true},
+  "node_modules/x": {"version": "1.0.0", "license": null, "hasInstallScript": true, "link": true},
+  "node_modules/y": {"version": "1.0.0", "license": " MIT ", "hasInstallScript": false},
+  "node_modules/z": {"version": "1.0.0", "license": "MIT"}
+}}`,
+	}},
+	// The port shows entry names, hosts and values that look unusual as
+	// placeholders; Go writes them raw (see the trap about project text in
+	// trusted fields). The test compares the rest.
+	{"entry names with unusual characters", map[string]string{
+		"package.json": `{"name": "x"}`,
+		"package-lock.json": `{"lockfileVersion": 3, "packages": {"": {},
+  "node_modules/t<&>": {"version": "1.0.0", "resolved": "https://h/<t>.tgz", "integrity": "ſha512-x"},
+  "node_modules/é": {"version": "1.0.0", "license": "MIT", "hasInstallScript": true},
+  "node_modules/a": {"version": "1.0.0", "resolved": "https://a<b>.example/a/-/a.tgz", "integrity": "sha1-x\u000bsha1-y"},
+  "node_modules/b": {"version": "1.0.0", "resolved": "https://registry.npmjs.org/b/-/b.tgz", "integrity": "sha1-x sha256-y  sha384-z"}
+}}`,
+	}},
+	{"a nested package with the root .npmrc", map[string]string{
+		"package.json":                `{"name": "root"}`,
+		".npmrc":                      "registry=https://root.example/\nallow_scripts[]=x\n",
+		"packages/lib/package.json":   `{"name": "lib", "AllowScripts": {}}`,
+		"packages/lib/.npmrc":         "//lib.example/:_authToken=x\n",
+		"packages/lib/package-lock.json": `{"lockfileVersion": 2, "packages": {"": {},
+  "node_modules/a": {"version": "1.0.0", "resolved": "https://root.example/a.tgz", "integrity": "sha512-x", "hasInstallScript": true},
+  "node_modules/b": {"version": "1.0.0", "resolved": "https://lib.example/b.tgz", "integrity": "sha512-x"}}}`,
+	}},
+	{"allowScripts null after a value", map[string]string{
+		"package.json":      `{"name": "x", "allowScripts": {"a": true}, "allowscripts": null}`,
+		"package-lock.json": `{"lockfileVersion": 3, "packages": {"": {}, "node_modules/a": {"version": "1.0.0", "hasInstallScript": true}}}`,
+	}},
+	{"allowScripts in a package.json that is an array", map[string]string{
+		"package.json":      `[{"allowScripts": {}}]`,
+		"package-lock.json": `{"lockfileVersion": 3, "packages": {"": {}}}`,
+	}},
+	{"allow-scripts spelled oddly in .npmrc", map[string]string{
+		"package.json":      `{"name": "x"}`,
+		".npmrc":            "ALLOW_SCRIPTS = x\n",
+		"package-lock.json": `{"lockfileVersion": 3, "packages": {"": {}}}`,
+	}},
+	{"a key of the lockfile with HTML in it", map[string]string{
+		"package.json":      `{"name": "x"}`,
+		"package-lock.json": "{\"lockfileVersion\": 3, \"packages\": {\"\": {},\n  \"node_modules/a<b>\": {\"version\": \"1.0.0\", \"resolved\": \"https://registry.npmjs.org/a/-/a.tgz\"}}}",
+	}},
+}
+
+var zzRewrite = []string{
+	"const P = /<!--/;\nconst a = b ?? c; // <!-- twice\r\n",
+	"crypto.createHash('md5'); <!-- a comment\n", "x(); <!-- a / b\n", "<!-- at line start\nconst r = /a/;\n",
+	"const s = '<!--'; // </div> and / more\n", "/a\\/<!--/", "/\\<!--/", "/a<!--b<!--c/ /<!--/", "/<!---/", "//<!--//",
+	"/\\\n<!--/", "/<!--\\/", "/<!--\\//", "/é<!--\xff/", "/\\é<!--/", "a/b/<!--/c/", "/<!--", "<!--/", "/<!--/<!--/",
+	"/x\\", "/x<!--\\", "/<!--<!--/",
+}
+
+var zzIgnoreFiles = map[string]string{
+	"package.json": `{"name": "x"}`,
+	"src/a.js":     "x\n// njsscan-ignore: express_open_redirect\ny\n",
+	"src/b.js":     "z // nosemgrep\n// njsscan-ignore\nconst s = 'njsscan-ignore in a string';\n",
+	"src/c.js":     "/* nosemgrep */ // nosemgrep\n///nosemgrep:rule\n/** njsscan-ignore */\n * nosemgrep\n  ** njsscan-ignore\n# nosemgrep\n<!-- nosemgrep -->\n// nosemgrepx\n// njsscan-ignored\n//\vnosemgrep\n//\fnosemgrep\n//\rnosemgrep\n// nosemgrep_\n// nosemgrep-x\n// nosemgrepé\n/ nosemgrep\n// NOSEMGREP\n#nosemgrep#nosemgrep\n // nosemgrep\n * nosemgrep\r\n",
+	"src/d.js":     "x\x00 // nosemgrep\n",
+	"src/e.ts":     "// nosemgrep\n",
+	"src/f.html":   "<!-- njsscan-ignore -->\n",
+	"src/.g.js":    "// nosemgrep\n",
+	"test/a.test.js": "// njsscan-ignore\n",
+}
+
+func TestZZSecurityOracle(t *testing.T) {
+	out := map[string]any{
+		"recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8",
+		"date":         zzDate,
+	}
+
+	// The osv-scanner report reader, the verdict and the dependency Findings.
+	var judges []zzJudge
+	for _, c := range zzReports {
+		lock := zzLock(t, c.entries)
+		j := zzJudge{Name: c.name, Exit: c.exit, Report: zzBS(c.report), Entries: c.entries}
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					j.Panic = strings.TrimPrefix(fmt.Sprint(r), "")
+				}
+			}()
+			v := judgeScan(c.exit, []byte(c.report), lock)
+			j.Advisories, j.Partial = v.Advisories, v.Partial
+			if v.Fail != nil {
+				j.Fail = &zzFail{string(v.Fail.Status), v.Fail.Code, v.Fail.Reason}
+			}
+			dir, _ := zzWrite(t, map[string]string{
+				"package.json":      `{"name": "x", "version": "1.0.0"}`,
+				"package-lock.json": `{"lockfileVersion": 3, "packages": {"": {"name": "x"}, ` + c.entries + `}}`,
+			})
+			in := zzInput(t, dir, ".")
+			src, res := dependencyLockfile(in)
+			if res != nil {
+				t.Fatalf("%s: %+v", c.name, res)
+			}
+			var fs []resultset.Finding
+			for _, a := range v.Advisories {
+				fs = append(fs, in.dependencyFinding(a, src, zzDate))
+			}
+			src.produced, src.located, src.path = true, nil, "package.json"
+			for _, a := range v.Advisories {
+				fs = append(fs, in.dependencyFinding(a, src, zzDate))
+			}
+			j.Findings = zzJSON(t, zzFindings(fs))
+		}()
+		judges = append(judges, j)
+	}
+	out["judge"] = judges
+
+	var order []int
+	for _, a := range zzVersions {
+		for _, b := range zzVersions {
+			order = append(order, compareVersions(a, b))
+		}
+	}
+	out["versions"] = zzVersions
+	out["versionOrder"] = order
+
+	type sev struct {
+		In    string `json:"in"`
+		Score string `json:"score"`
+		Word  string `json:"word"`
+	}
+	var sevs []sev
+	for _, s := range zzSeverities {
+		sevs = append(sevs, sev{s, severityScore(s), severityWord(s)})
+	}
+	out["severities"] = sevs
+
+	type scan struct {
+		In        string   `json:"in"`
+		Err       string   `json:"err"`
+		Dropped   []string `json:"dropped"`
+		Unchanged bool     `json:"unchanged"`
+		Kept      []string `json:"kept"`
+		ParseErr  string   `json:"parseErr"`
+		Out       string   `json:"out"`
+	}
+	var scans []scan
+	for _, raw := range zzScannable {
+		s := scan{In: zzBS(raw), Dropped: []string{}, Kept: []string{}}
+		filtered, dropped, err := scannableLockfile([]byte(raw))
+		if err != nil {
+			s.Err = err.Error()
+		} else {
+			s.Unchanged = string(filtered) == raw
+			s.Out = zzBS(string(filtered))
+			s.Dropped = append(s.Dropped, dropped...)
+			if l, err := lockfile.ParseLock(filtered); err != nil {
+				s.ParseErr = err.Error()
+			} else {
+				for k := range l.Packages {
+					s.Kept = append(s.Kept, k)
+				}
+				sort.Strings(s.Kept)
+			}
+		}
+		scans = append(scans, s)
+	}
+	out["scannable"] = scans
+
+	type cover struct {
+		Entries    string   `json:"entries"`
+		NotCovered []string `json:"notCovered"`
+		Limitation string   `json:"limitation"`
+		Locked     []string `json:"locked"`
+	}
+	var covers []cover
+	for _, e := range zzCoverage {
+		lock := zzLock(t, e)
+		c := cover{Entries: e, NotCovered: append([]string{}, notCoveredPackages(lock)...)}
+		if l := notCoveringLimitation(lock, "sub/package-lock.json"); l != nil {
+			c.Limitation = zzJSON(t, l)
+		}
+		for k := range lockedPackages(lock) {
+			c.Locked = append(c.Locked, k)
+		}
+		sort.Strings(c.Locked)
+		covers = append(covers, c)
+	}
+	out["coverage"] = covers
+
+	// The native lockfile Checks.
+	type native struct {
+		Project     zzProject `json:"project"`
+		Check       string    `json:"check"`
+		Package     string    `json:"package"`
+		Status      string    `json:"status"`
+		ReasonCode  string    `json:"reasonCode"`
+		Reason      string    `json:"reason"`
+		Findings    string    `json:"findings"`
+		Metrics     string    `json:"metrics"`
+		Limitations string    `json:"limitations"`
+	}
+	var natives []native
+	for _, p := range zzLockfileProjects {
+		dir, enc := zzWrite(t, p.files)
+		pkg := "."
+		if _, ok := p.files["packages/lib/package.json"]; ok {
+			pkg = "packages/lib"
+		}
+		for _, id := range []string{securityIntegrityID, securityLicensesID, packageInstallScriptsID} {
+			in := zzInput(t, dir, pkg)
+			res := Implementation(id).Run(context.Background(), in)
+			metrics := res.Metrics
+			if metrics == nil {
+				metrics = []resultset.Metric{}
+			}
+			lims := res.Limitations
+			if lims == nil {
+				lims = []resultset.Limitation{}
+			}
+			natives = append(natives, native{
+				Project: zzProject{p.name, enc}, Check: id, Package: pkg,
+				Status: string(res.Status), ReasonCode: res.ReasonCode, Reason: res.Reason,
+				Findings: zzJSON(t, zzFindings(res.Findings)), Metrics: zzJSON(t, metrics), Limitations: zzJSON(t, lims),
+			})
+		}
+	}
+	out["native"] = natives
+
+	// security.patterns.
+	type rewrite struct {
+		In    string `json:"in"`
+		Out   string `json:"out"`
+		Match bool   `json:"match"`
+	}
+	var rewrites []rewrite
+	for _, s := range zzRewrite {
+		rewrites = append(rewrites, rewrite{zzBS(s), zzBS(string(rewriteCommentOpeners([]byte(s)))), patternsRegexWithOpener.MatchString(s)})
+	}
+	out["rewrite"] = rewrites
+
+	dir, enc := zzWrite(t, zzIgnoreFiles)
+	in := zzInput(t, dir, ".")
+	njs, nosem := patternsIgnoreLines(in)
+	out["ignore"] = map[string]any{"files": enc, "njsscan": njs, "nosemgrep": nosem, "candidates": patternsFiles(in.Context.Package)}
+
+	type report struct {
+		Tool     string   `json:"tool"`
+		Package  string   `json:"package"`
+		Report   string   `json:"report"`
+		Rewritten []string `json:"rewritten"`
+		Findings string   `json:"findings"`
+		Unparsed []string `json:"unparsed"`
+		Err      string   `json:"err"`
+	}
+	reportFiles := map[string]string{
+		"package.json":              `{"name":"root"}`,
+		"packages/lib/package.json": `{"name":"lib"}`,
+		"src/app.js":                "const a = 1;\n" + strings.Repeat("// filler\n", 16) + "  res.send(String(eval(req.query.expr)));\r\nline 19\nline 20\n",
+		"packages/lib/src/app.js":   "a\nb\nc\nd\ne\nf\ng\nh\ni\nj\nk\nl\n",
+		"src/long.js":               strings.Repeat("x", 500) + "\n",
+		"src/bad.js":                "ok \xff\xfe line\n",
+		"views/index.ejs":           "<%- body %>\n",
+	}
+	rdir, renc := zzWrite(t, reportFiles)
+	out["reportFiles"] = renc
+	var reports []report
+	for _, c := range []struct {
+		tool, pkg, report string
+		rewritten         []string
+	}{
+		{"njsscan", ".", njsscanEval, nil},
+		{"njsscan", "packages/lib", njsscanEval, nil},
+		{"njsscan", ".", "Traceback (most recent call last):\n", nil},
+		{"njsscan", ".", `{"errors": [{"path": "/code/src/broken.js", "message": "Syntax error"}, {"path": "/elsewhere/x.js", "message": "a message that names no file but is long enough to be cut at the title length of the report so that we can see where it is cut and how; ` + strings.Repeat("x", 300) + `"}, {"path": "/code/../etc/passwd"}, {"path": "/code/"}, {"path": "/code/./src//a.js"}, {"message": ""}], "nodejs": {}, "templates": {}}`, nil},
+		{"njsscan", ".", `{"nodejs": {"b_rule": {"files": [{"file_path": "/code/src/app.js", "match_lines": [18, 20], "match_position": [3], "match_string": "x"}, {"file_path": "/code/src/app.js", "match_lines": [], "match_string": "skipped"}, {"file_path": "/other/x.js", "match_lines": [1]}, {"file_path": "/code/src/app.js", "match_lines": [18, 20], "match_string": "x"}, {"file_path": "/code/src/app.js", "match_lines": [18], "match_position": [1, 2, 3], "match_string": "x"}], "metadata": {"cwe": "CWE-1", "description": "<desc>"}}, "a_rule": {"files": [{"file_path": "/code/src/long.js", "match_lines": [1, 1], "match_position": [1, 2], "match_string": ""}]}}, "templates": null}`, nil},
+		{"njsscan", ".", `{"nodejs": {"r": {"files": [{"file_path": "/code/src/app.js", "match_lines": [18, 19], "match_string": "rewritten text"}]}}}`, []string{"src/app.js"}},
+		{"njsscan", ".", `{"nodejs": {"r": {"files": [{"file_path": "/code/src/app.js", "match_lines": ["18"]}]}}}`, nil},
+		{"njsscan", ".", `{"nodejs": {"r": {"files": [{"file_path": "/code/src/app.js", "match_lines": [1.5]}]}}}`, nil},
+		{"semgrep", ".", semgrepEval, nil},
+		{"semgrep", ".", `{"results": [
+			{"check_id": "a.b.c.rule-x", "path": "/code/src/app.js", "start": {"line": 18, "col": 19}, "end": {"line": 30, "col": 0}, "extra": {"message": "m <b>"}},
+			{"check_id": "plain", "path": "/code/src/app.js", "start": {"line": 0, "col": 0}, "end": {"line": 0, "col": 0}, "extra": {}},
+			{"check_id": "x.y", "path": "/code/src/bad.js", "START": {"LINE": 1, "Col": 2}, "end": {"line": 1, "col": 5}, "extra": {"message": "bad bytes"}},
+			{"check_id": "x.long", "path": "/code/src/long.js", "start": {"line": 1, "col": 1}, "end": {"line": 2, "col": 1}, "extra": {"message": "long"}},
+			{"check_id": "x.past", "path": "/code/src/app.js", "start": {"line": 99, "col": 1}, "end": {"line": 100, "col": 1}, "extra": {"message": "past the end"}},
+			{"check_id": "x.back", "path": "/code/src/app.js", "start": {"line": 5, "col": 1}, "end": {"line": 4, "col": 1}, "extra": {"message": "end before start"}},
+			{"check_id": "x.out", "path": "/tmp/x.js", "start": {"line": 1, "col": 1}, "end": {"line": 1, "col": 1}, "extra": {"message": "outside"}},
+			{"check_id": "x.missing", "path": "/code/src/none.js", "start": {"line": 1, "col": 1}, "end": {"line": 1, "col": 1}, "extra": {"message": "no file"}}
+		], "errors": []}`, nil},
+		{"semgrep", ".", `{"results": [{"check_id": 5}]}`, nil},
+		{"semgrep", ".", `[]`, nil},
+		{"semgrep", ".", `{"results": [{"start": {"line": "x"}}]}`, nil},
+		{"njsscan", ".", `[1]`, nil},
+		{"njsscan", ".", `{"nodejs": []}`, nil},
+		{"njsscan", ".", `{"nodejs": {"r": {"metadata": {"cwe": 1}}}}`, nil},
+		{"semgrep", ".", ``, nil},
+	} {
+		in := zzInput(t, rdir, c.pkg)
+		r := report{Tool: c.tool, Package: c.pkg, Report: c.report, Rewritten: c.rewritten, Unparsed: []string{}}
+		var fs []resultset.Finding
+		var unparsed []string
+		var err error
+		if c.tool == "njsscan" {
+			rw := map[string]bool{}
+			for _, p := range c.rewritten {
+				rw[p] = true
+			}
+			fs, unparsed, err = njsscanReport(in, []byte(c.report), rw)
+		} else {
+			fs, unparsed, err = semgrepReport(in, []byte(c.report))
+		}
+		if err != nil {
+			r.Err = err.Error()
+		}
+		r.Findings = zzJSON(t, zzFindings(fs))
+		r.Unparsed = append(r.Unparsed, unparsed...)
+		reports = append(reports, r)
+	}
+	out["reports"] = reports
+
+	// The tar copy of a package's Source code.
+	tarFiles := map[string]string{
+		"package.json":          `{"name":"x"}`,
+		"src/a/b/c.js":          "const P = /<!--/;\n",
+		"src/a/d.ts":            "x <!--\n",
+		"src/big.js":            strings.Repeat("y", patternsMaxFileBytes+1),
+		"src/exact.js":          strings.Repeat("z", patternsMaxFileBytes),
+		"src/views/index.ejs":   "<%- body %>\n",
+		"src/readme.md":         "not scanned\n",
+		"lib/x.mjs":             "export {}\n",
+	}
+	tdir, tenc := zzWrite(t, tarFiles)
+	if err := os.Symlink(filepath.Join(tdir, "src/a/d.ts"), filepath.Join(tdir, "src/link.js")); err != nil {
+		t.Fatal(err)
+	}
+	tin := zzInput(t, tdir, ".")
+	type tarEntry struct {
+		Name     string `json:"name"`
+		Type     string `json:"type"`
+		Mode     int64  `json:"mode"`
+		Size     int64  `json:"size"`
+		Content  string `json:"content"` // sha-less: the first 40 bytes
+	}
+	tarOf := func(files []string, rewrite bool) map[string]any {
+		var buf bytes.Buffer
+		oversized, err := writePatternsTar(&buf, tin, files, rewrite)
+		res := map[string]any{"oversized": oversized, "bytes": base64.StdEncoding.EncodeToString(buf.Bytes())}
+		if err != nil {
+			res["err"] = err.Error()
+		}
+		var entries []tarEntry
+		tr := tar.NewReader(bytes.NewReader(buf.Bytes()))
+		for h, err := tr.Next(); err == nil; h, err = tr.Next() {
+			data, _ := io.ReadAll(tr)
+			if len(data) > 40 {
+				data = data[:40]
+			}
+			entries = append(entries, tarEntry{h.Name, string(h.Typeflag), h.Mode, h.Size, string(data)})
+		}
+		res["entries"] = entries
+		return res
+	}
+	files := patternsFiles(tin.Context.Package)
+	out["tar"] = map[string]any{
+		"files":     tenc,
+		"symlink":   []string{"src/link.js", "src/a/d.ts"},
+		"scanned":   files,
+		"plain":     tarOf(files, false),
+		"rewritten": tarOf([]string{"src/a/b/c.js", "src/a/d.ts"}, true),
+	}
+	out["rulesHash"] = patternsRulesHash()
+	out["semgrepArgs"] = semgrepArgs()
+	out["njsscanArgs"] = njsscanArgs
+	out["osvArgs"] = osvArgs
+
+	data, err := json.MarshalIndent(out, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/security-oracle.json", append(data, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}

@@ -1,0 +1,69 @@
+// Generator of go-oracle-url.json: what net/url.Parse of the freeze commit's
+// toolchain (Go 1.27.3, a go.mod at go 1.27.1 as the repo's, so the same
+// GODEBUG defaults) says for the inputs of internal/gocompat/url.test.ts.
+// Kept as text; regenerate in a folder with a go.mod of `go 1.27.1`:
+// cp go-oracle-url.go.txt /tmp/x/main.go && (cd /tmp/x && go run .) > go-oracle-url.json
+package main
+
+import (
+	"encoding/json"
+	"net/url"
+	"os"
+)
+
+func main() {
+	inputs := []string{
+		"", "*", "https://registry.npmjs.org/a/-/a-1.0.0.tgz", "http://registry.npmjs.org/a",
+		"HTTPS://Registry.NPMJS.org/a", "git+ssh://git@example.com/x/from-git.git#abc",
+		"github:user/repo", "file:../local", "packages/member", "../x", "./x",
+		"git@github.com:user/repo.git", "https://user:pa%20ss@npm.example.com/a",
+		"https://us%zzer@npm.example.com/a", "https://user name@host/a", "https://a@b@host/x",
+		"https://host:8080/a", "https://host:80a/x", "https://host:/x", "https://host::1/x",
+		"https://[::1]:4873/a", "https://[::1]/a", "https://[1.2.3.4]/a", "https://[::ffff:1.2.3.4]/a",
+		"https://[fe80::1%25en0]/a", "https://[fe80::1%en0]/a", "https://[::1/a", "https://x[::1]/a",
+		"https://[gggg::1]/a", "https://[1:2:3:4:5:6:7:8]/a", "https://[1:2:3:4:5:6:7:8:9]/a", "https://[1::2::3]/a",
+		"https://[::1]x/a", "https://h%C3%A9st/a", "https://h%41st/a", "https://hé.example/a",
+		"https://ho st/a", "https://ho^st/a", "https://ho_st/a", "https://h!$&'()*+,;=st/a",
+		"https://host/a%zz", "https://host/a%2", "https://host/a?x=%zz", "https://host/a#%zz",
+		"https://host/a#frag", "https://host/a\x7f", "https://host/a\n", "https://host/a b",
+		"https:opaque", "https:/path/only", "https:///triple", "//host/x", ":nope", "1http://x",
+		"ht+tp.-x://h/a", "http://h/a?", "cache_object:foo/bar", "a:b/c", "/a:b", "x/a:b",
+		"https://h/%", "https://h%25/x", "https://h%2/x", "https://host:99999999/x",
+		"https://h/x#a#b", "https://h/x?y#z%", "https://h%e2%82%ac/x", "https://[::1%25]/x",
+		"https://[::1%25%0a]/x", "https://[::1%25en%20]/x", "https://[]/x", "https://[::]/x",
+		"https://[0:0:0:0:0:0:1.2.3.4]/x", "https://[::1.2.3]/x", "https://[::01.2.3.4]/x",
+		"https://[::256.1.1.1]/x", "https://[12345::]/x", "https://[:1]/x", "https://[1:]/x",
+		"https://[1::]/x", "https://[::1]:/x", "https://[::1]:a/x", "mongodb://h1:1,h2:2/x",
+		"https://h1:1,h2:2/x", "https://@host/x", "https://user:@host/x", "https://:pw@host/x",
+		"https://us/er@host", "https://us]er@host/x", "https://us%40er@host/x",
+		"https://[1.2.3.4%25eth0]/x", "https://[::1%25eth0%25x]/x", "https://[1:2:3:4:5:6:7::]/x",
+		"https://[::1:2:3:4:5:6:7]/x", "https://[1:2:3:4:5:6:7:8::]/x", "https://[0001:2:3:4:5:6:7:8]/x",
+		"https://[1:2:3:4:5:6:1.2.3.4]/x", "https://[1:2:3:4:5:6:7:1.2.3.4]/x", "https://[::1.2.3.04]/x",
+		"https://[::ffff:255.255.255.255]/x", "https://[A:B:C:D:E:F:a:b]/x", "HtTp://X/y",
+	}
+	type row struct {
+		In       string `json:"in"`
+		OK       bool   `json:"ok"`
+		Err      string `json:"err"`
+		Scheme   string `json:"scheme"`
+		Host     string `json:"host"`
+		Hostname string `json:"hostname"`
+	}
+	var rows []row
+	for _, in := range inputs {
+		u, err := url.Parse(in)
+		r := row{In: in, OK: err == nil}
+		if err != nil {
+			r.Err = err.Error()
+		} else {
+			r.Scheme, r.Host, r.Hostname = u.Scheme, u.Host, u.Hostname()
+		}
+		rows = append(rows, r)
+	}
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	_ = enc.Encode(map[string]any{
+		"recordedFrom": "Go 1.27.3 standard library (net/url), the toolchain of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8",
+		"parse":        rows,
+	})
+}

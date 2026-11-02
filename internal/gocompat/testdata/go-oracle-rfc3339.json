@@ -1,0 +1,167 @@
+{
+  "parse": [
+    {
+      "in": "2020-01-01T00:00:00.000Z",
+      "ok": true,
+      "unix_nano": "1577836800.0",
+      "hours_since_previous": ""
+    },
+    {
+      "in": "2024-01-01T00:00:00.000Z",
+      "ok": true,
+      "unix_nano": "1704067200.0",
+      "hours_since_previous": "35064"
+    },
+    {
+      "in": "2020-01-01T00:00:00Z",
+      "ok": true,
+      "unix_nano": "1577836800.0",
+      "hours_since_previous": "-35064"
+    },
+    {
+      "in": "2025-01-01T00:00:00Z",
+      "ok": true,
+      "unix_nano": "1735689600.0",
+      "hours_since_previous": "43848"
+    },
+    {
+      "in": "2018-04-09T00:00:00.000Z",
+      "ok": true,
+      "unix_nano": "1523232000.0",
+      "hours_since_previous": "-59016"
+    },
+    {
+      "in": "2026-01-01T00:00:00.000Z",
+      "ok": true,
+      "unix_nano": "1767225600.0",
+      "hours_since_previous": "67776"
+    },
+    {
+      "in": "2021-05-05T12:34:56.123456789Z",
+      "ok": true,
+      "unix_nano": "1620218096.123456789",
+      "hours_since_previous": "-40835.41774348423"
+    },
+    {
+      "in": "2021-05-05T12:34:56.1234567891234Z",
+      "ok": true,
+      "unix_nano": "1620218096.123456789",
+      "hours_since_previous": "0"
+    },
+    {
+      "in": "2000-02-29T00:00:00Z",
+      "ok": true,
+      "unix_nano": "951782400.0",
+      "hours_since_previous": "-185676.58225651577"
+    },
+    {
+      "in": "2001-02-29T00:00:00Z",
+      "ok": false,
+      "unix_nano": "",
+      "hours_since_previous": ""
+    },
+    {
+      "in": "2020-01-01T00:00:00+01:30",
+      "ok": true,
+      "unix_nano": "1577831400.0",
+      "hours_since_previous": "173902.5"
+    },
+    {
+      "in": "2020-01-01T00:00:00-23:59",
+      "ok": true,
+      "unix_nano": "1577923140.0",
+      "hours_since_previous": "25.483333333333334"
+    },
+    {
+      "in": "2020-01-01 00:00:00Z",
+      "ok": false,
+      "unix_nano": "",
+      "hours_since_previous": ""
+    },
+    {
+      "in": "2020-01-01t00:00:00Z",
+      "ok": false,
+      "unix_nano": "",
+      "hours_since_previous": ""
+    },
+    {
+      "in": "2020-01-01T00:00:00z",
+      "ok": false,
+      "unix_nano": "",
+      "hours_since_previous": ""
+    },
+    {
+      "in": "2020-01-01T00:00:00",
+      "ok": false,
+      "unix_nano": "",
+      "hours_since_previous": ""
+    },
+    {
+      "in": "2020-01-01T24:00:00Z",
+      "ok": false,
+      "unix_nano": "",
+      "hours_since_previous": ""
+    },
+    {
+      "in": "2020-01-01T23:59:60Z",
+      "ok": false,
+      "unix_nano": "",
+      "hours_since_previous": ""
+    },
+    {
+      "in": "0001-01-01T00:00:00Z",
+      "ok": true,
+      "unix_nano": "-62135596800.0",
+      "hours_since_previous": "-2.5620477880152157e+06"
+    },
+    {
+      "in": "9999-12-31T23:59:59.999999999Z",
+      "ok": true,
+      "unix_nano": "253402300799.999999999",
+      "hours_since_previous": "2.5620477880152157e+06"
+    },
+    {
+      "in": "1969-12-31T23:59:59.5Z",
+      "ok": true,
+      "unix_nano": "-1.500000000",
+      "hours_since_previous": "-2.5620477880152157e+06"
+    },
+    {
+      "in": "2020-13-01T00:00:00Z",
+      "ok": false,
+      "unix_nano": "",
+      "hours_since_previous": ""
+    },
+    {
+      "in": "2020-01-01T00:00:00.Z",
+      "ok": false,
+      "unix_nano": "",
+      "hours_since_previous": ""
+    },
+    {
+      "in": "",
+      "ok": false,
+      "unix_nano": "",
+      "hours_since_previous": ""
+    },
+    {
+      "in": "garbage",
+      "ok": false,
+      "unix_nano": "",
+      "hours_since_previous": ""
+    },
+    {
+      "in": "2011-10-05T14:48:00.000Z",
+      "ok": true,
+      "unix_nano": "1317826080.0",
+      "hours_since_previous": "366062.8001388889"
+    },
+    {
+      "in": "2015-06-30T23:59:59.999Z",
+      "ok": true,
+      "unix_nano": "1435708799.999000000",
+      "hours_since_previous": "32745.199999722223"
+    }
+  ],
+  "recordedFrom": "Go 1.27.3 standard library (time), the toolchain of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8"
+}

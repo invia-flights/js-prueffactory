@@ -38,6 +38,19 @@ export function isDeadline(signal: AbortSignal): boolean {
   );
 }
 
+// deadlines records the deadline of every signal derived here, in
+// milliseconds since the epoch: its own or its parent's, whichever is sooner.
+const deadlines = new WeakMap<AbortSignal, number>();
+
+/**
+ * deadline is Go's ctx.Deadline: when the signal ends at the latest because
+ * of its own or an ancestor's deadline, in milliseconds since the epoch, or
+ * undefined when nothing sets one.
+ */
+export function deadline(signal: AbortSignal): number | undefined {
+  return deadlines.get(signal);
+}
+
 /** background is a signal that never ends (Go's context.Background). */
 export function background(): AbortSignal {
   return new AbortController().signal;
@@ -64,6 +77,14 @@ export function withTimeout(parent: AbortSignal, d: Duration): Context {
 
 function derive(parent: AbortSignal | undefined, deadline?: number): Context {
   const ctl = new AbortController();
+  const inherited = parent === undefined ? undefined : deadlines.get(parent);
+  const effective =
+    deadline === undefined || (inherited !== undefined && inherited < deadline)
+      ? inherited
+      : deadline;
+  if (effective !== undefined) {
+    deadlines.set(ctl.signal, effective);
+  }
   let timer: NodeJS.Timeout | undefined;
   const release = (): void => {
     if (timer !== undefined) {
