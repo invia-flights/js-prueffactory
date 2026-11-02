@@ -1,11 +1,12 @@
 // Seam A with a real Docker daemon: a test script that chains two npm scripts
 // runs as two suites, every suite runs although the second one fails, and the
-// Report names the suite everywhere (Go: npm_run_chain_docker_test.go). The
-// Go file's other two tests read quality.unused (ticket 23) and the Coverage
-// and runtime.warnings of the chain (ticket 15); those tickets add them.
+// Report names the suite everywhere, and Knip reports nothing false for it
+// (Go: npm_run_chain_docker_test.go). The Go file's other test reads the
+// Coverage and runtime.warnings of the chain (ticket 15), which adds it.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { unusedSummary } from "./graph.testutil.ts";
 import { assertNothingLeft, copyProject, realRun } from "./realrun.testutil.ts";
 import {
   artifactOf,
@@ -118,4 +119,27 @@ test("a chain of npm scripts runs one suite per step and names the failing layer
   ]) {
     assert.ok(artifactOf(s, e, name), `no ${name} artifact`);
   }
+});
+
+// The configs of the chain name mocha-multi-reporters as the reporter and
+// ci/test.sh is the only place that runs c8: Knip must not report either as
+// unused, nor report an unresolved import in the configs and setup files, nor
+// an unused dependency for Mocha itself.
+test("Knip reports nothing false for a chain with a reporter plugin and a CI script", async (t) => {
+  const original = copyProject(t, "npm-run-chain");
+
+  const r = await realRun(t, ["test", original, "--only", "quality.unused"]);
+
+  assert.equal(r.code, 0, r.stderr);
+  const s = full(r);
+  const e = oneExecution(s, "quality.unused");
+  assert.equal(e.status, "completed", e.reason ?? "");
+  // The only true finding is the export that no test calls (src/unit-only.js
+  // keeps it for the Coverage test).
+  assert.deepEqual(
+    unusedSummary(s),
+    ["unused-export neverCalled"],
+    "mocha, mocha-multi-reporters and c8 are used",
+  );
+  assertNothingLeft(r);
 });

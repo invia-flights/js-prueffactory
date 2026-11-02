@@ -15,6 +15,16 @@
     "reason": "npm's own log of the install that runs as a prerequisite of tests.existing differs between two Runs of the same build, as in the entry above: cache hits in completion order, with timings, and a debug log named after the current time. The install's command, exit code and Findings are compared in report.json."
   },
   {
+    "case": "runs/*quality.unused*",
+    "file": "artifacts/package.install/*/npm-install.log",
+    "reason": "npm's own log of the install that runs as a prerequisite of quality.unused differs between two Runs of the same build, as in the entries above ('up to date in 98ms' against 96ms, cache hits in completion order). The install's command, exit code and Findings are compared in report.json."
+  },
+  {
+    "case": "runs/*only=modules.cycles*",
+    "file": "artifacts/package.install/*/npm-install.log",
+    "reason": "npm's own log of the install that runs as a prerequisite of modules.cycles differs between two Runs of the same build, as in the entries above ('up to date in 98ms' against 96ms, cache hits in completion order). The install's command, exit code and Findings are compared in report.json."
+  },
+  {
     "case": "runs/*only=*deps.tree*",
     "file": "artifacts/package.install/*/npm-install.log",
     "reason": "The same difference as the entry above, for Runs that install as the prerequisite of deps.tree (ticket 20): npm writes its cache hits in completion order, with timings, and names its debug log after the current time, so two Runs of the same build differ. The command, exit code and every Finding of deps.tree are compared in report.json."
