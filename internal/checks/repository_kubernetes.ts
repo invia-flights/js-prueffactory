@@ -55,8 +55,9 @@ import {
   chartFileOrChartYaml,
   type HelmChart,
   helmCharts,
+  shownDependencies,
 } from "./repository_helm.ts";
-import { shownPath, shownWord } from "./shown_text.ts";
+import { shownPath } from "./shown_text.ts";
 
 export { kubernetesID } from "./kubernetes_results.ts";
 
@@ -326,14 +327,6 @@ export function renderedInputs(
     }
   }
   return [inputs, limitations];
-}
-
-/**
- * shownDependencies lists dependency names from a Chart.yaml for trusted
- * text, with a placeholder for a name that does not look like a name.
- */
-function shownDependencies(names: readonly string[]): string {
-  return names.map((n) => shownWord(n, "dependency name")).join(", ");
 }
 
 /** templateLabel is how a Finding names a template that Helm gave no source for. */

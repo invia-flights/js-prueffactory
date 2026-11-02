@@ -36,6 +36,7 @@ import { lookupRender, renderHelmCharts } from "./helm_render.ts";
 import { failedToRun, toolsetUnavailable } from "./helper_result.ts";
 import type { Input, Result } from "./input.ts";
 import { lstatRegular } from "./readcap.ts";
+import { shownPath, shownWord } from "./shown_text.ts";
 import { cutTitle, repoFinding } from "./repo_findings.ts";
 import { candidates, readRegular } from "./repo_targets.ts";
 import {
@@ -363,7 +364,7 @@ async function runHelm(signal: AbortSignal, input: Input): Promise<Result> {
       blocked++;
       limitations.push({
         reason_code: reasonDependenciesNotVendored,
-        message: `the chart declares dependencies that are not vendored under charts/ (${chart.missing.join(", ")}), and Helm cannot download them without network access, so the chart was not linted or rendered`,
+        message: `the chart declares dependencies that are not vendored under charts/ (${shownDependencies(chart.missing)}), and Helm cannot download them without network access, so the chart was not linted or rendered`,
         check_id: helmID,
         path: chartFile(chart, "Chart.yaml"),
       });
@@ -501,11 +502,14 @@ export function helmRenderFailure(
   let at = chartFileOrChartYaml(input, d, "");
   let detail = "default";
   if (values !== "") {
-    what = "values file " + values;
+    what = "values file " + shownPath(values);
     detail = values;
     at = chartFileOrChartYaml(input, d, values);
   }
-  const chart = d === "." ? "the project root" : d;
+  // The chart folder and the values file are the project's own names: they
+  // reach the trusted message and title only when they look like paths.
+  // Hardening beyond Go, which wrote them raw; the location keeps the path.
+  const chart = d === "." ? "the project root" : shownPath(d);
   const rule = "helm.template";
   const shown = text.startsWith("Error: ")
     ? text.slice("Error: ".length)
@@ -546,4 +550,14 @@ export function chartFileOrChartYaml(
     return fallback;
   }
   return rel;
+}
+
+/**
+ * shownDependencies lists dependency names from a Chart.yaml for trusted
+ * text, with a placeholder for a name that does not look like a name. Go used
+ * it for repository.kubernetes only and wrote the names of repository.helm's
+ * Limitation raw; the port uses it for both (hardening beyond Go).
+ */
+export function shownDependencies(names: readonly string[]): string {
+  return names.map((n) => shownWord(n, "dependency name")).join(", ");
 }
