@@ -1,7 +1,19 @@
 // Seam A for tests: calls main in-process and captures what a user sees.
+import {
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { Writable } from "node:stream";
+import type { TestContext } from "node:test";
 
+import type { Entry } from "../checks/catalog.ts";
 import { main } from "./cli.ts";
+import { useCatalog } from "./selection.ts";
 
 export interface MainResult {
   exitCode: number;
@@ -51,4 +63,51 @@ class Capture extends Writable {
   bytes(): Buffer {
     return Buffer.concat(this.#chunks);
   }
+}
+
+// call runs main in-process (Seam A) with a fake environment and gives the
+// output as text.
+export async function call(
+  env: Record<string, string>,
+  ...args: string[]
+): Promise<{ code: number; stdout: string; stderr: string }> {
+  const r = await runMain(args, { env });
+  return {
+    code: r.exitCode,
+    stdout: r.stdout.toString("utf8"),
+    stderr: r.stderr.toString("utf8"),
+  };
+}
+
+// tempDir is a temporary folder, symlinks resolved, removed when the test ends.
+export function tempDir(t: TestContext): string {
+  const dir = realpathSync(mkdtempSync(join(tmpdir(), "jspf-cli-")));
+  t.after(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+  return dir;
+}
+
+// project creates a tiny project folder.
+export function project(t: TestContext): string {
+  const dir = join(tempDir(t), "demo");
+  mkdirSync(dir);
+  writeFileSync(join(dir, "package.json"), '{"name":"demo"}');
+  writeFileSync(join(dir, "index.js"), "module.exports = 1;\n");
+  return dir;
+}
+
+// noDocker is a fake environment with a writable state folder and no `docker`
+// on the PATH, plus the extra variables.
+export function noDocker(
+  t: TestContext,
+  extra: Record<string, string> = {},
+): Record<string, string> {
+  return { PATH: tempDir(t), XDG_STATE_HOME: tempDir(t), ...extra };
+}
+
+// useCatalogFor makes the command line resolve Selections against entries
+// until the test ends (Go's cli.UseCatalog).
+export function useCatalogFor(t: TestContext, entries: Entry[]): void {
+  t.after(useCatalog(entries));
 }
