@@ -1,0 +1,104 @@
+// Generator of go-oracle.json: the archives Go's archive/tar.Writer writes for
+// the headers js-prueffactory sets (root-owned, no times, no user names).
+// Names and contents are hex, so names that are not valid UTF-8 survive JSON.
+// Kept as text; regenerate with:
+// mkdir /tmp/x && cp go-oracle.go.txt /tmp/x/main.go && go run /tmp/x/main.go > go-oracle.json
+package main
+
+import (
+	"archive/tar"
+	"bytes"
+	"encoding/hex"
+	"encoding/json"
+	"os"
+	"runtime"
+	"strings"
+)
+
+type entry struct {
+	Type     string `json:"type"`
+	Name     string `json:"name"`
+	Linkname string `json:"linkname"`
+	Mode     int64  `json:"mode"`
+	Size     int64  `json:"size"`
+	Content  string `json:"content"`
+}
+
+type archive struct {
+	Title   string  `json:"title"`
+	Entries []entry `json:"entries"`
+	// HeaderOnly: the bytes after the last WriteHeader, without content or close.
+	HeaderOnly bool   `json:"headerOnly"`
+	Tar        string `json:"tar"`
+	Error      string `json:"error"`
+}
+
+func dir(name string) entry { return entry{Type: "directory", Name: name, Mode: 0o755} }
+
+func file(name, content string) entry {
+	return entry{Type: "file", Name: name, Mode: 0o644, Size: int64(len(content)), Content: content}
+}
+
+func link(name, target string) entry {
+	return entry{Type: "symlink", Name: name, Linkname: target, Mode: 0o777}
+}
+
+func main() {
+	long := strings.Repeat("d", 60) + "/" + strings.Repeat("e", 60) + "/" + strings.Repeat("f", 80) + ".txt"
+	exe := file("d/run.sh", "abc")
+	exe.Mode = 0o755
+	cases := []archive{
+		{Title: "folder, executable, link", Entries: []entry{dir("d/"), exe, link("d/link", "run.sh"), file("d/empty", "")}},
+		{Title: "content spans blocks", Entries: []entry{file("big", strings.Repeat("0123456789", 103)), file("next", "x")}},
+		{Title: "name of exactly 100 bytes", Entries: []entry{file(strings.Repeat("n", 100), "n")}},
+		{Title: "long name split into prefix and name", Entries: []entry{file(long, "long")}},
+		{Title: "long name that cannot be split", Entries: []entry{file("d/"+strings.Repeat("f", 120)+".txt", "pax")}},
+		{Title: "long folder name", Entries: []entry{dir(strings.Repeat("x", 120) + "/")}},
+		{Title: "UTF-8 names", Entries: []entry{dir("été/"), file("été/été.txt", "summer")}},
+		{Title: "names that are not valid UTF-8", Entries: []entry{file("a\xfe.js", "fe"), file("a\xff.js", "ff"), link("l\xff", "a\xff.js")}},
+		{Title: "long link targets", Entries: []entry{link("long-link", long), link("accent", "été.txt")}},
+		{Title: "a dropped byte leaves a slash at the end of the name field", Entries: []entry{file("\xff"+strings.Repeat("x", 99)+"/"+strings.Repeat("y", 10), "slash")}},
+		{Title: "PAX record length grows a digit", Entries: []entry{file("\xff"+strings.Repeat("a", 91), "91"), file("\xff"+strings.Repeat("a", 90), "90")}},
+		{Title: "size beyond the octal field", HeaderOnly: true, Entries: []entry{{Type: "file", Name: "huge", Mode: 0o644, Size: 1 << 33}}},
+		{Title: "NUL in a name", Entries: []entry{file("a\x00b", "")}},
+		{Title: "file name with a slash at the end", Entries: []entry{file("a/", "")}},
+	}
+	types := map[string]byte{"file": tar.TypeReg, "directory": tar.TypeDir, "symlink": tar.TypeSymlink}
+	for i := range cases {
+		c := &cases[i]
+		var buf bytes.Buffer
+		tw := tar.NewWriter(&buf)
+		var err error
+		for _, e := range c.Entries {
+			err = tw.WriteHeader(&tar.Header{Typeflag: types[e.Type], Name: e.Name, Linkname: e.Linkname, Mode: e.Mode, Size: e.Size})
+			if err != nil || c.HeaderOnly {
+				break
+			}
+			if _, err = tw.Write([]byte(e.Content)); err != nil {
+				break
+			}
+		}
+		if err == nil && !c.HeaderOnly {
+			err = tw.Close()
+		}
+		if err != nil {
+			c.Error = err.Error()
+		} else {
+			c.Tar = hex.EncodeToString(buf.Bytes())
+		}
+		for j := range c.Entries {
+			e := &c.Entries[j]
+			e.Name = hex.EncodeToString([]byte(e.Name))
+			e.Linkname = hex.EncodeToString([]byte(e.Linkname))
+			e.Content = hex.EncodeToString([]byte(e.Content))
+		}
+	}
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	if err := enc.Encode(map[string]any{
+		"recordedFrom": "Go " + strings.TrimPrefix(runtime.Version(), "go") + " archive/tar, the toolchain of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8",
+		"archives":     cases,
+	}); err != nil {
+		panic(err)
+	}
+}

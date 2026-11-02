@@ -1,11 +1,25 @@
 // Go's path/filepath functions that differ from package path or touch the
 // file system, for Unix paths. Node's path.relative and fs.realpath differ
 // in the corners (trailing slashes, "..", where a walk stops), and those
-// corners decide what a Snapshot keeps.
-import { lstatSync, readlinkSync } from "node:fs";
+// corners decide what a Snapshot keeps and which usage error a user sees.
+// join, dir, base and isAbs are in path.ts (the same on Unix).
+import {
+  lstatSync,
+  readdirSync,
+  readlinkSync,
+  type Stats,
+  statSync,
+} from "node:fs";
 
-import { fsPath, GoError, pathError } from "./os.ts";
-import { clean, isAbs } from "./path.ts";
+import {
+  byteString,
+  fromByteString,
+  fsPath,
+  GoError,
+  pathError,
+} from "./os.ts";
+import { clean, isAbs, join } from "./path.ts";
+import { sortStrings } from "./strings.ts";
 
 // rel is filepath.Rel. It returns undefined where Go returns an error.
 export function rel(basePath: string, targPath: string): string | undefined {
@@ -108,4 +122,65 @@ export function evalSymlinks(path: string): string {
     }
   }
   return clean(dest);
+}
+
+// evalSymlinksText is evalSymlinks for a path held as text (a command-line
+// argument): the result and the error text are text again.
+export function evalSymlinksText(path: string): string {
+  try {
+    return fromByteString(evalSymlinks(byteString(path)));
+  } catch (err) {
+    if (err instanceof GoError) {
+      throw new GoError(fromByteString(err.message), err.notExist);
+    }
+    throw err;
+  }
+}
+
+// stat is os.Stat.
+export function stat(path: string): Stats {
+  try {
+    return statSync(path);
+  } catch (err) {
+    throw pathError("stat", path, err);
+  }
+}
+
+// readDirNames is the names of os.ReadDir, sorted byte-wise as Go sorts them.
+export function readDirNames(path: string): string[] {
+  try {
+    return sortStrings(readdirSync(path));
+  } catch (err) {
+    throw pathError("open", path, err);
+  }
+}
+
+// getwd is os.Getwd: $PWD of the process when it is absolute and names the
+// working folder (so a folder reached through a symlink keeps that name),
+// else the real working folder.
+export function getwd(): string {
+  const pwd = process.env.PWD ?? "";
+  if (pwd.startsWith("/")) {
+    try {
+      const a = statSync(pwd);
+      const b = statSync(".");
+      if (a.dev === b.dev && a.ino === b.ino) {
+        return pwd;
+      }
+    } catch {
+      // fall back to the real working folder
+    }
+  }
+  return process.cwd();
+}
+
+// abs is filepath.Abs.
+export function abs(path: string): string {
+  return isAbs(path) ? clean(path) : join(getwd(), path);
+}
+
+// tempDir is os.TempDir on Unix: $TMPDIR of the process, else /tmp.
+export function tempDir(): string {
+  const dir = process.env.TMPDIR ?? "";
+  return dir === "" ? "/tmp" : dir;
 }

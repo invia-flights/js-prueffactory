@@ -12,10 +12,12 @@ import { join } from "node:path";
 import process from "node:process";
 import { test } from "node:test";
 
+import { readTar } from "../tarwriter/tar.testutil.ts";
 import {
   exists,
   limitedPaths,
   takeIn,
+  tarOf,
   tempDir,
   write,
 } from "./snapshot.testutil.ts";
@@ -242,5 +244,43 @@ test(
     assert.equal(s.hash, sha(entry).toString("hex"));
     assert.equal(s.fileCount, 1);
     assert.deepEqual(s.compare(root, {}), []);
+  },
+);
+
+// Two names that differ only in bytes that are not valid UTF-8 are two files.
+// Written as text, both would become "a\ufffd.js" in the archive and one
+// would overwrite the other in the volume, so the Checks would see something
+// else than the Snapshot hash covers. Go writes the bytes.
+test(
+  "names that are not valid UTF-8 reach the archive as their bytes",
+  {
+    skip:
+      process.platform !== "linux"
+        ? "the file system needs UTF-8 names"
+        : false,
+  },
+  async (t) => {
+    const root = tempDir(t);
+    const raw = (s: string) => Buffer.from(s, "latin1");
+    const at = (name: Buffer) => Buffer.concat([raw(root + "/"), name]);
+    writeFileSync(at(raw("a\xfe.js")), "fe");
+    writeFileSync(at(raw("a\xff.js")), "ff");
+    symlinkSync(raw("a\xff.js"), at(raw("l\xff")));
+
+    const s = takeIn(t, root);
+
+    assert.deepEqual(
+      readTar(await tarOf(s)).map((e) => [
+        e.type,
+        e.nameBytes.toString("hex"),
+        e.linknameBytes.toString("hex"),
+        e.content.toString(),
+      ]),
+      [
+        ["0", "61fe2e6a73", "", "fe"],
+        ["0", "61ff2e6a73", "", "ff"],
+        ["2", "6cff", "61ff2e6a73", ""],
+      ],
+    );
   },
 );
