@@ -1,0 +1,78 @@
+{
+  "recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8",
+  "note": "argument lists of the Go driver for cache volumes, recorded with a fake docker CLI; scope RUN, host h, pid 1, deadline the Unix epoch",
+  "calls": [
+    {
+      "call": "cacheVolume kind",
+      "args": [
+        "volume",
+        "create",
+        "--label",
+        "js-prueffactory.cache=kind",
+        "jspf-cache-kind"
+      ]
+    },
+    {
+      "call": "createCacheVolume toolset VERSION",
+      "args": [
+        "volume",
+        "create",
+        "--label",
+        "js-prueffactory.cache=toolset",
+        "--label",
+        "js-prueffactory.toolset-version=VERSION",
+        "jspf-toolset-VERSION"
+      ]
+    },
+    {
+      "call": "listVolumes toolset",
+      "args": [
+        "volume",
+        "ls",
+        "--quiet",
+        "--filter",
+        "label=js-prueffactory.cache=toolset"
+      ]
+    },
+    {
+      "call": "volumeLabel cache",
+      "args": [
+        "volume",
+        "inspect",
+        "--format",
+        "{{index .Labels \"js-prueffactory.cache\"}}",
+        "jspf-toolset-VERSION"
+      ]
+    },
+    {
+      "call": "removeVolumeIfUnused",
+      "args": [
+        "volume",
+        "rm",
+        "jspf-toolset-VERSION"
+      ]
+    },
+    {
+      "call": "hold toolset-hold",
+      "args": [
+        "create",
+        "--name",
+        "jspf-RUN-toolset-hold",
+        "--pull",
+        "never",
+        "--label",
+        "js-prueffactory.run-id=RUN",
+        "--label",
+        "js-prueffactory.host=h",
+        "--label",
+        "js-prueffactory.pid=1",
+        "--label",
+        "js-prueffactory.deadline=1970-01-01T00:00:00Z",
+        "--volume",
+        "jspf-toolset-VERSION:/toolset:ro",
+        "node@sha256:x",
+        "true"
+      ]
+    }
+  ]
+}
