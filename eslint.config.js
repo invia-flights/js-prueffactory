@@ -6,7 +6,9 @@ import tseslint from "typescript-eslint";
 export default defineConfig(
   // Test projects and the in-container helpers are not the tool's own code;
   // the helpers run unchanged on every project Node major.
+  // Agent worktrees under .claude/ are other checkouts of this repository.
   globalIgnores([
+    ".claude/",
     "**/testdata/",
     "internal/checks/js/",
     "internal/toolset/npm/",

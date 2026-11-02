@@ -1,0 +1,710 @@
+{
+  "evidenceCap": [
+    {
+      "Name": "two-byte character across the cap",
+      "Kind": "tool_output",
+      "TextBytes": 4095,
+      "OriginalSize": 4197,
+      "ArtifactPath": "artifacts/evidence/88e44d8043fca115.txt",
+      "Text": ""
+    },
+    {
+      "Name": "three-byte character across the cap",
+      "Kind": "tool_output",
+      "TextBytes": 4094,
+      "OriginalSize": 4098,
+      "ArtifactPath": "artifacts/evidence/f593ee86a2e21b88.txt",
+      "Text": ""
+    },
+    {
+      "Name": "three-byte character ending at the cap",
+      "Kind": "tool_output",
+      "TextBytes": 4096,
+      "OriginalSize": 4097,
+      "ArtifactPath": "artifacts/evidence/4fe74be9db3ab156.txt",
+      "Text": ""
+    },
+    {
+      "Name": "four-byte characters",
+      "Kind": "tool_output",
+      "TextBytes": 4096,
+      "OriginalSize": 4100,
+      "ArtifactPath": "artifacts/evidence/ac9e73ef771fc0aa.txt",
+      "Text": ""
+    },
+    {
+      "Name": "four-byte character across the cap",
+      "Kind": "tool_output",
+      "TextBytes": 4093,
+      "OriginalSize": 4101,
+      "ArtifactPath": "artifacts/evidence/ea19f19f2f05baaf.txt",
+      "Text": ""
+    },
+    {
+      "Name": "exactly the cap",
+      "Kind": "tool_output",
+      "TextBytes": 4096,
+      "OriginalSize": null,
+      "ArtifactPath": "",
+      "Text": ""
+    },
+    {
+      "Name": "mixed",
+      "Kind": "tool_output",
+      "TextBytes": 4096,
+      "OriginalSize": 5000,
+      "ArtifactPath": "artifacts/evidence/7725d7423adfe685.txt",
+      "Text": ""
+    },
+    {
+      "Name": "35 frames",
+      "Kind": "stack_trace",
+      "TextBytes": 791,
+      "OriginalSize": 922,
+      "ArtifactPath": "artifacts/evidence/a19a429f77bcc7d1.txt",
+      "Text": "Error: boom\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)\n    at fn (/app/x.js:1:1)"
+    },
+    {
+      "Name": "frames after NEL",
+      "Kind": "stack_trace",
+      "TextBytes": 731,
+      "OriginalSize": 756,
+      "ArtifactPath": "artifacts/evidence/54866aebf700195e.txt",
+      "Text": "Error: boom\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)\nat fn (/app/x.js:1:1)"
+    },
+    {
+      "Name": "frames after NBSP",
+      "Kind": "stack_trace",
+      "TextBytes": 731,
+      "OriginalSize": 756,
+      "ArtifactPath": "artifacts/evidence/7b64da7eace0b0cd.txt",
+      "Text": "Error: boom\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)\n at fn (/app/x.js:1:1)"
+    },
+    {
+      "Name": "frames after BOM",
+      "Kind": "stack_trace",
+      "TextBytes": 787,
+      "OriginalSize": null,
+      "ArtifactPath": "",
+      "Text": "Error: boom\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n﻿at fn (/app/x.js:1:1)\n"
+    },
+    {
+      "Name": "frames with CRLF",
+      "Kind": "stack_trace",
+      "TextBytes": 762,
+      "OriginalSize": 788,
+      "ArtifactPath": "artifacts/evidence/d55c6e60ed6e90b0.txt",
+      "Text": "Error: boom\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r\n  at fn (/app/x.js:1:1)\r"
+    }
+  ],
+  "findingOrderByCanonical": [
+    "F-0001 Zx",
+    "F-0002 \u0026x",
+    "F-0003 \u003cx",
+    "F-0004 \u2028x",
+    "F-0005 ax",
+    "F-0006 x",
+    "F-0007 😀x"
+  ],
+  "findingOrderByPath": [
+    "F-0001 Z.js",
+    "F-0002 z.js",
+    "F-0003 é.js",
+    "F-0004 .js",
+    "F-0005 ～.js",
+    "F-0006 😀.js"
+  ],
+  "fingerprints": [
+    {
+      "Check": "syntax.parse",
+      "Rule": "SyntaxError",
+      "Path": "src/a.js",
+      "Text": "Unexpected token ';' at line 3",
+      "Value": "562fbabebc4bfe478bebf7d537f901861a8072a05705f33383a3d2c6c2054c3c",
+      "WithSuite": {
+        "": "2b9fb19a83ba47ddbf84b2c5681c97118f0ae22f91d46d8799b3f7867a5554c3",
+        "test:unit": "9da9632a8c5fa2b9956302cb6f735b06615d9f73b51cd1a20d82af498b1b5538",
+        "😀": "30a7009cf0f5149089d69cee5f75ebf84be087ce264c054ce85923f2ee28e415"
+      }
+    },
+    {
+      "Check": "syntax.parse",
+      "Rule": "SyntaxError",
+      "Path": "src/a.js",
+      "Text": "Unexpected token ';' at line 41",
+      "Value": "562fbabebc4bfe478bebf7d537f901861a8072a05705f33383a3d2c6c2054c3c",
+      "WithSuite": {
+        "": "2b9fb19a83ba47ddbf84b2c5681c97118f0ae22f91d46d8799b3f7867a5554c3",
+        "test:unit": "9da9632a8c5fa2b9956302cb6f735b06615d9f73b51cd1a20d82af498b1b5538",
+        "😀": "30a7009cf0f5149089d69cee5f75ebf84be087ce264c054ce85923f2ee28e415"
+      }
+    },
+    {
+      "Check": "lint.correctness",
+      "Rule": "no-undef",
+      "Path": "src/ü/ä.js",
+      "Text": "'x' is not defined. (12:5)",
+      "Value": "8be4f5707d81ee5ee693722277999f2ceba57c740454efa9bf194c84f07f41bd",
+      "WithSuite": {
+        "": "fdc1dbc4d053ad5cc935680a85f96b43153c709ab105b6bdaff25c0c8d9e0dde",
+        "test:unit": "db318452a42076c9d1e5eff640915409ade24391c98a9800e875a192cb5410de",
+        "😀": "c76356575f3769a758a32d814013e2febf0dfc6dd6d1d666123e100e60cd717e"
+      }
+    },
+    {
+      "Check": "tests.existing",
+      "Rule": "",
+      "Path": "test/a.js",
+      "Text": "a  b\tc\n d",
+      "Value": "e12261df398106ba984e3d39a44bb83c1de546c8c4fac1a6cf96b2c4a4a7168d",
+      "WithSuite": {
+        "": "7b5b95b461216e719853e9b737acc6eab3ac742632fc270cc7115c86e24e7c41",
+        "test:unit": "910b8d10bf2196c75ed6848b193484aa182c5f175b93f3b37909ffe8ba1fccbc",
+        "😀": "31931f4b9960add2b7e8ab6edd869a0e20865aa9bf49ca88500c02c2e0c7ab3f"
+      }
+    },
+    {
+      "Check": "x",
+      "Rule": "y",
+      "Path": "p",
+      "Text": "Line 3, Column 4 and COLUMN 9 and line 7, column 2",
+      "Value": "23932545c1acbd83a22c9d6101c8b48bdfb989c88f4af2381d31d8603172afee",
+      "WithSuite": {
+        "": "58375586dfb9aec08bd4f77e465612853e0f9e4134388caad865853e0ef9a970",
+        "test:unit": "a77005aa3e8d6daf4b373d2548d56dbc3e806a0fc380744643aed12c4b2ebaf9",
+        "😀": "f1d37e4f396f62cd6f709f0da78c3044e607bd14f51195981238f92010da20ef"
+      }
+    },
+    {
+      "Check": "x",
+      "Rule": "y",
+      "Path": "p",
+      "Text": "file.js:10:20: boom",
+      "Value": "4ba48557f3ae484371179cf75271c3733a6c4fd1e3ad22b2addd272b0677f392",
+      "WithSuite": {
+        "": "d7d62affa2c80439dda8ff0e31eb2c04f14e7119188250e4e055913e29ad9b6b",
+        "test:unit": "77e6f99caadb4068624eedae44ab827c7de9e997319c123a79775e77f86d80d7",
+        "😀": "8e4e41696fea1ef19c4d06f73f976bf2d11d3f4764b7a3fb8ca1af5d1fdbb737"
+      }
+    },
+    {
+      "Check": "x",
+      "Rule": "y",
+      "Path": "p",
+      "Text": " nbspnel﻿bom　ideo\u2028ls​zw x\u000bvt\u001fus",
+      "Value": "57db745ae4a2a6ebfe5ab1308067ac20ac1461f004b6de6b352d1c1eccfd69a2",
+      "WithSuite": {
+        "": "6ceaa7e97b0c29a88abdd6c65b133ac83658152c03dccbe9cbe5bdefa3e3428a",
+        "test:unit": "11d0f08287ca9d5b69e5d4d322ff0d9c9bf54eed712da42fea8f1d6e2dbd8803",
+        "😀": "55f575bb21832c2e3a5441aa6212c7946ed3a6a2b1966158f9f24731dfa476a8"
+      }
+    },
+    {
+      "Check": "x",
+      "Rule": "y",
+      "Path": "p",
+      "Text": "",
+      "Value": "0ebd04ee5c30a0c13cc2db07298bb9679d589a93823088367ec97e76ef839c38",
+      "WithSuite": {
+        "": "2577c60273c3f98a6a76bda5a3fa550b0213bf0b960a54b94abba5eba92b7548",
+        "test:unit": "afd79cb052d97db225193ca634e0e4bf2dcbb1b6e5c98ca8ffba349193cf7f5e",
+        "😀": "f2bdcb7a70c31e4d2226fd1d0b1ca441c060c15fd49bec6e4ccc996d0733cbad"
+      }
+    },
+    {
+      "Check": "x",
+      "Rule": "y",
+      "Path": "p",
+      "Text": "emoji 😀 ﬁ ǅ",
+      "Value": "29b8dda68d5d82fb55a25ce13107d8d3c8208b649cbb0ef56e6d09ce4e90238a",
+      "WithSuite": {
+        "": "aa727e4f27514efaf9a03a52e7835b574fdf4cd5dcedd08adbacd98831c69189",
+        "test:unit": "9ac3971c1ced17fc23f36944f8209a762676978ddf728a67b20566a941c845b2",
+        "😀": "abcf35614811573bcc98f6c845c9a72174a6a707fa46221018314c098f441ab1"
+      }
+    },
+    {
+      "Check": "x",
+      "Rule": "y",
+      "Path": "p",
+      "Text": "inline:12abc",
+      "Value": "456b665da4adb39b457d315f91ee7dd1d0c930c2e0a582ab5805fca3ea19ada3",
+      "WithSuite": {
+        "": "d76afb16b0e03b849d49d68b53e3c3e25ff206693ac4e8420ff605fe3adae492",
+        "test:unit": "be8b92cbf4d35dcf81a8693ca1fd5c6ea1481cd68f2dc9074c78c2a69e423cbc",
+        "😀": "76fac548454012a64bf145e75f0ec0301a0d27c18c4eba5ec33fee13856b3d0b"
+      }
+    },
+    {
+      "Check": "x",
+      "Rule": "y",
+      "Path": "p",
+      "Text": "outline 5 newline 6 deadline 7 line 8",
+      "Value": "cba7062c6bba089c2ad80d76c37273c125a3e3a89cc8ff45742e3dc30352056a",
+      "WithSuite": {
+        "": "753acb6c27f8f0e7c8f506eef3219fb0018fbc2e3fd9a108fd1c27c5f4dfa5e3",
+        "test:unit": "1e8fd1c1982203b319c57f6d9902b5bec368151afc1908dfeea43ccccba37491",
+        "😀": "c8d9c934d95d7b9bc83683dad8df36e28192c3eb27b397547749c3f40103feca"
+      }
+    },
+    {
+      "Check": "x",
+      "Rule": "y",
+      "Path": "p",
+      "Text": "line 3, column",
+      "Value": "201af5f3f07e4f5e5863b7c35503c49428fa36a8ffe405757f2257f827cfeaa8",
+      "WithSuite": {
+        "": "74558df000b3c4c1a1c82b26f44b96836fdac9fc655f306ff998f841ba2283d0",
+        "test:unit": "971f693b26b9012145d7bb9ed267f7c11f91dbff84bbbe9dd17f05e0bf86c8f7",
+        "😀": "a0b2671f66f98340c156416d2f71ad7753ee2c112558cccedd56a9cabf7f0013"
+      }
+    },
+    {
+      "Check": "x",
+      "Rule": "y",
+      "Path": "p",
+      "Text": "lıne 5 LİNE 6 line ٣",
+      "Value": "419f9fc105883d64274846329f94a004545d7754ec3c35b2b86728004039e651",
+      "WithSuite": {
+        "": "a06aee7c9b2866616917243da0d33ea4ae1c164356b66801194e0a68cb596682",
+        "test:unit": "a7d498d0c200a55877b841e916682070b16902c67a271201f6fe0531e6a0c704",
+        "😀": "55b3ad88fdaa53508bc524cd6cd12853d5736a6795d148fa9d73614397305d96"
+      }
+    },
+    {
+      "Check": "x",
+      "Rule": "y",
+      "Path": "p",
+      "Text": "café café",
+      "Value": "58c0944b60085ce2aafc3dbe8ed7a5ed6e5b8434bb1f5045090c24c2e8703e2c",
+      "WithSuite": {
+        "": "04fdfef2dad7686b98196fd19e4d249d073acffbf8d043e8291075545fa755d9",
+        "test:unit": "956a13ee65edfc70c082189d89b32af1aa7a0ed29c01522439802d8b4a28f8e2",
+        "😀": "b9bcf77294f469e242d695eeb8212ac52e6cff89b1a402bea4d8fe7096264e1a"
+      }
+    },
+    {
+      "Check": "x",
+      "Rule": "y",
+      "Path": "p",
+      "Text": "a\u0000b",
+      "Value": "05ecf4b57a30a381d906b4d05df5b914488a357006ec03041bd2d7f0499829d3",
+      "WithSuite": {
+        "": "95da4408ac588b9f95126880134e85c2a436fe261b578f9165a2c877733062c7",
+        "test:unit": "79bfeab65b8839c03ef337444f14ee473258511907b002e899db708df359ffaf",
+        "😀": "26b099b8e6901505dc2aa795f051a0688f46b4ef847aa397b1407ac55bd00d3e"
+      }
+    },
+    {
+      "Check": "x",
+      "Rule": "y",
+      "Path": "p",
+      "Text": "LINE 10, COLUMN 3",
+      "Value": "0ebd04ee5c30a0c13cc2db07298bb9679d589a93823088367ec97e76ef839c38",
+      "WithSuite": {
+        "": "2577c60273c3f98a6a76bda5a3fa550b0213bf0b960a54b94abba5eba92b7548",
+        "test:unit": "afd79cb052d97db225193ca634e0e4bf2dcbb1b6e5c98ca8ffba349193cf7f5e",
+        "😀": "f2bdcb7a70c31e4d2226fd1d0b1ca441c060c15fd49bec6e4ccc996d0733cbad"
+      }
+    },
+    {
+      "Check": "x",
+      "Rule": "y",
+      "Path": "p",
+      "Text": "at line 12, column 7:3",
+      "Value": "204e9e34d770b0548df04879657785b37b6d0c95e08460066459a9cf47699329",
+      "WithSuite": {
+        "": "d6e830b6af83527e174ba6f6858e0913a7157e5203f4816c16ddfa7f86b33846",
+        "test:unit": "dfed752b11fa8e0e9ae1dd955ab678eacbc31c4cd151a9b7e8263b2e64f50c6e",
+        "😀": "625816d59ba3c970f24d44348a432fee83a789035aa0ddd2bab58f73e5303fe4"
+      }
+    }
+  ],
+  "passedTestsArtifact": {
+    "content": "{\n  \"check_id\": \"syntax.parse\",\n  \"context_id\": \"C-0002\",\n  \"counts\": {\n    \"passed\": 2,\n    \"flaky\": 1\n  },\n  \"passed\": [\n    {\n      \"file\": \"test/\\u003ca\\u003e.js\",\n      \"suite\": \"\",\n      \"full_title\": \"a \\u0026 b \\u003cc\\u003e\",\n      \"suite_path\": [\n        \"suite\"\n      ],\n      \"flaky\": false,\n      \"attempts\": [\n        {\n          \"outcome\": \"passed\",\n          \"duration_ms\": 3,\n          \"error\": null\n        }\n      ]\n    },\n    {\n      \"file\": \"test/a.js\",\n      \"suite\": \"\",\n      \"full_title\": \"line\\u2028sep \\u0007 \\\"q\\\" \\\\ 😀\",\n      \"suite_path\": [\n        \"suite\"\n      ],\n      \"flaky\": true,\n      \"attempts\": [\n        {\n          \"outcome\": \"failed\",\n          \"duration_ms\": 2,\n          \"error\": \"boom\\n\\tat x\"\n        },\n        {\n          \"outcome\": \"passed\",\n          \"duration_ms\": 3,\n          \"error\": null\n        }\n      ]\n    }\n  ]\n}\n",
+    "path": "artifacts/tests/syntax.parse-C-0002-passed.json"
+  },
+  "recordedFrom": "Go build of js-prueffactory at the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8",
+  "sortedStrings": [
+    "",
+    "Z.js",
+    "a",
+    "ab",
+    "z.js",
+    "",
+    "é.js",
+    "퟿",
+    ".js",
+    "～.js",
+    "￿",
+    "𐀀",
+    "😀.js"
+  ],
+  "texts": [
+    {
+      "In": "a \u0026\u0026 b",
+      "Quote": "`a \u0026\u0026 b`",
+      "WithoutControls": "a \u0026\u0026 b",
+      "Backticks": 0
+    },
+    {
+      "In": "`tick`",
+      "Quote": "`` `tick` ``",
+      "WithoutControls": "`tick`",
+      "Backticks": 1
+    },
+    {
+      "In": "``x`` y",
+      "Quote": "``` ``x`` y ```",
+      "WithoutControls": "``x`` y",
+      "Backticks": 2
+    },
+    {
+      "In": "ctrl\u0007bell\u001b[31m",
+      "Quote": "`ctrlbell[31m`",
+      "WithoutControls": "ctrlbell[31m",
+      "Backticks": 0
+    },
+    {
+      "In": "line1\r\nline2",
+      "Quote": "`line1 line2`",
+      "WithoutControls": "line1\r\nline2",
+      "Backticks": 0
+    },
+    {
+      "In": "nel",
+      "Quote": "`nel`",
+      "WithoutControls": "nel",
+      "Backticks": 0
+    },
+    {
+      "In": " nbsp",
+      "Quote": "`nbsp`",
+      "WithoutControls": " nbsp",
+      "Backticks": 0
+    },
+    {
+      "In": "﻿bom",
+      "Quote": "`﻿bom`",
+      "WithoutControls": "﻿bom",
+      "Backticks": 0
+    },
+    {
+      "In": "  spaced  ",
+      "Quote": "`spaced`",
+      "WithoutControls": "  spaced  ",
+      "Backticks": 0
+    },
+    {
+      "In": "",
+      "Quote": "",
+      "WithoutControls": "",
+      "Backticks": 0
+    },
+    {
+      "In": " del  csi",
+      "Quote": "`del csi`",
+      "WithoutControls": " del  csi",
+      "Backticks": 0
+    },
+    {
+      "In": "😀",
+      "Quote": "`😀`",
+      "WithoutControls": "😀",
+      "Backticks": 0
+    },
+    {
+      "In": "a\u2028b",
+      "Quote": "`a b`",
+      "WithoutControls": "a\u2028b",
+      "Backticks": 0
+    },
+    {
+      "In": "x ```` y ` z",
+      "Quote": "`````x ```` y ` z`````",
+      "WithoutControls": "x ```` y ` z",
+      "Backticks": 4
+    },
+    {
+      "In": "\t\u000b\f",
+      "Quote": "",
+      "WithoutControls": "\t\u000b\f",
+      "Backticks": 0
+    }
+  ],
+  "validation": {
+    "benchmark command without a benchmark section": [
+      "the benchmark command wrote no benchmark section: it is not_requested"
+    ],
+    "fullSet: Check both selected and deselected": [
+      "Check syntax.parse is both effective and deselected"
+    ],
+    "fullSet: Finding refers to a Limitation the Report lacks": [
+      "finding F-0001 refers to Limitation \"service_not_started\", but the Report has no Limitation with that reason code"
+    ],
+    "fullSet: ID with the wrong prefix": [
+      "test case number 1 has ID \"X-0001\", want \"T-0001\""
+    ],
+    "fullSet: artifact content does not match its hash": [
+      "finding F-0003 evidence 1 records an original size of 6000 but its artifact has 7 bytes",
+      "artifact A-0001 does not match its recorded SHA-256 and size"
+    ],
+    "fullSet: artifact path ends with a slash": [
+      "artifact A-0001 has the path \"artifacts/\", which is not a clean relative path inside the report folder"
+    ],
+    "fullSet: artifact path has a backslash": [
+      "artifact A-0001 has the path \"artifacts\\\\x.txt\", which is not a clean relative path inside the report folder"
+    ],
+    "fullSet: artifact path is absolute": [
+      "artifact A-0001 has the path \"/etc/passwd\", which is not a clean relative path inside the report folder"
+    ],
+    "fullSet: artifact path is dot": [],
+    "fullSet: artifact path is empty": [
+      "artifact A-0001 has the path \"\", which is not a clean relative path inside the report folder"
+    ],
+    "fullSet: artifact path is not clean": [
+      "artifact A-0001 has the path \"artifacts//x/../y.txt\", which is not a clean relative path inside the report folder"
+    ],
+    "fullSet: artifact path leaves the report folder": [
+      "artifact A-0001 has the path \"../escape.txt\", which is not a clean relative path inside the report folder"
+    ],
+    "fullSet: artifact would overwrite report.md": [
+      "artifact A-0001 would overwrite report.md"
+    ],
+    "fullSet: context ID of the wrong form": [
+      "execution E-0002 refers to unknown context \"C-0003\"",
+      "finding F-0001 refers to unknown context \"C-0003\"",
+      "finding F-0002 refers to unknown context \"C-0003\"",
+      "finding F-0003 refers to unknown context \"C-0003\"",
+      "context ID \"C-12é\" is not of the form C-0001"
+    ],
+    "fullSet: cut evidence claims a smaller original": [
+      "finding F-0003 evidence 1 records an original size of 10, smaller than its text of 4096 bytes",
+      "finding F-0003 evidence 1 records an original size of 10 but its artifact has 6000 bytes"
+    ],
+    "fullSet: cut evidence names no artifact": [
+      "finding F-0003 evidence 1 was cut but names no artifact with the full text"
+    ],
+    "fullSet: deselected by --fast although the Run was not fast": [
+      "summary.scope_completeness {Required:2 Completed:2 Ratio:\u003cpointer\u003e} does not match the executions {Required:1 Completed:1 Ratio:\u003cpointer\u003e}",
+      "execution E-0001 is deselected by --fast but selected is false and selection.fast is false"
+    ],
+    "fullSet: duplicate context IDs and an unknown test case reference": [
+      "duplicate context ID \"C-0001\"",
+      "test case T-0001 refers to unknown execution \"E-0404\"",
+      "test case T-0001 refers to unknown finding \"F-0404\""
+    ],
+    "fullSet: evidence text over the cap": [
+      "finding F-0001 evidence 1 has 4097 bytes, over the cap of 4096"
+    ],
+    "fullSet: execution with an unknown outcome": [
+      "execution E-0001 has unknown outcome \"odd \\\"one\\\"\""
+    ],
+    "fullSet: exit code is wrong": [
+      "run.exit_code is 0 but the results map to 1"
+    ],
+    "fullSet: failed test case with a never-run reason": [
+      "test case T-0001 has a never-run reason but the outcome \"failed\""
+    ],
+    "fullSet: failed without a Gate": [
+      "execution E-0001 has outcome failed without a Gate"
+    ],
+    "fullSet: finding ID is not in sequence": [
+      "finding number 1 has ID \"F-0042\", want \"F-0001\""
+    ],
+    "fullSet: finding in a different context than its execution": [
+      "finding F-0001 is in context C-0001 but its execution E-0002 is in C-0003"
+    ],
+    "fullSet: finding of a different Check than its execution": [
+      "finding F-0001 is of Check tests.existing but its execution E-0002 is of syntax.parse"
+    ],
+    "fullSet: metric and service in unknown contexts": [
+      "metric M-0001 refers to unknown context \"C-0404\"",
+      "service cache refers to unknown context \"C-0405\""
+    ],
+    "fullSet: never-run test case without a reason": [
+      "test case T-0002 never ran but gives no reason"
+    ],
+    "fullSet: not applicable execution that ran": [
+      "execution E-0001 is not applicable but has status \"completed\"",
+      "summary.scope_completeness {Required:2 Completed:2 Ratio:\u003cpointer\u003e} does not match the executions {Required:1 Completed:1 Ratio:\u003cpointer\u003e}",
+      "summary.standard_completeness {Required:2 Completed:2 Ratio:\u003cpointer\u003e} does not match the executions {Required:1 Completed:1 Ratio:\u003cpointer\u003e}"
+    ],
+    "fullSet: observations_only with a Gate": [
+      "execution E-0002 has outcome observations_only with status \"completed\" and gate=2",
+      "execution E-0002 fired a Gate but has outcome \"observations_only\""
+    ],
+    "fullSet: passed test case in the list": [
+      "summary.test_cases {Passed:1 Failed:1 Skipped:0 Todo:0 NeverRun:1} does not match the test cases listed {Passed:0 Failed:0 Skipped:0 Todo:0 NeverRun:1}",
+      "test case T-0001 passed, so it belongs in an artifact and not in the list"
+    ],
+    "fullSet: run completed although a selected Check did not complete": [
+      "summary.scope_completeness {Required:2 Completed:2 Ratio:\u003cpointer\u003e} does not match the executions {Required:2 Completed:1 Ratio:\u003cpointer\u003e}",
+      "summary.standard_completeness {Required:2 Completed:2 Ratio:\u003cpointer\u003e} does not match the executions {Required:2 Completed:1 Ratio:\u003cpointer\u003e}",
+      "run.status is \"completed\" but selected Checks incomplete is true"
+    ],
+    "fullSet: scope completeness does not match the executions": [
+      "summary.scope_completeness {Required:2 Completed:0 Ratio:\u003cpointer\u003e} does not match the executions {Required:2 Completed:2 Ratio:\u003cpointer\u003e}"
+    ],
+    "fullSet: stack trace with more than 30 frames": [
+      "finding F-0001 evidence 1 is a stack trace with 31 frames, over the cap of 30"
+    ],
+    "fullSet: standard completeness without a ratio": [
+      "summary.standard_completeness {Required:2 Completed:2 Ratio:\u003cnil\u003e} does not match the executions {Required:2 Completed:2 Ratio:\u003cpointer\u003e}"
+    ],
+    "fullSet: summary severity counts are wrong": [
+      "summary.findings_by_severity {Error:2 Warning:4 Note:1} does not match the Findings {Error:2 Warning:0 Note:1}"
+    ],
+    "fullSet: summary test counts are wrong": [
+      "summary.test_cases {Passed:1 Failed:1 Skipped:0 Todo:2 NeverRun:1} does not match the test cases listed {Passed:0 Failed:1 Skipped:0 Todo:0 NeverRun:1}"
+    ],
+    "fullSet: test case with an unknown outcome": [
+      "summary.test_cases {Passed:1 Failed:1 Skipped:0 Todo:0 NeverRun:1} does not match the test cases listed {Passed:0 Failed:0 Skipped:0 Todo:0 NeverRun:1}",
+      "test case T-0001 has unknown outcome \"weird\\a\""
+    ],
+    "fullSet: truncated evidence count is wrong": [
+      "report_completeness counts 5 truncated evidence items but 1 are cut"
+    ],
+    "fullSet: two artifacts share a path": [
+      "artifacts A-0001 and A-0002 share the path \"artifacts/evidence/1853dfaa6b3a0e3d.txt\""
+    ],
+    "fullSet: unknown evidence artifact and execution artifact": [
+      "execution E-0001 lists unknown artifact \"A-0405\"",
+      "finding F-0003 evidence refers to unknown artifact \"A-0404\""
+    ],
+    "fullSet: unselected execution with Findings": [
+      "finding F-0001 belongs to execution E-0002, which was not selected and may not report Findings",
+      "finding F-0002 belongs to execution E-0002, which was not selected and may not report Findings",
+      "finding F-0003 belongs to execution E-0002, which was not selected and may not report Findings",
+      "summary.scope_completeness {Required:2 Completed:2 Ratio:\u003cpointer\u003e} does not match the executions {Required:1 Completed:1 Ratio:\u003cpointer\u003e}",
+      "run.exit_code is 1 but the results map to 0"
+    ],
+    "handMade: benchmark not requested but a profile": [
+      "benchmark is not_requested but profiles.benchmark_profile is \"benchmark-v1-uncalibrated\""
+    ],
+    "handMade: benchmark not requested but scored": [
+      "benchmark is not_requested but has a score, range, verdict or profile"
+    ],
+    "handMade: benchmark with an unknown status": [
+      "benchmark has unknown status \"maybe\""
+    ],
+    "handMade: duplicate finding ID": [
+      "duplicate finding ID \"F-0001\"",
+      "execution E-0002 lists unknown finding \"F-0002\"",
+      "finding number 2 has ID \"F-0001\", want \"F-0002\""
+    ],
+    "handMade: execution lists an unknown finding": [
+      "execution E-0002 lists unknown finding \"F-4242\""
+    ],
+    "handMade: finding points at an unknown context": [
+      "finding F-0001 refers to unknown context \"C-9999\"",
+      "finding F-0001 is in context C-9999 but its execution E-0002 is in C-0003"
+    ],
+    "handMade: finding points at an unknown execution": [
+      "finding F-0001 refers to unknown execution \"E-9999\"",
+      "finding F-0001 is not listed by its execution E-9999",
+      "execution E-0002 says gate=2 but has 1 Gate Findings"
+    ],
+    "handMade: gate count does not match Findings": [
+      "execution E-0002 says gate=7 but has 2 Gate Findings"
+    ],
+    "handMade: passed outcome with Findings": [
+      "execution E-0002 has outcome passed with status \"completed\" and 3 Findings",
+      "execution E-0002 fired a Gate but has outcome \"passed\""
+    ],
+    "handMade: selected applicable Check never started": [
+      "execution E-0001 was selected and applicable but never started and has no reason status",
+      "execution E-0001 has outcome passed with status \"not_started\" and 0 Findings",
+      "summary.scope_completeness {Required:2 Completed:2 Ratio:\u003cpointer\u003e} does not match the executions {Required:2 Completed:1 Ratio:\u003cpointer\u003e}",
+      "summary.standard_completeness {Required:2 Completed:2 Ratio:\u003cpointer\u003e} does not match the executions {Required:2 Completed:1 Ratio:\u003cpointer\u003e}",
+      "run.status is \"completed\" but selected Checks incomplete is true"
+    ],
+    "handMade: summary gate count is wrong": [
+      "summary.gates is 9 but 2 Findings are Gates"
+    ],
+    "scored: benchmark section in a test mode Report": [
+      "a test mode Report (command \"test\") has a benchmark section with status computed"
+    ],
+    "scored: computed without a score": [
+      "benchmark is computed but has no score",
+      "benchmark area tests has a contribution but there is no score",
+      "benchmark area validity has a contribution but there is no score",
+      "benchmark area security has a contribution but there is no score",
+      "benchmark area code_correctness has a contribution but there is no score"
+    ],
+    "scored: contribution without a score": [
+      "benchmark area tests has a contribution but there is no score",
+      "benchmark area validity has a contribution but there is no score",
+      "benchmark area security has a contribution but there is no score",
+      "benchmark area code_correctness has a contribution but there is no score"
+    ],
+    "scored: contributions do not add up to the score": [
+      "benchmark area contributions add up to 46.6, not to the score 80.6"
+    ],
+    "scored: fail without a Gate": [
+      "benchmark verdict \"fail\" disagrees with 0 Gates"
+    ],
+    "scored: gate list holds a Finding that is no Gate": [
+      "benchmark lists 2 Gate Findings but 1 Findings are Gates",
+      "benchmark lists F-0099 as a Gate, but it is not one"
+    ],
+    "scored: gate list misses a Gate": [
+      "benchmark lists 0 Gate Findings but 1 Findings are Gates"
+    ],
+    "scored: incomplete status with a score": [
+      "benchmark is incomplete but has a score"
+    ],
+    "scored: incomplete with a score": [
+      "benchmark has an incomplete verdict but a score of 80.6"
+    ],
+    "scored: no areas": [
+      "benchmark has no areas"
+    ],
+    "scored: no fingerprint": [
+      "benchmark has no fingerprint"
+    ],
+    "scored: no profile ID": [
+      "benchmark has no profile ID"
+    ],
+    "scored: no range": [
+      "benchmark has no range, which is always computed"
+    ],
+    "scored: no verdict": [
+      "benchmark computed has no verdict"
+    ],
+    "scored: pass although a Gate fired": [
+      "benchmark verdict \"pass\" disagrees with 1 Gates"
+    ],
+    "scored: pass without a score": [
+      "benchmark verdict is pass without a score",
+      "benchmark area tests has a contribution but there is no score",
+      "benchmark area validity has a contribution but there is no score",
+      "benchmark area security has a contribution but there is no score",
+      "benchmark area code_correctness has a contribution but there is no score"
+    ],
+    "scored: profile differs from profiles.benchmark_profile": [
+      "benchmark profile \"benchmark-v1-uncalibrated\" differs from profiles.benchmark_profile"
+    ],
+    "scored: range in exponent form": [
+      "benchmark range 1e-07 to 1.234567e+06 is not inside 0 to 100 or is upside down"
+    ],
+    "scored: range upside down": [
+      "benchmark range 80.25 to 20 is not inside 0 to 100 or is upside down"
+    ],
+    "scored: score over 100": [
+      "benchmark score 101 is outside 0 to 100",
+      "benchmark area contributions add up to 80.6, not to the score 101.0"
+    ],
+    "scored: score with a fraction below 0": [
+      "benchmark score -0.25 is outside 0 to 100",
+      "benchmark area contributions add up to 80.6, not to the score -0.2"
+    ],
+    "scored: summary gates differ": [
+      "summary.gates is 3 but 1 Findings are Gates",
+      "summary counts 3 Gates but 1 Findings are Gates"
+    ],
+    "test mode Report with benchmark areas": [
+      "benchmark is not_requested but has areas, Gates, side indicators or a fingerprint"
+    ]
+  }
+}
