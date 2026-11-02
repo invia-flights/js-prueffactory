@@ -1,17 +1,55 @@
+// repository.helm lints and renders every Helm chart outside node_modules and
+// Test data (Go: repository_helm.go): `helm lint --strict`, then `helm
+// template` once with the default values and once per extra values file of
+// the chart folder. A chart that does not render is a Gate. Lint errors are
+// errors without a Gate, lint warnings are warnings. A chart whose
+// dependencies are not vendored under charts/ is blocked, because Helm would
+// have to download them.
+//
+// The Helm binary comes from the toolset volume and runs in the pinned Alpine
+// image, with the Snapshot read-only and no network.
+import { join as joinPath } from "node:path";
+
 import type { Project } from "../discovery/discovery.ts";
-import { base, dir } from "../gocompat/path.ts";
-import { compareBytes, sortStrings } from "../gocompat/strings.ts";
-import { Applicable, NotApplicable } from "../resultset/types.ts";
+import type { ContainerResult } from "../docker/driver.ts";
+import { base, clean, dir, join } from "../gocompat/path.ts";
+import { compareBytes, sortStrings, trimSpace } from "../gocompat/strings.ts";
+import { goString } from "../gocompat/utf8.ts";
+import { newFingerprint } from "../resultset/fingerprint.ts";
+import {
+  Applicable,
+  type Finding,
+  type Limitation,
+  NotApplicable,
+  StatusBlocked,
+  StatusCompleted,
+  StatusPartial,
+  StatusToolError,
+  type ToolRef,
+} from "../resultset/types.ts";
+import { Alpine, Helm, HelmRunner } from "../toolset/helm.ts";
+import { HelmBin, MountPath } from "../toolvolume/toolvolume.ts";
 import * as yaml from "../yamlv3/yaml.ts";
 import { type Check, register } from "./check.ts";
+import { tail } from "./cut_text.ts";
+import { lookupRender, renderHelmCharts } from "./helm_render.ts";
+import { failedToRun, toolsetUnavailable } from "./helper_result.ts";
+import type { Input, Result } from "./input.ts";
+import { lstatRegular } from "./readcap.ts";
+import { cutTitle, repoFinding } from "./repo_findings.ts";
 import { candidates, readRegular } from "./repo_targets.ts";
+import {
+  projectImages,
+  snapshotMount,
+  snapshotPath,
+  toolContainer,
+  toolInfo,
+} from "./repo_tools.ts";
 
 export const helmID = "repository.helm";
 
-// helmCheck lints and renders every Helm chart outside node_modules and Test
-// data. A chart whose dependencies are not vendored under charts/ is blocked,
-// because Helm would have to download them. The run arrives with ticket 17 of
-// the port.
+const reasonDependenciesNotVendored = "chart_dependencies_not_vendored";
+
 export const helmCheck: Check = {
   applicability(p, c) {
     if (c.package !== null) {
@@ -28,6 +66,17 @@ export const helmCheck: Check = {
     }
     return [Applicable, ""];
   },
+
+  images(c) {
+    return projectImages(c, HelmRunner);
+  },
+
+  // The Helm binary comes from the toolset volume.
+  usesToolset(c) {
+    return c.package === null;
+  },
+
+  run: runHelm,
 };
 
 register(helmID, helmCheck);
@@ -194,4 +243,307 @@ function vendored(
     }
   }
   return false;
+}
+
+/** helmToolRefs records the Helm release and the image it ran in. */
+export function helmToolRefs(): ToolRef[] {
+  return [
+    { name: HelmRunner.name, version: Helm.version, digest: null },
+    { name: "alpine", version: Alpine.tag, digest: Alpine.digest },
+  ];
+}
+
+/** chartPath is the absolute path of a chart folder inside a Helm container. */
+function chartPath(d: string): string {
+  return d === "." ? snapshotMount : snapshotPath(d);
+}
+
+export function helmLintCommand(d: string): string[] {
+  return [HelmBin, "lint", "--strict", chartPath(d)];
+}
+
+/**
+ * helmTemplateCommand renders a chart with its default values, or with one
+ * values file of its folder. Every path starts with a slash, so none can read
+ * as an option.
+ */
+export function helmTemplateCommand(d: string, values: string): string[] {
+  const cmd = [HelmBin, "template", "jspf", chartPath(d)];
+  if (values !== "") {
+    cmd.push("-f", chartPath(d) + "/" + values);
+  }
+  return cmd;
+}
+
+/** helmEnv keeps Helm's cache and config in the container's own /tmp. */
+export const helmEnv: Readonly<Record<string, string>> = {
+  HOME: "/tmp",
+  HELM_CACHE_HOME: "/tmp/helm/cache",
+  HELM_CONFIG_HOME: "/tmp/helm/config",
+  HELM_DATA_HOME: "/tmp/helm/data",
+};
+
+async function runHelm(signal: AbortSignal, input: Input): Promise<Result> {
+  const findings: Finding[] = [];
+  const limitations: Limitation[] = [];
+  const toolRefs = helmToolRefs();
+  const res: Result = {
+    status: StatusCompleted,
+    toolRefs,
+    findings,
+    limitations,
+  };
+  if (input.toolsetVolume === "") {
+    const unavailable = toolsetUnavailable(input, "the Helm binary");
+    unavailable.toolRefs = toolRefs;
+    return unavailable;
+  }
+  res.command = [HelmBin, "lint", "--strict", "<chart>"];
+
+  const charts = helmCharts(input.project);
+  // The rendering is shared with repository.kubernetes: charts render once
+  // per Run, whichever Check asks first.
+  const rendered = await renderHelmCharts(signal, input);
+  if (rendered.err !== null) {
+    return failedToRun(res, rendered.err);
+  }
+  const failed = rendered.failed;
+  if (failed !== null) {
+    res.tool = toolInfo(HelmRunner, failed.exitCode);
+    res.status = StatusToolError;
+    res.reasonCode = "tool_failed";
+    res.reason = `helm exited with ${String(failed.exitCode)}: ${tail(failed.stderr, 400)}`;
+    return res;
+  }
+  let blocked = 0;
+  let n = 0;
+  let worst = rendered.worst;
+  // lint starts one Helm container for `helm lint` and returns it, or
+  // undefined once the Check is over.
+  const lint = async (cmd: string[]): Promise<ContainerResult | undefined> => {
+    const docker = input.docker;
+    if (docker === null) {
+      throw new Error("no Docker driver is configured");
+    }
+    n++;
+    const spec = toolContainer(
+      input,
+      `helm-${String(n)}`,
+      HelmRunner,
+      cmd,
+      "",
+      helmEnv,
+    );
+    let c: ContainerResult;
+    try {
+      c = await docker.runContainer(signal, {
+        ...spec,
+        mounts: [
+          ...(spec.mounts ?? []),
+          { volume: input.toolsetVolume, path: MountPath, readOnly: true },
+        ],
+      });
+    } catch (err) {
+      failedToRun(res, err);
+      return undefined;
+    }
+    worst = Math.max(worst, c.exitCode);
+    res.tool = toolInfo(HelmRunner, worst);
+    if (c.exitCode > 1) {
+      res.status = StatusToolError;
+      res.reasonCode = "tool_failed";
+      res.reason = `helm exited with ${String(c.exitCode)}: ${tail(goString(c.stderr), 400)}`;
+      return undefined;
+    }
+    return c;
+  };
+
+  for (const chart of charts) {
+    if (chart.missing.length > 0) {
+      blocked++;
+      limitations.push({
+        reason_code: reasonDependenciesNotVendored,
+        message: `the chart declares dependencies that are not vendored under charts/ (${chart.missing.join(", ")}), and Helm cannot download them without network access, so the chart was not linted or rendered`,
+        check_id: helmID,
+        path: chartFile(chart, "Chart.yaml"),
+      });
+      continue;
+    }
+
+    const c = await lint(helmLintCommand(chart.dir));
+    if (c === undefined) {
+      return res;
+    }
+    const out = goString(c.stdout);
+    const found = helmLintFindings(input, chart.dir, out);
+    if (c.exitCode !== 0 && found.length === 0) {
+      found.push(helmLintFailure(input, chart.dir, goString(c.stderr) + out));
+    }
+    findings.push(...found);
+
+    for (const values of ["", ...chart.values]) {
+      const r = lookupRender(rendered, chart.dir, values);
+      if (r !== undefined && r.exitCode !== 0) {
+        findings.push(helmRenderFailure(input, chart.dir, values, r.stderr));
+      }
+    }
+  }
+
+  if (blocked === charts.length) {
+    res.status = StatusBlocked;
+    res.reasonCode = reasonDependenciesNotVendored;
+    res.reason = `every chart (${String(blocked)}) has dependencies that are not vendored under charts/`;
+  } else if (blocked > 0) {
+    res.status = StatusPartial;
+    res.reasonCode = reasonDependenciesNotVendored;
+    res.reason = `${String(blocked)} of ${String(charts.length)} charts have dependencies that are not vendored under charts/`;
+  } else {
+    res.status = StatusCompleted;
+  }
+  return res;
+}
+
+// helmMessage starts a lint message: "[ERROR] templates/x.yaml: text". Go's
+// `.` is every character but a newline; JavaScript's would also stop at a
+// carriage return and the line separators.
+const helmMessage = /^\[(INFO|WARNING|ERROR)\] ?([^\n]*)$/;
+
+const lintLevels: Readonly<Record<string, string>> = {
+  INFO: "info",
+  WARNING: "warning",
+  ERROR: "error",
+};
+
+/**
+ * helmLintFindings reads the plain text of `helm lint`. Every INFO, WARNING
+ * and ERROR message is a Finding, and none is a Gate: a lint error alone does
+ * not say that the chart cannot be deployed, the render does.
+ */
+export function helmLintFindings(
+  input: Input,
+  d: string,
+  output: string,
+): Finding[] {
+  const messages: { level: string; text: string }[] = [];
+  for (let line of output.split("\n")) {
+    line = line.replace(/\r+$/, "");
+    const m = helmMessage.exec(line);
+    const last = messages.at(-1);
+    if (m !== null) {
+      messages.push({ level: m[1] ?? "", text: m[2] ?? "" });
+    } else if (
+      last !== undefined &&
+      (line.startsWith("\t") || line.startsWith("  "))
+    ) {
+      last.text += "\n" + trimSpace(line);
+    }
+  }
+  return messages.map((m) => {
+    const at = m.text.indexOf(": ");
+    let file = trimSpace(at < 0 ? m.text : m.text.slice(0, at));
+    let text = at < 0 ? "" : m.text.slice(at + 2);
+    if (file.includes(" ") || file.includes("\n") || at < 0) {
+      // no file name in front of the text
+      file = "";
+      text = m.text;
+    }
+    const f = repoFinding(input, helmID, {
+      tool: "helm",
+      rule: "helm.lint",
+      level: lintLevels[m.level] ?? "",
+      path: chartFileOrChartYaml(input, d, file),
+      line: 0,
+      column: 0,
+      message: trimSpace(text),
+      raw: m.text,
+    });
+    f.gate = false;
+    return f;
+  });
+}
+
+/**
+ * helmLintFailure is the Finding for a failed `helm lint` that printed no
+ * message, such as a chart that cannot be loaded at all.
+ */
+export function helmLintFailure(
+  input: Input,
+  d: string,
+  output: string,
+): Finding {
+  const text = trimSpace(output);
+  const f = repoFinding(input, helmID, {
+    tool: "helm",
+    rule: "helm.lint",
+    level: "error",
+    path: chartFileOrChartYaml(input, d, ""),
+    line: 0,
+    column: 0,
+    message: "helm lint failed: " + tail(text, 300),
+    raw: text,
+  });
+  f.gate = false;
+  return f;
+}
+
+/**
+ * helmRenderFailure is the Gate for a chart that does not render, with its
+ * default values or with one values file.
+ */
+export function helmRenderFailure(
+  input: Input,
+  d: string,
+  values: string,
+  stderr: string,
+): Finding {
+  const text = trimSpace(stderr);
+  let what = "default values";
+  let at = chartFileOrChartYaml(input, d, "");
+  let detail = "default";
+  if (values !== "") {
+    what = "values file " + values;
+    detail = values;
+    at = chartFileOrChartYaml(input, d, values);
+  }
+  const chart = d === "." ? "the project root" : d;
+  const rule = "helm.template";
+  const shown = text.startsWith("Error: ")
+    ? text.slice("Error: ".length)
+    : text;
+  const f = repoFinding(input, helmID, {
+    tool: "helm",
+    rule,
+    level: "error",
+    path: at,
+    line: 0,
+    column: 0,
+    message: `chart in ${chart} does not render with its ${what}: ${tail(shown, 300)}`,
+    raw: text,
+  });
+  // The same chart can fail with several values files; each is its own Finding.
+  f.fingerprint = newFingerprint(helmID, rule, join(d, "Chart.yaml"), detail);
+  f.title = cutTitle(`Chart ${chart} does not render with ${what}`);
+  return f;
+}
+
+/**
+ * chartFileOrChartYaml returns the project-relative path of a file that Helm
+ * named relative to the chart folder, or the chart's Chart.yaml when the name
+ * is empty, a folder or not a regular file of the Snapshot.
+ */
+export function chartFileOrChartYaml(
+  input: Pick<Input, "snapshotDir">,
+  d: string,
+  name: string,
+): string {
+  const fallback = join(d, "Chart.yaml");
+  name = clean(name.startsWith("/") ? name.slice(1) : name);
+  if (name === "." || name.startsWith("..")) {
+    return fallback;
+  }
+  const rel = join(d, name);
+  if (lstatRegular(joinPath(input.snapshotDir, rel)) === undefined) {
+    return fallback;
+  }
+  return rel;
 }
