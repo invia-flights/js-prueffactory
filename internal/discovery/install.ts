@@ -5,7 +5,7 @@ import { detect } from "../lockfile/detect.ts";
 import { managerSupport } from "../lockfile/load.ts";
 import { type Manifest, parseManifest } from "../lockfile/manifest.ts";
 import type { Package } from "./discovery.ts";
-import { readRegular } from "./tsemit.ts";
+import { readConfig } from "./tsemit.ts";
 
 // readInstallInfo decides how the dependencies of every package get
 // installed: with npm, from a lockfile or without, or not at all because the
@@ -15,14 +15,15 @@ export function readInstallInfo(root: string, pkgs: readonly Package[]): void {
   const manifests = new Map<string, Manifest | null>();
   for (const pkg of pkgs) {
     const dir = joinPath(root, pkg.path);
-    // Go reads the manifest with a plain os.ReadFile (install.go:28); the
-    // port reads it as the build step rules do (hardening beyond Go): a
-    // symlinked or huge package.json counts as missing.
-    const data = readRegular(root, joinPath(dir, "package.json"));
+    // Go reads the manifest with a plain os.ReadFile (install.go:28), which
+    // follows every link. The port follows one that stays inside the
+    // project; a link that leaves it is not read, and the package says so
+    // (see readConfig). A huge or special package.json counts as missing.
+    const read = readConfig(root, joinPath(dir, "package.json"));
     let m: Manifest | null = null;
-    if (data !== null) {
+    if (read.kind === "ok") {
       try {
-        m = parseManifest(data);
+        m = parseManifest(read.data);
       } catch {
         m = null;
       }
@@ -33,6 +34,13 @@ export function readInstallInfo(root: string, pkgs: readonly Package[]): void {
     pkg.manager = d.manager;
     const u = managerSupport(d, m);
     if (u) pkg.installUnsupported = { code: u.code, reason: u.reason };
+    if (read.kind === "outside") {
+      pkg.installUnsupported = {
+        code: "manifest_link_outside_project",
+        reason:
+          "the package.json is a symbolic link to a file outside the project, and js-prueffactory does not read it",
+      };
+    }
   }
   for (const pkg of pkgs) {
     if (pkg.installUnsupported !== null) continue;

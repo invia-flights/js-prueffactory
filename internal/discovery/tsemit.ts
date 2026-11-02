@@ -1,23 +1,17 @@
-import {
-  closeSync,
-  constants,
-  fstatSync,
-  lstatSync,
-  openSync,
-  readSync,
-  realpathSync,
-} from "node:fs";
-
 import { rel as filepathRel } from "../gocompat/filepath.ts";
 import { base, dir, join as joinPath } from "../gocompat/path.ts";
 import { compareBytes, fields } from "../gocompat/strings.ts";
 import * as json from "../gocompat/unmarshal.ts";
+import {
+  type ReadOutcome,
+  readRegular as readSafely,
+} from "../safefile/safefile.ts";
 import { stripJSONC } from "./jsonc.ts";
 
 // maxConfigBytes is the size above which Discovery does not read a
-// project's config file: tsconfig.json and package.json are small, and the
-// project is untrusted input.
-const maxConfigBytes = 1 << 20;
+// project's config file: tsconfig.json, package.json and the Mocha config
+// are small, and the project is untrusted input.
+const maxConfigBytes = 16 << 20;
 
 // isLocal is filepath.IsLocal on Unix.
 function isLocal(p: string): boolean {
@@ -50,55 +44,31 @@ export function regularJSON(
   }
 }
 
-// readRegular reads a file that is a regular file below root, up to
-// maxConfigBytes; null when it cannot. Go confines the read with os.Root
-// (tsemit.go:24): the folders on the way may be symlinks only if they stay
-// inside root, and the file itself must not be a link or a special file.
-// Here the folder's real path must lie inside root's, the file is opened
-// without following a link, and no more than maxConfigBytes+1 bytes are
-// read. Go reads package.json for install and test decisions and the Mocha
-// config with a plain os.ReadFile; the port reads them through here
-// (hardening beyond Go, see install.ts and testfiles.ts).
-export function readRegular(root: string, file: string): Uint8Array | null {
+// readConfig reads a file below root, up to maxConfigBytes, and says why when
+// it cannot (the guard is safefile's). Go reads these files with a plain
+// os.ReadFile, which follows every link and has no size limit; the port
+// follows a symbolic link, in the file name or in a folder on the way, only
+// when its real path stays inside root, and refuses one that leaves root
+// (the "outside" outcome, which callers may report). The project is untrusted
+// input, so a file over maxConfigBytes or one that is not a regular file is
+// not read either.
+export function readConfig(root: string, file: string): ReadOutcome {
   const rel = filepathRel(root, file);
-  if (rel === undefined || !isLocal(rel)) return null;
-  let fd: number | undefined;
-  try {
-    const realRoot = realpathSync(root);
-    const realDir = realpathSync(dir(joinPath(root, rel)));
-    if (realDir !== realRoot && !realDir.startsWith(realRoot + "/")) {
-      return null;
-    }
-    const target = joinPath(realDir, base(rel));
-    // lstat before open: opening a FIFO for reading would block.
-    const info = lstatSync(target);
-    if (!info.isFile() || info.size > maxConfigBytes) return null;
-    fd = openSync(
-      target,
-      constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
-    );
-    const opened = fstatSync(fd);
-    if (!opened.isFile() || opened.size > maxConfigBytes) return null;
-    let buf = Buffer.alloc(opened.size + 1);
-    let n = 0;
-    for (;;) {
-      if (n === buf.length) {
-        // The file grew after fstat.
-        if (n > maxConfigBytes) return null;
-        const grown = Buffer.alloc(Math.min(2 * n, maxConfigBytes + 1));
-        buf.copy(grown, 0, 0, n);
-        buf = grown;
-      }
-      const got = readSync(fd, buf, n, buf.length - n, null);
-      if (got === 0) break;
-      n += got;
-    }
-    return n > maxConfigBytes ? null : buf.subarray(0, n);
-  } catch {
-    return null;
-  } finally {
-    if (fd !== undefined) closeSync(fd);
+  if (rel === undefined || !isLocal(rel)) {
+    return { kind: "outside", resolved: file };
   }
+  return readSafely(joinPath(root, rel), {
+    limit: maxConfigBytes,
+    over: "refuse",
+    root,
+  });
+}
+
+// readRegular is readConfig for callers that only need the content: null when
+// the file cannot be read, for whatever reason.
+export function readRegular(root: string, file: string): Uint8Array | null {
+  const r = readConfig(root, file);
+  return r.kind === "ok" ? r.data : null;
 }
 
 const rawMap: json.Schema = {

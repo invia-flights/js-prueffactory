@@ -227,7 +227,7 @@ test("build step rules never read through a symlink out of the project or a huge
     '{"scripts":{"build":"tsc"},"babel":{}}',
   );
   const huge =
-    '{"compilerOptions":{"outDir":"dist"},"x":"' + "a".repeat(2 << 20) + '"}';
+    '{"compilerOptions":{"outDir":"dist"},"x":"' + "a".repeat(17 << 20) + '"}';
   const cases: Record<string, (root: string) => void> = {
     "a symlinked folder holding the extended config": (root) => {
       symlinkSync(outside, join(root, "shared"));
@@ -251,7 +251,7 @@ test("build step rules never read through a symlink out of the project or a huge
       writeFileSync(join(root, "tsconfig.json"), "{}");
       writeFileSync(
         join(root, "package.json"),
-        '{"x":"' + "a".repeat(2 << 20) + '","scripts":{"build":"tsc"}}',
+        '{"x":"' + "a".repeat(17 << 20) + '","scripts":{"build":"tsc"}}',
       );
     },
   };
@@ -302,9 +302,10 @@ test("discover never follows a symlink out of the root", () => {
 });
 
 // Go reads package.json for install and test decisions with a plain
-// os.ReadFile (install.go:28, testfiles.go:77,99); the port reads it like
-// the build step rules do. Hardening beyond Go, see traps.md.
-test("a package.json linked out of the project or huge is never read for install or test decisions", () => {
+// os.ReadFile (install.go:28, testfiles.go:77,99), which follows every
+// link. The port follows a link that stays inside the project and refuses
+// one that leaves it (and says so), and reads up to 16 MiB; see traps.md.
+test("a package.json linked out of the project or over 16 MiB is never read for install or test decisions", () => {
   const manifest = {
     packageManager: "pnpm@9.0.0",
     workspaces: ["sub"],
@@ -323,7 +324,7 @@ test("a package.json linked out of the project or huge is never read for install
     "a huge package.json": (root) => {
       writeFileSync(
         join(root, "package.json"),
-        JSON.stringify({ x: "a".repeat(2 << 20), ...manifest }),
+        JSON.stringify({ x: "a".repeat(17 << 20), ...manifest }),
       );
     },
   };
@@ -342,7 +343,19 @@ test("a package.json linked out of the project or huge is never read for install
     );
     const [top, sub] = p.packages;
     assert.equal(top?.manager, NPM, `${name}: packageManager is not read`);
-    assert.equal(top.installUnsupported, null, name);
+    if (name.includes("symlinked")) {
+      assert.deepEqual(
+        top.installUnsupported,
+        {
+          code: "manifest_link_outside_project",
+          reason:
+            "the package.json is a symbolic link to a file outside the project, and js-prueffactory does not read it",
+        },
+        name,
+      );
+    } else {
+      assert.equal(top.installUnsupported, null, name);
+    }
     assert.equal(top.tests, null, `${name}: scripts.test is not read`);
     assert.equal(top.mochaDependency, false, `${name}: mocha is not read`);
     assert.deepEqual(top.generatorScripts, [], name);
@@ -351,6 +364,47 @@ test("a package.json linked out of the project or huge is never read for install
       null,
       `${name}: workspaces is not read`,
     );
+  }
+});
+
+test("a package.json that is a link inside the project, or up to 16 MiB, is read as Go reads it", () => {
+  const manifest = {
+    packageManager: "pnpm@9.0.0",
+    scripts: { test: "mocha" },
+    devDependencies: { mocha: "10.0.0" },
+  };
+  const cases: Record<string, (root: string) => void> = {
+    "a link to a file in another folder of the project": (root) => {
+      mkdirSync(join(root, "shared"));
+      writeFileSync(
+        join(root, "shared", "package.json"),
+        JSON.stringify(manifest),
+      );
+      symlinkSync("shared/package.json", join(root, "package.json"));
+    },
+    "a link through a linked folder": (root) => {
+      mkdirSync(join(root, "real"));
+      writeFileSync(
+        join(root, "real", "package.json"),
+        JSON.stringify(manifest),
+      );
+      symlinkSync("real", join(root, "alias"));
+      symlinkSync("alias/package.json", join(root, "package.json"));
+    },
+    "a file of 2 MiB": (root) => {
+      writeFileSync(
+        join(root, "package.json"),
+        JSON.stringify({ ...manifest, x: "a".repeat(2 << 20) }),
+      );
+    },
+  };
+  for (const [name, setup] of Object.entries(cases)) {
+    const root = tempDir();
+    setup(root);
+    const [top] = discover(root).packages;
+    assert.equal(top?.manager, "pnpm", `${name}: packageManager is read`);
+    assert.equal(top.mochaDependency, true, `${name}: mocha is read`);
+    assert.equal(top.tests?.suites[0]?.runner, "mocha", name);
   }
 });
 
