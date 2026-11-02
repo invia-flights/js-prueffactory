@@ -4,11 +4,9 @@
 // directives never change what the Checks measure. Several Checks share that
 // run. This part holds what list-checks needs: the Applicability of those
 // Checks. The run itself arrives with ticket 21 of the port.
-import { join as joinPath } from "node:path";
-
 import type { Context } from "../discovery/discovery.ts";
 import { Source, TestCode } from "../discovery/discovery.ts";
-import { ext } from "../gocompat/path.ts";
+import { ext, join } from "../gocompat/path.ts";
 import {
   type Applicability,
   Applicable,
@@ -95,5 +93,5 @@ export function eslintCandidate(rel: string): boolean {
 
 /** packageFolder is the absolute path of a package in the host-side Snapshot. */
 export function packageFolder(input: Input): string {
-  return joinPath(input.snapshotDir, input.context.package?.path ?? ".");
+  return join(input.snapshotDir, input.context.package?.path ?? ".");
 }

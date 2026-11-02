@@ -12,7 +12,7 @@ import {
   toLower,
 } from "../gocompat/strings.ts";
 import { GoSlice, type Schema, unmarshal } from "../gocompat/unmarshal.ts";
-import { toByteString } from "../gocompat/url.ts";
+import { toByteString } from "../gocompat/neturl.ts";
 import { decodeRune, goString } from "../gocompat/utf8.ts";
 import { FingerprintV1 } from "../resultset/types.ts";
 import {

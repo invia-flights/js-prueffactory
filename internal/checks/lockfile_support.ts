@@ -2,14 +2,15 @@
 // package.install-scripts) share. They all read the Lock that
 // internal/lockfile parses, report every package whose lockfile they cannot
 // use as unsupported with the reason internal/lockfile gives, and point their
-// Findings at the lockfile entry.
+// Findings at the lockfile entry. The registry-data Checks read the lockfile
+// through loadPackageLockfile too.
 import { join as joinPath, resolve } from "node:path";
 
 import type { Context } from "../discovery/discovery.ts";
 import { quoteJSONString } from "../gocompat/json.ts";
 import { join } from "../gocompat/path.ts";
 import { compareBytes, toLower } from "../gocompat/strings.ts";
-import { toByteString } from "../gocompat/url.ts";
+import { toByteString } from "../gocompat/neturl.ts";
 import { goString, trimSpaceBytes } from "../gocompat/utf8.ts";
 import { NPM } from "../lockfile/detect.ts";
 import { type Loaded, load } from "../lockfile/load.ts";
@@ -52,11 +53,11 @@ export function lockfileApplicability(
         " examines the lockfile of a package, and this is the project Context",
     ];
   }
-  // A package whose manager nothing set is an npm package. A package.json
-  // that names another manager makes the package that manager's even next to
-  // an npm lockfile.
-  const m: string = c.package.manager;
-  if (m !== "" && m !== NPM) {
+  // A package whose manager nothing set is an npm package (discovery sets
+  // npm then, where Go also accepts ""). A package.json that names another
+  // manager makes the package that manager's even next to an npm lockfile.
+  const m = c.package.manager;
+  if (m !== NPM) {
     return [Applicable, unsupportedInstallReason(c)];
   }
   if (c.package.npmLockfile !== "") {
@@ -68,68 +69,48 @@ export function lockfileApplicability(
   ];
 }
 
-/** PackageLockfile is the lockfile of the package that a lockfile Check runs in. */
+/**
+ * PackageLockfile is the lockfile of the package that a lockfile Check runs
+ * in (Go: packageLockfile).
+ */
 export class PackageLockfile {
   readonly input: Input;
   /** dir is the package folder in the Snapshot copy. */
   readonly dir: string;
   readonly loaded: Loaded;
+  /** lock is the parsed, usable lockfile. */
+  readonly lock: Lock;
   /** lockfilePath is the lockfile's path relative to the project root. */
   readonly lockfilePath: string;
-  /** rawLock is the lockfile as read, or null when it could not be read again. */
-  readonly rawLock: Buffer | null;
+  /** rawLock is the lockfile as read, or null when it could not be read. */
+  readonly rawLock: Uint8Array | null;
 
   constructor(
     input: Input,
     dir: string,
     loaded: Loaded,
+    lock: Lock,
     lockfilePath: string,
-    rawLock: Buffer | null,
+    rawLock: Uint8Array | null,
   ) {
     this.input = input;
     this.dir = dir;
     this.loaded = loaded;
+    this.lock = lock;
     this.lockfilePath = lockfilePath;
     this.rawLock = rawLock;
   }
 
-  /** packagesLock is the parsed lockfile; a PackageLockfile exists only for a usable one. */
-  packagesLock(): Lock {
-    if (this.loaded.lock === null) {
-      throw new Error("the lockfile is not usable");
-    }
-    return this.loaded.lock;
-  }
-
   /** packages is the parsed lockfile's map of entries. */
   get packages(): Lock["packages"] {
-    return this.packagesLock().packages;
+    return this.lock.packages;
   }
 
   /** keys returns the entry paths of the lockfile in byte order, without the root package. */
   keys(): string[] {
-    return [...this.packages.keys()].filter((k) => k !== "").sort(compareBytes);
-  }
-
-  /** location points at the entry's line in the lockfile. */
-  location(key: string): Location {
-    let line = 0;
-    let col = 0;
-    if (this.rawLock !== null) {
-      // Go searches for json.Marshal(key) + ":", which escapes <, > and &.
-      const needle = Buffer.from(quoteJSONString(key, true) + ":", "utf8");
-      const i = this.rawLock.indexOf(needle);
-      if (i >= 0) {
-        const before = this.rawLock.subarray(0, i);
-        let lines = 0;
-        for (const b of before) {
-          if (b === 0x0a) lines++;
-        }
-        line = 1 + lines;
-        col = i - before.lastIndexOf(0x0a);
-      }
-    }
-    return this.input.location("primary", this.lockfilePath, line, col);
+    return [...this.lock.packages.keys()]
+      .filter((k) => k !== "")
+      .sort(compareBytes);
   }
 
   /**
@@ -167,21 +148,36 @@ export class PackageLockfile {
       limitations: [],
     });
   }
-}
 
-/** packageDir is the package folder in the Snapshot copy. */
-function packageDir(input: Input): string {
-  const pkg = input.context.package;
-  if (pkg === null || pkg.path === ".") {
-    return input.snapshotDir;
+  /**
+   * location points at the entry's line in the lockfile: the first place
+   * the key appears as a JSON object key, with a byte column.
+   */
+  location(key: string): Location {
+    let line = 0;
+    let col = 0;
+    const raw = this.rawLock;
+    if (raw !== null) {
+      // Go marshals the key with HTML escaping, which npm never writes: a
+      // key with < > & is then not found, as in Go.
+      const needle = Buffer.from(quoteJSONString(key, true) + ":", "utf8");
+      const i = Buffer.from(raw.buffer, raw.byteOffset, raw.byteLength).indexOf(
+        needle,
+      );
+      if (i >= 0) {
+        const before = raw.subarray(0, i);
+        line = 1 + before.filter((b) => b === 0x0a).length;
+        col = i - before.lastIndexOf(0x0a);
+      }
+    }
+    return this.input.location("primary", this.lockfilePath, line, col);
   }
-  return joinPath(input.snapshotDir, pkg.path);
 }
 
 /**
- * loadPackageLockfile reads the package's lockfile. When it cannot be used
- * it returns the Result the Check hands back: unsupported, with the reason
- * code and text of internal/lockfile. A version 1 lockfile, another package
+ * loadPackageLockfile reads the package's lockfile. When it cannot be used it
+ * returns the Result the Check hands back: unsupported, with the reason code
+ * and text of internal/lockfile. A version 1 lockfile, another package
  * manager and a missing or broken lockfile are all gaps of these Checks, not
  * defects: package.manifest reports the defects.
  */
@@ -189,11 +185,14 @@ export function loadPackageLockfile(
   input: Input,
 ): [PackageLockfile, null] | [null, Result] {
   const pkg = input.context.package;
-  const dir = packageDir(input);
+  if (pkg === null) {
+    throw new Error("loadPackageLockfile needs a package Context");
+  }
+  const dir =
+    pkg.path === "." ? input.snapshotDir : join(input.snapshotDir, pkg.path);
   const loaded = load(dir);
   if (loaded.lock === null) {
-    // Not reachable by the contract of load without a reason, but never
-    // fail on it.
+    // Not reachable by the contract of load, but never fail on it.
     const u = loaded.unsupported ?? {
       code: "no_lockfile",
       reason: "the package has no usable lockfile",
@@ -203,11 +202,9 @@ export function loadPackageLockfile(
       { status: StatusUnsupported, reasonCode: u.code, reason: u.reason },
     ];
   }
-  let raw: Buffer | null;
+  let raw: Uint8Array | null;
   try {
-    raw = Buffer.from(
-      readCapped(joinPath(dir, loaded.lockfileName), maxProjectFileBytes),
-    );
+    raw = readCapped(join(dir, loaded.lockfileName), maxProjectFileBytes);
   } catch {
     raw = null;
   }
@@ -216,7 +213,8 @@ export function loadPackageLockfile(
       input,
       dir,
       loaded,
-      join(pkg?.path ?? ".", loaded.lockfileName),
+      loaded.lock,
+      join(pkg.path, loaded.lockfileName),
       raw,
     ),
     null,

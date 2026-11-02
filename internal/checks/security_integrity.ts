@@ -1,5 +1,5 @@
 import { fields, toLower } from "../gocompat/strings.ts";
-import { parse, toByteString, URL as GoURL } from "../gocompat/url.ts";
+import { parse, toByteString, URL as GoURL } from "../gocompat/neturl.ts";
 import type { Entry } from "../lockfile/lockfile.ts";
 import {
   type Finding,

@@ -7,6 +7,7 @@ import type { Allowlist } from "./allowlist.ts";
 import { sha256, unifiedDiff } from "./diff.ts";
 import { jsonLeaves, matches, replaceSpans } from "./jsonleaves.ts";
 import {
+  normaliseArtifact,
   normaliseReportJSON,
   normaliseReportMarkdown,
   reportValues,
@@ -181,7 +182,7 @@ function prepareRun(
     if (reportFiles.includes(name)) {
       continue;
     }
-    let text = substitute(raw, values);
+    let text = normaliseArtifact(name, substitute(raw, values));
     const accepted = allowlist.wholeFile(caseId, name);
     if (accepted !== undefined) {
       text = "<content accepted by the allowlist>\n";

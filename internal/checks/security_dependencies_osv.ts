@@ -6,7 +6,7 @@
 // advisory.
 import { quote } from "../gocompat/fmt.ts";
 import { marshal, string as stringShape } from "../gocompat/json.ts";
-import { atoi, parseFloat } from "../gocompat/strconv.ts";
+import { parseFloat, parseInt64 } from "../gocompat/strconv.ts";
 import {
   compareBytes,
   sortStrings,
@@ -19,7 +19,7 @@ import {
   UnmarshalTypeError,
   unmarshal,
 } from "../gocompat/unmarshal.ts";
-import { parseText } from "../gocompat/url.ts";
+import { parseText } from "../gocompat/neturl.ts";
 import { trimSpaceBytes } from "../gocompat/utf8.ts";
 import type { Lock } from "../lockfile/lockfile.ts";
 import type { Entry } from "../lockfile/lockfile.ts";
@@ -737,17 +737,6 @@ export function compactJSON(v: Uint8Array): Buffer {
 }
 
 /**
- * packageName is the real package name of a lockfile entry: the `name`
- * field when npm set one (an alias), otherwise the folder name in its key.
- */
-export function packageName(key: string, e: Entry): string {
-  if (e.name !== "") {
-    return e.name;
-  }
-  return entryName(key);
-}
-
-/**
  * lockedPackages is the set of name@version pairs the lockfile lists: every
  * entry but the root package and links.
  */
@@ -862,6 +851,22 @@ export function notCoveringLimitation(
   });
 }
 
+/** advisoryString shows the advisory for debugging and test failures (Go: advisory.String). */
+export function advisoryString(a: Advisory): string {
+  return `${a.package}@${a.version} [${a.ids.join(" ")}] ${a.severity} ${a.scope} fixed=${quote(a.fixed)}`;
+}
+
+/**
+ * packageName is the real package name of a lockfile entry: the `name` field
+ * when npm set one (an alias), otherwise the folder name in its key.
+ */
+export function packageName(key: string, e: Entry): string {
+  if (e.name !== "") {
+    return e.name;
+  }
+  return entryName(key);
+}
+
 /**
  * entryName is the package name of a lockfile entry path such as
  * node_modules/a/node_modules/@s/b.
@@ -874,10 +879,20 @@ export function entryName(key: string): string {
   return key.slice(i + "node_modules/".length);
 }
 
+/** atoi is Go's strconv.Atoi on 64-bit Go, or undefined where it fails. */
+function atoi(s: string): bigint | undefined {
+  try {
+    return parseInt64(s);
+  } catch {
+    return undefined;
+  }
+}
+
 /**
  * compareVersions compares two semantic versions: the numeric core first,
  * then the prerelease tail, where a version without one is the higher.
  * Build metadata is ignored. Parts that are not numbers compare as text.
+ * Only the sign of the result counts.
  */
 export function compareVersions(a: string, b: string): number {
   const [coreA, preA] = splitVersion(a);
@@ -906,20 +921,21 @@ export function compareVersions(a: string, b: string): number {
     } else if (nb !== undefined) {
       return 1;
     } else if (sa !== sb) {
-      return compareBytes(sa, sb) < 0 ? -1 : 1;
+      return compareBytes(sa, sb);
     }
   }
   return pa.length - pb.length;
 }
 
-function splitVersion(v: string): [bigint[], string] {
-  if (v.startsWith("v")) {
-    v = v.slice(1);
-  }
+/**
+ * splitVersion is the numeric core of a version (a part that is no number
+ * counts as 0) and its prerelease tail, without a leading "v" and build
+ * metadata.
+ */
+export function splitVersion(v: string): [bigint[], string] {
+  if (v.startsWith("v")) v = v.slice(1);
   const plus = v.indexOf("+");
-  if (plus >= 0) {
-    v = v.slice(0, plus);
-  }
+  if (plus >= 0) v = v.slice(0, plus);
   let pre = "";
   const dash = v.indexOf("-");
   if (dash >= 0) {
@@ -927,9 +943,4 @@ function splitVersion(v: string): [bigint[], string] {
     v = v.slice(0, dash);
   }
   return [v.split(".").map((part) => atoi(part) ?? 0n), pre];
-}
-
-/** advisoryString shows the advisory for debugging and test failures (Go: advisory.String). */
-export function advisoryString(a: Advisory): string {
-  return `${a.package}@${a.version} [${a.ids.join(" ")}] ${a.severity} ${a.scope} fixed=${quote(a.fixed)}`;
 }

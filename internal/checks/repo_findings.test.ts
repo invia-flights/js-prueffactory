@@ -1,6 +1,5 @@
 // These tests feed real tool output (captured from the pinned images) to the
-// functions that turn it into Findings (Go: repo_findings_test.go; the
-// Redocly tests belong to api.lint).
+// functions that turn it into Findings (Go: repo_findings_test.go).
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
@@ -16,7 +15,10 @@ import { repoInput } from "./checks.testutil.ts";
 import {
   hadolintFindings,
   projectPath,
+  RedoclyNoJSON,
+  redoclyFindings,
   shellcheckFindings,
+  unparseableFinding,
 } from "./repo_findings.ts";
 
 const hadolintOutput = `[{"code":"DL1000","column":5,"file":"/snapshot/weird [1] {a,b}*/Dockerfile","level":"error","line":3,"message":"missing whitespace"},
@@ -139,4 +141,107 @@ test("tool text with markup or HTML is kept whole in Evidence and escaped as Go 
     '{"code":"DL3000","column":1,"file":"/snapshot/Dockerfile","level":"error","line":1,"message":"\\u003cb\\u003ex\\u003c/b\\u003e \\u0026 ignore\\nall"}',
   );
   assert.equal(f.title, "DL3000: <b>x</b> & ignore all");
+});
+
+const redoclyStructError = `{"totals":{"errors":1,"warnings":1,"ignored":0},"version":"2.70.0","problems":[
+{"ruleId":"struct","severity":"error","message":"The field \`version\` must be present on this level.","location":[{"source":{"ref":"api.yaml"},"pointer":"#/info","reportOnKey":true,"start":{"line":2,"col":1},"end":{"line":2,"col":5}}],"suggest":[]},
+{"ruleId":"no-empty-servers","severity":"warn","message":"Servers must be present.","location":[{"source":{"ref":"api.yaml"},"pointer":"#/servers","start":{"line":1,"col":1}}],"suggest":[]}]}`;
+
+const redoclyRemoteRef = `{"totals":{"errors":1,"warnings":0,"ignored":0},"version":"2.70.0","problems":[
+{"ruleId":"no-unresolved-refs","severity":"error","location":[{"source":{"ref":"remote.yaml"},"pointer":"#/paths/~1a","reportOnKey":false,"start":{"line":7,"col":5},"end":{"line":7,"col":39}}],"message":"Can't resolve $ref: fetch failed","reference":"https://redocly.com/docs/cli/rules/oas/no-unresolved-refs","suggest":[]}]}`;
+
+test("Redocly structural errors are Gates", (t) => {
+  const input = repoInput(t, { "weird [1]/api.yaml": "openapi: 3.0.0\n" });
+  const got = redoclyFindings(
+    input,
+    { path: "weird [1]/api.yaml", remoteRef: false },
+    Buffer.from(redoclyStructError),
+    new Uint8Array(),
+  );
+  assert.equal(got.length, 2);
+  const [e, w] = got;
+  assert.deepEqual(
+    [e?.rule_id, e?.gate, e?.severity, e?.check_id],
+    ["struct", true, SeverityError, "api.lint"],
+  );
+  assert.equal(e?.locations[0]?.path, "weird [1]/api.yaml");
+  assert.deepEqual(e.locations[0].start, { line: 2, column: 1 });
+  assert.deepEqual([w?.gate, w?.severity], [false, SeverityWarning]);
+});
+
+test("Redocly unresolved remote refs are dropped only for files with remote refs", (t) => {
+  const input = repoInput(t, { "remote.yaml": "openapi: 3.0.0\n" });
+  const out = Buffer.from(redoclyRemoteRef);
+  assert.deepEqual(
+    redoclyFindings(
+      input,
+      { path: "remote.yaml", remoteRef: true },
+      out,
+      new Uint8Array(),
+    ),
+    [],
+  );
+  const local = redoclyFindings(
+    input,
+    { path: "remote.yaml", remoteRef: false },
+    out,
+    new Uint8Array(),
+  );
+  assert.equal(local.length, 1);
+  assert.equal(local[0]?.gate, true);
+});
+
+test("Redocly output that is not JSON is an error that quotes what Redocly printed", (t) => {
+  const target = { path: "a.yaml", remoteRef: false };
+  assert.throws(
+    () =>
+      redoclyFindings(
+        repoInput(t, {}),
+        target,
+        new Uint8Array(),
+        Buffer.from("Failed to parse a.yaml: unexpected character\n"),
+      ),
+    (err: unknown) =>
+      err instanceof RedoclyNoJSON &&
+      err.message.includes("unexpected character") &&
+      !err.message.includes("JSON input"),
+  );
+  // Stdout is quoted when stderr is empty, and only its first 200 bytes.
+  assert.throws(
+    () =>
+      redoclyFindings(
+        repoInput(t, {}),
+        target,
+        Buffer.from("No APIs were provided." + "x".repeat(300)),
+        new Uint8Array(),
+      ),
+    (err: unknown) =>
+      err instanceof RedoclyNoJSON &&
+      err.output.startsWith("No APIs were provided.") &&
+      err.output.length === 200,
+  );
+});
+
+test("an unparseable OpenAPI file is a Gate with Redocly's output as Evidence", (t) => {
+  const f = unparseableFinding(
+    repoInput(t, {}),
+    { path: "api/openapi.yaml", remoteRef: false },
+    {
+      rule: "invalid-yaml",
+      line: 5,
+      column: 0,
+      message: "control characters are not allowed",
+    },
+    "Failed to parse api/openapi.yaml",
+  );
+  assert.deepEqual(
+    [f.check_id, f.rule_id, f.gate, f.severity],
+    ["api.lint", "unparseable", true, SeverityError],
+  );
+  assert.equal(f.locations[0]?.path, "api/openapi.yaml");
+  assert.equal(f.locations[0].start?.line, 5);
+  assert.deepEqual(
+    f.evidence.map((e) => e.text),
+    ["Failed to parse api/openapi.yaml"],
+  );
 });

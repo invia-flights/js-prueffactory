@@ -515,3 +515,25 @@ test("install scripts without any scripts still records the policy and a count o
   assert.equal(metricValue(res, "install_scripts"), 0);
   assert.equal(metricValue(res, "allow_scripts_policy"), 0);
 });
+
+// Pins Go's behaviour (a detection gap, listed in traps.md for a later spec):
+// a `resolved` value that does not parse, has no scheme or has a scheme other
+// than http(s), git, file, ssh or bitbucket is classified as "no resolved
+// value" and produces no resolved-* or dependency-* Finding. Only the
+// integrity rules still apply to the entry.
+test("security.integrity gives an unparseable or unknown-scheme resolved value no resolved Finding, as Go does", async (t) => {
+  const lock = `{"lockfileVersion": 3, "packages": {"": {},
+    "node_modules/bad": {"version": "1.0.0", "resolved": "https://h/%zz", "integrity": "sha512-x"},
+    "node_modules/ftp": {"version": "1.0.0", "resolved": "ftp://evil.example/x.tgz", "integrity": "sha512-x"},
+    "node_modules/rel": {"version": "1.0.0", "resolved": "vendor/x.tgz", "integrity": "sha512-x"},
+    "node_modules/colon": {"version": "1.0.0", "resolved": "a:b", "integrity": "sha512-x"},
+    "node_modules/noint": {"version": "1.0.0", "resolved": "ftp://evil.example/y.tgz"}}}`;
+  const res = await runLockfileCheckOn(t, "security.integrity", {
+    "package.json": '{"name": "x"}',
+    "package-lock.json": lock,
+  });
+  assert.deepEqual(
+    (res.findings ?? []).map((f) => [f.rule_id, entryNames([f])[0]]),
+    [["integrity-missing", "noint"]],
+  );
+});

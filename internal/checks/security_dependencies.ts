@@ -488,7 +488,7 @@ export function dependencyLockfile(
     }
     return newDependencySource({
       raw: l.rawLock ?? new Uint8Array(),
-      lock: l.packagesLock(),
+      lock: l.lock,
       path: l.lockfilePath,
       produced: false,
       located: l,
