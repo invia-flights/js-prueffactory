@@ -4,6 +4,13 @@
 // is a wrapper that lists only this file's volumes, so the removal of other
 // toolset versions never reaches a volume of another test, agent or Run on
 // the shared daemon.
+//
+// The file is serial (`*.serial.docker.test.ts`): `npm run test:docker` runs
+// it after the parallel pass. Every Run that starts removes the unused
+// toolset volumes of other versions on the daemon (host-wide, under a lock
+// of its own cache folder, which these tests do not share), so a test volume
+// that no container holds for a moment would vanish under a concurrent Run
+// of internal/cli.
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import { mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";

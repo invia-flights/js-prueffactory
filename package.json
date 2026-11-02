@@ -13,7 +13,7 @@
   },
   "scripts": {
     "test": "node --test 'bin/**/!(*.docker).test.ts' 'cmd/**/!(*.docker).test.ts' 'dev/**/!(*.docker).test.ts' 'internal/**/!(*.docker).test.ts'",
-    "test:docker": "node --test --test-timeout=3600000 'bin/**/*.docker.test.ts' 'cmd/**/*.docker.test.ts' 'dev/**/*.docker.test.ts' 'internal/**/*.docker.test.ts'",
+    "test:docker": "s=0; node --test --test-timeout=3600000 'bin/**/!(*.serial).docker.test.ts' 'cmd/**/!(*.serial).docker.test.ts' 'dev/**/!(*.serial).docker.test.ts' 'internal/**/!(*.serial).docker.test.ts' || s=1; node --test --test-concurrency=1 --test-timeout=3600000 'internal/**/*.serial.docker.test.ts' || s=1; exit $s",
     "lint": "eslint --max-warnings=0 .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
