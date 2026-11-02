@@ -11,6 +11,7 @@ import { Ajv2020 } from "ajv/dist/2020.js";
 import addFormatsModule from "ajv-formats";
 
 import { formatFloatV, quote } from "../gocompat/fmt.ts";
+import { formatFloatF } from "../gocompat/strconv.ts";
 import { checkValid } from "../gocompat/unmarshal.ts";
 import { goString } from "../gocompat/utf8.ts";
 import { goFormats } from "./format.ts";
@@ -390,21 +391,12 @@ export function englishFloat(x: number): string {
   const sign = x < 0 ? "-" : "";
   const [mant = "", expText = "0"] = Math.abs(x).toExponential().split("e");
   const exp = Number(expText);
-  const digits = mant.replace(".", "");
   if (exp < -4 || exp >= 6) {
     const e = (exp < 0 ? "-" : "") + String(Math.abs(exp)).padStart(2, "0");
     return (
       sign + mant + "×10" + e.replace(/[0-9-]/g, (c) => superscript[c] ?? c)
     );
   }
-  let intPart: string;
-  let frac: string;
-  if (exp < 0) {
-    intPart = "0";
-    frac = "0".repeat(-exp - 1) + digits;
-  } else {
-    intPart = digits.slice(0, exp + 1).padEnd(exp + 1, "0");
-    frac = digits.slice(exp + 1);
-  }
-  return sign + group(intPart) + (frac === "" ? "" : "." + frac);
+  const [intPart = "", frac] = formatFloatF(Math.abs(x)).split(".");
+  return sign + group(intPart) + (frac === undefined ? "" : "." + frac);
 }
