@@ -6,6 +6,7 @@ import { imageRef } from "../toolset/toolset.ts";
 import { ensureAdvisoryDB } from "../toolvolume/advisorydb.ts";
 import type { RunState } from "./engine.ts";
 import { runnable } from "./plan.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** needsAdvisoryDB says whether any execution that will run scans with the advisory database. */
 export function needsAdvisoryDB(r: RunState): boolean {
@@ -56,7 +57,7 @@ export async function prepareAdvisoryDB(
     if (signal.aborted) {
       throw contextError(signal);
     }
-    const text = err instanceof Error ? err.message : String(err);
+    const text = errorMessage(err);
     r.log.print(`advisory database preparation failed: ${text}`);
     r.advisory = { volume: "", date: null, warning: "", err: text };
   }

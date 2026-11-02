@@ -24,6 +24,7 @@ import { ErrHelp, FlagSet } from "../../internal/gocompat/flag.ts";
 import { ReleaseServer } from "./checksum.ts";
 import { type Fetch, Registry } from "./registry.ts";
 import { changeString, type Sources, update } from "./update.ts";
+import { errorMessage } from "../../internal/gocompat/errors.ts";
 
 // usage is what Go's flag package prints for the command's FlagSet.
 const usage = `Usage of toolsetupdate:
@@ -48,7 +49,7 @@ export async function run(
     flags.parse(args);
   } catch (err) {
     if (err !== ErrHelp) {
-      stderr.write(`${err instanceof Error ? err.message : String(err)}\n`);
+      stderr.write(`${errorMessage(err)}\n`);
     }
     stderr.write(usage);
     return 2;
@@ -57,9 +58,7 @@ export async function run(
   try {
     changes = await update(signal, dir.value, src, !dry.value);
   } catch (err) {
-    stderr.write(
-      `toolsetupdate: nothing was written:\n${err instanceof Error ? err.message : String(err)}\n`,
-    );
+    stderr.write(`toolsetupdate: nothing was written:\n${errorMessage(err)}\n`);
     return 1;
   }
   for (const c of changes) {

@@ -47,6 +47,7 @@ import {
 import { cutTitle } from "./repo_findings.ts";
 import { shownPath } from "./shown_text.ts";
 import { unmarshalText } from "./security_dependencies_osv.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const patternsID = "security.patterns";
 
@@ -524,7 +525,7 @@ function reportUnreadable(
 ): Result {
   res.status = StatusToolError;
   res.reasonCode = "report_unreadable";
-  res.reason = `the ${tool} report could not be read: ${err instanceof Error ? err.message : String(err)}: ${tail(goString(stderr), 400)}`;
+  res.reason = `the ${tool} report could not be read: ${errorMessage(err)}: ${tail(goString(stderr), 400)}`;
   return res;
 }
 

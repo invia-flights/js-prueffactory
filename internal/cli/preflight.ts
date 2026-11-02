@@ -7,6 +7,7 @@ import type { Writable } from "node:stream";
 
 import { Driver, env, type Info, locate } from "../docker/driver.ts";
 import { ExitInternalError, ExitInterrupted } from "../resultset/exitcode.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export interface DockerSetup {
   // base is the Driver without a Run scope; withScope gives the Run's.
@@ -22,9 +23,7 @@ export async function preflightDocker(
   stderr: Writable,
 ): Promise<DockerSetup | number> {
   const fail = (err: unknown): number => {
-    stderr.write(
-      `js-prueffactory: ${err instanceof Error ? err.message : String(err)}\n`,
-    );
+    stderr.write(`js-prueffactory: ${errorMessage(err)}\n`);
     return ExitInternalError;
   };
   let exe: string;

@@ -33,6 +33,7 @@ import {
 import type { CIDoc } from "./gitlab_ci_yaml.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
 import { tooLargeLimitation } from "./readcap.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const gitlabCIID = "repository.gitlab-ci";
 
@@ -185,7 +186,7 @@ export function schemaFindings(
         path: rel,
         gate: false,
         title: "GitLab CI schema could not be applied",
-        message: err instanceof Error ? err.message : String(err),
+        message: errorMessage(err),
       }),
     ];
   }

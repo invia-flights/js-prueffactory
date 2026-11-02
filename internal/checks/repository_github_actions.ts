@@ -46,6 +46,7 @@ import {
   toolInfo,
   toolRef,
 } from "./repo_tools.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export { githubActionsID };
 
@@ -254,7 +255,7 @@ async function runZizmor(
       res.tool = toolInfo(Zizmor, c.exitCode);
       res.status = StatusToolError;
       res.reasonCode = "tool_output_unreadable";
-      res.reason = `${err instanceof Error ? err.message : String(err)}: ${tail(stderr, 400)}`;
+      res.reason = `${errorMessage(err)}: ${tail(stderr, 400)}`;
       return false;
     }
   }

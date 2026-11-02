@@ -27,6 +27,7 @@ import type { Limitation } from "../resultset/types.ts";
 import { newLimitation } from "../resultset/zero.ts";
 import { shownByteString } from "./lockfile_support.ts";
 import { shownWord } from "./shown_text.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** advisory is one vulnerability that affects one locked package version. */
 export interface Advisory {
@@ -303,7 +304,7 @@ export function unmarshalText(err: unknown, root: string): string {
     const into = /^[0-9]+$/.test(last) ? "" : "Go struct field ";
     return `json: cannot unmarshal ${err.value} into ${into}${root}.${err.field} of type ${err.type}`;
   }
-  return err instanceof Error ? err.message : String(err);
+  return errorMessage(err);
 }
 
 /** parseReport decodes the report; it throws Go's error text. */

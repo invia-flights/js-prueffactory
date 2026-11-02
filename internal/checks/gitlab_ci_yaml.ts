@@ -3,6 +3,7 @@
 import type { Value } from "../jsonschema/jsonschema.ts";
 import * as yaml from "../yamlv3/yaml.ts";
 import { Decoder as ValueDecoder, anySchema } from "../yamlv3/decode.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /**
  * maxCINodes bounds the nodes one file expands to, so that nested aliases
@@ -112,9 +113,7 @@ export function readCIDoc(data: Uint8Array): CIDoc {
     if (err instanceof yaml.YAMLError) {
       throw new CIReadError(err.message.replace(/^yaml: /, ""));
     }
-    throw new CIReadError(
-      `the YAML parser failed: ${err instanceof Error ? err.message : String(err)}`,
-    );
+    throw new CIReadError(`the YAML parser failed: ${errorMessage(err)}`);
   }
   const doc = new CIDoc();
   if (node === null) {

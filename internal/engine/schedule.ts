@@ -36,10 +36,7 @@ import {
 } from "./prerequisites.ts";
 import { takeSecretScan } from "./redaction.ts";
 import { recordNPM, recordTools } from "./tools.ts";
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** usesDocker says whether an execution starts a container and so needs the Preparation phase. */
 export function usesDocker(p: Planned): boolean {
@@ -238,12 +235,12 @@ function failedPreparation(
   if (endReason(signal, budget, budget) !== null) {
     return notStarted(r, signal, p);
   }
-  r.log.print(`preparation failed: ${message(err)}`);
+  r.log.print(`preparation failed: ${errorMessage(err)}`);
   return stopped(
     p,
     StatusInfrastructureError,
     "docker_setup_failed",
-    message(err),
+    errorMessage(err),
   );
 }
 
@@ -435,11 +432,13 @@ async function safeRun(
     return await p.check.run(signal, input);
   } catch (v) {
     const stack = v instanceof Error ? (v.stack ?? "") : "";
-    r.log.print(`internal error in ${p.entry.id}: ${message(v)}\n${stack}`);
+    r.log.print(
+      `internal error in ${p.entry.id}: ${errorMessage(v)}\n${stack}`,
+    );
     return {
       status: StatusToolError,
       reasonCode: "internal_error",
-      reason: `the Check panicked: ${message(v)}`,
+      reason: `the Check panicked: ${errorMessage(v)}`,
     };
   }
 }

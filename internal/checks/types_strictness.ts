@@ -44,6 +44,7 @@ import {
   typesTsconfigFor,
   typesUnsupported,
 } from "./types_javascript.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const typesStrictnessID = "types.strictness";
 
@@ -498,7 +499,7 @@ async function runTypesStrictness(
         status: StatusToolError,
         reasonCode: "type_coverage_failed",
         reason:
-          (err instanceof Error ? err.message : String(err)) +
+          errorMessage(err) +
           ": " +
           tail(
             goString(container.stderr) + "\n" + goString(container.stdout),

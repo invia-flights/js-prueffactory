@@ -7,6 +7,7 @@ import * as json from "../gocompat/unmarshal.ts";
 import { trimSpaceBytes } from "../gocompat/utf8.ts";
 import type { RegistryRequestPackage } from "./registry_data.ts";
 import { validHost } from "./registry_data.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** RegistryVersion is what the registry says about one version. */
 export interface RegistryVersion {
@@ -224,8 +225,7 @@ export function readRegistryAnswers(out: Uint8Array): RegistryAnswers {
     at = fetchedAt(d.fetched_at);
   } catch (err) {
     throw new Error(
-      "the registry helper wrote no JSON document: " +
-        (err instanceof Error ? err.message : String(err)),
+      "the registry helper wrote no JSON document: " + errorMessage(err),
       { cause: err },
     );
   }

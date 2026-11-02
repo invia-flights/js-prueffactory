@@ -28,6 +28,7 @@ import { type Input, untrusted } from "./input.ts";
 import { cutTitle, rawJSON } from "./repo_findings.ts";
 import { snapshotMount } from "./repo_tools.ts";
 import { shownPath } from "./shown_text.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const githubActionsID = "repository.github-actions";
 
@@ -56,10 +57,6 @@ function ghaPath(p: string): string {
   const q = p.startsWith("/") ? p.slice(1) : p;
   const prefix = snapshotMount.slice(1) + "/";
   return q.startsWith(prefix) ? q.slice(prefix.length) : q;
-}
-
-function errorText(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }
 
 const str: Schema = { kind: "string" };
@@ -113,7 +110,7 @@ export function actionlintFindings(
     const decoded = unmarshal(stdout, actionlintSchema) as GoSlice | null;
     results = (decoded?.items() ?? []) as ActionlintResult[];
   } catch (err) {
-    throw new Error(`actionlint printed no JSON: ${errorText(err)}`, {
+    throw new Error(`actionlint printed no JSON: ${errorMessage(err)}`, {
       cause: err,
     });
   }
@@ -324,7 +321,7 @@ export function zizmorFindings(input: Input, stdout: Uint8Array): Finding[] {
     const decoded = unmarshal(stdout, zizmorSchema) as GoSlice | null;
     results = (decoded?.items() ?? []) as ZizmorResult[];
   } catch (err) {
-    throw new Error(`zizmor printed no JSON: ${errorText(err)}`, {
+    throw new Error(`zizmor printed no JSON: ${errorMessage(err)}`, {
       cause: err,
     });
   }

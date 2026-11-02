@@ -62,6 +62,7 @@ import {
   scannedPackages,
   unmarshalText,
 } from "./security_dependencies_osv.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const depsSecurityID = "security.dependencies";
 
@@ -461,7 +462,7 @@ function newDependencySource(
         reasonCode: "lockfile_unreadable",
         reason:
           "the lockfile could not be prepared for the scan: " +
-          (err instanceof Error ? err.message : String(err)),
+          errorMessage(err),
       },
     ];
   }
@@ -534,7 +535,7 @@ export function dependencyLockfile(
         reasonCode: "lockfile_unreadable",
         reason:
           "the lockfile that npm install produced cannot be used: " +
-          (err instanceof Error ? err.message : String(err)),
+          errorMessage(err),
       },
     ];
   }

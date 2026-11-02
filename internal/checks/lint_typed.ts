@@ -88,6 +88,7 @@ import {
   tscProblem,
   typesTestTargets,
 } from "./types_strictness.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const lintTypedID = "lint.typed";
 
@@ -448,7 +449,7 @@ export function parseTypedLintOutput(
       []) as typeof files;
   } catch (err) {
     throw new Error(
-      `ESLint did not print its JSON document: ${err instanceof Error ? err.message : String(err)}`,
+      `ESLint did not print its JSON document: ${errorMessage(err)}`,
       { cause: err },
     );
   }
@@ -817,9 +818,7 @@ async function runLintTyped(
       run.messages = parseTypedLintOutput(container.stdout, workPath(pkg));
     } catch (err) {
       run.failed =
-        (err instanceof Error ? err.message : String(err)) +
-        ": " +
-        tail(goString(container.stderr), 800);
+        errorMessage(err) + ": " + tail(goString(container.stderr), 800);
     }
   }
 

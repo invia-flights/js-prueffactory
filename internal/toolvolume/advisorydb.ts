@@ -21,6 +21,7 @@ import {
 import { goString } from "../gocompat/utf8.ts";
 import { acquire } from "./lock.ts";
 import { lastLines } from "./toolvolume.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** AdvisoryMountPath is where the advisory database volume is mounted. */
 export const AdvisoryMountPath = "/osv-db";
@@ -176,7 +177,9 @@ export async function ensureAdvisoryDB(
   try {
     lock = await acquire(signal, join(cfg.cacheDir, "advisorydb.lock"));
   } catch (err) {
-    throw new Error(`advisory database lock: ${message(err)}`, { cause: err });
+    throw new Error(`advisory database lock: ${errorMessage(err)}`, {
+      cause: err,
+    });
   }
   try {
     const name = await cfg.docker.cacheVolume(signal, kind);
@@ -197,18 +200,18 @@ export async function ensureAdvisoryDB(
       }
       if (date === null) {
         throw new Error(
-          `the advisory database could not be downloaded: ${message(err)}`,
+          `the advisory database could not be downloaded: ${errorMessage(err)}`,
           { cause: err },
         );
       }
       logf(
-        `warning: the advisory database could not be refreshed, using the one of ${formatDBDate(date)}: ${message(err)}`,
+        `warning: the advisory database could not be refreshed, using the one of ${formatDBDate(date)}: ${errorMessage(err)}`,
       );
       return {
         name,
         date,
         refreshed: false,
-        warning: `the refresh failed: ${message(err)}`,
+        warning: `the refresh failed: ${errorMessage(err)}`,
       };
     }
     logf("downloaded the advisory database");
@@ -216,10 +219,6 @@ export async function ensureAdvisoryDB(
   } finally {
     lock.release();
   }
-}
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }
 
 /**
@@ -246,7 +245,7 @@ async function readAdvisoryDate(
     });
   } catch (err) {
     throw new Error(
-      `cannot inspect the advisory database volume: ${message(err)}`,
+      `cannot inspect the advisory database volume: ${errorMessage(err)}`,
       { cause: err },
     );
   }
@@ -301,7 +300,7 @@ async function refreshAdvisoryDB(
             { cause: err },
           );
         }
-        throw new Error(`${what}: ${message(err)}`, { cause: err });
+        throw new Error(`${what}: ${errorMessage(err)}`, { cause: err });
       }
       if (!ok(res.exitCode)) {
         throw new Error(

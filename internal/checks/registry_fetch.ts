@@ -62,6 +62,7 @@ import {
 } from "./registry_data.ts";
 import { readRegistryAnswers, RegistryAnswers } from "./registry_answers.ts";
 import { dependencyLockfile } from "./security_dependencies.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 const registryScriptPath = "/registry/registry-data.js";
 const registryInputPath = "/registry/input.json";
@@ -393,7 +394,7 @@ async function fetchRegistryData(
     d.fail = {
       status: StatusToolError,
       reasonCode: "helper_failed",
-      reason: err instanceof Error ? err.message : String(err),
+      reason: errorMessage(err),
     };
     return d;
   }

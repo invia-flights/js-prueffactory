@@ -4,6 +4,7 @@
 // -h/-help ask for help when no such flag is defined. Errors carry Go's text.
 
 import { quote } from "./fmt.ts";
+import { errorMessage } from "./errors.ts";
 
 /** ErrHelp is thrown by parse for -h or -help, like Go's flag.ErrHelp. */
 export const ErrHelp = new Error("flag: help requested");
@@ -137,8 +138,8 @@ export class FlagSet {
       } catch (err) {
         throw new Error(
           hasValue
-            ? `invalid boolean value ${quote(v)} for -${name}: ${message(err)}`
-            : `invalid boolean flag ${name}: ${message(err)}`,
+            ? `invalid boolean value ${quote(v)} for -${name}: ${errorMessage(err)}`
+            : `invalid boolean flag ${name}: ${errorMessage(err)}`,
           { cause: err },
         );
       }
@@ -155,7 +156,7 @@ export class FlagSet {
         flag.set(value);
       } catch (err) {
         throw new Error(
-          `invalid value ${quote(value)} for flag -${name}: ${message(err)}`,
+          `invalid value ${quote(value)} for flag -${name}: ${errorMessage(err)}`,
           { cause: err },
         );
       }
@@ -163,8 +164,4 @@ export class FlagSet {
     this.#actual.add(name);
     return true;
   }
-}
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }

@@ -5,15 +5,12 @@ import { join } from "../gocompat/path.ts";
 import { pathError } from "../gocompat/os.ts";
 import { type Options, type Snapshot, take } from "../snapshot/snapshot.ts";
 import type { RunState } from "./engine.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 function snapshotOptions(r: RunState): Options {
   return r.cfg.excludeFromSnapshot === ""
     ? {}
     : { excludeAbs: [r.cfg.excludeFromSnapshot] };
-}
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }
 
 /** takeSnapshot copies the Original into a new host-side temporary folder. */
@@ -38,7 +35,7 @@ export async function takeSnapshot(
   try {
     snap = take(r.cfg.original, join(dir, "snapshot"), snapshotOptions(r));
   } catch (err) {
-    throw new Error("cannot take the Snapshot: " + message(err), {
+    throw new Error("cannot take the Snapshot: " + errorMessage(err), {
       cause: err,
     });
   }
@@ -68,7 +65,7 @@ async function readGitState(r: RunState, signal: AbortSignal): Promise<void> {
     state = await r.cfg.git.read(r.cfg.original, signal);
   } catch (err) {
     r.log.print(
-      `warning: cannot read the git state of the Original: ${message(err)}`,
+      `warning: cannot read the git state of the Original: ${errorMessage(err)}`,
     );
     r.snapLimits.push({
       reason_code: "git_state_unreadable",
@@ -76,7 +73,7 @@ async function readGitState(r: RunState, signal: AbortSignal): Promise<void> {
       check_id: null,
       message:
         "the Original has a .git entry but no commit could be read from it: " +
-        message(err),
+        errorMessage(err),
     });
     return;
   }
@@ -106,12 +103,12 @@ export function verifyOriginal(r: RunState, snap: Snapshot): void {
   try {
     changed = snap.compare(r.cfg.original, snapshotOptions(r));
   } catch (err) {
-    r.log.print(`warning: cannot re-hash the Original: ${message(err)}`);
+    r.log.print(`warning: cannot re-hash the Original: ${errorMessage(err)}`);
     r.limitations.push({
       reason_code: "original_not_verified",
       message:
         "the Original could not be re-hashed at the end of the Run: " +
-        message(err),
+        errorMessage(err),
       check_id: null,
       path: null,
     });

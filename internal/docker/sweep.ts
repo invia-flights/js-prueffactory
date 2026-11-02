@@ -1,5 +1,4 @@
 import {
-  errorMessage,
   joinErrors,
   LabelDeadline,
   LabelHost,
@@ -8,6 +7,7 @@ import {
   trimSpace,
 } from "./common.ts";
 import type { Driver } from "./driver.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 // PidAlive says whether a process of this host runs.
 export type PidAlive = (pid: number) => boolean;

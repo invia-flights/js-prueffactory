@@ -19,6 +19,7 @@ import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import type { Writable } from "node:stream";
 import { parseArgs } from "node:util";
+import { errorMessage } from "../../internal/gocompat/errors.ts";
 
 export interface IO {
   // root is the source folder: the repository root.
@@ -46,7 +47,7 @@ export async function pack(args: readonly string[], io: IO): Promise<number> {
     }
     out = values.o;
   } catch (error) {
-    io.stderr.write(`pack: ${message(error)}\n${usage}`);
+    io.stderr.write(`pack: ${errorMessage(error)}\n${usage}`);
     return 2;
   }
   try {
@@ -59,10 +60,6 @@ export async function pack(args: readonly string[], io: IO): Promise<number> {
     io.stderr.write(`pack: ${error.message}\n`);
     return 1;
   }
-}
-
-function message(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }
 
 // git runs git in root and returns its trimmed stdout, or undefined when git
@@ -201,7 +198,7 @@ async function build(io: IO, commit: string, out: string): Promise<string> {
     try {
       copyFileSync(join(dest, result.filename), out);
     } catch (error) {
-      throw new PackError(`cannot write ${out}: ${message(error)}`);
+      throw new PackError(`cannot write ${out}: ${errorMessage(error)}`);
     }
     return String(source.version);
   } finally {

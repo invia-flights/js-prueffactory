@@ -43,6 +43,7 @@ import {
 } from "./repo_tools.ts";
 import { selected } from "./selection.ts";
 import { shownPath } from "./shown_text.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const apiLintID = "api.lint";
 const reasonNotParseable = "file_not_parseable";
@@ -211,9 +212,7 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
         found = [unparseableFinding(input, target, perr, err.output)];
       }
     } catch (err) {
-      unreadable.push(
-        `${shownPath(target.path)}: ${err instanceof Error ? err.message : String(err)}`,
-      );
+      unreadable.push(`${shownPath(target.path)}: ${errorMessage(err)}`);
       continue;
     }
     findings.push(...found);

@@ -6,6 +6,7 @@ import { join } from "node:path";
 import ts from "typescript";
 
 import { compareBytes } from "../../internal/gocompat/strings.ts";
+import { errorMessage } from "../../internal/gocompat/errors.ts";
 
 /** Sources answers what the registries and release servers say today. */
 export interface Sources {
@@ -141,11 +142,7 @@ export async function update(
     }
   }
   if (problems.length > 0) {
-    throw new Error(
-      problems
-        .map((e) => (e instanceof Error ? e.message : String(e)))
-        .join("\n"),
-    );
+    throw new Error(problems.map((e) => errorMessage(e)).join("\n"));
   }
   if (!write) {
     return changes;

@@ -9,6 +9,7 @@ import {
   SyntaxError as JSONSyntaxError,
   unmarshal,
 } from "../../internal/gocompat/unmarshal.ts";
+import { errorMessage } from "../../internal/gocompat/errors.ts";
 
 // requiredPlatforms are the platforms every pinned image must offer, so the
 // same digest works on Apple Silicon and on CI runners.
@@ -61,7 +62,7 @@ export async function get(
   } catch (err) {
     const cause =
       err instanceof Error && err.cause instanceof Error ? err.cause : err;
-    const reason = cause instanceof Error ? cause.message : String(cause);
+    const reason = errorMessage(cause);
     throw new Error(`Get ${quote(url)}: ${reason}`, { cause: err });
   }
 }
@@ -186,7 +187,7 @@ export class Registry {
     try {
       body = await this.#get(signal, manifestURL, path);
     } catch (err) {
-      throw new Error(`${repo}:${tag}: ${message(err)}`, { cause: err });
+      throw new Error(`${repo}:${tag}: ${errorMessage(err)}`, { cause: err });
     }
     let index: { manifests: { items(): unknown[] } | null };
     try {
@@ -300,7 +301,7 @@ export class Registry {
       out = unmarshal(body, tokenSchema) as typeof out;
     } catch (err) {
       throw new Error(
-        `the token endpoint's answer is not JSON: ${message(err)}`,
+        `the token endpoint's answer is not JSON: ${errorMessage(err)}`,
         { cause: err },
       );
     }
@@ -308,8 +309,4 @@ export class Registry {
     if (out.access_token !== "") return out.access_token;
     throw new Error("the token endpoint gave no token");
   }
-}
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }

@@ -17,6 +17,7 @@ import { readFile } from "../../internal/gocompat/os.ts";
 import { validate as validateRules } from "../../internal/resultset/validate.ts";
 import { validate as validateSchema } from "../../internal/schema/schema.ts";
 import { decodeSet } from "./decode.ts";
+import { errorMessage } from "../../internal/gocompat/errors.ts";
 
 /**
  * check returns the problems found in the report folder dir, where both
@@ -53,7 +54,7 @@ export function checkFiles(dir: string, markdown: boolean): string[] {
   try {
     set = decodeSet(data);
   } catch (err) {
-    return [...problems, `report.json cannot be read: ${message(err)}`];
+    return [...problems, `report.json cannot be read: ${errorMessage(err)}`];
   }
   return [...problems, ...validateRules(set)];
 }
@@ -64,10 +65,6 @@ function isRegular(path: string): boolean {
   } catch {
     return false;
   }
-}
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }
 
 const usage = "usage: reportcheck [-json-only] <report-folder>\n";
@@ -87,7 +84,7 @@ export function main(args: readonly string[], stderr: Writable): number {
       stderr.write(usage);
       return 0;
     }
-    stderr.write(`${message(err)}\n${usage}`);
+    stderr.write(`${errorMessage(err)}\n${usage}`);
     return 2;
   }
   const rest = flags.args();

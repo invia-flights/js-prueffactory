@@ -30,7 +30,6 @@ import {
   byteOrder,
   contextError,
   envKey,
-  errorMessage,
   fastLookupFailure,
   fields,
   hardening,
@@ -63,6 +62,7 @@ import {
 } from "./service.ts";
 import { type PidAlive, type SweepResult, sweepLeftovers } from "./sweep.ts";
 import { type File, tarFiles } from "./tar.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export {
   LabelDeadline,

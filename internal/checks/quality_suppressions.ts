@@ -30,6 +30,7 @@ import {
   tooLargeLimitation,
 } from "./readcap.ts";
 import { shownPath } from "./shown_text.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const qualitySuppressionsID = "quality.suppressions";
 
@@ -247,10 +248,7 @@ function runSuppressions(input: Input): Result {
         continue;
       }
       if (++unreadable === 1) {
-        firstErr =
-          shownPath(f.path) +
-          ": " +
-          (err instanceof Error ? err.message : String(err));
+        firstErr = shownPath(f.path) + ": " + errorMessage(err);
       }
       continue;
     }

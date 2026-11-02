@@ -9,6 +9,7 @@ import type { Finding } from "../resultset/types.ts";
 import type { Input } from "./input.ts";
 import { workPath } from "./package_install.ts";
 import { repoFinding } from "./repo_findings.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** lintExistingID is defined here so that the parts of the Check need no cycle. */
 export const lintExistingID = "lint.existing";
@@ -79,10 +80,9 @@ export function projectESLintFindings(
     files = ((unmarshal(stdout, eslintSchema) as GoSlice | null)?.items() ??
       []) as typeof files;
   } catch (err) {
-    throw new Error(
-      `ESLint printed no JSON report: ${err instanceof Error ? err.message : String(err)}`,
-      { cause: err },
-    );
+    throw new Error(`ESLint printed no JSON report: ${errorMessage(err)}`, {
+      cause: err,
+    });
   }
   const pkg = packageOf(input);
   const prefix = workPath(pkg) + "/";
@@ -182,10 +182,9 @@ export function biomeFindings(input: Input, stdout: Uint8Array): Finding[] {
     };
     diagnostics = (doc.diagnostics?.items() ?? []) as BiomeDiagnostic[];
   } catch (err) {
-    throw new Error(
-      `Biome printed no JSON report: ${err instanceof Error ? err.message : String(err)}`,
-      { cause: err },
-    );
+    throw new Error(`Biome printed no JSON report: ${errorMessage(err)}`, {
+      cause: err,
+    });
   }
   const out: Finding[] = [];
   for (const d of diagnostics) {

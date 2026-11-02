@@ -22,6 +22,7 @@ import {
 } from "../toolset/kubeconform.ts";
 import { acquire } from "./lock.ts";
 import { lastLines } from "./toolvolume.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /**
  * KubernetesSchemaMountPath is where the schema volume is mounted. The
@@ -104,7 +105,9 @@ export async function ensureKubernetesSchemas(
   try {
     lock = await acquire(signal, join(cfg.cacheDir, "kubernetes-schemas.lock"));
   } catch (err) {
-    throw new Error(`Kubernetes schema lock: ${message(err)}`, { cause: err });
+    throw new Error(`Kubernetes schema lock: ${errorMessage(err)}`, {
+      cause: err,
+    });
   }
   try {
     const d = cfg.docker;
@@ -133,7 +136,7 @@ export async function ensureKubernetesSchemas(
       });
     } catch (err) {
       throw new Error(
-        `cannot inspect the Kubernetes schema volume: ${message(err)}`,
+        `cannot inspect the Kubernetes schema volume: ${errorMessage(err)}`,
         { cause: err },
       );
     }
@@ -167,7 +170,7 @@ export async function ensureKubernetesSchemas(
           { cause: err },
         );
       }
-      throw new Error(`the Kubernetes schema download: ${message(err)}`, {
+      throw new Error(`the Kubernetes schema download: ${errorMessage(err)}`, {
         cause: err,
       });
     } finally {
@@ -189,10 +192,6 @@ export async function ensureKubernetesSchemas(
   } finally {
     lock.release();
   }
-}
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }
 
 /**

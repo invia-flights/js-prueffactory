@@ -12,10 +12,7 @@ import { quote } from "../gocompat/fmt.ts";
 import { isNotExist } from "../gocompat/os.ts";
 import { base, clean, dir, join } from "../gocompat/path.ts";
 import { usageError } from "./usage.ts";
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
+import { errorMessage } from "../gocompat/errors.ts";
 
 /**
  * resolveOriginal returns the absolute path of the project folder with every
@@ -26,13 +23,13 @@ export function resolveOriginal(path: string): string {
   try {
     absolute = abs(path);
   } catch (err) {
-    throw usageError(`cannot resolve ${quote(path)}: ${message(err)}`);
+    throw usageError(`cannot resolve ${quote(path)}: ${errorMessage(err)}`);
   }
   let resolved: string;
   try {
     resolved = evalSymlinks(absolute);
   } catch (err) {
-    throw usageError(`${quote(path)} is not a directory: ${message(err)}`);
+    throw usageError(`${quote(path)} is not a directory: ${errorMessage(err)}`);
   }
   let isDir: boolean;
   try {
@@ -75,7 +72,7 @@ export function resolveOutput(
       absolute = abs(explicit);
     } catch (err) {
       throw usageError(
-        `cannot resolve --output-dir ${quote(explicit)}: ${message(err)}`,
+        `cannot resolve --output-dir ${quote(explicit)}: ${errorMessage(err)}`,
       );
     }
     requireNewOrEmpty(absolute, explicit);
@@ -102,7 +99,7 @@ export function resolveOutput(
     absolute = abs(folder);
   } catch (err) {
     throw usageError(
-      `cannot resolve the default report folder ${quote(folder)}: ${message(err)}`,
+      `cannot resolve the default report folder ${quote(folder)}: ${errorMessage(err)}`,
     );
   }
   if (within(original, resolveThroughExisting(absolute))) {
@@ -122,7 +119,7 @@ function requireNewOrEmpty(absolute: string, shown: string): void {
       return;
     }
     throw usageError(
-      `cannot use --output-dir ${quote(shown)}: ${message(err)}`,
+      `cannot use --output-dir ${quote(shown)}: ${errorMessage(err)}`,
     );
   }
   if (!isDir) {
@@ -135,7 +132,7 @@ function requireNewOrEmpty(absolute: string, shown: string): void {
     entries = readDirNames(absolute);
   } catch (err) {
     throw usageError(
-      `cannot read --output-dir ${quote(shown)}: ${message(err)}`,
+      `cannot read --output-dir ${quote(shown)}: ${errorMessage(err)}`,
     );
   }
   if (entries.length > 0) {

@@ -40,6 +40,7 @@ import {
   testsCoverageID,
 } from "./tests_coverage_report.ts";
 import { runnable, testsExisting, testsExistingID } from "./tests_existing.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export { testsCoverageID };
 
@@ -229,7 +230,7 @@ export async function withCoverageLocation(
   } catch (err) {
     run.coverageError =
       "the volume for the raw coverage could not be created: " +
-      (err instanceof Error ? err.message : String(err));
+      errorMessage(err);
   }
   return run;
 }

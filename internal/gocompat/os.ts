@@ -14,6 +14,7 @@ import { join } from "node:path";
 import process from "node:process";
 
 import { goString } from "./utf8.ts";
+import { errorMessage } from "./errors.ts";
 
 // Go keeps file names as bytes. Code that must not lose a name that is not
 // valid UTF-8 holds it as a byte string: one character per byte (latin1).
@@ -152,7 +153,7 @@ export function errnoText(err: unknown): string {
   if (own !== undefined) {
     return process.platform === "darwin" ? own[0] : own[1];
   }
-  const message = err instanceof Error ? err.message : String(err);
+  const message = errorMessage(err);
   // Node: "EACCES: permission denied, open '/x'".
   const m = /^[A-Z0-9]+: (.*?)(?:, \w+ .*)?$/.exec(message);
   return m?.[1] ?? message;

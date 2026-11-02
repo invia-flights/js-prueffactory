@@ -14,6 +14,7 @@ import { imageRef } from "../toolset/toolset.ts";
 import { tail } from "./cut_text.ts";
 import { failedToRun } from "./helper_result.ts";
 import type { Input, Result } from "./input.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** filesPerContainer bounds the number of file arguments of one tool container. */
 export const filesPerContainer = 100;
@@ -144,7 +145,7 @@ export async function runChunks<T>(
     } catch (err) {
       res.status = StatusToolError;
       res.reasonCode = "tool_output_unreadable";
-      res.reason = `${err instanceof Error ? err.message : String(err)} (exit ${String(c.exitCode)}): ${tail(goString(c.stderr), 400)}`;
+      res.reason = `${errorMessage(err)} (exit ${String(c.exitCode)}): ${tail(goString(c.stderr), 400)}`;
       return false;
     }
   }

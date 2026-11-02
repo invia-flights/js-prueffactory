@@ -44,6 +44,7 @@ import {
 } from "./redaction.ts";
 import { executeAll } from "./schedule.ts";
 import { takeSnapshot, verifyOriginal } from "./source.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** Config is everything a Run needs. The front end validates it first. */
 export interface Config {
@@ -223,7 +224,7 @@ export class RunState {
           await this.cfg.docker.removeRunResources();
         } catch (err) {
           this.log.print(
-            `warning: could not remove every Docker resource of this Run: ${message(err)}`,
+            `warning: could not remove every Docker resource of this Run: ${errorMessage(err)}`,
           );
         }
       }
@@ -239,10 +240,6 @@ export class RunState {
     this.#removing = next;
     return next;
   }
-}
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }
 
 /**

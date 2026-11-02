@@ -29,6 +29,7 @@ import {
   workPath,
 } from "./package_install.ts";
 import { shownProblem } from "./shown_text.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const depsTreeID = "deps.tree";
 
@@ -111,7 +112,7 @@ export const depsTree: Check = {
       // (traps.md: Go bug for a later spec, untrusted text in trusted field).
       res.status = StatusToolError;
       res.reasonCode = "npm_ls_failed";
-      res.reason = `${err instanceof Error ? err.message : String(err)}: ${tail(goString(c.stderr), 400)}`;
+      res.reason = `${errorMessage(err)}: ${tail(goString(c.stderr), 400)}`;
       return res;
     }
     res.findings = problems.map((p) => depsTreeFinding(input, p));

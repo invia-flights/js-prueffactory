@@ -24,6 +24,7 @@ import { type Input, untrusted } from "./input.ts";
 import type { ParseError } from "./artifacts_structured.ts";
 import type { OpenAPITarget } from "./repo_targets.ts";
 import { snapshotMount } from "./repo_tools.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** projectPath turns a path a tool printed into a project-relative path. */
 export function projectPath(p: string): string {
@@ -177,11 +178,6 @@ export function rawJSON(fieldsInOrder: [string, string | bigint][]): string {
   );
 }
 
-/** errorText is the message of a thrown value, as Go's %v of an error. */
-function errorText(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
-
 /**
  * hadolintFindings reads hadolint's `-f json` output, an array of results.
  * It throws for output that is not that JSON.
@@ -192,7 +188,7 @@ export function hadolintFindings(input: Input, stdout: Uint8Array): Finding[] {
     const decoded = unmarshal(stdout, hadolintSchema) as GoSlice | null;
     results = (decoded?.items() ?? []) as HadolintResult[];
   } catch (err) {
-    throw new Error(`hadolint printed no JSON: ${errorText(err)}`, {
+    throw new Error(`hadolint printed no JSON: ${errorMessage(err)}`, {
       cause: err,
     });
   }
@@ -279,7 +275,7 @@ export function shellcheckFindings(
     };
     comments = (doc.comments?.items() ?? []) as ShellcheckComment[];
   } catch (err) {
-    throw new Error(`shellcheck printed no JSON: ${errorText(err)}`, {
+    throw new Error(`shellcheck printed no JSON: ${errorMessage(err)}`, {
       cause: err,
     });
   }

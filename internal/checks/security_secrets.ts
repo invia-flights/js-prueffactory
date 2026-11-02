@@ -32,6 +32,7 @@ import { tail } from "./cut_text.ts";
 import { failedToRun } from "./helper_result.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
 import { maxProjectFileBytes, readCapped } from "./readcap.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const secretsID = "security.secrets";
 
@@ -161,9 +162,7 @@ async function runSecrets(signal: AbortSignal, input: Input): Promise<Result> {
   } catch (err) {
     res.status = StatusToolError;
     res.reasonCode = "report_unreadable";
-    res.reason =
-      "the gitleaks report could not be read: " +
-      (err instanceof Error ? err.message : String(err));
+    res.reason = "the gitleaks report could not be read: " + errorMessage(err);
     return res;
   }
   [res.findings, res.redact] = found;
