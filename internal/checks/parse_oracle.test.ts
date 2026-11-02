@@ -134,11 +134,11 @@ test("diff artifacts and their Evidence match the Go build", () => {
         what,
       );
     }
-    // Go's encoder writes invalid UTF-8 as the escape \ufffd; the port has
-    // the character already, which its encoder writes as it is.
+    // Go 1.27's encoder writes invalid UTF-8 as the character U+FFFD, as the
+    // port's encoder does for its text.
     assert.equal(
       quoteJSONString(driftEvidence(a).text, true),
-      c.evidence.replaceAll("\\ufffd", "\ufffd"),
+      c.evidence,
       what,
     );
   }

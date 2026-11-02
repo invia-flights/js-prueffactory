@@ -58,5 +58,15 @@
     "case": "runs/*only=types,quality.suppressions,quality.size,quality.metrics",
     "file": "artifacts/package.install/*/npm-install.log",
     "reason": "types.javascript and types.strictness run package.install as their prerequisite, so the Run writes npm's own log, which differs between two Runs of the same build (cache hits in completion order, timings such as 'up to date in 95ms' against 91ms, a debug log named after the current time; see the first entry). Ticket 22: on the 10 projects of that ticket (types-jsdoc, types-mixed-ts, types-tsx, types-path-aliases, typed-js, typescript-source, typescript-build-step, needs-build, suppressions, quality-signals) in test and benchmark mode every difference was this log and the SHA-256 that report.json, report.md and the artifact list quote for it."
+  },
+  {
+    "case": "runs/*",
+    "file": "artifacts/package.install/*/npm-install.log",
+    "reason": "npm's own log of the install differs between two Runs of the same build: npm writes its cache hits in completion order, with timings ('added 71 packages in 555ms' against 309ms) and a debug log named after the current time. Ticket 26: the full default Selection of every test project installs, so this entry covers the Runs without --only; the entries above cover the same difference for Runs that name Checks. The command, exit code and every Finding taken from the log are compared in report.json."
+  },
+  {
+    "case": "runs/*",
+    "file": "artifacts/sbom.generate/*-sbom.cdx.json",
+    "reason": "npm sbom writes a random serialNumber (a UUID) and the time of the run into every CycloneDX document, so two Runs of the same build differ (as in the sbom.generate entry above). Ticket 26: the entry covers the Runs of the full default Selection. The component count is the metric sbom_components in report.json and is compared there."
   }
 ]

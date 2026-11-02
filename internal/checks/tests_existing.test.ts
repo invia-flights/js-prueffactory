@@ -12,6 +12,7 @@ import { describe, test } from "node:test";
 
 import { discover } from "../discovery/discovery.ts";
 import type { ContainerResult } from "../docker/driver.ts";
+import { AreaTests, lookup, PerPackage } from "./catalog.ts";
 import { packageContext } from "./checks.testutil.ts";
 import { Input } from "./input.ts";
 import { suiteCount, testLogName } from "./test_suites.ts";
@@ -28,6 +29,8 @@ import {
 import {
   loadFailure,
   mochaBin,
+  testsExisting,
+  testsExistingID,
   mochaReporterScript,
   planMochaArgs,
   supportedMochaVersion,
@@ -404,4 +407,23 @@ test("the program name in the note is cleaned because it comes from the project"
     "test-failed",
   );
   assert.equal(f.message.split("`").length - 1, 2, f.message);
+});
+
+test("tests.existing is implemented, per package, can fire Gates and needs the packages' install", (t) => {
+  // Go: TestTestsExistingIsImplementedAndNeedsThePackagesInstall
+  const e = lookup(testsExistingID);
+  assert.ok(e);
+  assert.equal(e.status, "implemented");
+  assert.equal(e.canFireGates, true);
+  assert.equal(e.area, AreaTests);
+  assert.equal(e.scope, PerPackage);
+
+  const input = suiteInput(t, { "test/add.test.js": "x" });
+  // It runs after package.install, runs a container on the package's Node
+  // image and runs in the Working copy.
+  assert.deepEqual(testsExisting.prerequisites?.(input.context), [
+    "package.install",
+  ]);
+  assert.equal(testsExisting.images?.(input.context).length, 1);
+  assert.equal(testsExisting.usesWorkingCopy?.(), true);
 });

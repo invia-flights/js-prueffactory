@@ -45,10 +45,12 @@ describe("report.json follows Go's encoder", () => {
     assert.ok(out.includes('"title": "\\b\\f\\n\\r\\t\\u0001\u007f"'));
   });
 
-  test("invalid UTF-8 is written as the escape of U+FFFD", () => {
+  test("invalid UTF-8 is written as the character U+FFFD", () => {
     // A lone surrogate is what invalid UTF-8 becomes in a JavaScript string.
+    // Go 1.27's encoder writes the character, not the escape � that
+    // earlier Go versions wrote (probed with the frozen build's toolchain).
     const out = withTitle("bad \ud800 end");
-    assert.ok(out.includes('"title": "bad \\ufffd end"'));
+    assert.ok(out.includes('"title": "bad � end"'));
   });
 
   test("object keys come in schema order, not in the order they were set", () => {

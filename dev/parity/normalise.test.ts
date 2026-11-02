@@ -122,3 +122,36 @@ test("report texts: the time of a tool's logrus line is the Run's, so it is norm
   const other = 'time="2026-11-02T15:03:23Z" msg="x"';
   assert.equal(substitute(other, none), other);
 });
+
+test("report texts: the time in the name of npm's debug log is the Run's, so it is normalised", () => {
+  const none = { runID: undefined, times: [] };
+  assert.equal(
+    substitute(
+      "A complete log of this run can be found in: /root/.npm/_logs/2026-11-02T19_09_34_148Z-debug-0.log",
+      none,
+    ),
+    "A complete log of this run can be found in: /root/.npm/_logs/<time>-debug-0.log",
+  );
+  // The number and the rest of the name stay, so another log is still a difference.
+  assert.equal(
+    substitute("_logs/2026-11-02T19_09_34_148Z-debug-1.log", none),
+    "_logs/<time>-debug-1.log",
+  );
+  const other = "/tmp/2026-11-02T19_09_34_148Z-debug-0.log";
+  assert.equal(substitute(other, none), other);
+});
+
+test("report texts: the fetch time that a registry Finding quotes is the package's own, so it is normalised", () => {
+  const none = { runID: undefined, times: [] };
+  const json =
+    '"message": "`glob` 8.1.0 is deprecated. Registry data of 2026-11-02T19:13:59Z.",\n' +
+    '"evidence": [{\n  "kind": "registry_data_date",\n  "text": "2026-11-02T19:13:59Z",\n  "origin": "npm registry"\n}]';
+  assert.equal(
+    substitute(json, none),
+    '"message": "`glob` 8.1.0 is deprecated. Registry data of <time>.",\n' +
+      '"evidence": [{\n  "kind": "registry_data_date",\n  "text": "<time>",\n  "origin": "npm registry"\n}]',
+  );
+  // Another text with a time stays.
+  const other = '"kind": "other",\n  "text": "2026-11-02T19:13:59Z"';
+  assert.equal(substitute(other, none), other);
+});

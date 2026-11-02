@@ -37,8 +37,12 @@ describe("JSON strings", () => {
       );
     });
   }
-  test("a lone surrogate becomes \\ufffd, as invalid UTF-8 does in Go", () => {
-    assert.equal(quoteJSONString("a\uD800b", false), '"a\\ufffdb"');
+  // The frozen build's Go 1.27 encoder writes the character U+FFFD for
+  // invalid UTF-8 (probed with json.Marshal, MarshalIndent and an Encoder
+  // with SetEscapeHTML(false)); earlier Go versions wrote the escape �.
+  test("a lone surrogate becomes the character U+FFFD, as invalid UTF-8 does in Go 1.27", () => {
+    assert.equal(quoteJSONString("a\uD800b", false), '"a�b"');
+    assert.equal(quoteJSONString("a\uDC00b", true), '"a�b"');
   });
 });
 
