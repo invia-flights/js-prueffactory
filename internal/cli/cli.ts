@@ -2,16 +2,32 @@
 // point that takes the arguments, an environment lookup, stdout, stderr and a
 // cancellation signal, and returns the exit code. cmd/js-prueffactory/main.ts
 // only wires the real process into it.
+import { hostname } from "node:os";
 import type { Writable } from "node:stream";
 
 import type { Selection } from "../checks/selection.ts";
 import { base } from "../gocompat/path.ts";
+import type { Driver } from "../docker/driver.ts";
+import { ErrAborted, run as runEngine } from "../engine/engine.ts";
+import { tempDir } from "../gocompat/filepath.ts";
 import { quote } from "../gocompat/fmt.ts";
-import { type Duration, durationString } from "../gocompat/time.ts";
+import {
+  type Duration,
+  durationString,
+  milliseconds,
+  minute,
+} from "../gocompat/time.ts";
+import { fromEnv } from "../gitstate/gitstate.ts";
 import { Logger } from "../progress/progress.ts";
-import { ExitInternalError, ExitOK } from "../resultset/exitcode.ts";
+import {
+  ExitInternalError,
+  ExitInterrupted,
+  ExitOK,
+} from "../resultset/exitcode.ts";
 import { newRunID, randomSuffix } from "../runid/runid.ts";
 import { resolveBudget } from "./budget.ts";
+import { cacheDir } from "./cachedir.ts";
+import { hardStop } from "./interrupt.ts";
 import { ErrHelp, type Formats, type Options, parse } from "./options.ts";
 import { type OutputPlan, resolveOriginal, resolveOutput } from "./paths.ts";
 import { type DockerSetup, preflightDocker } from "./preflight.ts";
@@ -171,7 +187,7 @@ async function runTest(
       budgetSource: budget.source,
       docker,
     },
-    stderr,
+    { getenv, stdout, stderr, signal, log },
   );
 }
 
@@ -190,14 +206,105 @@ export interface RunPlan {
   docker: DockerSetup;
 }
 
-// startRun sweeps leftovers, cleans old toolset volumes and runs the engine
-// (Go: the rest of runTest). The engine is ported in ticket 12; until then the
-// TypeScript build stops here, after every check of the command line passed.
-function startRun(plan: RunPlan, stderr: Writable): Promise<number> {
-  stderr.write(
-    `js-prueffactory: the TypeScript build does not run ${plan.command} yet\n`,
-  );
-  return Promise.resolve(ExitInternalError);
+// The process around a Run: where its output goes and what ends it.
+interface RunIO {
+  getenv: (name: string) => string;
+  stdout: Writable;
+  stderr: Writable;
+  signal: AbortSignal;
+  log: Logger;
+}
+
+/**
+ * interrupted is the exit path of a Run that was cancelled before it had a
+ * Report to write, or that was stopped by a second interrupt.
+ */
+function interrupted(stderr: Writable): number {
+  stderr.write("js-prueffactory: interrupted\n");
+  return ExitInterrupted;
+}
+
+// startRun sweeps what dead Runs left in Docker and runs the engine (Go: the
+// rest of runTest). The toolset volumes of other toolset versions are
+// removed here in Go (toolvolume.CleanOtherVersions); that part arrives with
+// the toolset volume itself (ticket 13 of the port).
+async function startRun(plan: RunPlan, io: RunIO): Promise<number> {
+  const { getenv, stdout, stderr, signal, log } = io;
+  const host = hostname();
+  const scoped = plan.docker.base.withScope({
+    runID: plan.runID,
+    host,
+    pid: process.pid,
+    deadline: new Date(
+      plan.start.getTime() + milliseconds(plan.budget + 10n * minute),
+    ),
+  });
+  await sweepLeftovers(signal, scoped, host, log);
+  if (signal.aborted) {
+    return interrupted(stderr);
+  }
+  const tmp = getenv("TMPDIR") || tempDir();
+  let res;
+  try {
+    res = await runEngine(signal, {
+      command: plan.command,
+      original: plan.original,
+      reportDir: plan.reportDir,
+      excludeFromSnapshot: plan.excludeFromSnapshot,
+      formats: plan.formats,
+      selection: plan.selection,
+      runID: plan.runID,
+      start: plan.start,
+      budget: plan.budget,
+      budgetSource: plan.budgetSource,
+      tempDir: tmp,
+      cacheDir: cacheDir(getenv),
+      git: fromEnv(getenv),
+      docker: scoped,
+      dockerInfo: plan.docker.info,
+      log,
+      hardStop: hardStop(signal),
+    });
+  } catch (err) {
+    if (err === ErrAborted) {
+      return interrupted(stderr);
+    }
+    stderr.write(`js-prueffactory: ${message(err)}\n`);
+    return ExitInternalError;
+  }
+  stdout.write(res.reportDir + "\n");
+  return res.exitCode;
+}
+
+/**
+ * sweepLeftovers removes what dead Runs left in Docker. It never fails the
+ * Run: a sweep that cannot finish only warns.
+ */
+async function sweepLeftovers(
+  signal: AbortSignal,
+  d: Driver,
+  host: string,
+  log: Logger,
+): Promise<void> {
+  let removed: readonly string[] = [];
+  let error: unknown;
+  try {
+    const res = await d.sweepLeftovers(signal, new Date(), host);
+    removed = res.removed;
+    error = res.error;
+  } catch (err) {
+    error = err;
+  }
+  if (removed.length > 0) {
+    log.print(
+      `removed ${String(removed.length)} leftover Docker resource(s) of dead Runs`,
+    );
+  }
+  if (error !== undefined && !signal.aborted) {
+    log.print(
+      `warning: could not sweep every leftover of dead Runs: ${message(error)}`,
+    );
+  }
 }
 
 // runListChecksCommand parses the arguments of list-checks and prints the

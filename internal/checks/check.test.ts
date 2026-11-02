@@ -3,13 +3,13 @@ import { test } from "node:test";
 
 import { Applicable } from "../resultset/types.ts";
 import "./all.ts";
-import { catalog, Implemented } from "./catalog.ts";
+import { catalog, Implemented, Planned } from "./catalog.ts";
 import { implementation, register } from "./check.ts";
+import { registry } from "./registry.ts";
 
 test("every implemented Catalog Check has a registered implementation, no planned one has", () => {
-  // The Go build registers exactly the implemented Checks (Go:
-  // TestACheckIsImplementedExactlyWhenItIsRegistered). Until the engine
-  // arrives the status follows the Go build, so the registry must match it.
+  // Go: TestACheckIsImplementedExactlyWhenItIsRegistered. The status comes
+  // from the registry; catalog.test.ts checks that it is the Go build's.
   for (const e of catalog()) {
     assert.equal(
       implementation(e.id) !== undefined,
@@ -17,6 +17,14 @@ test("every implemented Catalog Check has a registered implementation, no planne
       e.id,
     );
   }
+});
+
+test("registering a planned Check is what makes it implemented", (t) => {
+  t.after(() => registry.delete("tests.mutation"));
+  const status = () => catalog().find((e) => e.id === "tests.mutation")?.status;
+  assert.equal(status(), Planned);
+  register("tests.mutation", { applicability: () => [Applicable, ""] });
+  assert.equal(status(), Implemented);
 });
 
 test("register refuses an ID outside the Catalog and a second registration", () => {

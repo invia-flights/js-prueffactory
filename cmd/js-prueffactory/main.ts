@@ -4,11 +4,16 @@
 import process from "node:process";
 
 import { main } from "../../internal/cli/cli.ts";
+import { withInterrupts } from "../../internal/cli/interrupt.ts";
 
-// The interrupt handling of Go's cli.WithInterrupts (first SIGINT or SIGTERM
-// cancels the Run, the second skips the Report) arrives with the engine, in
-// ticket 12 of the port. Until then nothing aborts this signal.
-const interrupts = new AbortController();
+// The first SIGINT or SIGTERM cancels the Run, which cleans up and still
+// writes a Report. The second one skips the Report.
+const interrupts = withInterrupts();
+const onSignal = (): void => {
+  interrupts.interrupt();
+};
+process.on("SIGINT", onSignal);
+process.on("SIGTERM", onSignal);
 
 const code = await main(
   process.argv.slice(2),
@@ -17,6 +22,9 @@ const code = await main(
   process.stderr,
   interrupts.signal,
 );
+interrupts.stop();
+process.off("SIGINT", onSignal);
+process.off("SIGTERM", onSignal);
 // exitCode instead of process.exit, so that output still queued for a pipe
 // is written before the process ends.
 process.exitCode = code;

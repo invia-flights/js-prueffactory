@@ -51,23 +51,21 @@ always-auth=true
         v !== "${NPM_TOKEN}" &&
           v !== "true" &&
           v !== "https://registry.npmjs.org/",
-        `${v} is not a secret`,
+        `${typeof v === "string" ? v : v.toString("hex")} is not a secret`,
       );
     }
   });
 
   // Go's strict base64 (padding, no URL alphabet, \r ignored), quotes,
   // comments, Go's white space. Go's values may hold bytes that are not
-  // UTF-8; the port reads such bytes in the file as U+FFFD and leaves out a
-  // decoded value that is not UTF-8.
+  // UTF-8, in the file or decoded from base64; the port returns such a value
+  // as its bytes, so the raw bytes are redacted in artifacts as in Go.
   for (const [i, c] of goOracle.npmrc.entries()) {
     test(`as the Go build reads .npmrc ${String(i + 1)}`, () => {
-      const input = fromBase64(c.In);
-      const want = (c.Values ?? []).flatMap((v) => {
+      const want = (c.Values ?? []).map((v) => {
         const bytes = fromBase64(v);
         const text = bytes.toString("utf8");
-        const utf8 = Buffer.from(text, "utf8").equals(bytes);
-        return utf8 || input.includes(bytes) ? [text] : [];
+        return Buffer.from(text, "utf8").equals(bytes) ? text : bytes;
       });
       assert.deepEqual(npmrcValues(fromBase64(c.In)), want);
     });
