@@ -1,0 +1,44 @@
+{
+  "recordedFrom": "Go build of js-prueffactory at the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8",
+  "cases": [
+    {
+      "args": [
+        "help"
+      ],
+      "stdout": "usage:\n  js-prueffactory test <path> [--format json|markdown|json,markdown] [--output-dir <dir>]\n                              [--budget <duration>] [--fast]\n                              [--only <checks>] [--exclude <checks>]\n  js-prueffactory benchmark <path> [the same flags as test]\n  js-prueffactory list-checks <path> [--format markdown|json] [--fast] [--only <checks>] [--exclude <checks>]\n\nChecks the JavaScript project in <path> without modifying it and writes\nreport.json and report.md into a new report folder. The folder is printed as\nthe only line on stdout; progress goes to stderr. benchmark runs the same Checks\nand adds a 0 to 100 score, labelled uncalibrated, and a Verdict; the Verdict\nnever changes the exit code.\n\n--only and --exclude take comma-separated Check IDs or families (the part of an\nID before the first dot) and may repeat. list-checks shows the Catalog and what\napplies to <path> without Docker and without writing files.\n\nThe default Budget is 2 hours. --fast skips the slow Checks (list-checks shows\nwhich) and makes the default Budget 30 minutes; an explicit --budget always wins.\n\nexit codes: 0 all selected applicable Checks completed, no Gate fired;\n1 a Gate fired; 2 no Gate fired but a Check did not complete; 3 usage error,\nDocker unreachable or internal error; 130 interrupted.\n",
+      "stderr": "",
+      "exitCode": 0
+    },
+    {
+      "args": [
+        "-h"
+      ],
+      "stdout": "usage:\n  js-prueffactory test <path> [--format json|markdown|json,markdown] [--output-dir <dir>]\n                              [--budget <duration>] [--fast]\n                              [--only <checks>] [--exclude <checks>]\n  js-prueffactory benchmark <path> [the same flags as test]\n  js-prueffactory list-checks <path> [--format markdown|json] [--fast] [--only <checks>] [--exclude <checks>]\n\nChecks the JavaScript project in <path> without modifying it and writes\nreport.json and report.md into a new report folder. The folder is printed as\nthe only line on stdout; progress goes to stderr. benchmark runs the same Checks\nand adds a 0 to 100 score, labelled uncalibrated, and a Verdict; the Verdict\nnever changes the exit code.\n\n--only and --exclude take comma-separated Check IDs or families (the part of an\nID before the first dot) and may repeat. list-checks shows the Catalog and what\napplies to <path> without Docker and without writing files.\n\nThe default Budget is 2 hours. --fast skips the slow Checks (list-checks shows\nwhich) and makes the default Budget 30 minutes; an explicit --budget always wins.\n\nexit codes: 0 all selected applicable Checks completed, no Gate fired;\n1 a Gate fired; 2 no Gate fired but a Check did not complete; 3 usage error,\nDocker unreachable or internal error; 130 interrupted.\n",
+      "stderr": "",
+      "exitCode": 0
+    },
+    {
+      "args": [
+        "--help"
+      ],
+      "stdout": "usage:\n  js-prueffactory test <path> [--format json|markdown|json,markdown] [--output-dir <dir>]\n                              [--budget <duration>] [--fast]\n                              [--only <checks>] [--exclude <checks>]\n  js-prueffactory benchmark <path> [the same flags as test]\n  js-prueffactory list-checks <path> [--format markdown|json] [--fast] [--only <checks>] [--exclude <checks>]\n\nChecks the JavaScript project in <path> without modifying it and writes\nreport.json and report.md into a new report folder. The folder is printed as\nthe only line on stdout; progress goes to stderr. benchmark runs the same Checks\nand adds a 0 to 100 score, labelled uncalibrated, and a Verdict; the Verdict\nnever changes the exit code.\n\n--only and --exclude take comma-separated Check IDs or families (the part of an\nID before the first dot) and may repeat. list-checks shows the Catalog and what\napplies to <path> without Docker and without writing files.\n\nThe default Budget is 2 hours. --fast skips the slow Checks (list-checks shows\nwhich) and makes the default Budget 30 minutes; an explicit --budget always wins.\n\nexit codes: 0 all selected applicable Checks completed, no Gate fired;\n1 a Gate fired; 2 no Gate fired but a Check did not complete; 3 usage error,\nDocker unreachable or internal error; 130 interrupted.\n",
+      "stderr": "",
+      "exitCode": 0
+    },
+    {
+      "args": [],
+      "stdout": "",
+      "stderr": "js-prueffactory: no command given\nusage:\n  js-prueffactory test <path> [--format json|markdown|json,markdown] [--output-dir <dir>]\n                              [--budget <duration>] [--fast]\n                              [--only <checks>] [--exclude <checks>]\n  js-prueffactory benchmark <path> [the same flags as test]\n  js-prueffactory list-checks <path> [--format markdown|json] [--fast] [--only <checks>] [--exclude <checks>]\n\nChecks the JavaScript project in <path> without modifying it and writes\nreport.json and report.md into a new report folder. The folder is printed as\nthe only line on stdout; progress goes to stderr. benchmark runs the same Checks\nand adds a 0 to 100 score, labelled uncalibrated, and a Verdict; the Verdict\nnever changes the exit code.\n\n--only and --exclude take comma-separated Check IDs or families (the part of an\nID before the first dot) and may repeat. list-checks shows the Catalog and what\napplies to <path> without Docker and without writing files.\n\nThe default Budget is 2 hours. --fast skips the slow Checks (list-checks shows\nwhich) and makes the default Budget 30 minutes; an explicit --budget always wins.\n\nexit codes: 0 all selected applicable Checks completed, no Gate fired;\n1 a Gate fired; 2 no Gate fired but a Check did not complete; 3 usage error,\nDocker unreachable or internal error; 130 interrupted.\n",
+      "exitCode": 3
+    },
+    {
+      "args": [
+        "help",
+        "test"
+      ],
+      "stdout": "usage:\n  js-prueffactory test <path> [--format json|markdown|json,markdown] [--output-dir <dir>]\n                              [--budget <duration>] [--fast]\n                              [--only <checks>] [--exclude <checks>]\n  js-prueffactory benchmark <path> [the same flags as test]\n  js-prueffactory list-checks <path> [--format markdown|json] [--fast] [--only <checks>] [--exclude <checks>]\n\nChecks the JavaScript project in <path> without modifying it and writes\nreport.json and report.md into a new report folder. The folder is printed as\nthe only line on stdout; progress goes to stderr. benchmark runs the same Checks\nand adds a 0 to 100 score, labelled uncalibrated, and a Verdict; the Verdict\nnever changes the exit code.\n\n--only and --exclude take comma-separated Check IDs or families (the part of an\nID before the first dot) and may repeat. list-checks shows the Catalog and what\napplies to <path> without Docker and without writing files.\n\nThe default Budget is 2 hours. --fast skips the slow Checks (list-checks shows\nwhich) and makes the default Budget 30 minutes; an explicit --budget always wins.\n\nexit codes: 0 all selected applicable Checks completed, no Gate fired;\n1 a Gate fired; 2 no Gate fired but a Check did not complete; 3 usage error,\nDocker unreachable or internal error; 130 interrupted.\n",
+      "stderr": "",
+      "exitCode": 0
+    }
+  ]
+}
