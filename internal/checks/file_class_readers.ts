@@ -23,6 +23,7 @@ import { testsCoverage } from "./tests_coverage.ts";
 import { testsExisting } from "./tests_existing.ts";
 import { testsSmells } from "./tests_smells.ts";
 import { typesJavascript } from "./types_javascript.ts";
+import { typesStrictness } from "./types_strictness.ts";
 
 const readsFileClasses = (): boolean => true;
 
@@ -34,6 +35,8 @@ for (const c of [
   unused,
   cycles,
   typesJavascript,
+  // The Go Check embeds typesJavascript and so has its method too.
+  typesStrictness,
   lintCorrectness,
   depsEngines,
   testsSmells,

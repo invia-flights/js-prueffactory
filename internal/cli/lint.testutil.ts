@@ -21,7 +21,9 @@ export interface LintReport {
   findings: Finding[];
   artifacts: { id: string; path: string; check_id: string }[];
   inventory: {
-    file_hashes: { path: string; role: string }[];
+    file_hashes: { path: string; role: string; sha256: string }[];
+    suppressions: { kind: string; file_class: string; count: number }[];
+    size: { group: string; name: string; lines: number }[];
     moved_test_files: {
       context_id: string;
       path: string;
@@ -40,8 +42,12 @@ export interface LintReport {
     score: number | null;
     range: { low: number; high: number } | null;
     fingerprint: {
-      fields: { typed_lint_rules_hash: string | null };
+      fields: {
+        typed_lint_rules_hash: string | null;
+        typescript6_version: string | null;
+      };
     } | null;
+    side_indicators: { id: string; state: string; value: number | null }[];
     areas: {
       parts: {
         id: string;
