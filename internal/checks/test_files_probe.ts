@@ -13,11 +13,12 @@
 // fails leaves the static classes and a Limitation.
 import { readFileSync } from "node:fs";
 
-import type {
-  Context,
-  Package,
-  Project,
-  TestFile,
+import {
+  type Context,
+  type Package,
+  type Project,
+  Source,
+  type TestFile,
 } from "../discovery/discovery.ts";
 import { nodeTestFiles } from "../discovery/nodetestfiles.ts";
 import {
@@ -43,6 +44,8 @@ import { contextErrorIn } from "./helper_result.ts";
 import type { Input, Result } from "./input.ts";
 import { packageInstallID, workMount, workPath } from "./package_install.ts";
 import type { Shared } from "./shared.ts";
+import { shownPath } from "./shown_text.ts";
+import type { SuiteEvents } from "./test_events.ts";
 import { oneLine, projectRel } from "./test_report.ts";
 import { unsupportedTests } from "./tests_existing.ts";
 
@@ -456,6 +459,48 @@ export function unprobedSuiteLimitations(input: Input): Limitation[] {
         "the probe does not run for this package: " + u.reason,
       ),
     );
+}
+
+// --- the safety net ---
+
+/**
+ * sourceSpecLimitations is the safety net behind the probe: the files the
+ * runner actually loaded that the Project the Check sees still classes as
+ * Source code. They are linted without the runner's globals and counted as
+ * production code, so the Report says so.
+ */
+export function sourceSpecLimitations(
+  input: Input,
+  ev: SuiteEvents,
+): Limitation[] {
+  const pkg = input.context.package;
+  if (pkg === null) {
+    return [];
+  }
+  const classOf = new Map<string, string>();
+  for (const f of pkg.files) {
+    classOf.set(f.path, f.class);
+  }
+  const source: string[] = [];
+  for (const f of ev.loadedFiles()) {
+    const rel = projectRel(f);
+    if (rel !== undefined && classOf.get(rel) === Source) {
+      source.push(rel);
+    }
+  }
+  if (source.length === 0) {
+    return [];
+  }
+  return [
+    {
+      reason_code: "test_file_classified_as_source",
+      message:
+        `The runner of the suite ${suiteLabel(input.suite())} loaded ${String(source.length)} test file(s) that are classified as Source code: ${source.map(shownPath).join(", ")}. ` +
+        "The Checks that read File classes lint them without the runner's globals and count them as production code, because neither the folder names nor the test file probe found them.",
+      check_id: "tests.existing",
+      path: input.manifestPath(),
+    },
+  ];
 }
 
 /** testFilesNotResolvedLimitation is the Limitation of a suite whose probe failed. */

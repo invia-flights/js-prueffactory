@@ -366,6 +366,10 @@ describe("allowlist", () => {
           "runs/*/schema-drift/*",
           "artifacts/package.install/*/npm-install.log",
         ],
+        [
+          "runs/*tests.existing*",
+          "artifacts/package.install/*/npm-install.log",
+        ],
       ],
     );
     for (const e of committed) {

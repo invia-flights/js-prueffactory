@@ -26,8 +26,11 @@ import type {
 import { TrustUntrusted } from "../resultset/types.ts";
 import { newLocation } from "../resultset/zero.ts";
 import { sha256File } from "./readcap.ts";
+import type { SuiteRun } from "./runtime_warnings.ts";
 import type { Selection } from "./selection.ts";
 import type { Shared } from "./shared.ts";
+import type { CoverageRun } from "./tests_coverage.ts";
+import type { RepeatRun } from "./tests_repeat.ts";
 
 /** InputFields are the fields of an Input; tests name the ones they need. */
 export interface InputFields {
@@ -110,6 +113,18 @@ export class Input implements InputFields {
    * (see forSuite). Zero for an Input that was not bound.
    */
   suiteIndex = 0;
+  /**
+   * repeat is set on an Input bound to a further run of a suite (see
+   * forRepeat). null for the shared first run.
+   */
+  repeat: RepeatRun | null = null;
+  /**
+   * coverageVolume is the run-owned volume that every suite of the package
+   * writes raw V8 coverage into when tests.coverage is selected, and
+   * coverageError says why there is none (see runSuites).
+   */
+  coverageVolume = "";
+  coverageError = "";
 
   constructor(
     fields: Partial<InputFields> & Pick<InputFields, "project" | "context">,
@@ -167,13 +182,18 @@ export class Input implements InputFields {
   }
 
   /**
-   * suiteSuffix names the containers of the suite the Input is bound to: the
-   * Context ID, and the suite's place when it is not the first.
+   * suiteSuffix ends the names of the containers, volumes and networks of
+   * the suite's run. The first suite keeps the plain Context name, so that a
+   * package with one suite is named as it always was; a repeat run adds its
+   * number.
    */
   suiteSuffix(): string {
     let suffix = toLower(this.context.id);
     if (this.suiteIndex > 0) {
       suffix += `-s${String(this.suiteIndex + 1)}`;
+    }
+    if (this.repeat !== null) {
+      suffix += `-run${String(this.repeat.number)}`;
     }
     return suffix;
   }
@@ -280,4 +300,28 @@ export interface Result {
    * cancellation by the user is always left to the engine.
    */
   keepsStatus?: boolean;
+
+  // What the suite Checks keep for each other (Go: the private fields of
+  // Result). They never leave the checks package.
+
+  /**
+   * coverage is what a test suite run recorded for tests.coverage, which
+   * shares the run with tests.existing.
+   */
+  coverage?: CoverageRun | null;
+  /**
+   * suite is what a test run left for the Checks that read the same run,
+   * such as runtime.warnings. Only the suite run sets it.
+   */
+  suite?: SuiteRun | null;
+  /**
+   * mayNeed are the compose Services the suite of the run may need and the
+   * Run did not start, as markServicesNotStarted found them.
+   */
+  mayNeed?: string[];
+  /**
+   * parts are the results of the suites of a package with several, in list
+   * order. Only the merged result of such a package has them.
+   */
+  parts?: Result[];
 }

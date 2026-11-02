@@ -8,5 +8,10 @@
     "case": "runs/*/schema-drift/*",
     "file": "artifacts/package.install/*/npm-install.log",
     "reason": "schema.drift runs package.install as its prerequisite, so the Run writes npm's own log, which differs between two Runs of the same build (timings such as 'up to date in 162ms'; see the entry above). Only the logs differed on schema-drift in ticket 16."
+  },
+  {
+    "case": "runs/*tests.existing*",
+    "file": "artifacts/package.install/*/npm-install.log",
+    "reason": "npm's own log of the install that runs as a prerequisite of tests.existing differs between two Runs of the same build, as in the entry above: cache hits in completion order, with timings, and a debug log named after the current time. The install's command, exit code and Findings are compared in report.json."
   }
 ]
