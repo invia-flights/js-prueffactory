@@ -1,4 +1,4 @@
-import { quote } from "../gostrings/quote.ts";
+import { quote } from "../gocompat/fmt.ts";
 import { ServiceCPUs, ServiceMemoryMB } from "../toolset/services.ts";
 import {
   aliasName,

@@ -19,6 +19,17 @@ describe("%q", () => {
       assert.equal(quote(c.In), c.Quote);
     });
   }
+
+  // From the Docker driver's former helper (ticket 11): texts its messages quote.
+  test("paths, arguments and astral characters", () => {
+    assert.equal(quote("/Users/me/project"), '"/Users/me/project"');
+    assert.equal(quote("A=B --privileged"), '"A=B --privileged"');
+    assert.equal(quote("\u{E0001}"), '"\\U000e0001"');
+  });
+
+  test("a lone surrogate prints as the U+FFFD it is written as", () => {
+    assert.equal(quote("\uD800"), '"\uFFFD"');
+  });
 });
 
 describe("%v of a float64", () => {

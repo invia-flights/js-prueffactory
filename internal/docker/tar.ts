@@ -2,7 +2,7 @@ import { posix } from "node:path";
 import { PassThrough } from "node:stream";
 import { buffer } from "node:stream/consumers";
 
-import { quote } from "../gostrings/quote.ts";
+import { quote } from "../gocompat/fmt.ts";
 import { TarWriter } from "../tarwriter/tarwriter.ts";
 import { byteOrder } from "./common.ts";
 
