@@ -34,7 +34,7 @@ const ciKeywords = new Set([
 const ciDefaultStages = [".pre", "build", "test", "deploy", ".post"];
 
 function topOf(v: Value): Map<string, Value> {
-  return v instanceof Map ? v : new Map();
+  return v instanceof Map ? v : new Map<string, Value>();
 }
 
 /**
@@ -67,7 +67,9 @@ export function referenceFindings(input: Input, res: CIResolution): Finding[] {
   const out: Finding[] = [];
   for (const f of res.files) {
     const top = topOf(f.doc.value);
-    const names = sortStrings([...top.keys()].filter((k) => !ciKeywords.has(k)));
+    const names = sortStrings(
+      [...top.keys()].filter((k) => !ciKeywords.has(k)),
+    );
     const inTestData = f.class === TestData;
     for (const name of names) {
       const job = top.get(name);

@@ -52,6 +52,7 @@ export interface CIResolution {
 
 class Resolver {
   readonly input: Input;
+  readonly signal: AbortSignal;
   readonly res: CIResolution = {
     files: [],
     findings: [],
@@ -64,8 +65,9 @@ class Resolver {
   readonly classes = new Map<string, FileClass>();
   readonly paths: string[] = [];
 
-  constructor(input: Input) {
+  constructor(input: Input, signal: AbortSignal) {
     this.input = input;
+    this.signal = signal;
     for (const f of input.project.files) {
       this.classes.set(f.path, f.class);
       this.paths.push(f.path);
@@ -74,7 +76,7 @@ class Resolver {
   }
 
   // load reads and parses one file, then follows its includes.
-  load(rel: string): void {
+  async load(rel: string): Promise<void> {
     if (this.seen.has(rel)) {
       return;
     }
@@ -115,20 +117,24 @@ class Resolver {
     const file: CIFile = { path: rel, class: cls, doc };
     this.res.files.push(file);
     this.res.findings.push(...schemaFindings(this.input, rel, cls, doc));
-    this.followIncludes(file);
+    await this.followIncludes(file);
   }
 
-  followIncludes(from: CIFile): void {
+  async followIncludes(from: CIFile): Promise<void> {
     for (const inc of includesOf(from.doc)) {
       const pos = from.doc.position(inc.pointer);
       if (inc.kind !== "local") {
         for (const v of inc.values) {
-          this.notResolved(from, `include of type ${inc.kind}`, shownInclude(inc, v));
+          this.notResolved(
+            from,
+            `include of type ${inc.kind}`,
+            shownInclude(inc, v),
+          );
         }
         continue;
       }
       for (const v of inc.values) {
-        this.followLocal(from, pos, v);
+        await this.followLocal(from, pos, v);
       }
     }
   }
@@ -146,15 +152,34 @@ class Resolver {
   }
 
   // followLocal reads the file or the files a local include names.
-  followLocal(from: CIFile, pos: CIPos, value: string): void {
+  async followLocal(from: CIFile, pos: CIPos, value: string): Promise<void> {
     if (value.includes("$")) {
-      this.notResolved(from, "include of type local with a variable", shownGlob(value));
+      this.notResolved(
+        from,
+        "include of type local with a variable",
+        shownGlob(value),
+      );
       return;
     }
     let targets: string[] = [];
     if (/[*?]/.test(value)) {
-      const re = globRegexp(localCIPath(value));
-      targets = this.paths.filter((p) => re.test(p) && !inNodeModules(p));
+      const glob = globMatcher(localCIPath(value));
+      for (let i = 0; i < this.paths.length; i++) {
+        // Matching is linear, but a project may have many files: let the
+        // execution's time limit and a cancellation get through.
+        if (i % 256 === 0) {
+          await new Promise((resolve) => setImmediate(resolve));
+          if (this.signal.aborted) {
+            throw new Error(
+              "the Check was stopped while it matched include globs",
+            );
+          }
+        }
+        const p = this.paths[i] ?? "";
+        if (glob.test(p) && !inNodeModules(p)) {
+          targets.push(p);
+        }
+      }
     } else {
       const rel = localCIPath(value);
       if (this.classes.has(rel)) {
@@ -188,15 +213,18 @@ class Resolver {
         });
         return;
       }
-      this.load(t);
+      await this.load(t);
     }
   }
 }
 
 /** resolveCI reads the main CI file and the local files it includes. */
-export function resolveCI(input: Input): CIResolution {
-  const r = new Resolver(input);
-  r.load(gitlabCIFile);
+export async function resolveCI(
+  input: Input,
+  signal: AbortSignal,
+): Promise<CIResolution> {
+  const r = new Resolver(input, signal);
+  await r.load(gitlabCIFile);
   return r.res;
 }
 
@@ -261,7 +289,9 @@ function includeEntry(e: Value, pointer: string): CIInclude[] {
   if (e instanceof Map) {
     for (const kind of ["local", "remote", "template", "component"]) {
       if (e.has(kind)) {
-        return [{ kind, values: stringsOf(e.get(kind) ?? null), files: [], pointer }];
+        return [
+          { kind, values: stringsOf(e.get(kind) ?? null), files: [], pointer },
+        ];
       }
     }
     if (e.has("project")) {
@@ -282,7 +312,8 @@ function includeEntry(e: Value, pointer: string): CIInclude[] {
 /** stringsOf returns the strings of a string or of a list of strings. */
 export function stringsOf(v: Value): string[] {
   if (typeof v === "string") return [v];
-  if (Array.isArray(v)) return v.filter((e): e is string => typeof e === "string");
+  if (Array.isArray(v))
+    return v.filter((e): e is string => typeof e === "string");
   return [];
 }
 
@@ -293,37 +324,110 @@ function localCIPath(value: string): string {
   return clean("/" + value).replace(/^\//, "");
 }
 
-const metaChars = "\\.+*?()|[]{}^$";
+// A glob token: a literal character, `*` (any run without a slash), `**`
+// (any run without a newline), `**/` (nothing, or any run without a newline
+// that ends in a slash) or `?` (one character but a slash).
+type GlobToken =
+  | { kind: "literal"; char: number }
+  | { kind: "star" | "doubleStar" | "anyDirs" | "one" };
+
+/** GlobMatcher says whether a project path matches a local include glob. */
+export interface GlobMatcher {
+  test(path: string): boolean;
+}
 
 /**
- * globRegexp turns a path pattern into a regexp the way GitLab matches local
- * includes: `*` matches within a folder, `**` any number of folders, and `?`
- * one character. As in Go, the pattern is read byte by byte, so each byte of
- * a non-ASCII character becomes the character U+0080 to U+00FF and such a
- * pattern matches no real UTF-8 path.
+ * globMatcher matches a path pattern the way GitLab matches local includes
+ * and the Go build did with a regexp: `*` matches within a folder, `**` any
+ * number of folders, and `?` one character. As in Go, the pattern is read
+ * byte by byte, so each byte of a non-ASCII character becomes the character
+ * U+0080 to U+00FF and such a pattern matches no real UTF-8 path. Matching
+ * runs the pattern as a set of states over the path, as RE2 does, so it
+ * takes time linear in the path for any pattern the project writes.
  */
-function globRegexp(pattern: string): RegExp {
+export function globMatcher(pattern: string): GlobMatcher {
   const b = Buffer.from(pattern, "utf8");
-  let out = "^";
+  const tokens: GlobToken[] = [];
   for (let i = 0; i < b.length; i++) {
-    const c = String.fromCharCode(b[i] ?? 0);
-    if (c === "*" && b[i + 1] === 0x2a) {
+    const c = b[i] ?? 0;
+    if (c === 0x2a && b[i + 1] === 0x2a) {
       i++;
       if (b[i + 1] === 0x2f) {
         i++;
-        out += "(?:[^\\n]*/)?";
+        tokens.push({ kind: "anyDirs" });
       } else {
-        out += "[^\\n]*";
+        tokens.push({ kind: "doubleStar" });
       }
-    } else if (c === "*") {
-      out += "[^/]*";
-    } else if (c === "?") {
-      out += "[^/]";
-    } else if (metaChars.includes(c)) {
-      out += "\\" + c;
+    } else if (c === 0x2a) {
+      tokens.push({ kind: "star" });
+    } else if (c === 0x3f) {
+      tokens.push({ kind: "one" });
     } else {
-      out += c;
+      tokens.push({ kind: "literal", char: c });
     }
   }
-  return new RegExp(out + "$", "u");
+  const m = tokens.length;
+  const slash = 0x2f;
+  const newline = 0x0a;
+  // State i is "before token i"; state m accepts. An anyDirs token also has
+  // an inner state (inside[i]): within the run, waiting for its slash.
+  const close = (at: Uint8Array): void => {
+    // Every token but a literal and `?` may match nothing.
+    for (const [i, t] of tokens.entries()) {
+      if (
+        at[i] &&
+        (t.kind === "star" || t.kind === "doubleStar" || t.kind === "anyDirs")
+      ) {
+        at[i + 1] = 1;
+      }
+    }
+  };
+  return {
+    test(path: string): boolean {
+      let at = new Uint8Array(m + 1);
+      let inside = new Uint8Array(m);
+      at[0] = 1;
+      close(at);
+      for (const ch of path) {
+        const c = ch.codePointAt(0) ?? 0;
+        const next = new Uint8Array(m + 1);
+        const nextInside = new Uint8Array(m);
+        let any = false;
+        for (const [i, t] of tokens.entries()) {
+          if (at[i]) {
+            switch (t.kind) {
+              case "literal":
+                if (c === t.char) next[i + 1] = 1;
+                break;
+              case "star":
+                if (c !== slash) next[i] = 1;
+                break;
+              case "doubleStar":
+                if (c !== newline) next[i] = 1;
+                break;
+              case "anyDirs":
+                if (c === slash) next[i + 1] = 1;
+                if (c !== newline) nextInside[i] = 1;
+                break;
+              case "one":
+                if (c !== slash) next[i + 1] = 1;
+                break;
+            }
+          }
+          if (inside[i]) {
+            if (c === slash) next[i + 1] = 1;
+            if (c !== newline) nextInside[i] = 1;
+          }
+        }
+        close(next);
+        for (let i = 0; i <= m && !any; i++) {
+          any = next[i] === 1 || (i < m && nextInside[i] === 1);
+        }
+        if (!any) return false;
+        at = next;
+        inside = nextInside;
+      }
+      return at[m] === 1;
+    },
+  };
 }

@@ -60,22 +60,39 @@ export interface CISchemaError {
  * furthest into the value count, because the others fail at the value
  * itself and only say that it is not what they expected.
  */
-function failingLeaves(e: ValidationError): ValidationError[] {
-  if (e.causes.length === 0) {
-    return [e];
+function failingLeaves(root: ValidationError): ValidationError[] {
+  // Post-order with an explicit stack: an error tree is as deep as the
+  // value, and a value may nest thousands of levels.
+  const done = new Map<ValidationError, ValidationError[]>();
+  const todo: ValidationError[] = [root];
+  while (todo.length > 0) {
+    const e = todo.at(-1);
+    if (e === undefined) break;
+    if (e.causes.length === 0) {
+      done.set(e, [e]);
+      todo.pop();
+      continue;
+    }
+    const open = e.causes.filter((c) => !done.has(c));
+    if (open.length > 0) {
+      todo.push(...open);
+      continue;
+    }
+    todo.pop();
+    let branches = e.causes.map((c) => done.get(c) ?? []);
+    if (e.kind.name === "AnyOf" || e.kind.name === "OneOf") {
+      const deepest = (leaves: ValidationError[]): number =>
+        leaves.reduce((d, l) => Math.max(d, l.instanceLocation.length), 0);
+      const best = branches.reduce((d, b) => Math.max(d, deepest(b)), 0);
+      branches = branches.filter((b) => deepest(b) === best);
+    }
+    const out: ValidationError[] = [];
+    for (const b of branches) {
+      for (const l of b) out.push(l);
+    }
+    done.set(e, out);
   }
-  let branches = e.causes.map(failingLeaves);
-  if (e.kind.name === "AnyOf" || e.kind.name === "OneOf") {
-    const deepest = (leaves: ValidationError[]): number =>
-      leaves.reduce((d, l) => Math.max(d, l.instanceLocation.length), 0);
-    const best = branches.reduce((d, b) => Math.max(d, deepest(b)), 0);
-    branches = branches.filter((b) => deepest(b) === best);
-  }
-  const out: ValidationError[] = [];
-  for (const b of branches) {
-    for (const l of b) out.push(l);
-  }
-  return out;
+  return done.get(root) ?? [];
 }
 
 /**

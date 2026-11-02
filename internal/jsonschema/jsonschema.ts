@@ -18,16 +18,10 @@
 import { formatFloatV } from "../gocompat/fmt.ts";
 import { englishFloat, englishInt, goQuote } from "../schema/validator.ts";
 import { formats } from "./format.ts";
-import { re2 } from "../gocompat/regexp.ts";
+import { type Matcher, re2 } from "../gocompat/regexp.ts";
 
 export type Value =
-  | null
-  | boolean
-  | string
-  | number
-  | bigint
-  | Value[]
-  | Map<string, Value>;
+  null | boolean | string | number | bigint | Value[] | Map<string, Value>;
 
 /** ValidationError is one node of the error tree. */
 export interface ValidationError {
@@ -69,7 +63,7 @@ interface Schema {
   required: string[];
   dependencies: [string, string[] | Schema][];
   properties: Map<string, Schema>;
-  patternProperties: [RegExp, Schema][];
+  patternProperties: [Matcher, Schema][];
   additionalProperties: Additional;
   propertyNames: Schema | null;
   // array
@@ -82,7 +76,7 @@ interface Schema {
   // string
   minLength: number | null;
   maxLength: number | null;
-  pattern: { source: string; re: RegExp } | null;
+  pattern: { source: string; re: Matcher } | null;
   // number
   minimum: Rat | null;
   maximum: Rat | null;
@@ -113,12 +107,15 @@ export class CompiledSchema {
    * root is the library's kind.Schema error with the failures as causes.
    */
   validate(v: Value): ValidationError | null {
-    const vd = new Validator(v, [], this.#root, false);
-    const err = vd.validate();
+    const err = run({ sch: this.#root, v, vloc: [], boolResult: false });
     if (err === null) return null;
     return {
       instanceLocation: [],
-      kind: { name: "Schema", keywordPath: [], message: "jsonschema validation failed" },
+      kind: {
+        name: "Schema",
+        keywordPath: [],
+        message: "jsonschema validation failed",
+      },
       causes: err.kind.name === "Group" ? err.causes : [err],
     };
   }
@@ -162,7 +159,10 @@ export function compile(doc: JSONDoc): CompiledSchema {
       throw new Error(`schema at ${ptr} is not an object`);
     }
     const child = (...toks: string[]): string =>
-      ptr + toks.map((t) => "/" + t.replaceAll("~", "~0").replaceAll("/", "~1")).join("");
+      ptr +
+      toks
+        .map((t) => "/" + t.replaceAll("~", "~0").replaceAll("/", "~1"))
+        .join("");
     if (typeof node.$ref === "string") {
       const ref = node.$ref;
       if (!ref.startsWith("#")) {
@@ -172,16 +172,21 @@ export function compile(doc: JSONDoc): CompiledSchema {
       return; // draft-07: every other keyword of a $ref object is ignored
     }
     const list = (key: string): Schema[] =>
-      Array.isArray(node[key]) ? (node[key] as unknown[]).map((_, i) => at(child(key, String(i)))) : [];
-    const one = (key: string): Schema | null => (key in node ? at(child(key)) : null);
+      Array.isArray(node[key])
+        ? (node[key] as unknown[]).map((_, i) => at(child(key, String(i))))
+        : [];
+    const one = (key: string): Schema | null =>
+      key in node ? at(child(key)) : null;
     const additional = (key: string): Additional => {
       const v = node[key];
       if (v === undefined) return null;
       if (typeof v === "boolean") return v;
       return at(child(key));
     };
-    const num = (key: string): number | null => (typeof node[key] === "number" ? node[key] : null);
-    const rat = (key: string): Rat | null => (typeof node[key] === "number" ? ratOf(node[key]) : null);
+    const num = (key: string): number | null =>
+      typeof node[key] === "number" ? node[key] : null;
+    const rat = (key: string): Rat | null =>
+      typeof node[key] === "number" ? ratOf(node[key]) : null;
 
     s.allOf = list("allOf");
     s.anyOf = list("anyOf");
@@ -208,7 +213,9 @@ export function compile(doc: JSONDoc): CompiledSchema {
       for (const [name, dep] of Object.entries(node.dependencies)) {
         s.dependencies.push([
           name,
-          Array.isArray(dep) ? dep.map(String) : at(child("dependencies", name)),
+          Array.isArray(dep)
+            ? dep.map(String)
+            : at(child("dependencies", name)),
         ]);
       }
     }
@@ -335,13 +342,7 @@ function ratFloat(r: Rat): number {
 // --- value helpers ---
 
 type JSONType =
-  | "null"
-  | "boolean"
-  | "number"
-  | "integer"
-  | "string"
-  | "array"
-  | "object";
+  "null" | "boolean" | "number" | "integer" | "string" | "array" | "object";
 
 const typeOrder: JSONType[] = [
   "null",
@@ -447,31 +448,46 @@ class Validator {
     this.errors.push({ ...err, causes: errors });
   }
 
-  validateSelf(sch: Schema, boolResult: boolean): ValidationError | null {
-    return new Validator(this.v, this.vloc, sch, this.boolResult || boolResult).validate();
+  // self asks for the validation of this value against another schema.
+  self(sch: Schema, boolResult: boolean): Request {
+    return {
+      sch,
+      v: this.v,
+      vloc: this.vloc,
+      boolResult: this.boolResult || boolResult,
+    };
   }
 
-  validateVal(sch: Schema, v: Value, tok: string): ValidationError | null {
-    return new Validator(v, [...this.vloc, tok], sch, this.boolResult).validate();
+  // val asks for the validation of a child value.
+  val(sch: Schema, v: Value, tok: string): Request {
+    return { sch, v, vloc: [...this.vloc, tok], boolResult: this.boolResult };
   }
 
-  validate(): ValidationError | null {
+  *validate(): Step {
     const s = this.sch;
     const v = this.v;
     if (s.bool !== null) {
-      return s.bool ? null : this.error(() => kind("FalseSchema", [], "false schema"));
+      return s.bool
+        ? null
+        : this.error(() => kind("FalseSchema", [], "false schema"));
     }
     const t = typeOf(v);
     if (t === "invalid") {
-      return this.error(() => kind("InvalidJsonValue", [], "invalid jsonType float64"));
+      return this.error(() =>
+        kind("InvalidJsonValue", [], "invalid jsonType float64"),
+      );
     }
     if (s.types !== null && s.types.length > 0) {
       const matched =
         s.types.includes(t) ||
-        (s.types.includes("integer") && t === "number" && isInteger(v as number | bigint));
+        (s.types.includes("integer") &&
+          t === "number" &&
+          isInteger(v as number | bigint));
       if (!matched) {
         const want = typeOrder.filter((x) => s.types?.includes(x));
-        return this.error(() => kind("Type", ["type"], `got ${t}, want ${want.join(" or ")}`));
+        return this.error(() =>
+          kind("Type", ["type"], `got ${t}, want ${want.join(" or ")}`),
+        );
       }
     }
     if (s.const !== null) {
@@ -481,7 +497,9 @@ class Validator {
           kind(
             "Const",
             ["const"],
-            Array.isArray(want) || want instanceof Map ? "'const' failed" : `value must be ${display(want)}`,
+            Array.isArray(want) || want instanceof Map
+              ? "'const' failed"
+              : `value must be ${display(want)}`,
           ),
         );
       }
@@ -492,7 +510,9 @@ class Validator {
       const matched = types.has(t) && values.some((x) => equals(v, x));
       if (!matched) {
         return this.error(() => {
-          const primitive = values.every((x) => !Array.isArray(x) && !(x instanceof Map));
+          const primitive = values.every(
+            (x) => !Array.isArray(x) && !(x instanceof Map),
+          );
           let message = "'enum' failed";
           if (primitive) {
             message =
@@ -508,20 +528,27 @@ class Validator {
       const reason = s.format.check(v);
       if (reason !== undefined) {
         const name = s.format.name;
-        return this.error(() => kind("Format", ["format"], `${display(v)} is not valid ${name}: ${reason}`));
+        return this.error(() =>
+          kind(
+            "Format",
+            ["format"],
+            `${display(v)} is not valid ${name}: ${reason}`,
+          ),
+        );
       }
     }
     if (s.ref !== null) {
       // draft-07: the reference is all there is.
-      return this.validateRef(s.ref);
+      return yield* this.validateRef(s.ref);
     }
-    if (v instanceof Map) this.objValidate(v);
-    else if (Array.isArray(v)) this.arrValidate(v);
+    if (v instanceof Map) yield* this.objValidate(v);
+    else if (Array.isArray(v)) yield* this.arrValidate(v);
     else if (typeof v === "string") this.strValidate(v);
-    else if (typeof v === "number" || typeof v === "bigint") this.numValidate(v);
+    else if (typeof v === "number" || typeof v === "bigint")
+      this.numValidate(v);
 
     if (this.errors.length === 0 || !this.boolResult) {
-      this.condValidate();
+      yield* this.condValidate();
     }
     switch (this.errors.length) {
       case 0:
@@ -535,14 +562,22 @@ class Validator {
     }
   }
 
-  validateRef(sch: Schema): ValidationError | null {
-    const err = this.validateSelf(sch, false);
+  *validateRef(sch: Schema): Step {
+    const err = yield this.self(sch, false);
     if (err === null) return null;
-    const refErr = this.error(() => kind("Reference", ["$ref"], "validation failed"));
-    return { ...refErr, causes: err.kind.name === "Group" ? err.causes : [err] };
+    const refErr = this.error(() =>
+      kind("Reference", ["$ref"], "validation failed"),
+    );
+    return {
+      ...refErr,
+      causes: err.kind.name === "Group" ? err.causes : [err],
+    };
   }
 
-  findMissing(obj: Map<string, Value>, required: readonly string[]): string[] | null {
+  findMissing(
+    obj: Map<string, Value>,
+    required: readonly string[],
+  ): string[] | null {
     const missing: string[] = [];
     for (const name of required) {
       if (!obj.has(name)) {
@@ -553,15 +588,29 @@ class Validator {
     return missing.length > 0 ? missing : null;
   }
 
-  objValidate(obj: Map<string, Value>): void {
+  *objValidate(
+    obj: Map<string, Value>,
+  ): Generator<Request, void, ValidationError | null> {
     const s = this.sch;
     if (s.minProperties !== null && obj.size < s.minProperties) {
       const want = s.minProperties;
-      this.addError(() => kind("MinProperties", ["minProperties"], `minProperties: got ${englishInt(obj.size)}, want ${englishInt(want)}`));
+      this.addError(() =>
+        kind(
+          "MinProperties",
+          ["minProperties"],
+          `minProperties: got ${englishInt(obj.size)}, want ${englishInt(want)}`,
+        ),
+      );
     }
     if (s.maxProperties !== null && obj.size > s.maxProperties) {
       const want = s.maxProperties;
-      this.addError(() => kind("MaxProperties", ["maxProperties"], `maxProperties: got ${englishInt(obj.size)}, want ${englishInt(want)}`));
+      this.addError(() =>
+        kind(
+          "MaxProperties",
+          ["maxProperties"],
+          `maxProperties: got ${englishInt(obj.size)}, want ${englishInt(want)}`,
+        ),
+      );
     }
     if (s.required.length > 0) {
       const missing = this.findMissing(obj, s.required);
@@ -570,7 +619,9 @@ class Validator {
           kind(
             "Required",
             ["required"],
-            missing.length === 1 ? `missing property ${goQuote(missing[0] ?? "")}` : `missing properties ${joinQuoted(missing)}`,
+            missing.length === 1
+              ? `missing property ${goQuote(missing[0] ?? "")}`
+              : `missing properties ${joinQuoted(missing)}`,
           ),
         );
       }
@@ -583,11 +634,15 @@ class Validator {
         const missing = this.findMissing(obj, dep);
         if (missing !== null) {
           this.addError(() =>
-            kind("Dependency", ["dependency", name], `properties ${joinQuoted(missing)} required, if ${goQuote(name)} exists`),
+            kind(
+              "Dependency",
+              ["dependency", name],
+              `properties ${joinQuoted(missing)} required, if ${goQuote(name)} exists`,
+            ),
           );
         }
       } else {
-        this.addErr(this.validateSelf(dep, false));
+        this.addErr(yield this.self(dep, false));
       }
     }
 
@@ -598,66 +653,104 @@ class Validator {
       const prop = s.properties.get(name);
       if (prop !== undefined) {
         evaluated = true;
-        this.addErr(this.validateVal(prop, value, name));
+        this.addErr(yield this.val(prop, value, name));
       }
       for (const [re, sch] of s.patternProperties) {
         if (re.test(name)) {
           evaluated = true;
-          this.addErr(this.validateVal(sch, value, name));
+          this.addErr(yield this.val(sch, value, name));
         }
       }
       if (!evaluated && s.additionalProperties !== null) {
         if (s.additionalProperties === false) {
           additional.push(name);
         } else if (s.additionalProperties !== true) {
-          this.addErr(this.validateVal(s.additionalProperties, value, name));
+          this.addErr(yield this.val(s.additionalProperties, value, name));
         }
       }
     }
     if (additional.length > 0) {
       this.addError(() =>
-        kind("AdditionalProperties", ["additionalProperties"], `additional properties ${joinQuoted(additional)} not allowed`),
+        kind(
+          "AdditionalProperties",
+          ["additionalProperties"],
+          `additional properties ${joinQuoted(additional)} not allowed`,
+        ),
       );
     }
 
     if (s.propertyNames !== null) {
       for (const name of obj.keys()) {
-        const err = new Validator(name, [], s.propertyNames, this.boolResult).validate();
+        const err = yield {
+          sch: s.propertyNames,
+          v: name,
+          vloc: [],
+          boolResult: this.boolResult,
+        };
         if (err !== null) {
-          const e = this.error(() => kind("PropertyNames", ["propertyNames"], `invalid propertyName ${goQuote(name)}`));
-          this.errors.push({ ...e, causes: err.kind.name === "Group" ? err.causes : [err] });
+          const e = this.error(() =>
+            kind(
+              "PropertyNames",
+              ["propertyNames"],
+              `invalid propertyName ${goQuote(name)}`,
+            ),
+          );
+          this.errors.push({
+            ...e,
+            causes: err.kind.name === "Group" ? err.causes : [err],
+          });
         }
       }
     }
   }
 
-  arrValidate(arr: Value[]): void {
+  *arrValidate(arr: Value[]): Generator<Request, void, ValidationError | null> {
     const s = this.sch;
     if (s.minItems !== null && arr.length < s.minItems) {
       const want = s.minItems;
-      this.addError(() => kind("MinItems", ["minItems"], `minItems: got ${englishInt(arr.length)}, want ${englishInt(want)}`));
+      this.addError(() =>
+        kind(
+          "MinItems",
+          ["minItems"],
+          `minItems: got ${englishInt(arr.length)}, want ${englishInt(want)}`,
+        ),
+      );
     }
     if (s.maxItems !== null && arr.length > s.maxItems) {
       const want = s.maxItems;
-      this.addError(() => kind("MaxItems", ["maxItems"], `maxItems: got ${englishInt(arr.length)}, want ${englishInt(want)}`));
+      this.addError(() =>
+        kind(
+          "MaxItems",
+          ["maxItems"],
+          `maxItems: got ${englishInt(arr.length)}, want ${englishInt(want)}`,
+        ),
+      );
     }
     if (s.uniqueItems && arr.length > 1) {
       const dup = duplicates(arr);
       if (dup !== null) {
         const [i, j] = dup;
-        this.addError(() => kind("UniqueItems", ["uniqueItems"], `items at ${englishInt(i)} and ${englishInt(j)} are equal`));
+        this.addError(() =>
+          kind(
+            "UniqueItems",
+            ["uniqueItems"],
+            `items at ${englishInt(i)} and ${englishInt(j)} are equal`,
+          ),
+        );
       }
     }
     let evaluated = 0;
     if (Array.isArray(s.items)) {
       const n = Math.min(arr.length, s.items.length);
       for (let i = 0; i < n; i++) {
-        this.addErr(this.validateVal(s.items[i] as Schema, arr[i] ?? null, String(i)));
+        const sch = s.items[i];
+        if (sch !== undefined)
+          this.addErr(yield this.val(sch, arr[i] ?? null, String(i)));
       }
       evaluated = n;
     } else if (s.items !== null) {
       for (let i = 0; i < arr.length; i++) {
-        this.addErr(this.validateVal(s.items, arr[i] ?? null, String(i)));
+        this.addErr(yield this.val(s.items, arr[i] ?? null, String(i)));
       }
       evaluated = arr.length;
     }
@@ -665,11 +758,19 @@ class Validator {
       if (s.additionalItems === false) {
         if (evaluated !== arr.length) {
           const count = arr.length - evaluated;
-          this.addError(() => kind("AdditionalItems", ["additionalItems"], `last ${englishInt(count)} additionalItem(s) not allowed`));
+          this.addError(() =>
+            kind(
+              "AdditionalItems",
+              ["additionalItems"],
+              `last ${englishInt(count)} additionalItem(s) not allowed`,
+            ),
+          );
         }
       } else if (s.additionalItems !== true) {
         for (let i = evaluated; i < arr.length; i++) {
-          this.addErr(this.validateVal(s.additionalItems, arr[i] ?? null, String(i)));
+          this.addErr(
+            yield this.val(s.additionalItems, arr[i] ?? null, String(i)),
+          );
         }
       }
     }
@@ -677,12 +778,14 @@ class Validator {
       const errors: ValidationError[] = [];
       let matched = 0;
       for (let i = 0; i < arr.length; i++) {
-        const err = this.validateVal(s.contains, arr[i] ?? null, String(i));
+        const err = yield this.val(s.contains, arr[i] ?? null, String(i));
         if (err !== null) errors.push(err);
         else matched++;
       }
       if (matched === 0) {
-        this.addErrors(errors, () => kind("Contains", ["contains"], "no items match contains schema"));
+        this.addErrors(errors, () =>
+          kind("Contains", ["contains"], "no items match contains schema"),
+        );
       }
     }
   }
@@ -695,25 +798,51 @@ class Validator {
     }
     if (s.minLength !== null && length < s.minLength) {
       const want = s.minLength;
-      this.addError(() => kind("MinLength", ["minLength"], `minLength: got ${englishInt(length)}, want ${englishInt(want)}`));
+      this.addError(() =>
+        kind(
+          "MinLength",
+          ["minLength"],
+          `minLength: got ${englishInt(length)}, want ${englishInt(want)}`,
+        ),
+      );
     }
     if (s.maxLength !== null && length > s.maxLength) {
       const want = s.maxLength;
-      this.addError(() => kind("MaxLength", ["maxLength"], `maxLength: got ${englishInt(length)}, want ${englishInt(want)}`));
+      this.addError(() =>
+        kind(
+          "MaxLength",
+          ["maxLength"],
+          `maxLength: got ${englishInt(length)}, want ${englishInt(want)}`,
+        ),
+      );
     }
     if (s.pattern !== null && !s.pattern.re.test(str)) {
       const want = s.pattern.source;
-      this.addError(() => kind("Pattern", ["pattern"], `${goQuote(str)} does not match pattern ${goQuote(want)}`));
+      this.addError(() =>
+        kind(
+          "Pattern",
+          ["pattern"],
+          `${goQuote(str)} does not match pattern ${goQuote(want)}`,
+        ),
+      );
     }
   }
 
   numValidate(v: number | bigint): void {
     const s = this.sch;
     const num = ratOf(v);
-    const check = (name: string, want: Rat | null, fails: (c: number) => boolean): void => {
+    const check = (
+      name: string,
+      want: Rat | null,
+      fails: (c: number) => boolean,
+    ): void => {
       if (want !== null && fails(cmp(num, want))) {
         this.addError(() =>
-          kind(name[0]?.toUpperCase() + name.slice(1), [name], `${name}: got ${englishFloat(ratFloat(num))}, want ${englishFloat(ratFloat(want))}`),
+          kind(
+            name.charAt(0).toUpperCase() + name.slice(1),
+            [name],
+            `${name}: got ${englishFloat(ratFloat(num))}, want ${englishFloat(ratFloat(want))}`,
+          ),
         );
       }
     };
@@ -726,35 +855,41 @@ class Validator {
       // num / m is an integer when num.num*m.den is divisible by num.den*m.num.
       if ((num.num * m.den) % (num.den * m.num) !== 0n) {
         this.addError(() =>
-          kind("MultipleOf", ["multipleOf"], `multipleOf: got ${englishFloat(ratFloat(num))}, want ${englishFloat(ratFloat(m))}`),
+          kind(
+            "MultipleOf",
+            ["multipleOf"],
+            `multipleOf: got ${englishFloat(ratFloat(num))}, want ${englishFloat(ratFloat(m))}`,
+          ),
         );
       }
     }
   }
 
-  condValidate(): void {
+  *condValidate(): Generator<Request, void, ValidationError | null> {
     const s = this.sch;
-    if (s.not !== null && this.validateSelf(s.not, true) === null) {
+    if (s.not !== null && (yield this.self(s.not, true)) === null) {
       this.addError(() => kind("Not", [], "'not' failed"));
     }
     if (s.allOf.length > 0) {
       const errors: ValidationError[] = [];
       for (const sch of s.allOf) {
-        const err = this.validateSelf(sch, false);
+        const err = yield this.self(sch, false);
         if (err !== null) {
           errors.push(err);
           if (this.boolResult) break;
         }
       }
       if (errors.length > 0) {
-        this.addErrors(errors, () => kind("AllOf", ["allOf"], "'allOf' failed"));
+        this.addErrors(errors, () =>
+          kind("AllOf", ["allOf"], "'allOf' failed"),
+        );
       }
     }
     if (s.anyOf.length > 0) {
       let matched = false;
       const errors: ValidationError[] = [];
       for (const sch of s.anyOf) {
-        const err = this.validateSelf(sch, false);
+        const err = yield this.self(sch, false);
         if (err !== null) {
           errors.push(err);
         } else {
@@ -763,14 +898,18 @@ class Validator {
         }
       }
       if (!matched) {
-        this.addErrors(errors, () => kind("AnyOf", ["anyOf"], "'anyOf' failed"));
+        this.addErrors(errors, () =>
+          kind("AnyOf", ["anyOf"], "'anyOf' failed"),
+        );
       }
     }
     if (s.oneOf.length > 0) {
       let matched = -1;
       const errors: ValidationError[] = [];
       for (let i = 0; i < s.oneOf.length; i++) {
-        const err = this.validateSelf(s.oneOf[i] as Schema, matched !== -1);
+        const sch = s.oneOf[i];
+        if (sch === undefined) break;
+        const err = yield this.self(sch, matched !== -1);
         if (err !== null) {
           if (matched === -1) errors.push(err);
         } else if (matched === -1) {
@@ -778,26 +917,66 @@ class Validator {
         } else {
           const first = matched;
           this.addError(() =>
-            kind("OneOf", ["oneOf"], `'oneOf' failed, subschemas ${englishInt(first)}, ${englishInt(i)} matched`),
+            kind(
+              "OneOf",
+              ["oneOf"],
+              `'oneOf' failed, subschemas ${englishInt(first)}, ${englishInt(i)} matched`,
+            ),
           );
           break;
         }
       }
       if (matched === -1) {
-        this.addErrors(errors, () => kind("OneOf", ["oneOf"], "'oneOf' failed, none matched"));
+        this.addErrors(errors, () =>
+          kind("OneOf", ["oneOf"], "'oneOf' failed, none matched"),
+        );
       }
     }
     if (s.if !== null) {
-      if (this.validateSelf(s.if, true) === null) {
-        if (s.then !== null) this.addErr(this.validateSelf(s.then, false));
+      if ((yield this.self(s.if, true)) === null) {
+        if (s.then !== null) this.addErr(yield this.self(s.then, false));
       } else if (s.else !== null) {
-        this.addErr(this.validateSelf(s.else, false));
+        this.addErr(yield this.self(s.else, false));
       }
     }
   }
 }
 
 const emptyKind: ErrorKind = { name: "", keywordPath: [], message: "" };
+
+// A Request asks for the validation of a value against a schema.
+interface Request {
+  sch: Schema;
+  v: Value;
+  vloc: string[];
+  boolResult: boolean;
+}
+
+// A Step validates one value; it yields a Request for each subschema or
+// child value and gets that validation's error back. Go recurses once per
+// level; the loop in run keeps the JavaScript stack flat, so a deeply nested
+// value (the GitLab schema's steps nest without end) validates as in Go.
+type Step = Generator<Request, ValidationError | null, ValidationError | null>;
+
+function run(root: Request): ValidationError | null {
+  const start = (r: Request): Step =>
+    new Validator(r.v, r.vloc, r.sch, r.boolResult).validate();
+  const stack: Step[] = [start(root)];
+  let input: ValidationError | null = null;
+  for (;;) {
+    const top = stack.at(-1);
+    if (top === undefined) return input;
+    const r = top.next(input);
+    if (r.done) {
+      stack.pop();
+      input = r.value;
+      if (stack.length === 0) return input;
+      continue;
+    }
+    stack.push(start(r.value));
+    input = null;
+  }
+}
 
 // duplicates returns the positions of the first item that equals an earlier
 // one and of the first earlier one it equals, as the library's duplicates
@@ -813,25 +992,42 @@ function duplicates(arr: Value[]): [number, number] | null {
   return null;
 }
 
-// canonical is a text that two values share exactly when equals holds.
-function canonical(v: Value): string {
-  if (v instanceof Map) {
-    const keys = [...v.keys()].sort();
-    return (
-      "{" +
-      keys
-        .map((k) => JSON.stringify(k) + ":" + canonical(v.get(k) ?? null))
-        .join(",") +
-      "}"
-    );
+// canonical is a text that two values share exactly when equals holds. It
+// walks with its own stack, so a deeply nested item cannot exhaust the
+// JavaScript stack.
+function canonical(root: Value): string {
+  let out = "";
+  const todo: (Value | { text: string })[] = [root];
+  while (todo.length > 0) {
+    const v = todo.pop() ?? null;
+    if (v instanceof Map) {
+      const keys = [...v.keys()].sort();
+      const parts: (Value | { text: string })[] = [{ text: "{" }];
+      keys.forEach((k, i) => {
+        parts.push({ text: (i > 0 ? "," : "") + JSON.stringify(k) + ":" });
+        parts.push(v.get(k) ?? null);
+      });
+      parts.push({ text: "}" });
+      for (let i = parts.length - 1; i >= 0; i--) todo.push(parts[i] ?? null);
+    } else if (Array.isArray(v)) {
+      const parts: (Value | { text: string })[] = [{ text: "[" }];
+      v.forEach((x, i) => {
+        if (i > 0) parts.push({ text: "," });
+        parts.push(x);
+      });
+      parts.push({ text: "]" });
+      for (let i = parts.length - 1; i >= 0; i--) todo.push(parts[i] ?? null);
+    } else if (typeof v === "number" || typeof v === "bigint") {
+      const r = ratOf(v);
+      const g = gcd(r.num < 0n ? -r.num : r.num, r.den);
+      out += "n" + String(r.num / g) + "/" + String(r.den / g);
+    } else if (typeof v === "object" && v !== null) {
+      out += v.text;
+    } else {
+      out += JSON.stringify(v);
+    }
   }
-  if (Array.isArray(v)) return "[" + v.map(canonical).join(",") + "]";
-  if (typeof v === "number" || typeof v === "bigint") {
-    const r = ratOf(v);
-    const g = gcd(r.num < 0n ? -r.num : r.num, r.den);
-    return "n" + String(r.num / g) + "/" + String(r.den / g);
-  }
-  return JSON.stringify(v);
+  return out;
 }
 
 function gcd(a: bigint, b: bigint): bigint {

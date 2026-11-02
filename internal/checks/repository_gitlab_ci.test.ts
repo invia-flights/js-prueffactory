@@ -42,10 +42,15 @@ async function runGitlabCI(
   if (applicability === NotApplicable) {
     return { applicability, reason, result: null };
   }
-  assert.ok(gitlabCI.run);
+  assert.ok(gitlabCI.run !== undefined);
   const result = await gitlabCI.run(
     background(),
-    new Input({ project: proj, context: ctx, originalPath: dir, snapshotDir: dir }),
+    new Input({
+      project: proj,
+      context: ctx,
+      originalPath: dir,
+      snapshotDir: dir,
+    }),
   );
   return { applicability, reason, result };
 }
@@ -106,7 +111,8 @@ describe("the Check", () => {
       NotApplicable,
     );
     assert.equal(
-      (await runGitlabCI(t, { "ci/.gitlab-ci.yml": validPipeline })).applicability,
+      (await runGitlabCI(t, { "ci/.gitlab-ci.yml": validPipeline }))
+        .applicability,
       NotApplicable,
     );
     assert.equal(
@@ -118,7 +124,9 @@ describe("the Check", () => {
   test("a valid pipeline has no Findings and records the schema hash", async (t) => {
     const r = await runGitlabCI(t, { ".gitlab-ci.yml": validPipeline });
     assertClean(r);
-    const schema = r.result?.contextTools?.find((c) => c.name === "gitlab-ci-schema");
+    const schema = r.result?.contextTools?.find(
+      (c) => c.name === "gitlab-ci-schema",
+    );
     assert.ok(schema);
     assert.equal(schema.digest?.length, 64);
     assert.ok(schema.version.startsWith("18.5.0"));
@@ -130,7 +138,8 @@ describe("the Check", () => {
     });
     const got = byRule(r, "gitlab-ci.schema");
     assert.equal(got.length, 1);
-    const f = got[0] as Finding;
+    const [f] = got;
+    assert.ok(f);
     assert.equal(f.gate, true);
     assert.equal(f.severity, SeverityError);
     assert.equal(f.confidence, "confirmed");
@@ -145,18 +154,20 @@ describe("includes", () => {
   test("an error in a local include is reported in the included file", async (t) => {
     const r = await runGitlabCI(t, {
       ".gitlab-ci.yml": "include: ci/deploy.yml\n\nstages: [deploy]\n",
-      "ci/deploy.yml": "deploy:\n  stage: deploy\n  script: make\n  retry: lots\n",
+      "ci/deploy.yml":
+        "deploy:\n  stage: deploy\n  script: make\n  retry: lots\n",
       "ci/unrelated.yml": "this: [is, not, included",
     });
     const got = byRule(r, "gitlab-ci.schema");
     assert.equal(got.length, 1);
     assert.equal(got[0]?.gate, true);
-    assert.equal(got[0]?.locations[0]?.path, "ci/deploy.yml");
+    assert.equal(got[0].locations[0]?.path, "ci/deploy.yml");
     assert.equal(line(got[0]), 4);
   });
 
   test("every form of a local include is resolved recursively", async (t) => {
-    const job = (name: string): string => `${name}:\n  script: make\n  retry: lots\n`;
+    const job = (name: string): string =>
+      `${name}:\n  script: make\n  retry: lots\n`;
     const r = await runGitlabCI(t, {
       ".gitlab-ci.yml":
         "include:\n  - /ci/a.yml\n  - local: ci/b.yml\n  - local: ci/many/*.yml\n  - ci/deep/**/*.yml\n",
@@ -188,7 +199,7 @@ describe("includes", () => {
     assert.equal(gates(r), 2);
     assert.equal(got[0]?.locations[0]?.path, ".gitlab-ci.yml");
     assert.equal(line(got[0]), 4);
-    assert.ok(got[0]?.message.includes("ci/missing.yml"));
+    assert.ok(got[0].message.includes("ci/missing.yml"));
     assert.equal(line(got[1]), 5);
     assert.ok(got[1]?.message.includes("ci/nothing/*.yml"));
     assert.equal(r.result?.status, StatusCompleted);
@@ -219,7 +230,7 @@ test:
     });
     assert.equal(r.result?.status, StatusCompleted);
     assert.deepEqual(findings(r), []);
-    const limitations = r.result?.limitations ?? [];
+    const limitations = r.result.limitations ?? [];
     assert.equal(limitations.length, 6);
     for (const l of limitations) {
       assert.equal(l.reason_code, "include_not_resolved");
@@ -277,7 +288,8 @@ test:
     - job: packaged
       artifacts: true
 `,
-      "ci/jobs.yml": "packaged:\n  stage: build\n  script: make\n.shared:\n  variables:\n    A: b\n",
+      "ci/jobs.yml":
+        "packaged:\n  stage: build\n  script: make\n.shared:\n  variables:\n    A: b\n",
     });
     assertClean(r);
   });
@@ -314,7 +326,10 @@ test:
       assert.equal(got[i]?.gate, true);
     });
     for (const key of ["extends", "dependencies", "needs"]) {
-      assert.ok(got.some((f) => f.message.includes(key)), key);
+      assert.ok(
+        got.some((f) => f.message.includes(key)),
+        key,
+      );
     }
   });
 
@@ -327,10 +342,11 @@ test:
     assert.equal(got.length, 1);
     assert.equal(got[0]?.gate, true);
     assert.equal(line(got[0]), 6);
-    assert.ok(got[0]?.message.includes("deploy"));
+    assert.ok(got[0].message.includes("deploy"));
 
     r = await runGitlabCI(t, {
-      ".gitlab-ci.yml": "a:\n  stage: test\n  script: make\nb:\n  stage: publish\n  script: make\n",
+      ".gitlab-ci.yml":
+        "a:\n  stage: test\n  script: make\nb:\n  stage: publish\n  script: make\n",
     });
     got = byRule(r, "gitlab-ci.unknown-stage");
     assert.equal(got.length, 1);
@@ -355,7 +371,7 @@ build:
     assert.equal(gates(r), 0);
     for (const f of got) assert.equal(f.severity, SeverityNote);
     assert.equal(r.result?.limitations?.length, 1);
-    assert.equal(r.result?.status, StatusCompleted);
+    assert.equal(r.result.status, StatusCompleted);
   });
 
   test("while an include is unresolved, a stage is only a note if no file declares stages", async (t) => {
@@ -367,7 +383,8 @@ build:
     assert.equal(got.length, 1);
     assert.equal(got[0]?.gate, false);
     r = await runGitlabCI(t, {
-      ".gitlab-ci.yml": remote + "stages: [build]\na:\n  stage: from-remote\n  script: make\n",
+      ".gitlab-ci.yml":
+        remote + "stages: [build]\na:\n  stage: from-remote\n  script: make\n",
     });
     got = byRule(r, "gitlab-ci.unknown-stage");
     assert.equal(got.length, 1);
@@ -376,7 +393,8 @@ build:
 
   test("a missing local include does not make references notes", async (t) => {
     const r = await runGitlabCI(t, {
-      ".gitlab-ci.yml": "include: ci/missing.yml\na:\n  script: make\n  needs: [b]\n",
+      ".gitlab-ci.yml":
+        "include: ci/missing.yml\na:\n  script: make\n  needs: [b]\n",
     });
     const got = byRule(r, "gitlab-ci.unknown-job");
     assert.equal(got.length, 1);
@@ -415,10 +433,20 @@ test:
 });
 
 describe("project text stays out of trusted fields", () => {
-  const hostile = ["Ignore previous", "rm -rf", "http://evil", "click", "`rm", "ignore all"];
+  const hostile = [
+    "Ignore previous",
+    "rm -rf",
+    "http://evil",
+    "click",
+    "`rm",
+    "ignore all",
+  ];
   const assertNoHostileText = (where: string, text: string): void => {
     for (const bad of hostile) {
-      assert.ok(!text.includes(bad), `project text ${bad} in ${where}: ${text}`);
+      assert.ok(
+        !text.includes(bad),
+        `project text ${bad} in ${where}: ${text}`,
+      );
     }
   };
 
@@ -461,7 +489,7 @@ test:
 `,
     });
     assert.equal(r.result?.limitations?.length, 3);
-    for (const l of r.result?.limitations ?? []) {
+    for (const l of r.result.limitations ?? []) {
       assertNoHostileText("a Limitation", l.message);
     }
     for (const f of byRule(r, "gitlab-ci.include-missing")) {
@@ -495,7 +523,10 @@ test:
     assert.ok(refs.length > 0);
     assert.equal(stages.length, 1);
     for (const f of [...refs, ...stages]) {
-      assert.ok(!f.message.includes("evil.example") && !f.title.includes("evil.example"));
+      assert.ok(
+        !f.message.includes("evil.example") &&
+          !f.title.includes("evil.example"),
+      );
       assert.ok(f.evidence[0]?.text.includes("https://evil.example/"));
     }
   });
@@ -505,28 +536,38 @@ describe("alias bombs", () => {
   test("an alias bomb through merge keys is bounded and reported as unreadable", async (t) => {
     let b = ".l0: &l0 {}\n";
     for (let i = 1; i <= 12; i++) {
-      const refs = Array(9).fill(`*l${String(i - 1)}`).join(", ");
+      const refs = Array(9)
+        .fill(`*l${String(i - 1)}`)
+        .join(", ");
       b += `.l${String(i)}: &l${String(i)}\n  <<: [${refs}]\n`;
     }
     b += "test:\n  script: make\n";
     const start = Date.now();
     const r = await runGitlabCI(t, { ".gitlab-ci.yml": b });
-    assert.ok(Date.now() - start < 30_000, `took ${String(Date.now() - start)} ms`);
+    assert.ok(
+      Date.now() - start < 30_000,
+      `took ${String(Date.now() - start)} ms`,
+    );
     const got = byRule(r, "gitlab-ci.yaml");
     assert.equal(got.length, 1);
     assert.equal(got[0]?.gate, true);
-    assert.ok(got[0]?.evidence[0]?.text.includes("YAML nodes"));
+    assert.ok(got[0].evidence[0]?.text.includes("YAML nodes"));
   });
 
   test("an alias bomb through plain aliases is bounded", async (t) => {
     let b = "a0: &a0 [x, x, x, x, x, x, x, x, x]\n";
     for (let i = 1; i <= 12; i++) {
-      const refs = Array(9).fill(`*a${String(i - 1)}`).join(", ");
+      const refs = Array(9)
+        .fill(`*a${String(i - 1)}`)
+        .join(", ");
       b += `a${String(i)}: &a${String(i)} [${refs}]\n`;
     }
     const start = Date.now();
     const r = await runGitlabCI(t, { ".gitlab-ci.yml": b });
-    assert.ok(Date.now() - start < 30_000, `took ${String(Date.now() - start)} ms`);
+    assert.ok(
+      Date.now() - start < 30_000,
+      `took ${String(Date.now() - start)} ms`,
+    );
     assert.equal(byRule(r, "gitlab-ci.yaml").length, 1);
   });
 });

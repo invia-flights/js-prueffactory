@@ -14335,5 +14335,6659 @@
    ]
   }
  ],
+ "globs": [
+  {
+   "pattern": {
+    "prefix": "ci/*.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/a.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "ci/*.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/sub/a.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": {
+    "prefix": "ci/**/*.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/a.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "ci/**/*.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/x/y/a.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "ci/**",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/x/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "ci/**",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": {
+    "prefix": "**/*.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "a.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "**/*.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "x/a.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "**.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "x/a.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "ci/?.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/a.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "ci/?.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/ab.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": {
+    "prefix": "ci/?.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci//.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": {
+    "prefix": "ci/?.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/ä.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "ci/ä*.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/äb.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": {
+    "prefix": "ci/ä*.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/Ã¤b.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "a.b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "aXb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": {
+    "prefix": "a+b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "a+b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "(a)",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "(a)",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "[a]",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "[a]",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "a**/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "a**/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ax/y/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "a**/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ab",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "**/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "**/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "*",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "?",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": {
+    "prefix": "ci/*.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/a\nb.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "ci/**.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/a\nb.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": {
+    "prefix": "ci/**/a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/x\n/a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": {
+    "prefix": "ci/?",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "ci/\n",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "a*b*c",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "aXbYc",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "a*b*c",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "abcabc",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "$x",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "$x",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "^a$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "^a$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "",
+    "unit": "*a",
+    "count": 30,
+    "suffix": "*b"
+   },
+   "path": {
+    "prefix": "",
+    "unit": "a",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": {
+    "prefix": "",
+    "unit": "**/a",
+    "count": 30,
+    "suffix": "b"
+   },
+   "path": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 30000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": {
+    "prefix": "",
+    "unit": "?",
+    "count": 300,
+    "suffix": ""
+   },
+   "path": {
+    "prefix": "",
+    "unit": "x",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": {
+    "prefix": "ci/",
+    "unit": "*",
+    "count": 2000,
+    "suffix": ".yml"
+   },
+   "path": {
+    "prefix": "ci/",
+    "unit": "a",
+    "count": 50000,
+    "suffix": ".ym"
+   },
+   "match": false
+  }
+ ],
+ "patterns": [
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "(?:\\S/\\S|\\$\\S+)",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": true
+  },
+  {
+   "pattern": ".*",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": true
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": true
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "\\w\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(?:[1-9]\\d{3}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1\\d|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[1-9]\\d(?:0[48]|[2468][048]|[13579][26])|(?:[2468][048]|[13579][26])00)-02-29)T(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:Z|[+-][01]\\d:[0-5]\\d)$",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": true
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^(https?://.+|\\$[A-Za-z]+)",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^/.+/$",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[.]",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[^/]*[^./][^/]*$",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z0-9_-]+$",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": true
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^\\w+://",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": true
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^https?://.+\\.ya?ml$",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "^sha256-[A-Za-z0-9+/]{43}=$",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": ".",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "a/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "ci/a.yaml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "$VAR",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "pull",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "$",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "https://a.example/x.yml",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "http://",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "/x/",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "a\nb",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "a\n/b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "2024-02-29T10:00:00+01:00",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "x\u000b/y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "x /y",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "ab_9",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "1a",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "a-b",
+    "unit": "",
+    "count": 0,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": "/"
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": ".",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": "/",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": "$",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": "$a",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "https://",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ".ym"
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "https://",
+    "unit": ".y",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "/",
+    "unit": "a",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": "a/",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": "\n",
+    "count": 200000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": "x",
+    "count": 200000,
+    "suffix": ".yml"
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": "a ",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": "pul",
+    "count": 100000,
+    "suffix": ""
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "$",
+    "unit": "w",
+    "count": 300,
+    "suffix": ""
+   },
+   "match": true
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": "_",
+    "count": 200000,
+    "suffix": "!"
+   },
+   "match": false
+  },
+  {
+   "pattern": "pull-push|pull|push|\\$\\w{1,255}",
+   "text": {
+    "prefix": "",
+    "unit": "2024-",
+    "count": 50000,
+    "suffix": ""
+   },
+   "match": false
+  }
+ ],
  "recordedFrom": "the Go build at the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8 (Go 1.27.3)"
 }

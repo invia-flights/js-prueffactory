@@ -11,12 +11,14 @@ import { describe, test } from "node:test";
 
 import { discover } from "../discovery/discovery.ts";
 import { array, marshal } from "../gocompat/json.ts";
+import { re2 } from "../gocompat/regexp.ts";
 import {
   FindingShape,
   LimitationShape,
   ToolRefShape,
 } from "../resultset/types.ts";
 import { impl, projectContext, tempDir } from "./checks.testutil.ts";
+import { globMatcher } from "./gitlab_ci_includes.ts";
 import { Input } from "./input.ts";
 
 interface OracleCase {
@@ -31,8 +33,58 @@ interface OracleCase {
 }
 
 const oracle = JSON.parse(
-  readFileSync(new URL("./testdata/gitlab-ci-oracle.json", import.meta.url), "utf8"),
-) as { cases: OracleCase[] };
+  readFileSync(
+    new URL("./testdata/gitlab-ci-oracle.json", import.meta.url),
+    "utf8",
+  ),
+) as {
+  cases: OracleCase[];
+  globs: { pattern: LongText; path: LongText; match: boolean }[];
+  patterns: { pattern: string; text: LongText; match: boolean }[];
+};
+
+// A long input is prefix + unit repeated count times + suffix.
+interface LongText {
+  prefix: string;
+  unit: string;
+  count: number;
+  suffix: string;
+}
+
+const expand = (l: LongText): string =>
+  l.prefix + l.unit.repeat(l.count) + l.suffix;
+
+const label = (l: LongText): string =>
+  JSON.stringify(
+    l.count > 0
+      ? `${l.prefix}(${l.unit})x${String(l.count)}${l.suffix}`
+      : l.prefix,
+  );
+
+describe("include globs match as Go's regexp did, in linear time", () => {
+  for (const g of oracle.globs) {
+    test(`${label(g.pattern)} on ${label(g.path)}`, () => {
+      const start = performance.now();
+      assert.equal(
+        globMatcher(expand(g.pattern)).test(expand(g.path)),
+        g.match,
+      );
+      assert.ok(performance.now() - start < 1000, "too slow");
+    });
+  }
+});
+
+describe("the pinned schema's patterns match as Go's, fast on hostile input", () => {
+  for (const p of oracle.patterns) {
+    test(`${p.pattern} on ${label(p.text)}`, () => {
+      const m = re2(p.pattern);
+      const text = expand(p.text);
+      const start = performance.now();
+      assert.equal(m.test(text), p.match);
+      assert.ok(performance.now() - start < 1000, "too slow");
+    });
+  }
+});
 
 // Go marshals a nil slice as null; the port's records always hold arrays.
 function nullToEmpty(v: unknown): unknown {
@@ -70,14 +122,16 @@ describe("repository.gitlab-ci reports what the Go build reports", () => {
         originalPath: "/work/project",
         snapshotDir: dir,
       });
-      const run = impl("repository.gitlab-ci").run;
-      assert.ok(run);
-      const res = await run(AbortSignal.timeout(60_000), input);
+      const check = impl("repository.gitlab-ci");
+      assert.ok(check.run !== undefined);
+      const res = await check.run(AbortSignal.timeout(60_000), input);
       assert.equal(res.status, c.status);
       assert.equal(res.reasonCode ?? "", c.reason_code);
       assert.equal(res.reason ?? "", c.reason);
-      const json = (v: unknown, shape: Parameters<typeof marshal>[1]): unknown =>
-        JSON.parse(marshal(v, array(shape)));
+      const json = (
+        v: unknown,
+        shape: Parameters<typeof marshal>[1],
+      ): unknown => JSON.parse(marshal(v, array(shape)));
       assert.deepEqual(
         json(res.findings ?? [], FindingShape),
         normalise(nullToEmpty(c.findings)),

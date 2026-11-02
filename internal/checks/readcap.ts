@@ -177,24 +177,3 @@ export function sha256File(abs: string): string {
   fileHashes.set(key, sum);
   return sum;
 }
-
-/**
- * tooLargeLimitation names the files a Check left unread because of their
- * size, or returns nothing if there are none.
- */
-export function tooLargeLimitation(
-  checkID: string,
-  paths: readonly string[],
-): Limitation[] {
-  if (paths.length === 0) {
-    return [];
-  }
-  return [
-    {
-      reason_code: reasonTooLarge,
-      message: `${String(paths.length)} file(s) are over ${String(maxProjectFileBytes >> 20)} MiB and were not read: ${cutList(paths, 20).join(", ")}`,
-      check_id: checkID,
-      path: null,
-    },
-  ];
-}

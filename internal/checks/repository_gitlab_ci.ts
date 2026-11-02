@@ -64,14 +64,12 @@ export const gitlabCI: Check = {
     ];
   },
 
-  run(_signal, input) {
-    return Promise.resolve(runGitlabCI(input));
-  },
+  run: runGitlabCI,
 };
 
 register(gitlabCIID, gitlabCI);
 
-function runGitlabCI(input: Input): Result {
+async function runGitlabCI(signal: AbortSignal, input: Input): Promise<Result> {
   const sum = gitlabCISchemaSHA256();
   const res: Result = {
     status: StatusCompleted,
@@ -83,7 +81,7 @@ function runGitlabCI(input: Input): Result {
       },
     ],
   };
-  const files = resolveCI(input);
+  const files = await resolveCI(input, signal);
   const findings = [...files.findings, ...referenceFindings(input, files)];
   res.limitations = [
     ...files.limitations,
@@ -98,10 +96,10 @@ function runGitlabCI(input: Input): Result {
   res.findings = findings
     .map((f, i) => ({ f, i }))
     .sort((a, b) => {
-      const x = a.f.locations[0] as Location;
-      const y = b.f.locations[0] as Location;
+      const x = a.f.locations[0];
+      const y = b.f.locations[0];
       return (
-        compareBytes(x.path, y.path) ||
+        compareBytes(x?.path ?? "", y?.path ?? "") ||
         startLine(x) - startLine(y) ||
         a.i - b.i
       );
@@ -110,8 +108,8 @@ function runGitlabCI(input: Input): Result {
   return res;
 }
 
-function startLine(l: Location): number {
-  return l.start?.line ?? 0;
+function startLine(l: Location | undefined): number {
+  return l?.start?.line ?? 0;
 }
 
 /** GitlabFindingSpec is what one Finding of the Check says. */

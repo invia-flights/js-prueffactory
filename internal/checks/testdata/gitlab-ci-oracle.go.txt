@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"testing"
@@ -106,9 +107,107 @@ func TestZZGitlabOracle(t *testing.T) {
 			Findings: findings, Limitations: limitations, ContextTools: tools,
 		})
 	}
+	// Include globs: what globRegexp matches. A long input is written as
+	// prefix + unit repeated count times + suffix.
+	type longText struct {
+		Prefix string `json:"prefix"`
+		Unit   string `json:"unit"`
+		Count  int    `json:"count"`
+		Suffix string `json:"suffix"`
+	}
+	expand := func(l longText) string { return l.Prefix + strings.Repeat(l.Unit, l.Count) + l.Suffix }
+	type globCase struct {
+		Pattern longText `json:"pattern"`
+		Path    longText `json:"path"`
+		Match   bool     `json:"match"`
+	}
+	short := func(s string) longText { return longText{Prefix: s} }
+	var globs []globCase
+	addGlob := func(pattern, path longText) {
+		globs = append(globs, globCase{pattern, path, globRegexp(expand(pattern)).MatchString(expand(path))})
+	}
+	for _, g := range [][2]string{
+		{"ci/*.yml", "ci/a.yml"}, {"ci/*.yml", "ci/sub/a.yml"}, {"ci/**/*.yml", "ci/a.yml"}, {"ci/**/*.yml", "ci/x/y/a.yml"},
+		{"ci/**", "ci/x/y"}, {"ci/**", "ci"}, {"**/*.yml", "a.yml"}, {"**/*.yml", "x/a.yml"}, {"**.yml", "x/a.yml"},
+		{"ci/?.yml", "ci/a.yml"}, {"ci/?.yml", "ci/ab.yml"}, {"ci/?.yml", "ci//.yml"}, {"ci/?.yml", "ci/ä.yml"},
+		{"ci/ä*.yml", "ci/äb.yml"}, {"ci/ä*.yml", "ci/Ã¤b.yml"}, {"a.b", "aXb"}, {"a+b", "a+b"}, {"(a)", "(a)"}, {"[a]", "[a]"},
+		{"a**/b", "a/b"}, {"a**/b", "ax/y/b"}, {"a**/b", "ab"}, {"**/", "/"}, {"**/", ""}, {"*", ""}, {"?", ""},
+		{"ci/*.yml", "ci/a\nb.yml"}, {"ci/**.yml", "ci/a\nb.yml"}, {"ci/**/a", "ci/x\n/a"}, {"ci/?", "ci/\n"},
+		{"a*b*c", "aXbYc"}, {"a*b*c", "abcabc"}, {"$x", "$x"}, {"^a$", "^a$"},
+	} {
+		addGlob(short(g[0]), short(g[1]))
+	}
+	addGlob(longText{Unit: "*a", Count: 30, Suffix: "*b"}, longText{Unit: "a", Count: 50000})
+	addGlob(longText{Unit: "**/a", Count: 30, Suffix: "b"}, longText{Unit: "a/", Count: 30000})
+	addGlob(longText{Unit: "?", Count: 300}, longText{Unit: "x", Count: 300})
+	addGlob(longText{Prefix: "ci/", Unit: "*", Count: 2000, Suffix: ".yml"}, longText{Prefix: "ci/", Unit: "a", Count: 50000, Suffix: ".ym"})
+
+	// The pinned schema's patterns on short and long hostile strings: what
+	// Go's MatchString says.
+	type patternCase struct {
+		Pattern string   `json:"pattern"`
+		Text    longText `json:"text"`
+		Match   bool     `json:"match"`
+	}
+	var patterns []patternCase
+	var schemaDoc any
+	if err := json.Unmarshal(gitlabCISchema, &schemaDoc); err != nil {
+		t.Fatal(err)
+	}
+	seen := map[string]bool{}
+	var walk func(v any)
+	walk = func(v any) {
+		switch x := v.(type) {
+		case map[string]any:
+			for k, e := range x {
+				if k == "pattern" {
+					if s, ok := e.(string); ok {
+						seen[s] = true
+					}
+				}
+				if k == "patternProperties" {
+					if m, ok := e.(map[string]any); ok {
+						for p := range m {
+							seen[p] = true
+						}
+					}
+				}
+				walk(e)
+			}
+		case []any:
+			for _, e := range x {
+				walk(e)
+			}
+		}
+	}
+	walk(schemaDoc)
+	var pats []string
+	for p := range seen {
+		pats = append(pats, p)
+	}
+	sort.Strings(pats)
+	texts := []longText{
+		short(""), short("a"), short("."), short("a/b"), short("x.yml"), short("ci/a.yaml"), short("$VAR"), short("pull"), short("$"),
+		short("https://a.example/x.yml"), short("http://"), short("/x/"), short("a\nb"), short("a\n/b"), short("sha256-" + strings.Repeat("A", 43) + "="),
+		short("2024-02-29T10:00:00+01:00"), short("x\v/y"), short("x /y"), short("ab_9"), short("1a"), short("a-b"),
+		{Unit: "a", Count: 200000, Suffix: "/"}, {Unit: ".", Count: 200000}, {Unit: "a", Count: 200000}, {Unit: "/", Count: 200000},
+		{Unit: "$", Count: 200000}, {Unit: "$a", Count: 100000}, {Prefix: "https://", Unit: "a", Count: 200000, Suffix: ".ym"},
+		{Prefix: "https://", Unit: ".y", Count: 100000}, {Prefix: "/", Unit: "a", Count: 200000}, {Unit: "a/", Count: 100000},
+		{Unit: "\n", Count: 200000}, {Unit: "x", Count: 200000, Suffix: ".yml"}, {Unit: "a ", Count: 100000}, {Unit: "pul", Count: 100000},
+		{Prefix: "$", Unit: "w", Count: 300}, {Unit: "_", Count: 200000, Suffix: "!"}, {Unit: "2024-", Count: 50000},
+	}
+	for _, p := range pats {
+		re := regexp.MustCompile(p)
+		for _, tx := range texts {
+			patterns = append(patterns, patternCase{p, tx, re.MatchString(expand(tx))})
+		}
+	}
+
 	doc := map[string]any{
 		"recordedFrom": "the Go build at the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8 (Go 1.27.3)",
 		"cases":        out,
+		"globs":        globs,
+		"patterns":     patterns,
 	}
 	b, err := json.MarshalIndent(doc, "", " ")
 	if err != nil {

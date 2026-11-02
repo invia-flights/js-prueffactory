@@ -70,7 +70,11 @@ export function readCIDoc(data: Uint8Array): CIDoc {
     return doc;
   }
   let root = node;
-  if (root.kind === yaml.DocumentNode && root.content.length === 1 && root.content[0]) {
+  if (
+    root.kind === yaml.DocumentNode &&
+    root.content.length === 1 &&
+    root.content[0]
+  ) {
     root = root.content[0];
   }
   const c = new Converter(doc);
@@ -116,25 +120,52 @@ class Converter {
     return !this.tooBig;
   }
 
-  convert(n: yaml.Node, ptr: string): Value {
+  // convert reads a node. Go recurses once per nesting level; here every
+  // step is a generator that asks the loop below for its children, so a
+  // deeply nested file cannot exhaust the JavaScript stack. The order of
+  // the work, and so of every position recorded, is Go's.
+  convert(root: yaml.Node, ptr: string): Value {
+    const stack: Step[] = [this.convertStep(root, ptr)];
+    let input: Value = null;
+    for (;;) {
+      const top = stack.at(-1);
+      if (top === undefined) return input;
+      const r = top.next(input);
+      if (r.done) {
+        stack.pop();
+        input = r.value;
+        if (stack.length === 0) {
+          return input;
+        }
+        continue;
+      }
+      const [n, p, mapping] = r.value;
+      stack.push(mapping ? this.mappingStep(n, p) : this.convertStep(n, p));
+      input = null;
+    }
+  }
+
+  *convertStep(n: yaml.Node, ptr: string): Step {
     if (!this.count()) {
       return null;
     }
     switch (n.kind) {
       case yaml.AliasNode:
-        return n.alias ? this.convert(n.alias, ptr) : null;
+        return n.alias ? yield [n.alias, ptr, false] : null;
       case yaml.MappingNode:
-        return this.convertMapping(n, ptr);
+        return yield [n, ptr, true];
       case yaml.SequenceNode: {
         if (n.tag === "!reference") {
           this.doc.references.push(ptr);
         }
         const out: Value[] = [];
-        n.content.forEach((item, i) => {
+        for (let i = 0; i < n.content.length; i++) {
+          const item = n.content[i];
+          if (item === undefined) continue;
           const child = `${ptr}/${String(i)}`;
           this.doc.pos.set(child, { line: item.line, column: item.column });
-          out.push(this.convert(item, child));
-        });
+          out.push(yield [item, child, false]);
+        }
         if (n.tag === "!reference") {
           // The references are read as their text, whatever they hold.
           n.content.forEach((item, i) => {
@@ -151,10 +182,10 @@ class Converter {
     return null;
   }
 
-  // convertMapping reads a mapping, applying `<<` merge keys: explicit keys
+  // mappingStep reads a mapping, applying `<<` merge keys: explicit keys
   // win over merged ones, and an earlier mapping of a merged sequence wins
   // over a later one.
-  convertMapping(n: yaml.Node, ptr: string): Map<string, Value> {
+  *mappingStep(n: yaml.Node, ptr: string): Step {
     const out = new Map<string, Value>();
     if (!this.count()) {
       return out;
@@ -167,30 +198,31 @@ class Converter {
     };
     const pairs = Math.floor(n.content.length / 2);
     for (let i = 0; i < pairs; i++) {
-      const key = n.content[2 * i] as yaml.Node;
-      const val = n.content[2 * i + 1] as yaml.Node;
-      if (key.tag !== "!!merge") {
+      const key = n.content[2 * i];
+      const val = n.content[2 * i + 1];
+      if (key === undefined || val === undefined || key.tag !== "!!merge") {
         continue;
       }
       const target = val.kind === yaml.AliasNode && val.alias ? val.alias : val;
       if (target.kind === yaml.MappingNode) {
-        apply(this.convertMapping(target, ptr));
+        apply((yield [target, ptr, true]) as Map<string, Value>);
       } else if (target.kind === yaml.SequenceNode) {
         for (let j = target.content.length - 1; j >= 0 && this.count(); j--) {
-          let item = target.content[j] as yaml.Node;
+          let item = target.content[j];
+          if (item === undefined) continue;
           if (item.kind === yaml.AliasNode && item.alias) {
             item = item.alias;
           }
           if (item.kind === yaml.MappingNode) {
-            apply(this.convertMapping(item, ptr));
+            apply((yield [item, ptr, true]) as Map<string, Value>);
           }
         }
       }
     }
     for (let i = 0; i < pairs; i++) {
-      const key = n.content[2 * i] as yaml.Node;
-      const val = n.content[2 * i + 1] as yaml.Node;
-      if (key.tag === "!!merge") {
+      const key = n.content[2 * i];
+      const val = n.content[2 * i + 1];
+      if (key === undefined || val === undefined || key.tag === "!!merge") {
         continue;
       }
       const name =
@@ -199,11 +231,15 @@ class Converter {
       this.doc.pos.set(child, { line: key.line, column: key.column });
       // A later key of the same name replaces the value, as a Go map
       // assignment does; the Map keeps the first key's place.
-      out.set(name, this.convert(val, child));
+      out.set(name, yield [val, child, false]);
     }
     return out;
   }
 }
+
+// A Step converts one node; it yields [node, pointer, isMapping] for each
+// child and gets the child's value back.
+type Step = Generator<[yaml.Node, string, boolean], Value, Value>;
 
 // scalarValue is the value of a scalar: booleans and numbers by yaml.v3's
 // resolution, everything else as its text.
@@ -224,7 +260,11 @@ function scalarValue(n: yaml.Node): Value {
       } catch {
         return n.value;
       }
-      if (typeof v === "boolean" || typeof v === "bigint" || typeof v === "number") {
+      if (
+        typeof v === "boolean" ||
+        typeof v === "bigint" ||
+        typeof v === "number"
+      ) {
         return v;
       }
       if (v instanceof yaml.GoUint64) {

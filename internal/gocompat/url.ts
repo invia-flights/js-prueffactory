@@ -75,18 +75,30 @@ function unhexByte(c: string): number {
 // unescape does and returns the unescaped byte string.
 function unescape(s: string, mode: number): string {
   let out = "";
-  for (let i = 0; i < s.length; ) {
+  for (let i = 0; i < s.length;) {
     const c = s.charAt(i);
     if (c === "%") {
-      if (i + 2 >= s.length || !ishex(s.charAt(i + 1)) || !ishex(s.charAt(i + 2))) {
+      if (
+        i + 2 >= s.length ||
+        !ishex(s.charAt(i + 1)) ||
+        !ishex(s.charAt(i + 2))
+      ) {
         throw new ParseError("invalid URL escape " + q(s.slice(i, i + 3)));
       }
       const v = unhexByte(s.slice(i + 1, i + 3));
-      if (mode === encodeHost && unhexByte(s.charAt(i + 1)) < 8 && s.slice(i, i + 3) !== "%25") {
+      if (
+        mode === encodeHost &&
+        unhexByte(s.charAt(i + 1)) < 8 &&
+        s.slice(i, i + 3) !== "%25"
+      ) {
         throw new ParseError("invalid URL escape " + q(s.slice(i, i + 3)));
       }
       if (mode === encodeZone) {
-        if (s.slice(i, i + 3) !== "%25" && v !== 0x20 && shouldEscape(String.fromCharCode(v), encodeHost)) {
+        if (
+          s.slice(i, i + 3) !== "%25" &&
+          v !== 0x20 &&
+          shouldEscape(String.fromCharCode(v), encodeHost)
+        ) {
           throw new ParseError("invalid URL escape " + q(s.slice(i, i + 3)));
         }
       }
@@ -94,7 +106,11 @@ function unescape(s: string, mode: number): string {
       i += 3;
       continue;
     }
-    if ((mode === encodeHost || mode === encodeZone) && c.charCodeAt(0) < 0x80 && shouldEscape(c, mode)) {
+    if (
+      (mode === encodeHost || mode === encodeZone) &&
+      c.charCodeAt(0) < 0x80 &&
+      shouldEscape(c, mode)
+    ) {
       throw new ParseError("invalid character " + quote(c) + " in host name");
     }
     out += c;
@@ -122,7 +138,7 @@ function getScheme(raw: string): [string, string] {
 
 function validOptionalPort(port: string): boolean {
   if (port === "") return true;
-  if (port.charAt(0) !== ":") return false;
+  if (!port.startsWith(":")) return false;
   for (const c of port.slice(1)) {
     if (c < "0" || c > "9") return false;
   }
@@ -299,7 +315,11 @@ export function hostname(url: URL): string {
  * parseAddr is netip.ParseAddr: whether s (a byte string) is an IP address,
  * Go's error text if not, and whether it is IPv4 and has a zone.
  */
-export function parseAddr(s: string): { error?: string; is4: boolean; zone: string } {
+export function parseAddr(s: string): {
+  error?: string;
+  is4: boolean;
+  zone: string;
+} {
   try {
     for (let i = 0; i < s.length; i++) {
       switch (s.charAt(i)) {
@@ -347,7 +367,11 @@ function parseIPv4Fields(input: string, off: number, end: number): void {
       }
     } else if (c === ".") {
       if (i === 0 || i === s.length - 1 || s.charAt(i - 1) === ".") {
-        throw addrError(input, "IPv4 field must have at least one digit", s.slice(i));
+        throw addrError(
+          input,
+          "IPv4 field must have at least one digit",
+          s.slice(i),
+        );
       }
       if (pos === 3) {
         throw addrError(input, "IPv4 address too long");
@@ -377,7 +401,7 @@ function parseIPv6(input: string): string {
     }
   }
   let ellipsis = -1;
-  if (s.length >= 2 && s.charAt(0) === ":" && s.charAt(1) === ":") {
+  if (s.length >= 2 && s.startsWith(":") && s.charAt(1) === ":") {
     ellipsis = 0;
     s = s.slice(2);
     if (s.length === 0) return zone;
@@ -398,14 +422,26 @@ function parseIPv6(input: string): string {
       }
     }
     if (off === 0) {
-      throw addrError(input, "each colon-separated field must have at least one digit", s);
+      throw addrError(
+        input,
+        "each colon-separated field must have at least one digit",
+        s,
+      );
     }
     if (off < s.length && s.charAt(off) === ".") {
       if (ellipsis < 0 && i !== 12) {
-        throw addrError(input, "embedded IPv4 address must replace the final 2 fields of the address", s);
+        throw addrError(
+          input,
+          "embedded IPv4 address must replace the final 2 fields of the address",
+          s,
+        );
       }
       if (i + 4 > 16) {
-        throw addrError(input, "too many hex fields to fit an embedded IPv4 at the end of the address", s);
+        throw addrError(
+          input,
+          "too many hex fields to fit an embedded IPv4 at the end of the address",
+          s,
+        );
       }
       let end = input.length;
       if (zone.length > 0) end -= zone.length + 1;
@@ -417,13 +453,13 @@ function parseIPv6(input: string): string {
     i += 2;
     s = s.slice(off);
     if (s.length === 0) break;
-    if (s.charAt(0) !== ":") {
+    if (!s.startsWith(":")) {
       throw addrError(input, "unexpected character, want colon", s);
     } else if (s.length === 1) {
       throw addrError(input, "colon must be followed by more characters", s);
     }
     s = s.slice(1);
-    if (s.charAt(0) === ":") {
+    if (s.startsWith(":")) {
       if (ellipsis >= 0) {
         throw addrError(input, "multiple :: in address", s);
       }

@@ -145,6 +145,23 @@ class Parser {
     return this.s[i] ?? "";
   }
 
+  #colonBracket: Int32Array | undefined;
+
+  // nextColonBracket is the position of the first ":]" at or after i, or -1
+  // (Go: strings.Index of the rest). The positions are found in one pass, so
+  // many "[:" in one class stay linear.
+  nextColonBracket(i: number): number {
+    if (this.#colonBracket === undefined) {
+      const next = new Int32Array(this.s.length + 1).fill(-1);
+      for (let k = this.s.length - 2; k >= 0; k--) {
+        next[k] =
+          this.s[k] === ":" && this.s[k + 1] === "]" ? k : (next[k + 1] ?? -1);
+      }
+      this.#colonBracket = next;
+    }
+    return this.#colonBracket[i] ?? -1;
+  }
+
   fail(code: string, from: number, to: number): never {
     throw new SyntaxError(code, this.text(from, to));
   }
@@ -180,33 +197,45 @@ class Parser {
     return this.stack.splice(i);
   }
 
+  // collapse joins subs with op. Go hoists the subs of a sub with the same op
+  // into the new node; copying them would make nested groups quadratic, so
+  // the node keeps its subs and only its height counts as if hoisted. The
+  // repeat check walks through such a sub as through its subs.
   collapse(subs: Node[], op: "concat" | "alternate"): Node {
     if (subs.length === 1 && subs[0]) {
       return subs[0];
     }
-    const flat: Node[] = [];
+    const n = node(op, subs, this.flags);
+    n.height = 1;
     for (const s of subs) {
-      if (s.op === op) flat.push(...s.subs);
-      else flat.push(s);
+      n.height = Math.max(n.height, s.op === op ? s.height : 1 + s.height);
     }
-    return node(op, flat, this.flags);
+    return n;
   }
 
   concat(): void {
     const subs = this.topItems();
-    this.push(subs.length === 0 ? node("item", [], this.flags) : this.collapse(subs, "concat"));
+    this.push(
+      subs.length === 0
+        ? node("item", [], this.flags)
+        : this.collapse(subs, "concat"),
+    );
   }
 
   alternate(): void {
     const subs = this.topItems();
-    this.push(subs.length === 0 ? node("item", [], this.flags) : this.collapse(subs, "alternate"));
+    this.push(
+      subs.length === 0
+        ? node("item", [], this.flags)
+        : this.collapse(subs, "alternate"),
+    );
   }
 
   swapVerticalBar(): boolean {
     const n = this.stack.length;
     const top = this.stack[n - 1];
     const below = this.stack[n - 2];
-    if (n >= 2 && top && below && below.pseudo === "bar") {
+    if (n >= 2 && top && below?.pseudo === "bar") {
       this.stack[n - 2] = top;
       this.stack[n - 1] = below;
       return true;
@@ -227,14 +256,9 @@ class Parser {
       this.stack.pop();
     }
     this.alternate();
-    const n = this.stack.length;
-    if (n < 2) {
-      throw new SyntaxError(ErrUnexpectedParen, this.whole);
-    }
-    const re1 = this.stack[n - 1] as Node;
-    const re2 = this.stack[n - 2] as Node;
-    this.stack.length = n - 2;
-    if (re2.pseudo !== "paren") {
+    const re1 = this.stack.pop();
+    const re2 = this.stack.pop();
+    if (re1 === undefined || re2?.pseudo !== "paren") {
       throw new SyntaxError(ErrUnexpectedParen, this.whole);
     }
     this.flags = re2.flags;
@@ -336,7 +360,10 @@ class Parser {
         this.fail(ErrInvalidNamedCapture, i, this.s.length);
       }
       const name = this.text(i + exprStart, end);
-      if (name === "" || !Array.from(name).every((c) => c === "_" || isalnum(c))) {
+      if (
+        name === "" ||
+        !Array.from(name).every((c) => c === "_" || isalnum(c))
+      ) {
         this.fail(ErrInvalidNamedCapture, i, end + 1);
       }
       this.pseudo("paren", true);
@@ -406,9 +433,10 @@ class Parser {
       case "5":
       case "6":
       case "7":
-        if (this.at(j) < "0" || this.at(j) > "7") break;
-      // fallthrough: an octal escape
       case "0":
+        // A single non-zero digit is a backreference, which Go rejects;
+        // otherwise up to three octal digits.
+        if (c !== "0" && (this.at(j) < "0" || this.at(j) > "7")) break;
         for (let k = 1; k < 3 && this.at(j) >= "0" && this.at(j) <= "7"; k++) {
           j++;
         }
@@ -462,7 +490,10 @@ class Parser {
   // parseUnicodeClass parses \p or \P at i; it returns the end, or -1 when
   // there is none.
   parseUnicodeClass(i: number): number {
-    if (this.at(i) !== "\\" || (this.at(i + 1) !== "p" && this.at(i + 1) !== "P")) {
+    if (
+      this.at(i) !== "\\" ||
+      (this.at(i + 1) !== "p" && this.at(i + 1) !== "P")
+    ) {
       return -1;
     }
     let j = i + 2;
@@ -545,10 +576,14 @@ class Parser {
     let first = true;
     while (j >= this.s.length || this.at(j) !== "]" || first) {
       first = false;
-      if (this.s.length - j > 2 && this.at(j) === "[" && this.at(j + 1) === ":") {
-        const close = this.text(j + 2, this.s.length).indexOf(":]");
+      if (
+        this.s.length - j > 2 &&
+        this.at(j) === "[" &&
+        this.at(j + 1) === ":"
+      ) {
+        const close = this.nextColonBracket(j + 2);
         if (close >= 0) {
-          const nameEnd = j + 2 + Array.from(this.text(j + 2, this.s.length).slice(0, close)).length + 2;
+          const nameEnd = close + 2;
           const name = this.text(j, nameEnd);
           if (!posixGroups.has(name)) {
             this.fail(ErrInvalidCharRange, j, nameEnd);
@@ -570,7 +605,11 @@ class Parser {
       const rng = j;
       j = this.parseClassChar(j, i);
       const lo = this.classCharValue(rng, j);
-      if (this.s.length - j >= 2 && this.at(j) === "-" && this.at(j + 1) !== "]") {
+      if (
+        this.s.length - j >= 2 &&
+        this.at(j) === "-" &&
+        this.at(j + 1) !== "]"
+      ) {
         const hiStart = j + 1;
         j = this.parseClassChar(hiStart, i);
         const hi = this.classCharValue(hiStart, j);
@@ -696,15 +735,25 @@ class Parser {
 
 // repeatIsValid says whether the repetitions of re and those inside it stay
 // within n copies of the innermost thing.
-function repeatIsValid(re: Node, n: number): boolean {
-  if (re.op === "repeat") {
-    let m = re.max;
-    if (m === 0) return true;
-    if (m < 0) m = re.min;
-    if (m > n) return false;
-    if (m > 0) n = Math.trunc(n / m);
+// It walks with its own stack: groups may nest deeper than the JavaScript
+// stack allows.
+function repeatIsValid(root: Node, limit: number): boolean {
+  const todo: [Node, number][] = [[root, limit]];
+  while (todo.length > 0) {
+    const top = todo.pop();
+    if (top === undefined) break;
+    const [re, n0] = top;
+    let n = n0;
+    if (re.op === "repeat") {
+      let m = re.max;
+      if (m === 0) continue;
+      if (m < 0) m = re.min;
+      if (m > n) return false;
+      if (m > 0) n = Math.trunc(n / m);
+    }
+    for (const s of re.subs) todo.push([s, n]);
   }
-  return re.subs.every((s) => repeatIsValid(s, n));
+  return true;
 }
 
 /**
@@ -723,15 +772,43 @@ export function compileError(expr: string): string | undefined {
   }
 }
 
+/** Matcher is what re2 gives: Go's MatchString as test. */
+export interface Matcher {
+  test(s: string): boolean;
+}
+
+// linearMatchers replace patterns whose JavaScript translation backtracks
+// on hostile input. RE2 matches in linear time; V8 does not, so a pinned
+// pattern with ambiguous quantifiers gets a hand-written matcher here.
+const linearMatchers: Readonly<Record<string, Matcher>> = {
+  // [^/]*[^./][^/]*, the whole string: no slash and some character that
+  // is not a dot. As a RegExp it is quadratic on a long run without a
+  // slash that ends in one.
+  "^[^/]*[^./][^/]*$": {
+    test: (s) => !s.includes("/") && /[^.]/u.test(s),
+  },
+};
+
 /**
- * re2 compiles an RE2 pattern of a pinned schema into a RegExp whose test()
- * gives Go's MatchString. Only what such patterns use is translated: groups,
+ * re2 compiles an RE2 pattern of a pinned schema into a Matcher that gives
+ * Go's MatchString. Only what such patterns use is translated: groups,
  * alternation, repetition, classes, ^ and $ (start and end of text, as in Go
  * without (?m)), . (any character but \n), \d \D \s \S \w \W and escaped
  * punctuation. Anything else throws, so a pinned schema with a new construct
- * fails its tests instead of matching differently.
+ * fails its tests instead of matching differently. A pattern that would
+ * backtrack has a hand-written matcher (linearMatchers); the tests run every
+ * pinned pattern on long hostile strings.
  */
-export function re2(pattern: string): RegExp {
+export function re2(pattern: string): Matcher {
+  const linear = linearMatchers[pattern];
+  if (linear !== undefined) {
+    return linear;
+  }
+  return re2RegExp(pattern);
+}
+
+/** re2RegExp is re2's translation into a RegExp, without the replacements. */
+export function re2RegExp(pattern: string): RegExp {
   if (compileError(pattern) !== undefined) {
     throw new Error(`not a Go regexp: ${pattern}`);
   }
@@ -754,7 +831,8 @@ export function re2(pattern: string): RegExp {
           out += inClass ? "\\t\\n\\f\\r " : "[\\t\\n\\f\\r ]";
           continue;
         case "S":
-          if (inClass) throw new Error(`unsupported \\S in a class: ${pattern}`);
+          if (inClass)
+            throw new Error(`unsupported \\S in a class: ${pattern}`);
           out += "[^\\t\\n\\f\\r ]";
           continue;
       }
