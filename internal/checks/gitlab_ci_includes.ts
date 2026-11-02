@@ -348,86 +348,100 @@ export interface GlobMatcher {
 export function globMatcher(pattern: string): GlobMatcher {
   const b = Buffer.from(pattern, "utf8");
   const tokens: GlobToken[] = [];
+  const push = (t: GlobToken): void => {
+    // Two `*`, two `**` or two `**/` in a row match what one does; keeping
+    // one keeps the state set small.
+    const last = tokens.at(-1);
+    if (t.kind !== "literal" && t.kind !== "one" && last?.kind === t.kind) {
+      return;
+    }
+    tokens.push(t);
+  };
   for (let i = 0; i < b.length; i++) {
     const c = b[i] ?? 0;
     if (c === 0x2a && b[i + 1] === 0x2a) {
       i++;
       if (b[i + 1] === 0x2f) {
         i++;
-        tokens.push({ kind: "anyDirs" });
+        push({ kind: "anyDirs" });
       } else {
-        tokens.push({ kind: "doubleStar" });
+        push({ kind: "doubleStar" });
       }
     } else if (c === 0x2a) {
-      tokens.push({ kind: "star" });
+      push({ kind: "star" });
     } else if (c === 0x3f) {
-      tokens.push({ kind: "one" });
+      push({ kind: "one" });
     } else {
-      tokens.push({ kind: "literal", char: c });
+      push({ kind: "literal", char: c });
     }
   }
   const m = tokens.length;
   const slash = 0x2f;
   const newline = 0x0a;
-  // State i is "before token i"; state m accepts. An anyDirs token also has
-  // an inner state (inside[i]): within the run, waiting for its slash.
-  const close = (at: Uint8Array): void => {
-    // Every token but a literal and `?` may match nothing.
-    for (const [i, t] of tokens.entries()) {
-      if (
-        at[i] &&
-        (t.kind === "star" || t.kind === "doubleStar" || t.kind === "anyDirs")
-      ) {
-        at[i + 1] = 1;
-      }
-    }
-  };
+  // A state is a position in the tokens: 2*i is "before token i", 2*i+1 is
+  // "inside the run of the `**/` at i, waiting for its slash", and 2*m
+  // accepts. The active states are kept as a list, each at most once.
+  const empty = (t: GlobToken): boolean =>
+    t.kind === "star" || t.kind === "doubleStar" || t.kind === "anyDirs";
   return {
     test(path: string): boolean {
-      let at = new Uint8Array(m + 1);
-      let inside = new Uint8Array(m);
-      at[0] = 1;
-      close(at);
+      const mark = new Int32Array(2 * m + 1).fill(-1);
+      let step = 0;
+      let active: number[] = [];
+      // add puts a "before" state and the ones it reaches by matching
+      // nothing into the list.
+      const add = (list: number[], i0: number): void => {
+        for (let i = i0; i <= m; i++) {
+          if (mark[2 * i] === step) return;
+          mark[2 * i] = step;
+          list.push(2 * i);
+          const t = tokens[i];
+          if (t === undefined || !empty(t)) return;
+        }
+      };
+      const addInside = (list: number[], i: number): void => {
+        if (mark[2 * i + 1] !== step) {
+          mark[2 * i + 1] = step;
+          list.push(2 * i + 1);
+        }
+      };
+      add(active, 0);
       for (const ch of path) {
         const c = ch.codePointAt(0) ?? 0;
-        const next = new Uint8Array(m + 1);
-        const nextInside = new Uint8Array(m);
-        let any = false;
-        for (const [i, t] of tokens.entries()) {
-          if (at[i]) {
-            switch (t.kind) {
-              case "literal":
-                if (c === t.char) next[i + 1] = 1;
-                break;
-              case "star":
-                if (c !== slash) next[i] = 1;
-                break;
-              case "doubleStar":
-                if (c !== newline) next[i] = 1;
-                break;
-              case "anyDirs":
-                if (c === slash) next[i + 1] = 1;
-                if (c !== newline) nextInside[i] = 1;
-                break;
-              case "one":
-                if (c !== slash) next[i + 1] = 1;
-                break;
-            }
+        step++;
+        const next: number[] = [];
+        for (const s of active) {
+          const i = s >> 1;
+          const t = tokens[i];
+          if (t === undefined) continue; // the accepting state
+          if ((s & 1) === 1) {
+            if (c === slash) add(next, i + 1);
+            if (c !== newline) addInside(next, i);
+            continue;
           }
-          if (inside[i]) {
-            if (c === slash) next[i + 1] = 1;
-            if (c !== newline) nextInside[i] = 1;
+          switch (t.kind) {
+            case "literal":
+              if (c === t.char) add(next, i + 1);
+              break;
+            case "star":
+              if (c !== slash) add(next, i);
+              break;
+            case "doubleStar":
+              if (c !== newline) add(next, i);
+              break;
+            case "anyDirs":
+              if (c === slash) add(next, i + 1);
+              if (c !== newline) addInside(next, i);
+              break;
+            case "one":
+              if (c !== slash) add(next, i + 1);
+              break;
           }
         }
-        close(next);
-        for (let i = 0; i <= m && !any; i++) {
-          any = next[i] === 1 || (i < m && nextInside[i] === 1);
-        }
-        if (!any) return false;
-        at = next;
-        inside = nextInside;
+        if (next.length === 0) return false;
+        active = next;
       }
-      return at[m] === 1;
+      return active.includes(2 * m);
     },
   };
 }
