@@ -233,10 +233,10 @@ function keywordOf(e: ErrorObject): string {
 
 /** goQuote is the Go library's quote: %q in single quotes. */
 export function goQuote(s: string): string {
-  const q = quote(s);
-  return (
-    "'" + q.slice(1, -1).replaceAll('\\"', '"').replaceAll("'", "\\'") + "'"
-  );
+  // As Go: the replacements run over the whole %q text, quotes included, so
+  // a value that ends with a backslash loses that escape ('\' for "\\").
+  const q = quote(s).replaceAll('\\"', '"').replaceAll("'", "\\'");
+  return "'" + q.slice(1, -1) + "'";
 }
 
 /** display is the Go library's display of a primitive value (fmt %v). */
@@ -382,9 +382,13 @@ const superscript: Record<string, string> = {
 /**
  * englishFloat is %v of a float64 through Go's English message printer: the
  * shortest digits, in exponent form ("1.5×10⁰⁶") where %v would use one
- * (exponent below -4 or from 6 on), else plain with grouped thousands.
+ * (exponent below -4 or from 6 on), else plain with grouped thousands. A
+ * number beyond float64 (1e400 in a document) is infinite: "∞" or "-∞".
  */
 export function englishFloat(x: number): string {
+  if (!Number.isFinite(x)) {
+    return x < 0 ? "-∞" : "∞";
+  }
   if (x === 0) {
     return Object.is(x, -0) ? "-0" : "0";
   }

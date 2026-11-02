@@ -1,0 +1,5658 @@
+{
+  "bases": {
+    "populated": "{\n  \"format\": \"js-prueffactory.report\",\n  \"schema_version\": \"0.4.0\",\n  \"producer\": {\n    \"name\": \"js-prueffactory\",\n    \"version\": \"0.1.0\",\n    \"vcs_revision\": \"abc\"\n  },\n  \"run\": {\n    \"id\": \"20261025T101500Z-x-aaaa\",\n    \"command\": \"test\",\n    \"started_at\": \"2026-10-25T10:15:00Z\",\n    \"finished_at\": \"2026-10-25T10:16:00Z\",\n    \"duration_ms\": 60000,\n    \"budget_seconds\": 1800,\n    \"budget_source\": \"default\",\n    \"status\": \"completed\",\n    \"registry_data_date\": null,\n    \"exit_code\": 1,\n    \"host\": {\n      \"os\": \"darwin\",\n      \"arch\": \"arm64\"\n    },\n    \"docker\": {\n      \"server_version\": \"29.4.0\",\n      \"api_version\": \"1.56\",\n      \"cpus\": 8,\n      \"memory_bytes\": 8589934592\n    }\n  },\n  \"source\": {\n    \"original_path\": \"/p\",\n    \"snapshot_algorithm\": \"sorted-path-sha256-v1\",\n    \"snapshot_hash\": \"abababababababababababababababababababababababababababababababab\",\n    \"file_count\": 3,\n    \"git\": {\n      \"commit\": \"deadbeef\",\n      \"dirty\": \"unknown\"\n    },\n    \"original_unchanged\": true,\n    \"changed_paths\": [],\n    \"excluded_paths\": []\n  },\n  \"profiles\": {\n    \"catalog_version\": \"1\",\n    \"execution_profile\": \"execution-v0\",\n    \"benchmark_profile\": null,\n    \"toolset_version\": \"abc\"\n  },\n  \"selection\": {\n    \"only\": [\n      \"syntax\"\n    ],\n    \"exclude\": [],\n    \"effective_checks\": [\n      \"syntax.parse\"\n    ],\n    \"deselected_checks\": [],\n    \"prerequisites_run\": [],\n    \"is_standard_scope\": false,\n    \"fast\": false\n  },\n  \"contexts\": [\n    {\n      \"id\": \"C-0001\",\n      \"kind\": \"project\",\n      \"path\": \".\",\n      \"node\": null,\n      \"npm_version\": null,\n      \"tools\": [],\n      \"limits\": {\n        \"cpus\": 0,\n        \"memory_mb\": 0\n      }\n    },\n    {\n      \"id\": \"C-0002\",\n      \"kind\": \"package\",\n      \"path\": \".\",\n      \"node\": {\n        \"version\": \"24\",\n        \"source\": \"default\",\n        \"image\": \"node@sha256:abababababababababababababababababababababababababababababababab\",\n        \"image_digest\": \"sha256:abababababababababababababababababababababababababababababababab\",\n        \"variant\": \"debian\",\n        \"not_checked_versions\": []\n      },\n      \"npm_version\": \"11.0.0\",\n      \"tools\": [\n        {\n          \"name\": \"node\",\n          \"version\": \"24.22.1\",\n          \"digest\": \"sha256:abababababababababababababababababababababababababababababababab\"\n        }\n      ],\n      \"limits\": {\n        \"cpus\": 2,\n        \"memory_mb\": 4096\n      }\n    }\n  ],\n  \"services\": [\n    {\n      \"family\": \"valkey\",\n      \"compose_service\": \"redis\",\n      \"image\": \"valkey\",\n      \"image_digest\": \"sha256:x\",\n      \"declared_image\": \"valkey/valkey:8\",\n      \"context_ids\": [\n        \"C-0002\"\n      ],\n      \"status\": \"started\",\n      \"reason\": null\n    }\n  ],\n  \"summary\": {\n    \"findings_by_severity\": {\n      \"error\": 1,\n      \"warning\": 0,\n      \"note\": 0\n    },\n    \"gates\": 1,\n    \"test_cases\": {\n      \"passed\": 4,\n      \"failed\": 1,\n      \"skipped\": 0,\n      \"todo\": 0,\n      \"never_run\": 0\n    },\n    \"scope_completeness\": {\n      \"required\": 1,\n      \"completed\": 1,\n      \"ratio\": 1\n    },\n    \"standard_completeness\": {\n      \"required\": 1,\n      \"completed\": 1,\n      \"ratio\": 1\n    },\n    \"network_isolation\": \"not_probed\"\n  },\n  \"benchmark\": {\n    \"status\": \"not_requested\",\n    \"profile_id\": null,\n    \"score\": null,\n    \"range\": null,\n    \"verdict\": null\n  },\n  \"checks\": [\n    {\n      \"id\": \"E-0001\",\n      \"check_id\": \"tests.existing\",\n      \"family\": \"tests\",\n      \"context_id\": \"C-0002\",\n      \"selected\": true,\n      \"applicability\": \"applicable\",\n      \"status\": \"completed\",\n      \"outcome\": \"failed\",\n      \"reason_code\": null,\n      \"reason\": null,\n      \"gate\": 1,\n      \"finding_ids\": [\n        \"F-0001\"\n      ],\n      \"started_at\": \"2026-10-25T10:15:00Z\",\n      \"duration_ms\": 5,\n      \"tool\": {\n        \"name\": \"mocha\",\n        \"version\": \"10.8.2\",\n        \"exit_code\": 1\n      },\n      \"command\": [\n        \"mocha\"\n      ],\n      \"artifact_ids\": [\n        \"A-0001\"\n      ]\n    }\n  ],\n  \"test_cases\": [\n    {\n      \"id\": \"T-0001\",\n      \"execution_id\": \"E-0001\",\n      \"file\": \"test/a.js\",\n      \"suite\": \"scripts.test\",\n      \"full_title\": \"a b\",\n      \"suite_path\": [\n        \"a\"\n      ],\n      \"outcome\": \"failed\",\n      \"never_run_reason\": null,\n      \"flaky\": false,\n      \"attempts\": [\n        {\n          \"outcome\": \"failed\",\n          \"duration_ms\": 3,\n          \"error\": \"boom\"\n        }\n      ],\n      \"finding_ids\": [\n        \"F-0001\"\n      ]\n    }\n  ],\n  \"findings\": [\n    {\n      \"id\": \"F-0001\",\n      \"check_id\": \"tests.existing\",\n      \"execution_id\": \"E-0001\",\n      \"context_id\": \"C-0002\",\n      \"rule_id\": \"assertion\",\n      \"fingerprint\": {\n        \"algorithm\": \"v1\",\n        \"value\": \"71b2535e38d19b6d9f4bd26451f8a6ee7d7cbc7cb956393ac433eed39147de02\"\n      },\n      \"kind\": \"defect\",\n      \"severity\": \"error\",\n      \"confidence\": \"confirmed\",\n      \"gate\": true,\n      \"in_test_data\": false,\n      \"in_test_code\": false,\n      \"title\": \"t\",\n      \"message\": \"m\",\n      \"locations\": [\n        {\n          \"role\": \"primary\",\n          \"path_base\": \"project_root\",\n          \"path\": \"test/a.js\",\n          \"start\": {\n            \"line\": 3,\n            \"column\": 5\n          },\n          \"end\": {\n            \"line\": 3,\n            \"column\": null\n          },\n          \"file_sha256\": \"abababababababababababababababababababababababababababababababab\",\n          \"snippet\": {\n            \"start_line\": 3,\n            \"text\": \"x\"\n          }\n        }\n      ],\n      \"expected\": \"1\",\n      \"actual\": \"2\",\n      \"evidence\": [\n        {\n          \"kind\": \"stack\",\n          \"text\": \"x\",\n          \"origin\": \"mocha\",\n          \"trust\": \"untrusted_data\",\n          \"original_size\": 9000,\n          \"artifact_id\": \"A-0001\"\n        }\n      ],\n      \"reproduction\": {\n        \"rerun_command\": [\n          \"js-prueffactory\",\n          \"test\",\n          \"/p\"\n        ],\n        \"test\": {\n          \"runner\": \"mocha\",\n          \"file\": \"test/a.js\",\n          \"full_title\": \"a b\",\n          \"native_command\": [\n            \"mocha\",\n            \"--fgrep\",\n            \"a b\"\n          ]\n        },\n        \"verified_by\": [\n          \"tests.existing\"\n        ]\n      },\n      \"limitations\": [\n        \"x\"\n      ],\n      \"suite\": \"scripts.test\"\n    }\n  ],\n  \"metrics\": [\n    {\n      \"id\": \"M-0001\",\n      \"check_id\": \"quality.size\",\n      \"context_id\": \"C-0001\",\n      \"name\": \"lines\",\n      \"value\": 10,\n      \"reason\": null,\n      \"unit\": \"lines\"\n    }\n  ],\n  \"inventory\": {\n    \"tests\": [\n      {\n        \"context_id\": \"C-0002\",\n        \"found\": 5,\n        \"run\": 0,\n        \"passed\": 0,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"todo\": 0,\n        \"focused\": 0,\n        \"never_run\": 0\n      }\n    ],\n    \"test_suites\": [\n      {\n        \"context_id\": \"C-0002\",\n        \"suite\": \"scripts.test\",\n        \"found\": 5,\n        \"run\": 0,\n        \"passed\": 0,\n        \"failed\": 0,\n        \"skipped\": 0,\n        \"todo\": 0,\n        \"focused\": 0,\n        \"never_run\": 0\n      }\n    ],\n    \"test_files\": [\n      {\n        \"context_id\": \"C-0002\",\n        \"suite\": \"scripts.test\",\n        \"file\": \"test/a.js\",\n        \"found\": 5,\n        \"passed\": 0,\n        \"passed_focused\": 0\n      }\n    ],\n    \"suppressions\": [\n      {\n        \"kind\": \"eslint-disable\",\n        \"file_class\": \"source\",\n        \"count\": 1\n      }\n    ],\n    \"file_hashes\": [\n      {\n        \"path\": \"package.json\",\n        \"role\": \"manifest\",\n        \"sha256\": \"abababababababababababababababababababababababababababababababab\"\n      }\n    ],\n    \"size\": [\n      {\n        \"group\": \"extension\",\n        \"name\": \".js\",\n        \"lines\": 3,\n        \"non_blank_lines\": 2\n      }\n    ],\n    \"moved_test_files\": [\n      {\n        \"context_id\": \"C-0002\",\n        \"path\": \"src/a.spec.js\",\n        \"suite\": \"scripts.test\",\n        \"kind\": \"spec\"\n      }\n    ]\n  },\n  \"limitations\": [\n    {\n      \"reason_code\": \"x\",\n      \"message\": \"m\",\n      \"check_id\": \"syntax.parse\",\n      \"path\": \"a\"\n    }\n  ],\n  \"artifacts\": [\n    {\n      \"id\": \"A-0001\",\n      \"path\": \"artifacts/a.json\",\n      \"media_type\": \"application/json\",\n      \"sha256\": \"abababababababababababababababababababababababababababababababab\",\n      \"size\": 1,\n      \"check_id\": \"tests.existing\",\n      \"redacted\": false,\n      \"truncated\": false\n    }\n  ],\n  \"report_completeness\": {\n    \"all_findings_included\": true,\n    \"truncated_evidence_items\": 1,\n    \"missing_artifacts\": [],\n    \"redaction\": {\n      \"applied\": false,\n      \"count\": 0,\n      \"reason\": \"secrets scan not run\"\n    }\n  }\n}\n"
+  },
+  "folders": [
+    {
+      "name": "golden benchmark-fail",
+      "base": "benchmark-fail",
+      "jsonOnly": false,
+      "ops": null,
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "golden benchmark-fail, JSON only",
+      "base": "benchmark-fail",
+      "jsonOnly": true,
+      "ops": null,
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "golden benchmark-incomplete",
+      "base": "benchmark-incomplete",
+      "jsonOnly": false,
+      "ops": null,
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "golden benchmark-incomplete, JSON only",
+      "base": "benchmark-incomplete",
+      "jsonOnly": true,
+      "ops": null,
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "golden benchmark-pass",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": null,
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "golden benchmark-pass, JSON only",
+      "base": "benchmark-pass",
+      "jsonOnly": true,
+      "ops": null,
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "golden clean",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": null,
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "golden clean, JSON only",
+      "base": "clean",
+      "jsonOnly": true,
+      "ops": null,
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "golden hostile",
+      "base": "hostile",
+      "jsonOnly": false,
+      "ops": null,
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "golden hostile, JSON only",
+      "base": "hostile",
+      "jsonOnly": true,
+      "ops": null,
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "golden large",
+      "base": "large",
+      "jsonOnly": false,
+      "ops": null,
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "golden large, JSON only",
+      "base": "large",
+      "jsonOnly": true,
+      "ops": null,
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "report.md missing",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "remove",
+          "file": "report.md"
+        }
+      ],
+      "problems": [
+        "report.md is missing from \u003cdir\u003e"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.md is missing from \u003cdir\u003e\n"
+    },
+    {
+      "name": "report.md missing, JSON only",
+      "base": "clean",
+      "jsonOnly": true,
+      "ops": [
+        {
+          "op": "remove",
+          "file": "report.md"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "report.json missing",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "remove",
+          "file": "report.json"
+        }
+      ],
+      "problems": [
+        "report.json is missing from \u003cdir\u003e"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json is missing from \u003cdir\u003e\n"
+    },
+    {
+      "name": "report.json missing, JSON only",
+      "base": "clean",
+      "jsonOnly": true,
+      "ops": [
+        {
+          "op": "remove",
+          "file": "report.json"
+        }
+      ],
+      "problems": [
+        "report.json is missing from \u003cdir\u003e"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json is missing from \u003cdir\u003e\n"
+    },
+    {
+      "name": "both files missing",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "remove",
+          "file": "report.json"
+        },
+        {
+          "op": "remove",
+          "file": "report.md"
+        }
+      ],
+      "problems": [
+        "report.json is missing from \u003cdir\u003e",
+        "report.md is missing from \u003cdir\u003e"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json is missing from \u003cdir\u003e\nreportcheck: report.md is missing from \u003cdir\u003e\n"
+    },
+    {
+      "name": "report.md is a folder",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "remove",
+          "file": "report.md"
+        },
+        {
+          "op": "mkdir",
+          "file": "report.md"
+        }
+      ],
+      "problems": [
+        "report.md is missing from \u003cdir\u003e"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.md is missing from \u003cdir\u003e\n"
+    },
+    {
+      "name": "report.json is a folder",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "remove",
+          "file": "report.json"
+        },
+        {
+          "op": "mkdir",
+          "file": "report.json"
+        }
+      ],
+      "problems": [
+        "report.json is missing from \u003cdir\u003e"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json is missing from \u003cdir\u003e\n"
+    },
+    {
+      "name": "report.json is empty",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "write",
+          "file": "report.json"
+        }
+      ],
+      "problems": [
+        "not valid JSON: EOF"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: not valid JSON: EOF\n"
+    },
+    {
+      "name": "report.json is blank",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "write",
+          "file": "report.json",
+          "content": " \n"
+        }
+      ],
+      "problems": [
+        "not valid JSON: EOF"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: not valid JSON: EOF\n"
+    },
+    {
+      "name": "report.json is not JSON",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "write",
+          "file": "report.json",
+          "content": "not json"
+        }
+      ],
+      "problems": [
+        "not valid JSON: invalid character 'o' in literal null (expecting 'u')"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: not valid JSON: invalid character 'o' in literal null (expecting 'u')\n"
+    },
+    {
+      "name": "report.json is cut short",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "write",
+          "file": "report.json",
+          "content": "{\"format\":"
+        }
+      ],
+      "problems": [
+        "not valid JSON: unexpected EOF"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: not valid JSON: unexpected EOF\n"
+    },
+    {
+      "name": "report.json has trailing data",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\n}\n",
+          "new": "\n}\n{}"
+        }
+      ],
+      "problems": [
+        "not valid JSON: invalid character after top-level value"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: not valid JSON: invalid character after top-level value\n"
+    },
+    {
+      "name": "report.json starts with a byte order mark",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "{\n  \"format\"",
+          "new": "﻿{\n  \"format\""
+        }
+      ],
+      "problems": [
+        "not valid JSON: invalid character '\\ufeff' looking for beginning of value"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: not valid JSON: invalid character '\\ufeff' looking for beginning of value\n"
+    },
+    {
+      "name": "report.json breaks the schema",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "write",
+          "file": "report.json",
+          "content": "{\"format\":\"nope\"}"
+        }
+      ],
+      "problems": [
+        "/: missing properties 'schema_version', 'producer', 'run', 'source', 'profiles', 'selection', 'contexts', 'services', 'summary', 'benchmark', 'checks', 'test_cases', 'findings', 'metrics', 'inventory', 'limitations', 'artifacts', 'report_completeness'",
+        "/format: value must be 'js-prueffactory.report'"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /: missing properties 'schema_version', 'producer', 'run', 'source', 'profiles', 'selection', 'contexts', 'services', 'summary', 'benchmark', 'checks', 'test_cases', 'findings', 'metrics', 'inventory', 'limitations', 'artifacts', 'report_completeness'\nreportcheck: /format: value must be 'js-prueffactory.report'\n"
+    },
+    {
+      "name": "report.json is an array",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "write",
+          "file": "report.json",
+          "content": "[]"
+        }
+      ],
+      "problems": [
+        "/: got array, want object"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /: got array, want object\n"
+    },
+    {
+      "name": "a wrong format value",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"js-prueffactory.report\"",
+          "new": "\"js-prueffactory.other\""
+        }
+      ],
+      "problems": [
+        "/format: value must be 'js-prueffactory.report'"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /format: value must be 'js-prueffactory.report'\n"
+    },
+    {
+      "name": "an unknown field",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"format\":",
+          "new": "\"surprise\": 1, \"format\":"
+        }
+      ],
+      "problems": [
+        "/: additional properties 'surprise' not allowed"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /: additional properties 'surprise' not allowed\n"
+    },
+    {
+      "name": "two Contexts with one ID",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"C-0002\"",
+          "new": "\"C-0001\""
+        }
+      ],
+      "problems": [
+        "duplicate context ID \"C-0001\"",
+        "execution E-0001 refers to unknown context \"C-0002\""
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: duplicate context ID \"C-0001\"\nreportcheck: execution E-0001 refers to unknown context \"C-0002\"\n"
+    },
+    {
+      "name": "an exit code that does not fit the Report",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"exit_code\": 0",
+          "new": "\"exit_code\": 1"
+        }
+      ],
+      "problems": [
+        "run.exit_code is 1 but the results map to 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: run.exit_code is 1 but the results map to 0\n"
+    },
+    {
+      "name": "a consistency violation in a JSON-only folder",
+      "base": "clean",
+      "jsonOnly": true,
+      "ops": [
+        {
+          "op": "remove",
+          "file": "report.md"
+        },
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"C-0002\"",
+          "new": "\"C-0001\""
+        }
+      ],
+      "problems": [
+        "duplicate context ID \"C-0001\"",
+        "execution E-0001 refers to unknown context \"C-0002\""
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: duplicate context ID \"C-0001\"\nreportcheck: execution E-0001 refers to unknown context \"C-0002\"\n"
+    },
+    {
+      "name": "a consistency violation with report.md missing",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "remove",
+          "file": "report.md"
+        },
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"C-0002\"",
+          "new": "\"C-0001\""
+        }
+      ],
+      "problems": [
+        "report.md is missing from \u003cdir\u003e",
+        "duplicate context ID \"C-0001\"",
+        "execution E-0001 refers to unknown context \"C-0002\""
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.md is missing from \u003cdir\u003e\nreportcheck: duplicate context ID \"C-0001\"\nreportcheck: execution E-0001 refers to unknown context \"C-0002\"\n"
+    },
+    {
+      "name": "a schema violation with report.md missing",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "remove",
+          "file": "report.md"
+        },
+        {
+          "op": "write",
+          "file": "report.json",
+          "content": "{\"format\":\"nope\"}"
+        }
+      ],
+      "problems": [
+        "report.md is missing from \u003cdir\u003e",
+        "/: missing properties 'schema_version', 'producer', 'run', 'source', 'profiles', 'selection', 'contexts', 'services', 'summary', 'benchmark', 'checks', 'test_cases', 'findings', 'metrics', 'inventory', 'limitations', 'artifacts', 'report_completeness'",
+        "/format: value must be 'js-prueffactory.report'"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.md is missing from \u003cdir\u003e\nreportcheck: /: missing properties 'schema_version', 'producer', 'run', 'source', 'profiles', 'selection', 'contexts', 'services', 'summary', 'benchmark', 'checks', 'test_cases', 'findings', 'metrics', 'inventory', 'limitations', 'artifacts', 'report_completeness'\nreportcheck: /format: value must be 'js-prueffactory.report'\n"
+    },
+    {
+      "name": "a repeated key, last one wins",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"exit_code\": 0",
+          "new": "\"exit_code\": 1, \"exit_code\": 0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "a repeated key, last one breaks",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"exit_code\": 0",
+          "new": "\"exit_code\": 0, \"exit_code\": 1"
+        }
+      ],
+      "problems": [
+        "run.exit_code is 1 but the results map to 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: run.exit_code is 1 but the results map to 0\n"
+    },
+    {
+      "name": "a time with a lower-case t",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"2026-10-25t10:15:00Z\""
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: parsing time \"2026-10-25t10:15:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"t10:15:00Z\" as \"T\""
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: parsing time \"2026-10-25t10:15:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"t10:15:00Z\" as \"T\"\n"
+    },
+    {
+      "name": "a time with a lower-case z",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"2026-10-25T10:15:00z\""
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: parsing time \"2026-10-25T10:15:00z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"z\" as \"Z07:00\""
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: parsing time \"2026-10-25T10:15:00z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"z\" as \"Z07:00\"\n"
+    },
+    {
+      "name": "a leap second",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"2026-12-31T23:59:60Z\""
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: parsing time \"2026-12-31T23:59:60Z\": second out of range"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: parsing time \"2026-12-31T23:59:60Z\": second out of range\n"
+    },
+    {
+      "name": "a time with an offset",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"2026-10-25T11:15:00+01:00\""
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "a time with nine fraction digits",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"2026-10-25T10:15:00.123456789Z\""
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "a time with ten fraction digits",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"2026-10-25T10:15:00.1234567891Z\""
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "a time at hour 24",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"2026-10-25T24:00:00Z\""
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-10-25T24:00:00Z' is not valid date-time: invalid time element: hour/min/sec out of range"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /run/started_at: '2026-10-25T24:00:00Z' is not valid date-time: invalid time element: hour/min/sec out of range\n"
+    },
+    {
+      "name": "a time on February 30",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"2026-02-30T10:15:00Z\""
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-02-30T10:15:00Z' is not valid date-time: invalid date element: parsing time \"2026-02-30\": day out of range"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /run/started_at: '2026-02-30T10:15:00Z' is not valid date-time: invalid date element: parsing time \"2026-02-30\": day out of range\n"
+    },
+    {
+      "name": "a time with a signed year",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"+026-10-25T10:15:00Z\""
+        }
+      ],
+      "problems": [
+        "/run/started_at: '+026-10-25T10:15:00Z' is not valid date-time: invalid date element: parsing time \"+026-10-25\" as \"2006-01-02\": cannot parse \"+026-10-25\" as \"2006\""
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /run/started_at: '+026-10-25T10:15:00Z' is not valid date-time: invalid date element: parsing time \"+026-10-25\" as \"2006-01-02\": cannot parse \"+026-10-25\" as \"2006\"\n"
+    },
+    {
+      "name": "a time with a one-digit hour",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"2026-10-25T+1:15:00Z\""
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: parsing time \"2026-10-25T+1:15:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"+1:15:00Z\" as \"15\""
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: parsing time \"2026-10-25T+1:15:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"+1:15:00Z\" as \"15\"\n"
+    },
+    {
+      "name": "a time with a signed offset minute",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"2026-10-25T10:15:00+01:+1\""
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: parsing time \"2026-10-25T10:15:00+01:+1\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"+01:+1\" as \"Z07:00\""
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: parsing time \"2026-10-25T10:15:00+01:+1\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"+01:+1\" as \"Z07:00\"\n"
+    },
+    {
+      "name": "a time with an offset of 24 hours",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"2026-10-25T10:15:00+24:00\""
+        }
+      ],
+      "problems": [
+        "/run/started_at: '2026-10-25T10:15:00+24:00' is not valid date-time: invalid time element: hour/min in offset out of range"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /run/started_at: '2026-10-25T10:15:00+24:00' is not valid date-time: invalid time element: hour/min in offset out of range\n"
+    },
+    {
+      "name": "a time with an escaped character",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"2026-10-25T10:15:00\\u005a\""
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "an integer written as 1000.0",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"duration_ms\": 1000",
+          "new": "\"duration_ms\": 1000.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1000.0 into Go struct field Set.run.duration_ms of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1000.0 into Go struct field Set.run.duration_ms of type int64\n"
+    },
+    {
+      "name": "an integer written as 1e3",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"duration_ms\": 1000",
+          "new": "\"duration_ms\": 1e3"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e3 into Go struct field Set.run.duration_ms of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e3 into Go struct field Set.run.duration_ms of type int64\n"
+    },
+    {
+      "name": "an integer written as 1E3",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"duration_ms\": 1000",
+          "new": "\"duration_ms\": 1E3"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1E3 into Go struct field Set.run.duration_ms of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1E3 into Go struct field Set.run.duration_ms of type int64\n"
+    },
+    {
+      "name": "an integer beyond int64",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"duration_ms\": 1000",
+          "new": "\"duration_ms\": 1e30"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e30 into Go struct field Set.run.duration_ms of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e30 into Go struct field Set.run.duration_ms of type int64\n"
+    },
+    {
+      "name": "an integer just beyond int64",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"memory_bytes\": 8589934592",
+          "new": "\"memory_bytes\": 9223372036854775808"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 9223372036854775808 into Go struct field Set.run.docker.memory_bytes of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 9223372036854775808 into Go struct field Set.run.docker.memory_bytes of type int64\n"
+    },
+    {
+      "name": "a fraction where an integer belongs",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"duration_ms\": 1000",
+          "new": "\"duration_ms\": 1000.5"
+        }
+      ],
+      "problems": [
+        "/run/duration_ms: got number, want integer"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /run/duration_ms: got number, want integer\n"
+    },
+    {
+      "name": "negative zero",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"exit_code\": 0",
+          "new": "\"exit_code\": -0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "a string with a lone surrogate",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"/work/demo\"",
+          "new": "\"/work/\\ud800\""
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "a string with invalid UTF-8",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"/work/demo\"",
+          "newBase64": "Ii93b3JrL/8i"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "an integer error before a time error",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"duration_ms\": 1000",
+          "new": "\"duration_ms\": 1.0"
+        },
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:01Z\"",
+          "new": "\"2026-10-25t10:15:01Z\""
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: parsing time \"2026-10-25t10:15:01Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"t10:15:01Z\" as \"T\""
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: parsing time \"2026-10-25t10:15:01Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"t10:15:01Z\" as \"T\"\n"
+    },
+    {
+      "name": "a time error before an integer error",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"2026-10-25T10:15:00Z\"",
+          "new": "\"2026-10-25t10:15:00Z\""
+        },
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"exit_code\": 0",
+          "new": "\"exit_code\": 0.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: parsing time \"2026-10-25t10:15:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"t10:15:00Z\" as \"T\""
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: parsing time \"2026-10-25t10:15:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"t10:15:00Z\" as \"T\"\n"
+    },
+    {
+      "name": "two integer errors",
+      "base": "clean",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"duration_ms\": 1000",
+          "new": "\"duration_ms\": 1.0"
+        },
+        {
+          "op": "replace",
+          "file": "report.json",
+          "old": "\"exit_code\": 0",
+          "new": "\"exit_code\": 0.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.run.duration_ms of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.run.duration_ms of type int64\n"
+    },
+    {
+      "name": "populated run.duration_ms = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 346,
+          "end": 351,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.run.duration_ms of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.run.duration_ms of type int64\n"
+    },
+    {
+      "name": "populated run.duration_ms = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 346,
+          "end": 351,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.run.duration_ms of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.run.duration_ms of type int64\n"
+    },
+    {
+      "name": "populated run.duration_ms = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 346,
+          "end": 351,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/run/duration_ms: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /run/duration_ms: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated run.budget_seconds = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 375,
+          "end": 379,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.run.budget_seconds of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.run.budget_seconds of type int64\n"
+    },
+    {
+      "name": "populated run.budget_seconds = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 375,
+          "end": 379,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.run.budget_seconds of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.run.budget_seconds of type int64\n"
+    },
+    {
+      "name": "populated run.budget_seconds = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 375,
+          "end": 379,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/run/budget_seconds: minimum: got -∞, want 1"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /run/budget_seconds: minimum: got -∞, want 1\n"
+    },
+    {
+      "name": "populated run.exit_code = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 489,
+          "end": 490,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.run.exit_code of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.run.exit_code of type int\n"
+    },
+    {
+      "name": "populated run.exit_code = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 489,
+          "end": 490,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "/run/exit_code: value must be one of 0, 1, 2, 130"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /run/exit_code: value must be one of 0, 1, 2, 130\n"
+    },
+    {
+      "name": "populated run.exit_code = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 489,
+          "end": 490,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/run/exit_code: value must be one of 0, 1, 2, 130"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /run/exit_code: value must be one of 0, 1, 2, 130\n"
+    },
+    {
+      "name": "populated run.docker.cpus = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 650,
+          "end": 651,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.run.docker.cpus of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.run.docker.cpus of type int\n"
+    },
+    {
+      "name": "populated run.docker.cpus = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 650,
+          "end": 651,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.run.docker.cpus of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.run.docker.cpus of type int\n"
+    },
+    {
+      "name": "populated run.docker.cpus = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 650,
+          "end": 651,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/run/docker/cpus: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /run/docker/cpus: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated run.docker.memory_bytes = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 675,
+          "end": 685,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.run.docker.memory_bytes of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.run.docker.memory_bytes of type int64\n"
+    },
+    {
+      "name": "populated run.docker.memory_bytes = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 675,
+          "end": 685,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.run.docker.memory_bytes of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.run.docker.memory_bytes of type int64\n"
+    },
+    {
+      "name": "populated run.docker.memory_bytes = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 675,
+          "end": 685,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/run/docker/memory_bytes: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /run/docker/memory_bytes: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated source.file_count = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 896,
+          "end": 897,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.source.file_count of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.source.file_count of type int\n"
+    },
+    {
+      "name": "populated source.file_count = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 896,
+          "end": 897,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.source.file_count of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.source.file_count of type int\n"
+    },
+    {
+      "name": "populated source.file_count = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 896,
+          "end": 897,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/source/file_count: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /source/file_count: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated contexts.limits.cpus = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 1636,
+          "end": 1637,
+          "new": "1.0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "populated contexts.limits.cpus = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 1636,
+          "end": 1637,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.contexts.0.limits.cpus of type float64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.contexts.0.limits.cpus of type float64\n"
+    },
+    {
+      "name": "populated contexts.limits.cpus = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 1636,
+          "end": 1637,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/contexts/0/limits/cpus: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /contexts/0/limits/cpus: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated contexts.limits.memory_mb = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 1660,
+          "end": 1661,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.contexts.0.limits.memory_mb of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.contexts.0.limits.memory_mb of type int64\n"
+    },
+    {
+      "name": "populated contexts.limits.memory_mb = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 1660,
+          "end": 1661,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.contexts.0.limits.memory_mb of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.contexts.0.limits.memory_mb of type int64\n"
+    },
+    {
+      "name": "populated contexts.limits.memory_mb = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 1660,
+          "end": 1661,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/contexts/0/limits/memory_mb: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /contexts/0/limits/memory_mb: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.findings_by_severity.error = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2751,
+          "end": 2752,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.findings_by_severity.error of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.findings_by_severity.error of type int\n"
+    },
+    {
+      "name": "populated summary.findings_by_severity.error = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2751,
+          "end": 2752,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.findings_by_severity.error of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.findings_by_severity.error of type int\n"
+    },
+    {
+      "name": "populated summary.findings_by_severity.error = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2751,
+          "end": 2752,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/findings_by_severity/error: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/findings_by_severity/error: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.findings_by_severity.warning = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2771,
+          "end": 2772,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.findings_by_severity.warning of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.findings_by_severity.warning of type int\n"
+    },
+    {
+      "name": "populated summary.findings_by_severity.warning = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2771,
+          "end": 2772,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.findings_by_severity.warning of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.findings_by_severity.warning of type int\n"
+    },
+    {
+      "name": "populated summary.findings_by_severity.warning = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2771,
+          "end": 2772,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/findings_by_severity/warning: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/findings_by_severity/warning: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.findings_by_severity.note = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2788,
+          "end": 2789,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.findings_by_severity.note of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.findings_by_severity.note of type int\n"
+    },
+    {
+      "name": "populated summary.findings_by_severity.note = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2788,
+          "end": 2789,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.findings_by_severity.note of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.findings_by_severity.note of type int\n"
+    },
+    {
+      "name": "populated summary.findings_by_severity.note = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2788,
+          "end": 2789,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/findings_by_severity/note: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/findings_by_severity/note: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.gates = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2810,
+          "end": 2811,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.gates of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.gates of type int\n"
+    },
+    {
+      "name": "populated summary.gates = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2810,
+          "end": 2811,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.gates of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.gates of type int\n"
+    },
+    {
+      "name": "populated summary.gates = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2810,
+          "end": 2811,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/gates: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/gates: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.test_cases.passed = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2849,
+          "end": 2850,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.test_cases.passed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.test_cases.passed of type int\n"
+    },
+    {
+      "name": "populated summary.test_cases.passed = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2849,
+          "end": 2850,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.test_cases.passed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.test_cases.passed of type int\n"
+    },
+    {
+      "name": "populated summary.test_cases.passed = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2849,
+          "end": 2850,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/test_cases/passed: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/test_cases/passed: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.test_cases.failed = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2868,
+          "end": 2869,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.test_cases.failed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.test_cases.failed of type int\n"
+    },
+    {
+      "name": "populated summary.test_cases.failed = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2868,
+          "end": 2869,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.test_cases.failed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.test_cases.failed of type int\n"
+    },
+    {
+      "name": "populated summary.test_cases.failed = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2868,
+          "end": 2869,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/test_cases/failed: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/test_cases/failed: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.test_cases.skipped = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2888,
+          "end": 2889,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.test_cases.skipped of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.test_cases.skipped of type int\n"
+    },
+    {
+      "name": "populated summary.test_cases.skipped = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2888,
+          "end": 2889,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.test_cases.skipped of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.test_cases.skipped of type int\n"
+    },
+    {
+      "name": "populated summary.test_cases.skipped = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2888,
+          "end": 2889,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/test_cases/skipped: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/test_cases/skipped: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.test_cases.todo = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2905,
+          "end": 2906,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.test_cases.todo of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.test_cases.todo of type int\n"
+    },
+    {
+      "name": "populated summary.test_cases.todo = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2905,
+          "end": 2906,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.test_cases.todo of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.test_cases.todo of type int\n"
+    },
+    {
+      "name": "populated summary.test_cases.todo = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2905,
+          "end": 2906,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/test_cases/todo: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/test_cases/todo: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.test_cases.never_run = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2927,
+          "end": 2928,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.test_cases.never_run of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.test_cases.never_run of type int\n"
+    },
+    {
+      "name": "populated summary.test_cases.never_run = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2927,
+          "end": 2928,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.test_cases.never_run of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.test_cases.never_run of type int\n"
+    },
+    {
+      "name": "populated summary.test_cases.never_run = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2927,
+          "end": 2928,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/test_cases/never_run: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/test_cases/never_run: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.scope_completeness.required = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2982,
+          "end": 2983,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.scope_completeness.required of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.scope_completeness.required of type int\n"
+    },
+    {
+      "name": "populated summary.scope_completeness.required = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2982,
+          "end": 2983,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.scope_completeness.required of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.scope_completeness.required of type int\n"
+    },
+    {
+      "name": "populated summary.scope_completeness.required = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 2982,
+          "end": 2983,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/scope_completeness/required: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/scope_completeness/required: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.scope_completeness.completed = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3004,
+          "end": 3005,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.scope_completeness.completed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.scope_completeness.completed of type int\n"
+    },
+    {
+      "name": "populated summary.scope_completeness.completed = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3004,
+          "end": 3005,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.scope_completeness.completed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.scope_completeness.completed of type int\n"
+    },
+    {
+      "name": "populated summary.scope_completeness.completed = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3004,
+          "end": 3005,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/scope_completeness/completed: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/scope_completeness/completed: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.scope_completeness.ratio = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3022,
+          "end": 3023,
+          "new": "1.0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "populated summary.scope_completeness.ratio = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3022,
+          "end": 3023,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "/summary/scope_completeness/ratio: maximum: got ∞, want 1"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/scope_completeness/ratio: maximum: got ∞, want 1\n"
+    },
+    {
+      "name": "populated summary.scope_completeness.ratio = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3022,
+          "end": 3023,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/scope_completeness/ratio: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/scope_completeness/ratio: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.standard_completeness.required = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3080,
+          "end": 3081,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.standard_completeness.required of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.standard_completeness.required of type int\n"
+    },
+    {
+      "name": "populated summary.standard_completeness.required = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3080,
+          "end": 3081,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.standard_completeness.required of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.standard_completeness.required of type int\n"
+    },
+    {
+      "name": "populated summary.standard_completeness.required = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3080,
+          "end": 3081,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/standard_completeness/required: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/standard_completeness/required: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.standard_completeness.completed = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3102,
+          "end": 3103,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.standard_completeness.completed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.summary.standard_completeness.completed of type int\n"
+    },
+    {
+      "name": "populated summary.standard_completeness.completed = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3102,
+          "end": 3103,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.standard_completeness.completed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.summary.standard_completeness.completed of type int\n"
+    },
+    {
+      "name": "populated summary.standard_completeness.completed = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3102,
+          "end": 3103,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/standard_completeness/completed: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/standard_completeness/completed: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated summary.standard_completeness.ratio = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3120,
+          "end": 3121,
+          "new": "1.0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "populated summary.standard_completeness.ratio = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3120,
+          "end": 3121,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "/summary/standard_completeness/ratio: maximum: got ∞, want 1"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/standard_completeness/ratio: maximum: got ∞, want 1\n"
+    },
+    {
+      "name": "populated summary.standard_completeness.ratio = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3120,
+          "end": 3121,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/summary/standard_completeness/ratio: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /summary/standard_completeness/ratio: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated checks.gate = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3620,
+          "end": 3621,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.checks.0.gate of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.checks.0.gate of type int\n"
+    },
+    {
+      "name": "populated checks.gate = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3620,
+          "end": 3621,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.checks.0.gate of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.checks.0.gate of type int\n"
+    },
+    {
+      "name": "populated checks.gate = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3620,
+          "end": 3621,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/checks/0/gate: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /checks/0/gate: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated checks.duration_ms = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3737,
+          "end": 3738,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.checks.0.duration_ms of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.checks.0.duration_ms of type int64\n"
+    },
+    {
+      "name": "populated checks.duration_ms = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3737,
+          "end": 3738,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.checks.0.duration_ms of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.checks.0.duration_ms of type int64\n"
+    },
+    {
+      "name": "populated checks.duration_ms = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3737,
+          "end": 3738,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/checks/0/duration_ms: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /checks/0/duration_ms: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated checks.tool.exit_code = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3831,
+          "end": 3832,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.checks.0.tool.exit_code of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.checks.0.tool.exit_code of type int\n"
+    },
+    {
+      "name": "populated checks.tool.exit_code = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3831,
+          "end": 3832,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.checks.0.tool.exit_code of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.checks.0.tool.exit_code of type int\n"
+    },
+    {
+      "name": "populated checks.tool.exit_code = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 3831,
+          "end": 3832,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number -1e400 into Go struct field Set.checks.0.tool.exit_code of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number -1e400 into Go struct field Set.checks.0.tool.exit_code of type int\n"
+    },
+    {
+      "name": "populated test_cases.attempts.duration_ms = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4319,
+          "end": 4320,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.test_cases.0.attempts.0.duration_ms of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.test_cases.0.attempts.0.duration_ms of type int64\n"
+    },
+    {
+      "name": "populated test_cases.attempts.duration_ms = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4319,
+          "end": 4320,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.test_cases.0.attempts.0.duration_ms of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.test_cases.0.attempts.0.duration_ms of type int64\n"
+    },
+    {
+      "name": "populated test_cases.attempts.duration_ms = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4319,
+          "end": 4320,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/test_cases/0/attempts/0/duration_ms: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /test_cases/0/attempts/0/duration_ms: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated findings.locations.start.line = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5116,
+          "end": 5117,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.findings.0.locations.0.start.line of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.findings.0.locations.0.start.line of type int\n"
+    },
+    {
+      "name": "populated findings.locations.start.line = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5116,
+          "end": 5117,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.findings.0.locations.0.start.line of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.findings.0.locations.0.start.line of type int\n"
+    },
+    {
+      "name": "populated findings.locations.start.line = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5116,
+          "end": 5117,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/findings/0/locations/0/start/line: minimum: got -∞, want 1",
+        "/findings/0/locations/0/start: got object, want null"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /findings/0/locations/0/start/line: minimum: got -∞, want 1\nreportcheck: /findings/0/locations/0/start: got object, want null\n"
+    },
+    {
+      "name": "populated findings.locations.start.column = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5141,
+          "end": 5142,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.findings.0.locations.0.start.column of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.findings.0.locations.0.start.column of type int\n"
+    },
+    {
+      "name": "populated findings.locations.start.column = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5141,
+          "end": 5142,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.findings.0.locations.0.start.column of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.findings.0.locations.0.start.column of type int\n"
+    },
+    {
+      "name": "populated findings.locations.start.column = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5141,
+          "end": 5142,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/findings/0/locations/0/start/column: minimum: got -∞, want 1",
+        "/findings/0/locations/0/start: got object, want null"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /findings/0/locations/0/start/column: minimum: got -∞, want 1\nreportcheck: /findings/0/locations/0/start: got object, want null\n"
+    },
+    {
+      "name": "populated findings.locations.end.line = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5195,
+          "end": 5196,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.findings.0.locations.0.end.line of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.findings.0.locations.0.end.line of type int\n"
+    },
+    {
+      "name": "populated findings.locations.end.line = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5195,
+          "end": 5196,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.findings.0.locations.0.end.line of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.findings.0.locations.0.end.line of type int\n"
+    },
+    {
+      "name": "populated findings.locations.end.line = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5195,
+          "end": 5196,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/findings/0/locations/0/end/line: minimum: got -∞, want 1",
+        "/findings/0/locations/0/end: got object, want null"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /findings/0/locations/0/end/line: minimum: got -∞, want 1\nreportcheck: /findings/0/locations/0/end: got object, want null\n"
+    },
+    {
+      "name": "populated findings.locations.snippet.start_line = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5380,
+          "end": 5381,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.findings.0.locations.0.snippet.start_line of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.findings.0.locations.0.snippet.start_line of type int\n"
+    },
+    {
+      "name": "populated findings.locations.snippet.start_line = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5380,
+          "end": 5381,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.findings.0.locations.0.snippet.start_line of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.findings.0.locations.0.snippet.start_line of type int\n"
+    },
+    {
+      "name": "populated findings.locations.snippet.start_line = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5380,
+          "end": 5381,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/findings/0/locations/0/snippet/start_line: minimum: got -∞, want 1",
+        "/findings/0/locations/0/snippet: got object, want null"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /findings/0/locations/0/snippet/start_line: minimum: got -∞, want 1\nreportcheck: /findings/0/locations/0/snippet: got object, want null\n"
+    },
+    {
+      "name": "populated findings.evidence.original_size = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5655,
+          "end": 5659,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.findings.0.evidence.0.original_size of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.findings.0.evidence.0.original_size of type int\n"
+    },
+    {
+      "name": "populated findings.evidence.original_size = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5655,
+          "end": 5659,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.findings.0.evidence.0.original_size of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.findings.0.evidence.0.original_size of type int\n"
+    },
+    {
+      "name": "populated findings.evidence.original_size = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5655,
+          "end": 5659,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/findings/0/evidence/0/original_size: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /findings/0/evidence/0/original_size: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated metrics.value = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6363,
+          "end": 6365,
+          "new": "1.0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "populated metrics.value = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6363,
+          "end": 6365,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.metrics.0.value of type float64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.metrics.0.value of type float64\n"
+    },
+    {
+      "name": "populated metrics.value = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6363,
+          "end": 6365,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number -1e400 into Go struct field Set.metrics.0.value of type float64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number -1e400 into Go struct field Set.metrics.0.value of type float64\n"
+    },
+    {
+      "name": "populated inventory.tests.found = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6511,
+          "end": 6512,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.found of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.found of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.found = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6511,
+          "end": 6512,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.found of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.found of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.found = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6511,
+          "end": 6512,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/tests/0/found: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/tests/0/found: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.tests.run = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6529,
+          "end": 6530,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.run of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.run of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.run = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6529,
+          "end": 6530,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.run of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.run of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.run = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6529,
+          "end": 6530,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/tests/0/run: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/tests/0/run: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.tests.passed = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6550,
+          "end": 6551,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.passed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.passed of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.passed = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6550,
+          "end": 6551,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.passed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.passed of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.passed = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6550,
+          "end": 6551,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/tests/0/passed: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/tests/0/passed: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.tests.failed = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6571,
+          "end": 6572,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.failed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.failed of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.failed = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6571,
+          "end": 6572,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.failed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.failed of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.failed = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6571,
+          "end": 6572,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/tests/0/failed: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/tests/0/failed: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.tests.skipped = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6593,
+          "end": 6594,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.skipped of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.skipped of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.skipped = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6593,
+          "end": 6594,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.skipped of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.skipped of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.skipped = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6593,
+          "end": 6594,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/tests/0/skipped: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/tests/0/skipped: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.tests.todo = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6612,
+          "end": 6613,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.todo of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.todo of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.todo = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6612,
+          "end": 6613,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.todo of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.todo of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.todo = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6612,
+          "end": 6613,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/tests/0/todo: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/tests/0/todo: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.tests.focused = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6634,
+          "end": 6635,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.focused of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.focused of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.focused = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6634,
+          "end": 6635,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.focused of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.focused of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.focused = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6634,
+          "end": 6635,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/tests/0/focused: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/tests/0/focused: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.tests.never_run = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6658,
+          "end": 6659,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.never_run of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.tests.0.never_run of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.never_run = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6658,
+          "end": 6659,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.never_run of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.tests.0.never_run of type int\n"
+    },
+    {
+      "name": "populated inventory.tests.never_run = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6658,
+          "end": 6659,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/tests/0/never_run: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/tests/0/never_run: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.test_suites.found = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6786,
+          "end": 6787,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.found of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.found of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.found = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6786,
+          "end": 6787,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.found of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.found of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.found = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6786,
+          "end": 6787,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/test_suites/0/found: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/test_suites/0/found: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.test_suites.run = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6804,
+          "end": 6805,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.run of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.run of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.run = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6804,
+          "end": 6805,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.run of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.run of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.run = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6804,
+          "end": 6805,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/test_suites/0/run: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/test_suites/0/run: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.test_suites.passed = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6825,
+          "end": 6826,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.passed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.passed of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.passed = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6825,
+          "end": 6826,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.passed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.passed of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.passed = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6825,
+          "end": 6826,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/test_suites/0/passed: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/test_suites/0/passed: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.test_suites.failed = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6846,
+          "end": 6847,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.failed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.failed of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.failed = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6846,
+          "end": 6847,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.failed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.failed of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.failed = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6846,
+          "end": 6847,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/test_suites/0/failed: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/test_suites/0/failed: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.test_suites.skipped = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6868,
+          "end": 6869,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.skipped of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.skipped of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.skipped = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6868,
+          "end": 6869,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.skipped of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.skipped of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.skipped = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6868,
+          "end": 6869,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/test_suites/0/skipped: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/test_suites/0/skipped: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.test_suites.todo = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6887,
+          "end": 6888,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.todo of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.todo of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.todo = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6887,
+          "end": 6888,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.todo of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.todo of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.todo = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6887,
+          "end": 6888,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/test_suites/0/todo: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/test_suites/0/todo: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.test_suites.focused = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6909,
+          "end": 6910,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.focused of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.focused of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.focused = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6909,
+          "end": 6910,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.focused of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.focused of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.focused = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6909,
+          "end": 6910,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/test_suites/0/focused: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/test_suites/0/focused: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.test_suites.never_run = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6933,
+          "end": 6934,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.never_run of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_suites.0.never_run of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.never_run = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6933,
+          "end": 6934,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.never_run of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_suites.0.never_run of type int\n"
+    },
+    {
+      "name": "populated inventory.test_suites.never_run = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 6933,
+          "end": 6934,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/test_suites/0/never_run: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/test_suites/0/never_run: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.test_files.found = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7089,
+          "end": 7090,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_files.0.found of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_files.0.found of type int\n"
+    },
+    {
+      "name": "populated inventory.test_files.found = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7089,
+          "end": 7090,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_files.0.found of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_files.0.found of type int\n"
+    },
+    {
+      "name": "populated inventory.test_files.found = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7089,
+          "end": 7090,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/test_files/0/found: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/test_files/0/found: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.test_files.passed = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7110,
+          "end": 7111,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_files.0.passed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_files.0.passed of type int\n"
+    },
+    {
+      "name": "populated inventory.test_files.passed = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7110,
+          "end": 7111,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_files.0.passed of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_files.0.passed of type int\n"
+    },
+    {
+      "name": "populated inventory.test_files.passed = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7110,
+          "end": 7111,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/test_files/0/passed: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/test_files/0/passed: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.test_files.passed_focused = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7139,
+          "end": 7140,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_files.0.passed_focused of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.test_files.0.passed_focused of type int\n"
+    },
+    {
+      "name": "populated inventory.test_files.passed_focused = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7139,
+          "end": 7140,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_files.0.passed_focused of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.test_files.0.passed_focused of type int\n"
+    },
+    {
+      "name": "populated inventory.test_files.passed_focused = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7139,
+          "end": 7140,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/test_files/0/passed_focused: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/test_files/0/passed_focused: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.suppressions.count = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7269,
+          "end": 7270,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.suppressions.0.count of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.suppressions.0.count of type int\n"
+    },
+    {
+      "name": "populated inventory.suppressions.count = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7269,
+          "end": 7270,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.suppressions.0.count of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.suppressions.0.count of type int\n"
+    },
+    {
+      "name": "populated inventory.suppressions.count = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7269,
+          "end": 7270,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/suppressions/0/count: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/suppressions/0/count: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.size.lines = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7567,
+          "end": 7568,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.size.0.lines of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.size.0.lines of type int\n"
+    },
+    {
+      "name": "populated inventory.size.lines = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7567,
+          "end": 7568,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.size.0.lines of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.size.0.lines of type int\n"
+    },
+    {
+      "name": "populated inventory.size.lines = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7567,
+          "end": 7568,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/size/0/lines: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/size/0/lines: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated inventory.size.non_blank_lines = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7597,
+          "end": 7598,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.size.0.non_blank_lines of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.inventory.size.0.non_blank_lines of type int\n"
+    },
+    {
+      "name": "populated inventory.size.non_blank_lines = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7597,
+          "end": 7598,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.size.0.non_blank_lines of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.inventory.size.0.non_blank_lines of type int\n"
+    },
+    {
+      "name": "populated inventory.size.non_blank_lines = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 7597,
+          "end": 7598,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/inventory/size/0/non_blank_lines: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /inventory/size/0/non_blank_lines: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated artifacts.size = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 8141,
+          "end": 8142,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.artifacts.0.size of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.artifacts.0.size of type int64\n"
+    },
+    {
+      "name": "populated artifacts.size = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 8141,
+          "end": 8142,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.artifacts.0.size of type int64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.artifacts.0.size of type int64\n"
+    },
+    {
+      "name": "populated artifacts.size = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 8141,
+          "end": 8142,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/artifacts/0/size: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /artifacts/0/size: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated report_completeness.truncated_evidence_items = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 8335,
+          "end": 8336,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.report_completeness.truncated_evidence_items of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.report_completeness.truncated_evidence_items of type int\n"
+    },
+    {
+      "name": "populated report_completeness.truncated_evidence_items = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 8335,
+          "end": 8336,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.report_completeness.truncated_evidence_items of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.report_completeness.truncated_evidence_items of type int\n"
+    },
+    {
+      "name": "populated report_completeness.truncated_evidence_items = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 8335,
+          "end": 8336,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/report_completeness/truncated_evidence_items: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /report_completeness/truncated_evidence_items: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "populated report_completeness.redaction.count = 1.0",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 8425,
+          "end": 8426,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.report_completeness.redaction.count of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.report_completeness.redaction.count of type int\n"
+    },
+    {
+      "name": "populated report_completeness.redaction.count = 1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 8425,
+          "end": 8426,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.report_completeness.redaction.count of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.report_completeness.redaction.count of type int\n"
+    },
+    {
+      "name": "populated report_completeness.redaction.count = -1e400",
+      "base": "populated",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 8425,
+          "end": 8426,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/report_completeness/redaction/count: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /report_completeness/redaction/count: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.score = 1.0",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4141,
+          "end": 4145,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "benchmark area contributions add up to 80.6, not to the score 1.0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: benchmark area contributions add up to 80.6, not to the score 1.0\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.score = 1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4141,
+          "end": 4145,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/score: maximum: got ∞, want 100"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/score: maximum: got ∞, want 100\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.score = -1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4141,
+          "end": 4145,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/score: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/score: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.range.low = 1.0",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4175,
+          "end": 4179,
+          "new": "1.0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "benchmark-pass benchmark.range.low = 1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4175,
+          "end": 4179,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/range/low: maximum: got ∞, want 100",
+        "/benchmark/range: got object, want null"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/range/low: maximum: got ∞, want 100\nreportcheck: /benchmark/range: got object, want null\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.range.low = -1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4175,
+          "end": 4179,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/range/low: minimum: got -∞, want 0",
+        "/benchmark/range: got object, want null"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/range/low: minimum: got -∞, want 0\nreportcheck: /benchmark/range: got object, want null\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.range.high = 1.0",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4195,
+          "end": 4199,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "benchmark range 80.6 to 1 is not inside 0 to 100 or is upside down"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: benchmark range 80.6 to 1 is not inside 0 to 100 or is upside down\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.range.high = 1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4195,
+          "end": 4199,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/range/high: maximum: got ∞, want 100",
+        "/benchmark/range: got object, want null"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/range/high: maximum: got ∞, want 100\nreportcheck: /benchmark/range: got object, want null\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.range.high = -1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4195,
+          "end": 4199,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/range/high: minimum: got -∞, want 0",
+        "/benchmark/range: got object, want null"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/range/high: minimum: got -∞, want 0\nreportcheck: /benchmark/range: got object, want null\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.weight = 1.0",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4294,
+          "end": 4296,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.benchmark.areas.0.weight of type int"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1.0 into Go struct field Set.benchmark.areas.0.weight of type int\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.weight = 1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4294,
+          "end": 4296,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/weight: maximum: got ∞, want 100"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/weight: maximum: got ∞, want 100\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.weight = -1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4294,
+          "end": 4296,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/weight: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/weight: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.score = 1.0",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4339,
+          "end": 4343,
+          "new": "1.0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.score = 1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4339,
+          "end": 4343,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/score: maximum: got ∞, want 100"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/score: maximum: got ∞, want 100\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.score = -1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4339,
+          "end": 4343,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/score: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/score: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.range.low = 1.0",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4381,
+          "end": 4385,
+          "new": "1.0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.range.low = 1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4381,
+          "end": 4385,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/range/low: maximum: got ∞, want 100",
+        "/benchmark/areas/0/range: got object, want null"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/range/low: maximum: got ∞, want 100\nreportcheck: /benchmark/areas/0/range: got object, want null\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.range.low = -1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4381,
+          "end": 4385,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/range/low: minimum: got -∞, want 0",
+        "/benchmark/areas/0/range: got object, want null"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/range/low: minimum: got -∞, want 0\nreportcheck: /benchmark/areas/0/range: got object, want null\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.range.high = 1.0",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4405,
+          "end": 4409,
+          "new": "1.0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.range.high = 1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4405,
+          "end": 4409,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/range/high: maximum: got ∞, want 100",
+        "/benchmark/areas/0/range: got object, want null"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/range/high: maximum: got ∞, want 100\nreportcheck: /benchmark/areas/0/range: got object, want null\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.range.high = -1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4405,
+          "end": 4409,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/range/high: minimum: got -∞, want 0",
+        "/benchmark/areas/0/range: got object, want null"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/range/high: minimum: got -∞, want 0\nreportcheck: /benchmark/areas/0/range: got object, want null\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.contribution = 1.0",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4477,
+          "end": 4479,
+          "new": "1.0"
+        }
+      ],
+      "problems": [
+        "benchmark area contributions add up to 46.6, not to the score 80.6"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: benchmark area contributions add up to 46.6, not to the score 80.6\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.contribution = 1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4477,
+          "end": 4479,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/contribution: maximum: got ∞, want 100"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/contribution: maximum: got ∞, want 100\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.contribution = -1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4477,
+          "end": 4479,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/contribution: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/contribution: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.parts.raw_value = 1.0",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4602,
+          "end": 4606,
+          "new": "1.0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.parts.raw_value = 1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4602,
+          "end": 4606,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.benchmark.areas.0.parts.0.raw_value of type float64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.benchmark.areas.0.parts.0.raw_value of type float64\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.parts.raw_value = -1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4602,
+          "end": 4606,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/parts/0/raw_value: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/parts/0/raw_value: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.parts.score = 1.0",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4716,
+          "end": 4720,
+          "new": "1.0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.parts.score = 1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4716,
+          "end": 4720,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/parts/0/score: maximum: got ∞, want 100"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/parts/0/score: maximum: got ∞, want 100\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.parts.score = -1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 4716,
+          "end": 4720,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/parts/0/score: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/parts/0/score: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.parts.n_eff = 1.0",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5029,
+          "end": 5030,
+          "new": "1.0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.parts.n_eff = 1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5029,
+          "end": 5030,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.benchmark.areas.0.parts.1.n_eff of type float64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.benchmark.areas.0.parts.1.n_eff of type float64\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.parts.n_eff = -1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5029,
+          "end": 5030,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/parts/1/n_eff: minimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/parts/1/n_eff: minimum: got -∞, want 0\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.parts.x50 = 1.0",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5051,
+          "end": 5052,
+          "new": "1.0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.parts.x50 = 1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5051,
+          "end": 5052,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.benchmark.areas.0.parts.1.x50 of type float64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.benchmark.areas.0.parts.1.x50 of type float64\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.areas.parts.x50 = -1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 5051,
+          "end": 5052,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "/benchmark/areas/0/parts/1/x50: exclusiveMinimum: got -∞, want 0"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: /benchmark/areas/0/parts/1/x50: exclusiveMinimum: got -∞, want 0\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.side_indicators.value = 1.0",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 16813,
+          "end": 16814,
+          "new": "1.0"
+        }
+      ],
+      "problems": null,
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "benchmark-pass benchmark.side_indicators.value = 1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 16813,
+          "end": 16814,
+          "new": "1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.benchmark.side_indicators.3.value of type float64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number 1e400 into Go struct field Set.benchmark.side_indicators.3.value of type float64\n"
+    },
+    {
+      "name": "benchmark-pass benchmark.side_indicators.value = -1e400",
+      "base": "benchmark-pass",
+      "jsonOnly": false,
+      "ops": [
+        {
+          "op": "splice",
+          "file": "report.json",
+          "start": 16813,
+          "end": 16814,
+          "new": "-1e400"
+        }
+      ],
+      "problems": [
+        "report.json cannot be read: json: cannot unmarshal number -1e400 into Go struct field Set.benchmark.side_indicators.3.value of type float64"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json cannot be read: json: cannot unmarshal number -1e400 into Go struct field Set.benchmark.side_indicators.3.value of type float64\n"
+    }
+  ],
+  "recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8",
+  "times": [
+    {
+      "in": "2026-10-25T10:15:00Z",
+      "err": "",
+      "unixMilli": 1792923300000
+    },
+    {
+      "in": "2026-10-25t10:15:00Z",
+      "err": "parsing time \"2026-10-25t10:15:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"t10:15:00Z\" as \"T\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:00z",
+      "err": "parsing time \"2026-10-25T10:15:00z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"z\" as \"Z07:00\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-12-31T23:59:60Z",
+      "err": "parsing time \"2026-12-31T23:59:60Z\": second out of range",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T24:00:00Z",
+      "err": "parsing time \"2026-10-25T24:00:00Z\": hour out of range",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-02-30T10:15:00Z",
+      "err": "parsing time \"2026-02-30T10:15:00Z\": day out of range",
+      "unixMilli": 0
+    },
+    {
+      "in": "2028-02-29T10:15:00Z",
+      "err": "",
+      "unixMilli": 1835432100000
+    },
+    {
+      "in": "2026-10-25T10:15:00+24:00",
+      "err": "",
+      "unixMilli": 1792836900000
+    },
+    {
+      "in": "2026-10-25T10:15:00+23:60",
+      "err": "",
+      "unixMilli": 1792836900000
+    },
+    {
+      "in": "2026-10-25T10:15:00+23:59",
+      "err": "",
+      "unixMilli": 1792836960000
+    },
+    {
+      "in": "2026-10-25T10:15:00+01:+1",
+      "err": "parsing time \"2026-10-25T10:15:00+01:+1\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"+01:+1\" as \"Z07:00\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "+026-10-25T10:15:00Z",
+      "err": "parsing time \"+026-10-25T10:15:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"+026-10-25T10:15:00Z\" as \"2006\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T+1:15:00Z",
+      "err": "parsing time \"2026-10-25T+1:15:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"+1:15:00Z\" as \"15\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T1:15:00Z",
+      "err": "",
+      "unixMilli": 1792890900000
+    },
+    {
+      "in": "2026-10-25T10:15:00,5Z",
+      "err": "",
+      "unixMilli": 1792923300500
+    },
+    {
+      "in": "2026-10-25T10:15:00.Z",
+      "err": "parsing time \"2026-10-25T10:15:00.Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \".Z\" as \"Z07:00\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:00.123456789123Z",
+      "err": "",
+      "unixMilli": 1792923300123
+    },
+    {
+      "in": "2026-10-25T10:15:00",
+      "err": "parsing time \"2026-10-25T10:15:00\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"\" as \"Z07:00\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "",
+      "err": "parsing time \"\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"\" as \"2006\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "x",
+      "err": "parsing time \"x\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"x\" as \"2006\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:00Zextra",
+      "err": "parsing time \"2026-10-25T10:15:00Zextra\": extra text: \"extra\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25 10:15:00Z",
+      "err": "parsing time \"2026-10-25 10:15:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \" 10:15:00Z\" as \"T\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "0000-01-01T00:00:00Z",
+      "err": "",
+      "unixMilli": -62167219200000
+    },
+    {
+      "in": "9999-12-31T23:59:59.999999999Z",
+      "err": "",
+      "unixMilli": 253402300799999
+    },
+    {
+      "in": "2026-10-25T10:15:00-00:00",
+      "err": "",
+      "unixMilli": 1792923300000
+    },
+    {
+      "in": "2026-10-25T10:15:00+00:30",
+      "err": "",
+      "unixMilli": 1792921500000
+    },
+    {
+      "in": "2026-1-25T10:15:00Z",
+      "err": "parsing time \"2026-1-25T10:15:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"1-25T10:15:00Z\" as \"01\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-5T10:15:00Z",
+      "err": "parsing time \"2026-10-5T10:15:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"5T10:15:00Z\" as \"02\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-13-01T00:00:00Z",
+      "err": "parsing time \"2026-13-01T00:00:00Z\": month out of range",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-00-01T00:00:00Z",
+      "err": "parsing time \"2026-00-01T00:00:00Z\": month out of range",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:60:00Z",
+      "err": "parsing time \"2026-10-25T10:60:00Z\": minute out of range",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:61Z",
+      "err": "parsing time \"2026-10-25T10:15:61Z\": second out of range",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:00+0100",
+      "err": "parsing time \"2026-10-25T10:15:00+0100\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"+0100\" as \"Z07:00\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:00+01:00:00",
+      "err": "parsing time \"2026-10-25T10:15:00+01:00:00\": extra text: \":00\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "-001-10-25T10:15:00Z",
+      "err": "parsing time \"-001-10-25T10:15:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"-001-10-25T10:15:00Z\" as \"2006\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:00é",
+      "err": "parsing time \"2026-10-25T10:15:00\\xc3\\xa9\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"\\xc3\\xa9\" as \"Z07:00\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:00.5+01:00",
+      "err": "",
+      "unixMilli": 1792919700500
+    },
+    {
+      "in": "2026-10-25T10:15:00.123-02:30",
+      "err": "",
+      "unixMilli": 1792932300123
+    },
+    {
+      "in": "1969-12-31T23:59:59.999Z",
+      "err": "",
+      "unixMilli": -1
+    },
+    {
+      "in": "2026-10-25T10:1:00Z",
+      "err": "parsing time \"2026-10-25T10:1:00Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"1:00Z\" as \"04\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:0Z",
+      "err": "parsing time \"2026-10-25T10:15:0Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"0Z\" as \"05\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:00+1:00",
+      "err": "parsing time \"2026-10-25T10:15:00+1:00\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"+1:00\" as \"Z07:00\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:00+01:0",
+      "err": "parsing time \"2026-10-25T10:15:00+01:0\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"+01:0\" as \"Z07:00\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:00.1a",
+      "err": "parsing time \"2026-10-25T10:15:00.1a\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"a\" as \"Z07:00\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:00+01-00",
+      "err": "parsing time \"2026-10-25T10:15:00+01-00\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"+01-00\" as \"Z07:00\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "2026-10-25T10:15:00 Z",
+      "err": "parsing time \"2026-10-25T10:15:00 Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \" Z\" as \"Z07:00\"",
+      "unixMilli": 0
+    },
+    {
+      "in": "20261025T101500Z",
+      "err": "parsing time \"20261025T101500Z\" as \"2006-01-02T15:04:05Z07:00\": cannot parse \"1025T101500Z\" as \"-\"",
+      "unixMilli": 0
+    }
+  ],
+  "usage": [
+    {
+      "name": "no folder",
+      "args": [],
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "usage: reportcheck [-json-only] \u003creport-folder\u003e\n"
+    },
+    {
+      "name": "two folders",
+      "args": [
+        "\u003cgolden clean\u003e",
+        "\u003cgolden clean\u003e"
+      ],
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "usage: reportcheck [-json-only] \u003creport-folder\u003e\n"
+    },
+    {
+      "name": "a flag after the folder",
+      "args": [
+        "\u003cgolden clean\u003e",
+        "-json-only"
+      ],
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "usage: reportcheck [-json-only] \u003creport-folder\u003e\n"
+    },
+    {
+      "name": "an unknown flag",
+      "args": [
+        "-x",
+        "\u003cgolden clean\u003e"
+      ],
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "flag provided but not defined: -x\nusage: reportcheck [-json-only] \u003creport-folder\u003e\n"
+    },
+    {
+      "name": "help",
+      "args": [
+        "-h"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "usage: reportcheck [-json-only] \u003creport-folder\u003e\n"
+    },
+    {
+      "name": "help with two dashes",
+      "args": [
+        "--help"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "usage: reportcheck [-json-only] \u003creport-folder\u003e\n"
+    },
+    {
+      "name": "two dashes",
+      "args": [
+        "--json-only",
+        "\u003cgolden clean\u003e"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "json-only=false",
+      "args": [
+        "-json-only=false",
+        "\u003cgolden clean\u003e"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "json-only=nope",
+      "args": [
+        "-json-only=nope",
+        "\u003cgolden clean\u003e"
+      ],
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "invalid boolean value \"nope\" for -json-only: parse error\nusage: reportcheck [-json-only] \u003creport-folder\u003e\n"
+    },
+    {
+      "name": "a double dash",
+      "args": [
+        "--",
+        "\u003cgolden clean\u003e"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "name": "a missing folder",
+      "args": [
+        "/nonexistent/reportcheck-oracle"
+      ],
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "reportcheck: report.json is missing from /nonexistent/reportcheck-oracle\nreportcheck: report.md is missing from /nonexistent/reportcheck-oracle\n"
+    }
+  ]
+}

@@ -16,7 +16,7 @@ import { type Context, discover, Project } from "../discovery/discovery.ts";
 import { newContext } from "../resultset/zero.ts";
 import "./all.ts";
 import { type Check, implementation } from "./check.ts";
-import { Input } from "./input.ts";
+import { Input, type Result } from "./input.ts";
 
 /** tempDir is a temporary folder, removed when the test ends. */
 export function tempDir(t: TestContext): string {
@@ -82,4 +82,13 @@ export function repoInput(
     originalPath: "/orig",
     snapshotDir: dir,
   });
+}
+
+/** runCheck runs a registered Check, which must have a run method. */
+export async function runCheck(id: string, input: Input): Promise<Result> {
+  const c = impl(id);
+  if (c.run === undefined) {
+    assert.fail(`${id} does not run`);
+  }
+  return c.run(new AbortController().signal, input);
 }

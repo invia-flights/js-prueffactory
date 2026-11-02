@@ -245,14 +245,6 @@ export function sub(t: bigint, u: bigint): Duration {
   return d;
 }
 
-function daysIn(month: number, year: number): number {
-  if (month === 2) {
-    const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
-    return leap ? 29 : 28;
-  }
-  return [4, 6, 9, 11].includes(month) ? 30 : 31;
-}
-
 // daysFromCivil counts the days from 1970-01-01 to a proleptic Gregorian
 // date (Howard Hinnant's algorithm), for any year Go's parser accepts.
 function daysFromCivil(year: number, month: number, day: number): number {
@@ -266,13 +258,25 @@ function daysFromCivil(year: number, month: number, day: number): number {
 }
 
 /**
- * parseRFC3339 is the RFC 3339 fast path of Go's time.Parse(RFC3339Nano, s)
- * and of time.Time's JSON decoding: the instant in Unix nanoseconds, or
- * undefined for a string the fast path rejects. Go then tries its general
- * layout parser, which also accepts a one-digit hour, a comma before the
- * fraction and a zone hour of 24; those count as no time here.
+ * parseRFC3339Nano is Go's time.Parse(time.RFC3339Nano, s) with the
+ * nanoseconds kept: the instant in Unix nanoseconds, or undefined when Go
+ * rejects the string. Go's RFC 3339 fast path is read here with nine digits
+ * of fraction; a string it rejects goes to the general layout parser
+ * (parseRFC3339 below, which keeps milliseconds only).
  */
-export function parseRFC3339(s: string): bigint | undefined {
+export function parseRFC3339Nano(s: string): bigint | undefined {
+  const fast = parseRFC3339Fast(s);
+  if (fast !== undefined) {
+    return fast;
+  }
+  try {
+    return BigInt(parseRFC3339(s).getTime()) * millisecond;
+  } catch {
+    return undefined;
+  }
+}
+
+function parseRFC3339Fast(s: string): bigint | undefined {
   // The fast path's shape: fixed digits and separators, a fraction only
   // when a digit follows the dot, then Z or a ±hh:mm offset.
   const m =
@@ -339,4 +343,208 @@ export function formatCompactUTC(t: Date): string {
     pad(t.getUTCSeconds(), 2) +
     "Z"
   );
+}
+
+// RFC3339 is Go's time.RFC3339 layout.
+const RFC3339 = "2006-01-02T15:04:05Z07:00";
+
+// The chunks of the RFC 3339 layout as Go's nextStdChunk splits it: the
+// literal prefix, then the element.
+const rfc3339Chunks = [
+  ["", "2006"],
+  ["-", "01"],
+  ["-", "02"],
+  ["T", "15"],
+  [":", "04"],
+  [":", "05"],
+  ["", "Z07:00"],
+] as const;
+
+// parseError is the text of Go's *time.ParseError.
+function parseError(
+  value: string,
+  layoutElem: string,
+  valueElem: string,
+  message: string,
+): Error {
+  if (message !== "") {
+    return new Error(`parsing time ${timeQuote(value)}${message}`);
+  }
+  return new Error(
+    `parsing time ${timeQuote(value)} as ${timeQuote(RFC3339)}: cannot parse ${timeQuote(valueElem)} as ${timeQuote(layoutElem)}`,
+  );
+}
+
+// getnum is the time package's getnum: one or two leading digits, exactly
+// two when fixed. undefined where Go returns errBad.
+function getnum(s: string, fixed: boolean): [number, string] | undefined {
+  if (!isDigit(s.charAt(0))) {
+    return undefined;
+  }
+  if (!isDigit(s.charAt(1))) {
+    return fixed ? undefined : [Number(s.charAt(0)), s.slice(1)];
+  }
+  return [Number(s.slice(0, 2)), s.slice(2)];
+}
+
+function daysIn(month: number, year: number): number {
+  if (month === 2) {
+    const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+    return leap ? 29 : 28;
+  }
+  return [4, 6, 9, 11].includes(month) ? 30 : 31;
+}
+
+/**
+ * parseRFC3339 is Go's time.Parse(time.RFC3339, s), which is how Go 1.27's
+ * json.Unmarshal reads a time.Time: more lenient than RFC 3339 (a one-digit
+ * hour, a comma before the fraction, offsets up to 24:60). It throws an Error
+ * with the text of Go's *time.ParseError. The Date keeps milliseconds only.
+ */
+export function parseRFC3339(s: string): Date {
+  // The time package works on bytes; a byte string keeps the offsets right.
+  const avalue = Buffer.from(s, "utf8").toString("latin1");
+  const fail = (layoutElem: string, valueElem: string, message: string) =>
+    parseError(fromLatin1(avalue), layoutElem, fromLatin1(valueElem), message);
+  let value = avalue;
+  let year = 0;
+  let month = -1;
+  let day = -1;
+  let hour = 0;
+  let min = 0;
+  let sec = 0;
+  let nsec = 0;
+  let zoneOffset = 0;
+  for (const [prefix, std] of rfc3339Chunks) {
+    if (prefix !== "") {
+      if (!value.startsWith(prefix)) {
+        throw fail(prefix, value, "");
+      }
+      value = value.slice(1);
+    }
+    const hold = value;
+    let bad = false;
+    let rangeErr = "";
+    switch (std) {
+      case "2006": {
+        const p = value.slice(0, 4);
+        if (
+          value.length < 4 ||
+          !isDigit(value.charAt(0)) ||
+          !/^[+-]?[0-9]*$/.test(p)
+        ) {
+          bad = true;
+          break;
+        }
+        year = Number(p);
+        value = value.slice(4);
+        break;
+      }
+      case "01": {
+        const r = getnum(value, true);
+        if (r === undefined) {
+          bad = true;
+          break;
+        }
+        [month, value] = r;
+        if (month <= 0 || month > 12) rangeErr = "month";
+        break;
+      }
+      case "02": {
+        const r = getnum(value, true);
+        if (r === undefined) {
+          bad = true;
+          break;
+        }
+        [day, value] = r;
+        break;
+      }
+      case "15": {
+        const r = getnum(value, false);
+        if (r === undefined) {
+          bad = true;
+          break;
+        }
+        [hour, value] = r;
+        if (hour >= 24) rangeErr = "hour";
+        break;
+      }
+      case "04": {
+        const r = getnum(value, true);
+        if (r === undefined) {
+          bad = true;
+          break;
+        }
+        [min, value] = r;
+        if (min >= 60) rangeErr = "minute";
+        break;
+      }
+      case "05": {
+        const r = getnum(value, true);
+        if (r === undefined) {
+          bad = true;
+          break;
+        }
+        [sec, value] = r;
+        if (sec >= 60) {
+          rangeErr = "second";
+          break;
+        }
+        // A fraction the layout does not name is read anyway.
+        if (/^[.,][0-9]/.test(value)) {
+          let n = 2;
+          while (n < value.length && isDigit(value.charAt(n))) n++;
+          const digits = value.slice(1, Math.min(n, 10));
+          nsec = Number(digits.padEnd(9, "0"));
+          value = value.slice(n);
+        }
+        break;
+      }
+      case "Z07:00": {
+        if (value.startsWith("Z")) {
+          value = value.slice(1);
+          break;
+        }
+        if (value.length < 6 || value.charAt(3) !== ":") {
+          bad = true;
+          break;
+        }
+        const sign = value.charAt(0);
+        const hr = getnum(value.slice(1, 3), true);
+        const mm = hr && getnum(value.slice(4, 6), true);
+        value = value.slice(6);
+        if (hr === undefined || mm === undefined) {
+          bad = true;
+          break;
+        }
+        if (hr[0] > 24) rangeErr = "time zone offset hour";
+        if (mm[0] > 60) rangeErr = "time zone offset minute";
+        zoneOffset = (hr[0] * 60 + mm[0]) * 60;
+        if (sign === "-") zoneOffset = -zoneOffset;
+        else if (sign !== "+") bad = true;
+        break;
+      }
+    }
+    if (rangeErr !== "") {
+      throw fail(std, value, `: ${rangeErr} out of range`);
+    }
+    if (bad) {
+      throw fail(std, hold, "");
+    }
+  }
+  if (value.length !== 0) {
+    throw fail("", value, `: extra text: ${timeQuote(fromLatin1(value))}`);
+  }
+  if (day < 1 || day > daysIn(month, year)) {
+    throw fail("", value, ": day out of range");
+  }
+  const t = new Date(0);
+  t.setUTCFullYear(year, month - 1, day);
+  t.setUTCHours(hour, min, sec, Math.floor(nsec / 1e6));
+  return new Date(t.getTime() - zoneOffset * 1000);
+}
+
+// fromLatin1 turns a byte string back into text.
+function fromLatin1(b: string): string {
+  return Buffer.from(b, "latin1").toString("utf8");
 }

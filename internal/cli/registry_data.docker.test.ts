@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { parseRFC3339 } from "../gocompat/time.ts";
+import { parseRFC3339Nano } from "../gocompat/time.ts";
 import { realRun, treeFingerprint } from "./realrun.testutil.ts";
 import {
   deadRegistryURL,
@@ -158,7 +158,7 @@ test("deprecated locked versions are warnings with their text, scope and directn
   // fingerprint.
   const date = full(r).run.registry_data_date;
   assert.ok(date !== null, "run.registry_data_date is null");
-  const at = parseRFC3339(date);
+  const at = parseRFC3339Nano(date);
   assert.ok(at !== undefined, date);
   const ms = Number(at / 1_000_000n);
   assert.ok(Date.now() - ms < 15 * 60_000 && ms < Date.now() + 60_000, date);

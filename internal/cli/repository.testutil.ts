@@ -33,6 +33,7 @@ export interface FullReport {
     rule_id: string | null;
     gate: boolean;
     severity: string;
+    confidence: string;
     title: string;
     message: string;
     locations: { path: string; start: { line: number } | null }[];
@@ -41,9 +42,19 @@ export interface FullReport {
   summary: { gates: number };
   benchmark: {
     areas: {
-      parts: { id: string; state: string; raw_value: number | null }[];
+      parts: {
+        id: string;
+        state: string;
+        raw_value: number | null;
+        n_eff: number | null;
+      }[];
     }[];
-    fingerprint: { fields: { kubernetes_schema_version: string | null } };
+    fingerprint: {
+      fields: {
+        kubernetes_schema_version: string | null;
+        gitlab_ci_schema_hash: string | null;
+      };
+    };
   } | null;
 }
 

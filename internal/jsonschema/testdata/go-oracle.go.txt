@@ -1,0 +1,209 @@
+// Generator of go-oracle.json: what santhosh-tekuri/jsonschema v6.0.3, with
+// the freeze commit's toolchain (Go 1.27.3), says about the formats the GitLab
+// CI schema asserts (uri, uri-reference, regex, date-time) and about small
+// draft-07 schemas, and the Unicode class names Go's regexp accepts.
+// Kept as text; regenerate from the repository root with:
+//
+//	mkdir -p dev/zzschemaoracle && cp internal/jsonschema/testdata/go-oracle.go.txt dev/zzschemaoracle/main.go
+//	go run ./dev/zzschemaoracle > internal/jsonschema/testdata/go-oracle.json && rm -r dev/zzschemaoracle
+package main
+
+import (
+	"encoding/json"
+	"errors"
+	"os"
+	"sort"
+	"strings"
+	"unicode"
+
+	"github.com/santhosh-tekuri/jsonschema/v6"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
+)
+
+var printer = message.NewPrinter(language.English)
+
+type leaf struct {
+	Instance string `json:"instance"`
+	Keyword  string `json:"keyword"`
+	Message  string `json:"message"`
+}
+
+func leaves(e *jsonschema.ValidationError, out *[]leaf) {
+	if len(e.Causes) == 0 {
+		*out = append(*out, leaf{
+			Instance: "/" + strings.Join(e.InstanceLocation, "/"),
+			Keyword:  strings.Join(e.ErrorKind.KeywordPath(), "/"),
+			Message:  e.ErrorKind.LocalizedString(printer),
+		})
+		return
+	}
+	for _, c := range e.Causes {
+		leaves(c, out)
+	}
+}
+
+func compile(schema string) *jsonschema.Schema {
+	doc, err := jsonschema.UnmarshalJSON(strings.NewReader(schema))
+	if err != nil {
+		panic(err)
+	}
+	c := jsonschema.NewCompiler()
+	if err := c.AddResource("https://example.test/s.json", doc); err != nil {
+		panic(err)
+	}
+	s, err := c.Compile("https://example.test/s.json")
+	if err != nil {
+		panic(err)
+	}
+	return s
+}
+
+func validate(s *jsonschema.Schema, instance any) []leaf {
+	err := s.Validate(instance)
+	if err == nil {
+		return []leaf{}
+	}
+	var verr *jsonschema.ValidationError
+	if !errors.As(err, &verr) {
+		panic(err)
+	}
+	out := []leaf{}
+	leaves(verr, &out)
+	return out
+}
+
+type formatCase struct {
+	Format string `json:"format"`
+	Value  string `json:"value"`
+	Error  string `json:"error"` // the leaf message, "" when valid
+}
+
+type schemaCase struct {
+	Schema   json.RawMessage `json:"schema"`
+	Instance json.RawMessage `json:"instance"`
+	Leaves   []leaf          `json:"leaves"`
+}
+
+func main() {
+	regexes := []string{
+		"", "a", "/Lines\\s*:\\s*(\\d+.\\d+)%/", "(?i)total.*? (100(?:\\.0+)?\\%|[1-9]?\\d(?:\\.\\d+)?\\%)$",
+		"x(", "x)", "a**", "a*?*", "a+*", "a??", "a{2}{3}", "a{2}*", "*a", "(*)", "(|*)", "^*", "$+", "\\b*", "(?i)*", "a(?i)*",
+		"(?<=a)b", "(?=a)", "(?!a)", "\\1", "\\8", "\\0", "\\07", "\\123", "[z-a]", "[a-z]", "[]a]", "[^]a]", "[]", "[^]", "[a", "[a-]", "[-a]",
+		"[\\d-z]", "[a-\\d]", "a{1001}", "a{1000}", "a{0,1000}", "a{1000,}", "(a{100}){100}", "((a{10}){10}){10}", "((a{10}){10}){11}", "a{,5}", "a{5,3}", "a{99999999999}",
+		"a{", "a{1", "a{1,", "a{1,2", "a{01}", "{", "}", "x{2}y", "\\p{Greek}", "\\pL", "\\p{Foo}", "\\p{^Greek}", "\\PL", "\\pZ", "\\p{L", "\\pX", "\\p{greek}",
+		"\\p{Letter}", "\\p{Uppercase_Letter}", "\\p{ascii}", "\\p{Any}", "\\p{Assigned}", "\\p{lc}", "\\p{Old_Italic}", "\\p{old italic}", "\\p{OLDITALIC}", "\\p{}",
+		"[[:alpha:]]", "[[:nope:]]", "[[:^digit:]]", "[[:alpha:]", "[[:]]", "[:alpha:]", "\\q", "\\_", "\\%", "\\/", "\\-", "\\ ", "\\z", "\\Z", "\\A", "\\C", "\\Qa.b\\E+", "\\Qab", "\\Q\\E*",
+		"\\x41", "\\x4", "\\x{41}", "\\x{}", "\\x{110000}", "\\x{10FFFF}", "\\xZZ", "\\a\\f\\t\\n\\r\\v", "\\e", "\\", "a\\", "[\\", "[a\\]", "\\d\\D\\s\\S\\w\\W", "[\\d\\pL]", "[\\p{Foo}]",
+		"(?P<n>a)", "(?P<>b)", "(?P<n!>b)", "(?<n>a)", "(?'n'a)", "(?P<n", "(?P=n)", "(?P>n)", "(?i)", "(?i:a)", "(?-i)", "(?i-)", "(?-)", "(?x)", "(?imsU)", "(?i-m:a)", "(?--i)", "(?", "(?:", "(?:a",
+		"(a|b", "a|b)", "a||b", "|", "()", "(())", "()*", "(?:)*", "a|*", "(a)(b)(c)\\3", "ä+", "😀{2}", "[😀-😃]", "[😃-😀]", "\\pN+\\p{Han}", ".", "(?s).", "(?U)a*",
+		"x{2,1}", "x{0}", "x{1000}{2}", "(x{1000}){2}", "(?:x{500}){3}", "\\b{2}", "a{2}?", "a{2}??", "a{2}+",
+		"/^TOTAL.+?(\\d+\\%)$/", "/Statements\\s*:\\s*([^%]+)/", "/\\d+.\\d+% covered/", "/(?<=Coverage: )\\d+/",
+	}
+	// A regexp nested more deeply than Go allows.
+	regexes = append(regexes, strings.Repeat("(", 1001)+"a"+strings.Repeat(")", 1001))
+	regexes = append(regexes, strings.Repeat("(", 999)+"a"+strings.Repeat(")", 999))
+	regexes = append(regexes, strings.Repeat("(?:", 1001)+"a"+strings.Repeat(")", 1001))
+	regexes = append(regexes, strings.Repeat("(?:a", 1001)+strings.Repeat(")", 1001))
+	regexes = append(regexes, strings.Repeat("a*", 1001))
+	regexes = append(regexes, strings.Repeat("(a)*", 600))
+
+	uris := []string{
+		"", "a", "https://example.com", "https://example.com/a b", "https://exa mple.com/", "http://example.com:abc/", "http://example.com:80/",
+		"https://ex%zzample.com/", "https://ex%41mple.com/", "https://ex%c3%a4mple.com/", "https://[::1]:80/", "https://[::1]x/", "https://[::1/", "https://[fe80::1%25en0]/",
+		"https://[fe80::1%en0]/", "https://[1.2.3.4]/", "https://[::ffff:1.2.3.4]/", "https://a[::1]/", "https://[1:2:3:4:5:6:7:8:9]/", "https://[1::2::3]/", "https://[12345::]/",
+		"https://[::g]/", "https://[1:2]/", "https://[::1.2.3]/", "https://[::1.2.3.04]/", "https://[::1.2.3.256]/", "https://[1:2:3:4:5:6:7::1.2.3.4]/", "https://[:]/",
+		"https://a:b:c@host/", "https://a b@host/", "https://user@host/", "https://us%zzer@host/", "https://u:p%zz@host/", "https://h:1:2/", "ftp://h:1:2/", "mongodb://h1:1,h2:2/",
+		"https://ok.example.com/p?q=1#frag%zz", "https://ok.example.com/p?q=%zz", "https://ok/p%zz", "#frag", "#%zz", "?q", "//host/p", "///p", "/p", "p:q", "a/b:c", "a:b/c",
+		":x", "1a:b", "mailto:a@b", "urn:x:y", "*", "http://\u00e4.example/", "http://ex\u00e4mple.com/", "http://exa\u0001mple/", "https://a\x7fb/", "\\\\server\\share",
+		"c:\\x", "https://$CI_ENVIRONMENT_SLUG.example.com", "$CI_URL", "https://<x>/", "https://\"x\"/", "https://a{b}/", "https://a|b/", "https://a^b/", "https://a`b/",
+		"https://example.com:/", "https://:80/", "https://@/", "https://[]/", "https://host]/", "https://h%25/", "https://h%4/", "ci/a.yml", "ci\\a.yml", "../x.yml",
+		"Jobs/Build.gitlab-ci.yml", "group/project", "$CI_SERVER_FQDN/a/b@1", "example.org/group/components/lint@1.0", "ci/x y.yml", "http://a b.yml",
+		"https://[fe80::1%25]/", "https://[fe80::1%25%zz]/", "https://[fe80::1%25a%20b]/", "https://[fe80::1%25a%0a]/", "https://[%3a%3a1]/", "https://[::1]:x/",
+	}
+	var formats []formatCase
+	schemas := map[string]*jsonschema.Schema{}
+	for _, f := range []string{"uri", "uri-reference", "regex", "date-time"} {
+		schemas[f] = compile(`{"$schema": "http://json-schema.org/draft-07/schema#", "format": "` + f + `"}`)
+	}
+	add := func(f, v string) {
+		msg := ""
+		if l := validate(schemas[f], v); len(l) > 0 {
+			msg = l[0].Message
+		}
+		formats = append(formats, formatCase{f, v, msg})
+	}
+	for _, r := range regexes {
+		add("regex", r)
+	}
+	for _, u := range uris {
+		add("uri", u)
+		add("uri-reference", u)
+	}
+	for _, d := range []string{"2026-01-02T03:04:05Z", "2026-13-01T00:00:00Z", "2024-02-29T10:00:00+01:00", "2026-01-02 03:04:05Z", "x"} {
+		add("date-time", d)
+	}
+
+	// Small draft-07 schemas: the error tree's leaves for each instance.
+	pairs := [][2]string{
+		{`{"type": "integer"}`, `1.5`}, {`{"type": "integer"}`, `2.0`}, {`{"type": ["string", "null"]}`, `5`}, {`{"type": "number"}`, `"x"`},
+		{`{"const": "a"}`, `"b"`}, {`{"const": 1}`, `1.0`}, {`{"const": [1]}`, `[2]`}, {`{"enum": ["a", "b", 3]}`, `"c"`}, {`{"enum": ["a"]}`, `true`}, {`{"enum": [{"a": 1}]}`, `1`},
+		{`{"type": "string", "enum": ["a"]}`, `5`}, {`{"minimum": 0, "maximum": 2}`, `-1`}, {`{"minimum": 0, "maximum": 2}`, `1000001`}, {`{"maximum": 2}`, `2.5`}, {`{"minimum": 1e-6}`, `0`},
+		{`{"minLength": 2, "maxLength": 3, "pattern": "^a"}`, `"b"`}, {`{"maxLength": 3}`, `"äöüß"`}, {`{"minItems": 2, "maxItems": 3, "uniqueItems": true}`, `[1]`},
+		{`{"uniqueItems": true}`, `[1, 2, 1.0]`}, {`{"uniqueItems": true}`, `[{"a": 1}, {"a": 1}]`}, {`{"maxItems": 1}`, `[1, 2, 3]`},
+		{`{"required": ["a", "b"]}`, `{}`}, {`{"required": ["a", "b"]}`, `{"a": 1}`}, {`{"properties": {"a": {"type": "string"}}, "additionalProperties": false}`, `{"a": 1, "b": 2}`},
+		{`{"patternProperties": {"^x": {"type": "string"}}, "additionalProperties": {"type": "integer"}}`, `{"xa": 1, "y": "s"}`},
+		{`{"dependencies": {"a": ["b", "c"]}}`, `{"a": 1}`}, {`{"dependencies": {"a": {"required": ["z"]}}}`, `{"a": 1}`},
+		{`{"items": {"type": "string"}}`, `["a", 1, "b", 2]`}, {`{"items": [{"type": "string"}], "additionalItems": false}`, `["a", 1, 2]`},
+		{`{"not": {"type": "string"}}`, `"a"`}, {`{"allOf": [{"type": "string"}, {"minLength": 2}]}`, `1`},
+		{`{"anyOf": [{"type": "string"}, {"type": "object", "required": ["a"]}]}`, `{}`}, {`{"oneOf": [{"type": "string"}, {"minLength": 1}]}`, `"a"`},
+		{`{"oneOf": [{"type": "string"}, {"type": "integer"}]}`, `[]`}, {`{"if": {"type": "string"}, "then": {"minLength": 3}}`, `"ab"`},
+		{`{"if": {"type": "string"}, "then": {"minLength": 3}, "else": {"type": "null"}}`, `5`},
+		{`{"definitions": {"s": {"type": "string"}}, "properties": {"a": {"$ref": "#/definitions/s"}}}`, `{"a": 1}`},
+		{`{"definitions": {"s": {"type": "string"}}, "$ref": "#/definitions/s", "minLength": 5}`, `"a"`},
+		{`{"definitions": {"t": {"anyOf": [{"type": "string"}, {"$ref": "#/definitions/t2"}]}, "t2": {"properties": {"x": {"type": "string"}}, "required": ["x"]}}, "$ref": "#/definitions/t"}`, `{"x": 1}`},
+		{`{"type": "object", "properties": {"a": {"type": "string"}}, "required": ["b"]}`, `{"a": 1}`},
+		{`{"format": "uri", "type": "string", "pattern": "x"}`, `"a b"`}, {`false`, `1`}, {`{"properties": {"a": false}}`, `{"a": 1}`},
+	}
+	var cases []schemaCase
+	for _, p := range pairs {
+		// Without $schema the library assumes 2020-12; the GitLab schema is draft-07.
+		var s *jsonschema.Schema
+		if p[0] == "false" {
+			s = compile(`false`)
+		} else {
+			s = compile(strings.Replace(p[0], "{", `{"$schema": "http://json-schema.org/draft-07/schema#", `, 1))
+		}
+		inst, err := jsonschema.UnmarshalJSON(strings.NewReader(p[1]))
+		if err != nil {
+			panic(err)
+		}
+		cases = append(cases, schemaCase{json.RawMessage(p[0]), json.RawMessage(p[1]), validate(s, inst)})
+	}
+
+	// The names \p{...} accepts besides the special ones: categories,
+	// scripts and category aliases, as Go's regexp spells them.
+	var names []string
+	for n := range unicode.Categories {
+		names = append(names, n)
+	}
+	for n := range unicode.Scripts {
+		names = append(names, n)
+	}
+	for n := range unicode.CategoryAliases {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+
+	out := map[string]any{
+		"recordedFrom": "santhosh-tekuri/jsonschema v6.0.3 with Go 1.27.3, the toolchain of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8",
+		"formats":      formats,
+		"schemas":      cases,
+		"unicodeNames": names,
+	}
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", " ")
+	if err := enc.Encode(out); err != nil {
+		panic(err)
+	}
+}

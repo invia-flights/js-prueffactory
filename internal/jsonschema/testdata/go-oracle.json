@@ -1,0 +1,2800 @@
+{
+ "formats": [
+  {
+   "format": "regex",
+   "value": "",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "a",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "/Lines\\s*:\\s*(\\d+.\\d+)%/",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?i)total.*? (100(?:\\.0+)?\\%|[1-9]?\\d(?:\\.\\d+)?\\%)$",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "x(",
+   "error": "'x(' is not valid regex: error parsing regexp: missing closing ): `x(`"
+  },
+  {
+   "format": "regex",
+   "value": "x)",
+   "error": "'x)' is not valid regex: error parsing regexp: unexpected ): `x)`"
+  },
+  {
+   "format": "regex",
+   "value": "a**",
+   "error": "'a**' is not valid regex: error parsing regexp: invalid nested repetition operator: `**`"
+  },
+  {
+   "format": "regex",
+   "value": "a*?*",
+   "error": "'a*?*' is not valid regex: error parsing regexp: invalid nested repetition operator: `*?*`"
+  },
+  {
+   "format": "regex",
+   "value": "a+*",
+   "error": "'a+*' is not valid regex: error parsing regexp: invalid nested repetition operator: `+*`"
+  },
+  {
+   "format": "regex",
+   "value": "a??",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "a{2}{3}",
+   "error": "'a{2}{3}' is not valid regex: error parsing regexp: invalid nested repetition operator: `{2}{3}`"
+  },
+  {
+   "format": "regex",
+   "value": "a{2}*",
+   "error": "'a{2}*' is not valid regex: error parsing regexp: invalid nested repetition operator: `{2}*`"
+  },
+  {
+   "format": "regex",
+   "value": "*a",
+   "error": "'*a' is not valid regex: error parsing regexp: missing argument to repetition operator: `*`"
+  },
+  {
+   "format": "regex",
+   "value": "(*)",
+   "error": "'(*)' is not valid regex: error parsing regexp: missing argument to repetition operator: `*`"
+  },
+  {
+   "format": "regex",
+   "value": "(|*)",
+   "error": "'(|*)' is not valid regex: error parsing regexp: missing argument to repetition operator: `*`"
+  },
+  {
+   "format": "regex",
+   "value": "^*",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "$+",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\b*",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?i)*",
+   "error": "'(?i)*' is not valid regex: error parsing regexp: missing argument to repetition operator: `*`"
+  },
+  {
+   "format": "regex",
+   "value": "a(?i)*",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?\u003c=a)b",
+   "error": "'(?\u003c=a)b' is not valid regex: error parsing regexp: invalid named capture: `(?\u003c=a)b`"
+  },
+  {
+   "format": "regex",
+   "value": "(?=a)",
+   "error": "'(?=a)' is not valid regex: error parsing regexp: invalid or unsupported Perl syntax: `(?=`"
+  },
+  {
+   "format": "regex",
+   "value": "(?!a)",
+   "error": "'(?!a)' is not valid regex: error parsing regexp: invalid or unsupported Perl syntax: `(?!`"
+  },
+  {
+   "format": "regex",
+   "value": "\\1",
+   "error": "'\\\\1' is not valid regex: error parsing regexp: invalid escape sequence: `\\1`"
+  },
+  {
+   "format": "regex",
+   "value": "\\8",
+   "error": "'\\\\8' is not valid regex: error parsing regexp: invalid escape sequence: `\\8`"
+  },
+  {
+   "format": "regex",
+   "value": "\\0",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\07",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\123",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[z-a]",
+   "error": "'[z-a]' is not valid regex: error parsing regexp: invalid character class range: `z-a`"
+  },
+  {
+   "format": "regex",
+   "value": "[a-z]",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[]a]",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[^]a]",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[]",
+   "error": "'[]' is not valid regex: error parsing regexp: missing closing ]: `[]`"
+  },
+  {
+   "format": "regex",
+   "value": "[^]",
+   "error": "'[^]' is not valid regex: error parsing regexp: missing closing ]: `[^]`"
+  },
+  {
+   "format": "regex",
+   "value": "[a",
+   "error": "'[a' is not valid regex: error parsing regexp: missing closing ]: `[a`"
+  },
+  {
+   "format": "regex",
+   "value": "[a-]",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[-a]",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[\\d-z]",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[a-\\d]",
+   "error": "'[a-\\\\d]' is not valid regex: error parsing regexp: invalid escape sequence: `\\d`"
+  },
+  {
+   "format": "regex",
+   "value": "a{1001}",
+   "error": "'a{1001}' is not valid regex: error parsing regexp: invalid repeat count: `{1001}`"
+  },
+  {
+   "format": "regex",
+   "value": "a{1000}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "a{0,1000}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "a{1000,}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(a{100}){100}",
+   "error": "'(a{100}){100}' is not valid regex: error parsing regexp: invalid repeat count: `{100}`"
+  },
+  {
+   "format": "regex",
+   "value": "((a{10}){10}){10}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "((a{10}){10}){11}",
+   "error": "'((a{10}){10}){11}' is not valid regex: error parsing regexp: invalid repeat count: `{11}`"
+  },
+  {
+   "format": "regex",
+   "value": "a{,5}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "a{5,3}",
+   "error": "'a{5,3}' is not valid regex: error parsing regexp: invalid repeat count: `{5,3}`"
+  },
+  {
+   "format": "regex",
+   "value": "a{99999999999}",
+   "error": "'a{99999999999}' is not valid regex: error parsing regexp: invalid repeat count: `{99999999999}`"
+  },
+  {
+   "format": "regex",
+   "value": "a{",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "a{1",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "a{1,",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "a{1,2",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "a{01}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "{",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "x{2}y",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\p{Greek}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\pL",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\p{Foo}",
+   "error": "'\\\\p{Foo}' is not valid regex: error parsing regexp: invalid character class range: `\\p{Foo}`"
+  },
+  {
+   "format": "regex",
+   "value": "\\p{^Greek}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\PL",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\pZ",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\p{L",
+   "error": "'\\\\p{L' is not valid regex: error parsing regexp: invalid character class range: `\\p{L`"
+  },
+  {
+   "format": "regex",
+   "value": "\\pX",
+   "error": "'\\\\pX' is not valid regex: error parsing regexp: invalid character class range: `\\pX`"
+  },
+  {
+   "format": "regex",
+   "value": "\\p{greek}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\p{Letter}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\p{Uppercase_Letter}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\p{ascii}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\p{Any}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\p{Assigned}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\p{lc}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\p{Old_Italic}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\p{old italic}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\p{OLDITALIC}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\p{}",
+   "error": "'\\\\p{}' is not valid regex: error parsing regexp: invalid character class range: `\\p{}`"
+  },
+  {
+   "format": "regex",
+   "value": "[[:alpha:]]",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[[:nope:]]",
+   "error": "'[[:nope:]]' is not valid regex: error parsing regexp: invalid character class range: `[:nope:]`"
+  },
+  {
+   "format": "regex",
+   "value": "[[:^digit:]]",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[[:alpha:]",
+   "error": "'[[:alpha:]' is not valid regex: error parsing regexp: missing closing ]: `[[:alpha:]`"
+  },
+  {
+   "format": "regex",
+   "value": "[[:]]",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[:alpha:]",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\q",
+   "error": "'\\\\q' is not valid regex: error parsing regexp: invalid escape sequence: `\\q`"
+  },
+  {
+   "format": "regex",
+   "value": "\\_",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\%",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\/",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\-",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\ ",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\z",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\Z",
+   "error": "'\\\\Z' is not valid regex: error parsing regexp: invalid escape sequence: `\\Z`"
+  },
+  {
+   "format": "regex",
+   "value": "\\A",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\C",
+   "error": "'\\\\C' is not valid regex: error parsing regexp: invalid escape sequence: `\\C`"
+  },
+  {
+   "format": "regex",
+   "value": "\\Qa.b\\E+",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\Qab",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\Q\\E*",
+   "error": "'\\\\Q\\\\E*' is not valid regex: error parsing regexp: missing argument to repetition operator: `*`"
+  },
+  {
+   "format": "regex",
+   "value": "\\x41",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\x4",
+   "error": "'\\\\x4' is not valid regex: error parsing regexp: invalid escape sequence: `\\x4`"
+  },
+  {
+   "format": "regex",
+   "value": "\\x{41}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\x{}",
+   "error": "'\\\\x{}' is not valid regex: error parsing regexp: invalid escape sequence: `\\x{}`"
+  },
+  {
+   "format": "regex",
+   "value": "\\x{110000}",
+   "error": "'\\\\x{110000}' is not valid regex: error parsing regexp: invalid escape sequence: `\\x{110000`"
+  },
+  {
+   "format": "regex",
+   "value": "\\x{10FFFF}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\xZZ",
+   "error": "'\\\\xZZ' is not valid regex: error parsing regexp: invalid escape sequence: `\\xZZ`"
+  },
+  {
+   "format": "regex",
+   "value": "\\a\\f\\t\\n\\r\\v",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "\\e",
+   "error": "'\\\\e' is not valid regex: error parsing regexp: invalid escape sequence: `\\e`"
+  },
+  {
+   "format": "regex",
+   "value": "\\",
+   "error": "'\\' is not valid regex: error parsing regexp: trailing backslash at end of expression: ``"
+  },
+  {
+   "format": "regex",
+   "value": "a\\",
+   "error": "'a\\' is not valid regex: error parsing regexp: trailing backslash at end of expression: ``"
+  },
+  {
+   "format": "regex",
+   "value": "[\\",
+   "error": "'[\\' is not valid regex: error parsing regexp: trailing backslash at end of expression: ``"
+  },
+  {
+   "format": "regex",
+   "value": "[a\\]",
+   "error": "'[a\\\\]' is not valid regex: error parsing regexp: missing closing ]: `[a\\]`"
+  },
+  {
+   "format": "regex",
+   "value": "\\d\\D\\s\\S\\w\\W",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[\\d\\pL]",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[\\p{Foo}]",
+   "error": "'[\\\\p{Foo}]' is not valid regex: error parsing regexp: invalid character class range: `\\p{Foo}`"
+  },
+  {
+   "format": "regex",
+   "value": "(?P\u003cn\u003ea)",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?P\u003c\u003eb)",
+   "error": "'(?P\u003c\u003eb)' is not valid regex: error parsing regexp: invalid named capture: `(?P\u003c\u003e`"
+  },
+  {
+   "format": "regex",
+   "value": "(?P\u003cn!\u003eb)",
+   "error": "'(?P\u003cn!\u003eb)' is not valid regex: error parsing regexp: invalid named capture: `(?P\u003cn!\u003e`"
+  },
+  {
+   "format": "regex",
+   "value": "(?\u003cn\u003ea)",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?'n'a)",
+   "error": "'(?\\'n\\'a)' is not valid regex: error parsing regexp: invalid or unsupported Perl syntax: `(?'`"
+  },
+  {
+   "format": "regex",
+   "value": "(?P\u003cn",
+   "error": "'(?P\u003cn' is not valid regex: error parsing regexp: invalid named capture: `(?P\u003cn`"
+  },
+  {
+   "format": "regex",
+   "value": "(?P=n)",
+   "error": "'(?P=n)' is not valid regex: error parsing regexp: invalid or unsupported Perl syntax: `(?P`"
+  },
+  {
+   "format": "regex",
+   "value": "(?P\u003en)",
+   "error": "'(?P\u003en)' is not valid regex: error parsing regexp: invalid or unsupported Perl syntax: `(?P`"
+  },
+  {
+   "format": "regex",
+   "value": "(?i)",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?i:a)",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?-i)",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?i-)",
+   "error": "'(?i-)' is not valid regex: error parsing regexp: invalid or unsupported Perl syntax: `(?i-)`"
+  },
+  {
+   "format": "regex",
+   "value": "(?-)",
+   "error": "'(?-)' is not valid regex: error parsing regexp: invalid or unsupported Perl syntax: `(?-)`"
+  },
+  {
+   "format": "regex",
+   "value": "(?x)",
+   "error": "'(?x)' is not valid regex: error parsing regexp: invalid or unsupported Perl syntax: `(?x`"
+  },
+  {
+   "format": "regex",
+   "value": "(?imsU)",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?i-m:a)",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?--i)",
+   "error": "'(?--i)' is not valid regex: error parsing regexp: invalid or unsupported Perl syntax: `(?--`"
+  },
+  {
+   "format": "regex",
+   "value": "(?",
+   "error": "'(?' is not valid regex: error parsing regexp: invalid or unsupported Perl syntax: `(?`"
+  },
+  {
+   "format": "regex",
+   "value": "(?:",
+   "error": "'(?:' is not valid regex: error parsing regexp: missing closing ): `(?:`"
+  },
+  {
+   "format": "regex",
+   "value": "(?:a",
+   "error": "'(?:a' is not valid regex: error parsing regexp: missing closing ): `(?:a`"
+  },
+  {
+   "format": "regex",
+   "value": "(a|b",
+   "error": "'(a|b' is not valid regex: error parsing regexp: missing closing ): `(a|b`"
+  },
+  {
+   "format": "regex",
+   "value": "a|b)",
+   "error": "'a|b)' is not valid regex: error parsing regexp: unexpected ): `a|b)`"
+  },
+  {
+   "format": "regex",
+   "value": "a||b",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "|",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "()",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(())",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "()*",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?:)*",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "a|*",
+   "error": "'a|*' is not valid regex: error parsing regexp: missing argument to repetition operator: `*`"
+  },
+  {
+   "format": "regex",
+   "value": "(a)(b)(c)\\3",
+   "error": "'(a)(b)(c)\\\\3' is not valid regex: error parsing regexp: invalid escape sequence: `\\3`"
+  },
+  {
+   "format": "regex",
+   "value": "ä+",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "😀{2}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[😀-😃]",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "[😃-😀]",
+   "error": "'[😃-😀]' is not valid regex: error parsing regexp: invalid character class range: `😃-😀`"
+  },
+  {
+   "format": "regex",
+   "value": "\\pN+\\p{Han}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": ".",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?s).",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?U)a*",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "x{2,1}",
+   "error": "'x{2,1}' is not valid regex: error parsing regexp: invalid repeat count: `{2,1}`"
+  },
+  {
+   "format": "regex",
+   "value": "x{0}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "x{1000}{2}",
+   "error": "'x{1000}{2}' is not valid regex: error parsing regexp: invalid nested repetition operator: `{1000}{2}`"
+  },
+  {
+   "format": "regex",
+   "value": "(x{1000}){2}",
+   "error": "'(x{1000}){2}' is not valid regex: error parsing regexp: invalid repeat count: `{2}`"
+  },
+  {
+   "format": "regex",
+   "value": "(?:x{500}){3}",
+   "error": "'(?:x{500}){3}' is not valid regex: error parsing regexp: invalid repeat count: `{3}`"
+  },
+  {
+   "format": "regex",
+   "value": "\\b{2}",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "a{2}?",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "a{2}??",
+   "error": "'a{2}??' is not valid regex: error parsing regexp: invalid nested repetition operator: `{2}??`"
+  },
+  {
+   "format": "regex",
+   "value": "a{2}+",
+   "error": "'a{2}+' is not valid regex: error parsing regexp: invalid nested repetition operator: `{2}+`"
+  },
+  {
+   "format": "regex",
+   "value": "/^TOTAL.+?(\\d+\\%)$/",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "/Statements\\s*:\\s*([^%]+)/",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "/\\d+.\\d+% covered/",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "/(?\u003c=Coverage: )\\d+/",
+   "error": "'/(?\u003c=Coverage: )\\\\d+/' is not valid regex: error parsing regexp: invalid named capture: `(?\u003c=Coverage: )\\d+/`"
+  },
+  {
+   "format": "regex",
+   "value": "(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((a)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))",
+   "error": "'(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((a)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))' is not valid regex: error parsing regexp: expression nests too deeply: `(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((a)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))`"
+  },
+  {
+   "format": "regex",
+   "value": "(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((a)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:a)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a(?:a)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*a*",
+   "error": ""
+  },
+  {
+   "format": "regex",
+   "value": "(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*(a)*",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "",
+   "error": "'' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "a",
+   "error": "'a' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "a",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://example.com",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://example.com",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://example.com/a b",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://example.com/a b",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://exa mple.com/",
+   "error": "'https://exa mple.com/' is not valid uri: parse \"https://exa mple.com/\": invalid character \" \" in host name"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://exa mple.com/",
+   "error": "'https://exa mple.com/' is not valid uri-reference: parse \"https://exa mple.com/\": invalid character \" \" in host name"
+  },
+  {
+   "format": "uri",
+   "value": "http://example.com:abc/",
+   "error": "'http://example.com:abc/' is not valid uri: parse \"http://example.com:abc/\": invalid port \":abc\" after host"
+  },
+  {
+   "format": "uri-reference",
+   "value": "http://example.com:abc/",
+   "error": "'http://example.com:abc/' is not valid uri-reference: parse \"http://example.com:abc/\": invalid port \":abc\" after host"
+  },
+  {
+   "format": "uri",
+   "value": "http://example.com:80/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "http://example.com:80/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://ex%zzample.com/",
+   "error": "'https://ex%zzample.com/' is not valid uri: parse \"https://ex%zzample.com/\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://ex%zzample.com/",
+   "error": "'https://ex%zzample.com/' is not valid uri-reference: parse \"https://ex%zzample.com/\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri",
+   "value": "https://ex%41mple.com/",
+   "error": "'https://ex%41mple.com/' is not valid uri: parse \"https://ex%41mple.com/\": invalid URL escape \"%41\""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://ex%41mple.com/",
+   "error": "'https://ex%41mple.com/' is not valid uri-reference: parse \"https://ex%41mple.com/\": invalid URL escape \"%41\""
+  },
+  {
+   "format": "uri",
+   "value": "https://ex%c3%a4mple.com/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://ex%c3%a4mple.com/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://[::1]:80/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[::1]:80/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://[::1]x/",
+   "error": "'https://[::1]x/' is not valid uri: parse \"https://[::1]x/\": invalid port \"x\" after host"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[::1]x/",
+   "error": "'https://[::1]x/' is not valid uri-reference: parse \"https://[::1]x/\": invalid port \"x\" after host"
+  },
+  {
+   "format": "uri",
+   "value": "https://[::1/",
+   "error": "'https://[::1/' is not valid uri: parse \"https://[::1/\": missing ']' in host"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[::1/",
+   "error": "'https://[::1/' is not valid uri-reference: parse \"https://[::1/\": missing ']' in host"
+  },
+  {
+   "format": "uri",
+   "value": "https://[fe80::1%25en0]/",
+   "error": "'https://[fe80::1%25en0]/' is not valid uri: invalid ipv6 address: zone id is not a part of ipv6 address"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[fe80::1%25en0]/",
+   "error": "'https://[fe80::1%25en0]/' is not valid uri-reference: invalid ipv6 address: zone id is not a part of ipv6 address"
+  },
+  {
+   "format": "uri",
+   "value": "https://[fe80::1%en0]/",
+   "error": "'https://[fe80::1%en0]/' is not valid uri: parse \"https://[fe80::1%en0]/\": invalid URL escape \"%en\""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[fe80::1%en0]/",
+   "error": "'https://[fe80::1%en0]/' is not valid uri-reference: parse \"https://[fe80::1%en0]/\": invalid URL escape \"%en\""
+  },
+  {
+   "format": "uri",
+   "value": "https://[1.2.3.4]/",
+   "error": "'https://[1.2.3.4]/' is not valid uri: parse \"https://[1.2.3.4]/\": invalid IP-literal"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[1.2.3.4]/",
+   "error": "'https://[1.2.3.4]/' is not valid uri-reference: parse \"https://[1.2.3.4]/\": invalid IP-literal"
+  },
+  {
+   "format": "uri",
+   "value": "https://[::ffff:1.2.3.4]/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[::ffff:1.2.3.4]/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://a[::1]/",
+   "error": "'https://a[::1]/' is not valid uri: parse \"https://a[::1]/\": invalid IP-literal"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://a[::1]/",
+   "error": "'https://a[::1]/' is not valid uri-reference: parse \"https://a[::1]/\": invalid IP-literal"
+  },
+  {
+   "format": "uri",
+   "value": "https://[1:2:3:4:5:6:7:8:9]/",
+   "error": "'https://[1:2:3:4:5:6:7:8:9]/' is not valid uri: parse \"https://[1:2:3:4:5:6:7:8:9]/\": invalid host: ParseAddr(\"1:2:3:4:5:6:7:8:9\"): trailing garbage after address (at \"9\")"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[1:2:3:4:5:6:7:8:9]/",
+   "error": "'https://[1:2:3:4:5:6:7:8:9]/' is not valid uri-reference: parse \"https://[1:2:3:4:5:6:7:8:9]/\": invalid host: ParseAddr(\"1:2:3:4:5:6:7:8:9\"): trailing garbage after address (at \"9\")"
+  },
+  {
+   "format": "uri",
+   "value": "https://[1::2::3]/",
+   "error": "'https://[1::2::3]/' is not valid uri: parse \"https://[1::2::3]/\": invalid host: ParseAddr(\"1::2::3\"): multiple :: in address (at \":3\")"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[1::2::3]/",
+   "error": "'https://[1::2::3]/' is not valid uri-reference: parse \"https://[1::2::3]/\": invalid host: ParseAddr(\"1::2::3\"): multiple :: in address (at \":3\")"
+  },
+  {
+   "format": "uri",
+   "value": "https://[12345::]/",
+   "error": "'https://[12345::]/' is not valid uri: parse \"https://[12345::]/\": invalid host: ParseAddr(\"12345::\"): each group must have 4 or less digits (at \"12345::\")"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[12345::]/",
+   "error": "'https://[12345::]/' is not valid uri-reference: parse \"https://[12345::]/\": invalid host: ParseAddr(\"12345::\"): each group must have 4 or less digits (at \"12345::\")"
+  },
+  {
+   "format": "uri",
+   "value": "https://[::g]/",
+   "error": "'https://[::g]/' is not valid uri: parse \"https://[::g]/\": invalid host: ParseAddr(\"::g\"): each colon-separated field must have at least one digit (at \"g\")"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[::g]/",
+   "error": "'https://[::g]/' is not valid uri-reference: parse \"https://[::g]/\": invalid host: ParseAddr(\"::g\"): each colon-separated field must have at least one digit (at \"g\")"
+  },
+  {
+   "format": "uri",
+   "value": "https://[1:2]/",
+   "error": "'https://[1:2]/' is not valid uri: parse \"https://[1:2]/\": invalid host: ParseAddr(\"1:2\"): address string too short"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[1:2]/",
+   "error": "'https://[1:2]/' is not valid uri-reference: parse \"https://[1:2]/\": invalid host: ParseAddr(\"1:2\"): address string too short"
+  },
+  {
+   "format": "uri",
+   "value": "https://[::1.2.3]/",
+   "error": "'https://[::1.2.3]/' is not valid uri: parse \"https://[::1.2.3]/\": invalid host: ParseAddr(\"::1.2.3\"): IPv4 address too short"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[::1.2.3]/",
+   "error": "'https://[::1.2.3]/' is not valid uri-reference: parse \"https://[::1.2.3]/\": invalid host: ParseAddr(\"::1.2.3\"): IPv4 address too short"
+  },
+  {
+   "format": "uri",
+   "value": "https://[::1.2.3.04]/",
+   "error": "'https://[::1.2.3.04]/' is not valid uri: parse \"https://[::1.2.3.04]/\": invalid host: ParseAddr(\"::1.2.3.04\"): IPv4 field has octet with leading zero"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[::1.2.3.04]/",
+   "error": "'https://[::1.2.3.04]/' is not valid uri-reference: parse \"https://[::1.2.3.04]/\": invalid host: ParseAddr(\"::1.2.3.04\"): IPv4 field has octet with leading zero"
+  },
+  {
+   "format": "uri",
+   "value": "https://[::1.2.3.256]/",
+   "error": "'https://[::1.2.3.256]/' is not valid uri: parse \"https://[::1.2.3.256]/\": invalid host: ParseAddr(\"::1.2.3.256\"): IPv4 field has value \u003e255"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[::1.2.3.256]/",
+   "error": "'https://[::1.2.3.256]/' is not valid uri-reference: parse \"https://[::1.2.3.256]/\": invalid host: ParseAddr(\"::1.2.3.256\"): IPv4 field has value \u003e255"
+  },
+  {
+   "format": "uri",
+   "value": "https://[1:2:3:4:5:6:7::1.2.3.4]/",
+   "error": "'https://[1:2:3:4:5:6:7::1.2.3.4]/' is not valid uri: parse \"https://[1:2:3:4:5:6:7::1.2.3.4]/\": invalid host: ParseAddr(\"1:2:3:4:5:6:7::1.2.3.4\"): too many hex fields to fit an embedded IPv4 at the end of the address (at \"1.2.3.4\")"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[1:2:3:4:5:6:7::1.2.3.4]/",
+   "error": "'https://[1:2:3:4:5:6:7::1.2.3.4]/' is not valid uri-reference: parse \"https://[1:2:3:4:5:6:7::1.2.3.4]/\": invalid host: ParseAddr(\"1:2:3:4:5:6:7::1.2.3.4\"): too many hex fields to fit an embedded IPv4 at the end of the address (at \"1.2.3.4\")"
+  },
+  {
+   "format": "uri",
+   "value": "https://[:]/",
+   "error": "'https://[:]/' is not valid uri: parse \"https://[:]/\": invalid host: ParseAddr(\":\"): each colon-separated field must have at least one digit (at \":\")"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[:]/",
+   "error": "'https://[:]/' is not valid uri-reference: parse \"https://[:]/\": invalid host: ParseAddr(\":\"): each colon-separated field must have at least one digit (at \":\")"
+  },
+  {
+   "format": "uri",
+   "value": "https://a:b:c@host/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://a:b:c@host/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://a b@host/",
+   "error": "'https://a b@host/' is not valid uri: parse \"https://a b@host/\": net/url: invalid userinfo"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://a b@host/",
+   "error": "'https://a b@host/' is not valid uri-reference: parse \"https://a b@host/\": net/url: invalid userinfo"
+  },
+  {
+   "format": "uri",
+   "value": "https://user@host/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://user@host/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://us%zzer@host/",
+   "error": "'https://us%zzer@host/' is not valid uri: parse \"https://us%zzer@host/\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://us%zzer@host/",
+   "error": "'https://us%zzer@host/' is not valid uri-reference: parse \"https://us%zzer@host/\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri",
+   "value": "https://u:p%zz@host/",
+   "error": "'https://u:p%zz@host/' is not valid uri: parse \"https://u:p%zz@host/\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://u:p%zz@host/",
+   "error": "'https://u:p%zz@host/' is not valid uri-reference: parse \"https://u:p%zz@host/\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri",
+   "value": "https://h:1:2/",
+   "error": "'https://h:1:2/' is not valid uri: parse \"https://h:1:2/\": invalid port \":1:2\" after host"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://h:1:2/",
+   "error": "'https://h:1:2/' is not valid uri-reference: parse \"https://h:1:2/\": invalid port \":1:2\" after host"
+  },
+  {
+   "format": "uri",
+   "value": "ftp://h:1:2/",
+   "error": "'ftp://h:1:2/' is not valid uri: ipv6 address not enclosed in brackets"
+  },
+  {
+   "format": "uri-reference",
+   "value": "ftp://h:1:2/",
+   "error": "'ftp://h:1:2/' is not valid uri-reference: ipv6 address not enclosed in brackets"
+  },
+  {
+   "format": "uri",
+   "value": "mongodb://h1:1,h2:2/",
+   "error": "'mongodb://h1:1,h2:2/' is not valid uri: ipv6 address not enclosed in brackets"
+  },
+  {
+   "format": "uri-reference",
+   "value": "mongodb://h1:1,h2:2/",
+   "error": "'mongodb://h1:1,h2:2/' is not valid uri-reference: ipv6 address not enclosed in brackets"
+  },
+  {
+   "format": "uri",
+   "value": "https://ok.example.com/p?q=1#frag%zz",
+   "error": "'https://ok.example.com/p?q=1#frag%zz' is not valid uri: parse \"https://ok.example.com/p?q=1#frag%zz\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://ok.example.com/p?q=1#frag%zz",
+   "error": "'https://ok.example.com/p?q=1#frag%zz' is not valid uri-reference: parse \"https://ok.example.com/p?q=1#frag%zz\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri",
+   "value": "https://ok.example.com/p?q=%zz",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://ok.example.com/p?q=%zz",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://ok/p%zz",
+   "error": "'https://ok/p%zz' is not valid uri: parse \"https://ok/p%zz\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://ok/p%zz",
+   "error": "'https://ok/p%zz' is not valid uri-reference: parse \"https://ok/p%zz\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri",
+   "value": "#frag",
+   "error": "'#frag' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "#frag",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "#%zz",
+   "error": "'#%zz' is not valid uri: parse \"#%zz\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri-reference",
+   "value": "#%zz",
+   "error": "'#%zz' is not valid uri-reference: parse \"#%zz\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri",
+   "value": "?q",
+   "error": "'?q' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "?q",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "//host/p",
+   "error": "'//host/p' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "//host/p",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "///p",
+   "error": "'///p' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "///p",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "/p",
+   "error": "'/p' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "/p",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "p:q",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "p:q",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "a/b:c",
+   "error": "'a/b:c' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "a/b:c",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "a:b/c",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "a:b/c",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": ":x",
+   "error": "':x' is not valid uri: parse \":x\": missing protocol scheme"
+  },
+  {
+   "format": "uri-reference",
+   "value": ":x",
+   "error": "':x' is not valid uri-reference: parse \":x\": missing protocol scheme"
+  },
+  {
+   "format": "uri",
+   "value": "1a:b",
+   "error": "'1a:b' is not valid uri: parse \"1a:b\": first path segment in URL cannot contain colon"
+  },
+  {
+   "format": "uri-reference",
+   "value": "1a:b",
+   "error": "'1a:b' is not valid uri-reference: parse \"1a:b\": first path segment in URL cannot contain colon"
+  },
+  {
+   "format": "uri",
+   "value": "mailto:a@b",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "mailto:a@b",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "urn:x:y",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "urn:x:y",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "*",
+   "error": "'*' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "*",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "http://ä.example/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "http://ä.example/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "http://exämple.com/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "http://exämple.com/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "http://exa\u0001mple/",
+   "error": "'http://exa\\x01mple/' is not valid uri: parse \"http://exa\\x01mple/\": net/url: invalid control character in URL"
+  },
+  {
+   "format": "uri-reference",
+   "value": "http://exa\u0001mple/",
+   "error": "'http://exa\\x01mple/' is not valid uri-reference: parse \"http://exa\\x01mple/\": net/url: invalid control character in URL"
+  },
+  {
+   "format": "uri",
+   "value": "https://ab/",
+   "error": "'https://a\\x7fb/' is not valid uri: parse \"https://a\\x7fb/\": net/url: invalid control character in URL"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://ab/",
+   "error": "'https://a\\x7fb/' is not valid uri-reference: parse \"https://a\\x7fb/\": net/url: invalid control character in URL"
+  },
+  {
+   "format": "uri",
+   "value": "\\\\server\\share",
+   "error": "'\\\\\\\\server\\\\share' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "\\\\server\\share",
+   "error": "'\\\\\\\\server\\\\share' is not valid uri-reference: contains \\"
+  },
+  {
+   "format": "uri",
+   "value": "c:\\x",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "c:\\x",
+   "error": "'c:\\\\x' is not valid uri-reference: contains \\"
+  },
+  {
+   "format": "uri",
+   "value": "https://$CI_ENVIRONMENT_SLUG.example.com",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://$CI_ENVIRONMENT_SLUG.example.com",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "$CI_URL",
+   "error": "'$CI_URL' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "$CI_URL",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://\u003cx\u003e/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://\u003cx\u003e/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://\"x\"/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://\"x\"/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://a{b}/",
+   "error": "'https://a{b}/' is not valid uri: parse \"https://a{b}/\": invalid character \"{\" in host name"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://a{b}/",
+   "error": "'https://a{b}/' is not valid uri-reference: parse \"https://a{b}/\": invalid character \"{\" in host name"
+  },
+  {
+   "format": "uri",
+   "value": "https://a|b/",
+   "error": "'https://a|b/' is not valid uri: parse \"https://a|b/\": invalid character \"|\" in host name"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://a|b/",
+   "error": "'https://a|b/' is not valid uri-reference: parse \"https://a|b/\": invalid character \"|\" in host name"
+  },
+  {
+   "format": "uri",
+   "value": "https://a^b/",
+   "error": "'https://a^b/' is not valid uri: parse \"https://a^b/\": invalid character \"^\" in host name"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://a^b/",
+   "error": "'https://a^b/' is not valid uri-reference: parse \"https://a^b/\": invalid character \"^\" in host name"
+  },
+  {
+   "format": "uri",
+   "value": "https://a`b/",
+   "error": "'https://a`b/' is not valid uri: parse \"https://a`b/\": invalid character \"`\" in host name"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://a`b/",
+   "error": "'https://a`b/' is not valid uri-reference: parse \"https://a`b/\": invalid character \"`\" in host name"
+  },
+  {
+   "format": "uri",
+   "value": "https://example.com:/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://example.com:/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://:80/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://:80/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://@/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://@/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://[]/",
+   "error": "'https://[]/' is not valid uri: parse \"https://[]/\": invalid host: ParseAddr(\"\"): unable to parse IP"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[]/",
+   "error": "'https://[]/' is not valid uri-reference: parse \"https://[]/\": invalid host: ParseAddr(\"\"): unable to parse IP"
+  },
+  {
+   "format": "uri",
+   "value": "https://host]/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://host]/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://h%25/",
+   "error": ""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://h%25/",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "https://h%4/",
+   "error": "'https://h%4/' is not valid uri: parse \"https://h%4/\": invalid URL escape \"%4\""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://h%4/",
+   "error": "'https://h%4/' is not valid uri-reference: parse \"https://h%4/\": invalid URL escape \"%4\""
+  },
+  {
+   "format": "uri",
+   "value": "ci/a.yml",
+   "error": "'ci/a.yml' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "ci/a.yml",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "ci\\a.yml",
+   "error": "'ci\\\\a.yml' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "ci\\a.yml",
+   "error": "'ci\\\\a.yml' is not valid uri-reference: contains \\"
+  },
+  {
+   "format": "uri",
+   "value": "../x.yml",
+   "error": "'../x.yml' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "../x.yml",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "Jobs/Build.gitlab-ci.yml",
+   "error": "'Jobs/Build.gitlab-ci.yml' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "Jobs/Build.gitlab-ci.yml",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "group/project",
+   "error": "'group/project' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "group/project",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "$CI_SERVER_FQDN/a/b@1",
+   "error": "'$CI_SERVER_FQDN/a/b@1' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "$CI_SERVER_FQDN/a/b@1",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "example.org/group/components/lint@1.0",
+   "error": "'example.org/group/components/lint@1.0' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "example.org/group/components/lint@1.0",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "ci/x y.yml",
+   "error": "'ci/x y.yml' is not valid uri: relative url"
+  },
+  {
+   "format": "uri-reference",
+   "value": "ci/x y.yml",
+   "error": ""
+  },
+  {
+   "format": "uri",
+   "value": "http://a b.yml",
+   "error": "'http://a b.yml' is not valid uri: parse \"http://a b.yml\": invalid character \" \" in host name"
+  },
+  {
+   "format": "uri-reference",
+   "value": "http://a b.yml",
+   "error": "'http://a b.yml' is not valid uri-reference: parse \"http://a b.yml\": invalid character \" \" in host name"
+  },
+  {
+   "format": "uri",
+   "value": "https://[fe80::1%25]/",
+   "error": "'https://[fe80::1%25]/' is not valid uri: parse \"https://[fe80::1%25]/\": invalid host: ParseAddr(\"fe80::1%\"): zone must be a non-empty string"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[fe80::1%25]/",
+   "error": "'https://[fe80::1%25]/' is not valid uri-reference: parse \"https://[fe80::1%25]/\": invalid host: ParseAddr(\"fe80::1%\"): zone must be a non-empty string"
+  },
+  {
+   "format": "uri",
+   "value": "https://[fe80::1%25%zz]/",
+   "error": "'https://[fe80::1%25%zz]/' is not valid uri: parse \"https://[fe80::1%25%zz]/\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[fe80::1%25%zz]/",
+   "error": "'https://[fe80::1%25%zz]/' is not valid uri-reference: parse \"https://[fe80::1%25%zz]/\": invalid URL escape \"%zz\""
+  },
+  {
+   "format": "uri",
+   "value": "https://[fe80::1%25a%20b]/",
+   "error": "'https://[fe80::1%25a%20b]/' is not valid uri: invalid ipv6 address: zone id is not a part of ipv6 address"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[fe80::1%25a%20b]/",
+   "error": "'https://[fe80::1%25a%20b]/' is not valid uri-reference: invalid ipv6 address: zone id is not a part of ipv6 address"
+  },
+  {
+   "format": "uri",
+   "value": "https://[fe80::1%25a%0a]/",
+   "error": "'https://[fe80::1%25a%0a]/' is not valid uri: parse \"https://[fe80::1%25a%0a]/\": invalid URL escape \"%0a\""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[fe80::1%25a%0a]/",
+   "error": "'https://[fe80::1%25a%0a]/' is not valid uri-reference: parse \"https://[fe80::1%25a%0a]/\": invalid URL escape \"%0a\""
+  },
+  {
+   "format": "uri",
+   "value": "https://[%3a%3a1]/",
+   "error": "'https://[%3a%3a1]/' is not valid uri: parse \"https://[%3a%3a1]/\": invalid URL escape \"%3a\""
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[%3a%3a1]/",
+   "error": "'https://[%3a%3a1]/' is not valid uri-reference: parse \"https://[%3a%3a1]/\": invalid URL escape \"%3a\""
+  },
+  {
+   "format": "uri",
+   "value": "https://[::1]:x/",
+   "error": "'https://[::1]:x/' is not valid uri: parse \"https://[::1]:x/\": invalid port \":x\" after host"
+  },
+  {
+   "format": "uri-reference",
+   "value": "https://[::1]:x/",
+   "error": "'https://[::1]:x/' is not valid uri-reference: parse \"https://[::1]:x/\": invalid port \":x\" after host"
+  },
+  {
+   "format": "date-time",
+   "value": "2026-01-02T03:04:05Z",
+   "error": ""
+  },
+  {
+   "format": "date-time",
+   "value": "2026-13-01T00:00:00Z",
+   "error": "'2026-13-01T00:00:00Z' is not valid date-time: invalid date element: parsing time \"2026-13-01\": month out of range"
+  },
+  {
+   "format": "date-time",
+   "value": "2024-02-29T10:00:00+01:00",
+   "error": ""
+  },
+  {
+   "format": "date-time",
+   "value": "2026-01-02 03:04:05Z",
+   "error": "'2026-01-02 03:04:05Z' is not valid date-time: 11th character must be t or T"
+  },
+  {
+   "format": "date-time",
+   "value": "x",
+   "error": "'x' is not valid date-time: less than 20 characters long"
+  }
+ ],
+ "recordedFrom": "santhosh-tekuri/jsonschema v6.0.3 with Go 1.27.3, the toolchain of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8",
+ "schemas": [
+  {
+   "schema": {
+    "type": "integer"
+   },
+   "instance": 1.5,
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "type",
+     "message": "got number, want integer"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "type": "integer"
+   },
+   "instance": 2.0,
+   "leaves": []
+  },
+  {
+   "schema": {
+    "type": [
+     "string",
+     "null"
+    ]
+   },
+   "instance": 5,
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "type",
+     "message": "got number, want null or string"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "type": "number"
+   },
+   "instance": "x",
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "type",
+     "message": "got string, want number"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "const": "a"
+   },
+   "instance": "b",
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "const",
+     "message": "value must be 'a'"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "const": 1
+   },
+   "instance": 1.0,
+   "leaves": []
+  },
+  {
+   "schema": {
+    "const": [
+     1
+    ]
+   },
+   "instance": [
+    2
+   ],
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "const",
+     "message": "'const' failed"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "enum": [
+     "a",
+     "b",
+     3
+    ]
+   },
+   "instance": "c",
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "enum",
+     "message": "value must be one of 'a', 'b', 3"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "enum": [
+     "a"
+    ]
+   },
+   "instance": true,
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "enum",
+     "message": "value must be 'a'"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "enum": [
+     {
+      "a": 1
+     }
+    ]
+   },
+   "instance": 1,
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "enum",
+     "message": "'enum' failed"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "type": "string",
+    "enum": [
+     "a"
+    ]
+   },
+   "instance": 5,
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "type",
+     "message": "got number, want string"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "minimum": 0,
+    "maximum": 2
+   },
+   "instance": -1,
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "minimum",
+     "message": "minimum: got -1, want 0"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "minimum": 0,
+    "maximum": 2
+   },
+   "instance": 1000001,
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "maximum",
+     "message": "maximum: got 1.000001×10⁰⁶, want 2"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "maximum": 2
+   },
+   "instance": 2.5,
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "maximum",
+     "message": "maximum: got 2.5, want 2"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "minimum": 1e-6
+   },
+   "instance": 0,
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "minimum",
+     "message": "minimum: got 0, want 1×10⁻⁰⁶"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "minLength": 2,
+    "maxLength": 3,
+    "pattern": "^a"
+   },
+   "instance": "b",
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "minLength",
+     "message": "minLength: got 1, want 2"
+    },
+    {
+     "instance": "/",
+     "keyword": "pattern",
+     "message": "'b' does not match pattern '^a'"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "maxLength": 3
+   },
+   "instance": "äöüß",
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "maxLength",
+     "message": "maxLength: got 4, want 3"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "minItems": 2,
+    "maxItems": 3,
+    "uniqueItems": true
+   },
+   "instance": [
+    1
+   ],
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "minItems",
+     "message": "minItems: got 1, want 2"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "uniqueItems": true
+   },
+   "instance": [
+    1,
+    2,
+    1.0
+   ],
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "uniqueItems",
+     "message": "items at 0 and 2 are equal"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "uniqueItems": true
+   },
+   "instance": [
+    {
+     "a": 1
+    },
+    {
+     "a": 1
+    }
+   ],
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "uniqueItems",
+     "message": "items at 0 and 1 are equal"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "maxItems": 1
+   },
+   "instance": [
+    1,
+    2,
+    3
+   ],
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "maxItems",
+     "message": "maxItems: got 3, want 1"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "required": [
+     "a",
+     "b"
+    ]
+   },
+   "instance": {},
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "required",
+     "message": "missing properties 'a', 'b'"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "required": [
+     "a",
+     "b"
+    ]
+   },
+   "instance": {
+    "a": 1
+   },
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "required",
+     "message": "missing property 'b'"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "properties": {
+     "a": {
+      "type": "string"
+     }
+    },
+    "additionalProperties": false
+   },
+   "instance": {
+    "a": 1,
+    "b": 2
+   },
+   "leaves": [
+    {
+     "instance": "/a",
+     "keyword": "type",
+     "message": "got number, want string"
+    },
+    {
+     "instance": "/",
+     "keyword": "additionalProperties",
+     "message": "additional properties 'b' not allowed"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "patternProperties": {
+     "^x": {
+      "type": "string"
+     }
+    },
+    "additionalProperties": {
+     "type": "integer"
+    }
+   },
+   "instance": {
+    "xa": 1,
+    "y": "s"
+   },
+   "leaves": [
+    {
+     "instance": "/xa",
+     "keyword": "type",
+     "message": "got number, want string"
+    },
+    {
+     "instance": "/y",
+     "keyword": "type",
+     "message": "got string, want integer"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "dependencies": {
+     "a": [
+      "b",
+      "c"
+     ]
+    }
+   },
+   "instance": {
+    "a": 1
+   },
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "dependency/a",
+     "message": "properties 'b', 'c' required, if 'a' exists"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "dependencies": {
+     "a": {
+      "required": [
+       "z"
+      ]
+     }
+    }
+   },
+   "instance": {
+    "a": 1
+   },
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "required",
+     "message": "missing property 'z'"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "items": {
+     "type": "string"
+    }
+   },
+   "instance": [
+    "a",
+    1,
+    "b",
+    2
+   ],
+   "leaves": [
+    {
+     "instance": "/1",
+     "keyword": "type",
+     "message": "got number, want string"
+    },
+    {
+     "instance": "/3",
+     "keyword": "type",
+     "message": "got number, want string"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "items": [
+     {
+      "type": "string"
+     }
+    ],
+    "additionalItems": false
+   },
+   "instance": [
+    "a",
+    1,
+    2
+   ],
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "additionalItems",
+     "message": "last 2 additionalItem(s) not allowed"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "not": {
+     "type": "string"
+    }
+   },
+   "instance": "a",
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "",
+     "message": "'not' failed"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "allOf": [
+     {
+      "type": "string"
+     },
+     {
+      "minLength": 2
+     }
+    ]
+   },
+   "instance": 1,
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "type",
+     "message": "got number, want string"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "anyOf": [
+     {
+      "type": "string"
+     },
+     {
+      "type": "object",
+      "required": [
+       "a"
+      ]
+     }
+    ]
+   },
+   "instance": {},
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "type",
+     "message": "got object, want string"
+    },
+    {
+     "instance": "/",
+     "keyword": "required",
+     "message": "missing property 'a'"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "oneOf": [
+     {
+      "type": "string"
+     },
+     {
+      "minLength": 1
+     }
+    ]
+   },
+   "instance": "a",
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "oneOf",
+     "message": "'oneOf' failed, subschemas 0, 1 matched"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "oneOf": [
+     {
+      "type": "string"
+     },
+     {
+      "type": "integer"
+     }
+    ]
+   },
+   "instance": [],
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "type",
+     "message": "got array, want string"
+    },
+    {
+     "instance": "/",
+     "keyword": "type",
+     "message": "got array, want integer"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "if": {
+     "type": "string"
+    },
+    "then": {
+     "minLength": 3
+    }
+   },
+   "instance": "ab",
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "minLength",
+     "message": "minLength: got 2, want 3"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "if": {
+     "type": "string"
+    },
+    "then": {
+     "minLength": 3
+    },
+    "else": {
+     "type": "null"
+    }
+   },
+   "instance": 5,
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "type",
+     "message": "got number, want null"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "definitions": {
+     "s": {
+      "type": "string"
+     }
+    },
+    "properties": {
+     "a": {
+      "$ref": "#/definitions/s"
+     }
+    }
+   },
+   "instance": {
+    "a": 1
+   },
+   "leaves": [
+    {
+     "instance": "/a",
+     "keyword": "type",
+     "message": "got number, want string"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "definitions": {
+     "s": {
+      "type": "string"
+     }
+    },
+    "$ref": "#/definitions/s",
+    "minLength": 5
+   },
+   "instance": "a",
+   "leaves": []
+  },
+  {
+   "schema": {
+    "definitions": {
+     "t": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "$ref": "#/definitions/t2"
+       }
+      ]
+     },
+     "t2": {
+      "properties": {
+       "x": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "x"
+      ]
+     }
+    },
+    "$ref": "#/definitions/t"
+   },
+   "instance": {
+    "x": 1
+   },
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "type",
+     "message": "got object, want string"
+    },
+    {
+     "instance": "/x",
+     "keyword": "type",
+     "message": "got number, want string"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "type": "object",
+    "properties": {
+     "a": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "b"
+    ]
+   },
+   "instance": {
+    "a": 1
+   },
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "required",
+     "message": "missing property 'b'"
+    },
+    {
+     "instance": "/a",
+     "keyword": "type",
+     "message": "got number, want string"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "format": "uri",
+    "type": "string",
+    "pattern": "x"
+   },
+   "instance": "a b",
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "format",
+     "message": "'a b' is not valid uri: relative url"
+    }
+   ]
+  },
+  {
+   "schema": false,
+   "instance": 1,
+   "leaves": [
+    {
+     "instance": "/",
+     "keyword": "",
+     "message": "false schema"
+    }
+   ]
+  },
+  {
+   "schema": {
+    "properties": {
+     "a": false
+    }
+   },
+   "instance": {
+    "a": 1
+   },
+   "leaves": [
+    {
+     "instance": "/a",
+     "keyword": "",
+     "message": "false schema"
+    }
+   ]
+  }
+ ],
+ "unicodeNames": [
+  "Adlam",
+  "Ahom",
+  "Anatolian_Hieroglyphs",
+  "Arabic",
+  "Armenian",
+  "Avestan",
+  "Balinese",
+  "Bamum",
+  "Bassa_Vah",
+  "Batak",
+  "Bengali",
+  "Beria_Erfe",
+  "Bhaiksuki",
+  "Bopomofo",
+  "Brahmi",
+  "Braille",
+  "Buginese",
+  "Buhid",
+  "C",
+  "Canadian_Aboriginal",
+  "Carian",
+  "Cased_Letter",
+  "Caucasian_Albanian",
+  "Cc",
+  "Cf",
+  "Chakma",
+  "Cham",
+  "Cherokee",
+  "Chorasmian",
+  "Close_Punctuation",
+  "Cn",
+  "Co",
+  "Combining_Mark",
+  "Common",
+  "Connector_Punctuation",
+  "Control",
+  "Coptic",
+  "Cs",
+  "Cuneiform",
+  "Currency_Symbol",
+  "Cypriot",
+  "Cypro_Minoan",
+  "Cyrillic",
+  "Dash_Punctuation",
+  "Decimal_Number",
+  "Deseret",
+  "Devanagari",
+  "Dives_Akuru",
+  "Dogra",
+  "Duployan",
+  "Egyptian_Hieroglyphs",
+  "Elbasan",
+  "Elymaic",
+  "Enclosing_Mark",
+  "Ethiopic",
+  "Final_Punctuation",
+  "Format",
+  "Garay",
+  "Georgian",
+  "Glagolitic",
+  "Gothic",
+  "Grantha",
+  "Greek",
+  "Gujarati",
+  "Gunjala_Gondi",
+  "Gurmukhi",
+  "Gurung_Khema",
+  "Han",
+  "Hangul",
+  "Hanifi_Rohingya",
+  "Hanunoo",
+  "Hatran",
+  "Hebrew",
+  "Hiragana",
+  "Imperial_Aramaic",
+  "Inherited",
+  "Initial_Punctuation",
+  "Inscriptional_Pahlavi",
+  "Inscriptional_Parthian",
+  "Javanese",
+  "Kaithi",
+  "Kannada",
+  "Katakana",
+  "Kawi",
+  "Kayah_Li",
+  "Kharoshthi",
+  "Khitan_Small_Script",
+  "Khmer",
+  "Khojki",
+  "Khudawadi",
+  "Kirat_Rai",
+  "L",
+  "LC",
+  "Lao",
+  "Latin",
+  "Lepcha",
+  "Letter",
+  "Letter_Number",
+  "Limbu",
+  "Line_Separator",
+  "Linear_A",
+  "Linear_B",
+  "Lisu",
+  "Ll",
+  "Lm",
+  "Lo",
+  "Lowercase_Letter",
+  "Lt",
+  "Lu",
+  "Lycian",
+  "Lydian",
+  "M",
+  "Mahajani",
+  "Makasar",
+  "Malayalam",
+  "Mandaic",
+  "Manichaean",
+  "Marchen",
+  "Mark",
+  "Masaram_Gondi",
+  "Math_Symbol",
+  "Mc",
+  "Me",
+  "Medefaidrin",
+  "Meetei_Mayek",
+  "Mende_Kikakui",
+  "Meroitic_Cursive",
+  "Meroitic_Hieroglyphs",
+  "Miao",
+  "Mn",
+  "Modi",
+  "Modifier_Letter",
+  "Modifier_Symbol",
+  "Mongolian",
+  "Mro",
+  "Multani",
+  "Myanmar",
+  "N",
+  "Nabataean",
+  "Nag_Mundari",
+  "Nandinagari",
+  "Nd",
+  "New_Tai_Lue",
+  "Newa",
+  "Nko",
+  "Nl",
+  "No",
+  "Nonspacing_Mark",
+  "Number",
+  "Nushu",
+  "Nyiakeng_Puachue_Hmong",
+  "Ogham",
+  "Ol_Chiki",
+  "Ol_Onal",
+  "Old_Hungarian",
+  "Old_Italic",
+  "Old_North_Arabian",
+  "Old_Permic",
+  "Old_Persian",
+  "Old_Sogdian",
+  "Old_South_Arabian",
+  "Old_Turkic",
+  "Old_Uyghur",
+  "Open_Punctuation",
+  "Oriya",
+  "Osage",
+  "Osmanya",
+  "Other",
+  "Other_Letter",
+  "Other_Number",
+  "Other_Punctuation",
+  "Other_Symbol",
+  "P",
+  "Pahawh_Hmong",
+  "Palmyrene",
+  "Paragraph_Separator",
+  "Pau_Cin_Hau",
+  "Pc",
+  "Pd",
+  "Pe",
+  "Pf",
+  "Phags_Pa",
+  "Phoenician",
+  "Pi",
+  "Po",
+  "Private_Use",
+  "Ps",
+  "Psalter_Pahlavi",
+  "Punctuation",
+  "Rejang",
+  "Runic",
+  "S",
+  "Samaritan",
+  "Saurashtra",
+  "Sc",
+  "Separator",
+  "Sharada",
+  "Shavian",
+  "Siddham",
+  "Sidetic",
+  "SignWriting",
+  "Sinhala",
+  "Sk",
+  "Sm",
+  "So",
+  "Sogdian",
+  "Sora_Sompeng",
+  "Soyombo",
+  "Space_Separator",
+  "Spacing_Mark",
+  "Sundanese",
+  "Sunuwar",
+  "Surrogate",
+  "Syloti_Nagri",
+  "Symbol",
+  "Syriac",
+  "Tagalog",
+  "Tagbanwa",
+  "Tai_Le",
+  "Tai_Tham",
+  "Tai_Viet",
+  "Tai_Yo",
+  "Takri",
+  "Tamil",
+  "Tangsa",
+  "Tangut",
+  "Telugu",
+  "Thaana",
+  "Thai",
+  "Tibetan",
+  "Tifinagh",
+  "Tirhuta",
+  "Titlecase_Letter",
+  "Todhri",
+  "Tolong_Siki",
+  "Toto",
+  "Tulu_Tigalari",
+  "Ugaritic",
+  "Unassigned",
+  "Uppercase_Letter",
+  "Vai",
+  "Vithkuqi",
+  "Wancho",
+  "Warang_Citi",
+  "Yezidi",
+  "Yi",
+  "Z",
+  "Zanabazar_Square",
+  "Zl",
+  "Zp",
+  "Zs",
+  "cntrl",
+  "digit",
+  "punct"
+ ]
+}

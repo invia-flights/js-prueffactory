@@ -2,7 +2,7 @@
 // registry_answers.go).
 import { formatRFC3339 } from "../gocompat/json.ts";
 import { compareBytes, sortStrings } from "../gocompat/strings.ts";
-import { parseRFC3339, second } from "../gocompat/time.ts";
+import { parseRFC3339Nano, second } from "../gocompat/time.ts";
 import * as json from "../gocompat/unmarshal.ts";
 import { trimSpaceBytes } from "../gocompat/utf8.ts";
 import type { RegistryRequestPackage } from "./registry_data.ts";
@@ -202,7 +202,7 @@ function fetchedAt(raw: Uint8Array | null): Date | null {
   if (typeof s !== "string") {
     throw new Error("Time.UnmarshalJSON: input is not a JSON string");
   }
-  const ns = parseRFC3339(s);
+  const ns = parseRFC3339Nano(s);
   if (ns === undefined) {
     throw new Error(
       `parsing time ${JSON.stringify(s)} as RFC 3339: cannot parse`,

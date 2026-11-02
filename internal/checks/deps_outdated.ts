@@ -3,7 +3,7 @@ import { formatFloatFixed } from "../gocompat/fmt.ts";
 import * as gojson from "../gocompat/json.ts";
 import { round } from "../gocompat/math.ts";
 import { compareBytes, trimSpace } from "../gocompat/strings.ts";
-import { hours, parseRFC3339, sub } from "../gocompat/time.ts";
+import { hours, parseRFC3339Nano, sub } from "../gocompat/time.ts";
 import { newFingerprint } from "../resultset/fingerprint.ts";
 import {
   ConfidenceConfirmed,
@@ -237,8 +237,8 @@ export function libyearsBetween(
   locked: string,
   latest: string,
 ): number | undefined {
-  const from = parseRFC3339(locked);
-  const to = parseRFC3339(latest);
+  const from = parseRFC3339Nano(locked);
+  const to = parseRFC3339Nano(latest);
   if (from === undefined || to === undefined) {
     return undefined;
   }

@@ -138,7 +138,8 @@ function date(s: string): string | undefined {
     `parsing time ${timeQuote(s)}: ${what} out of range`;
 
   let value = s;
-  if (value.length < 4) {
+  // Go's stdLongYear wants a digit first, so a sign is not a year.
+  if (value.length < 4 || !/^[0-9]/.test(value)) {
     return cannot(value, "2006");
   }
   const year = atoiTime(value.slice(0, 4));

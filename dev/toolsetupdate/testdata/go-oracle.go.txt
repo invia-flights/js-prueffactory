@@ -1,0 +1,242 @@
+package main
+
+// Generator of go-oracle.json: what the frozen Go toolsetupdate says with
+// recorded registry answers. The Go code is frozen, so this is kept as text.
+// To regenerate at the freeze commit: copy it to
+// dev/toolsetupdate/zz_oracle_test.go, run
+// go test -count=1 -run TestZZOracle ./dev/toolsetupdate, delete the copy.
+//
+// Every request of the command goes to one fake server, whatever host it
+// names (registry-1.docker.io, ghcr.io, auth.example.test, get.helm.sh,
+// raw.githubusercontent.com): a manifest path answers with a recorded index
+// from testdata after a bearer-token round, a .sha256sum path with the
+// SHA-256 of "archive <path>", and any other path with "content of <path>".
+// The TypeScript test serves the same answers.
+
+import (
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"os"
+	"path"
+	"strings"
+	"testing"
+)
+
+// fakeAnswers configures the fake server.
+type fakeAnswers struct {
+	// manifests maps a manifest path to a testdata file; others get
+	// index-alpine.json.
+	manifests map[string]string
+	// challenge replaces the WWW-Authenticate header of the 401 answer.
+	challenge string
+	// token is the body of the token answer; tokenStatus its status.
+	token       string
+	tokenStatus int
+	// noAuth serves manifests without a token round.
+	noAuth bool
+}
+
+func fakeServer(t *testing.T, a fakeAnswers) *http.Client {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		p := r.URL.Path
+		switch {
+		case p == "/token":
+			if a.tokenStatus != 0 {
+				w.WriteHeader(a.tokenStatus)
+			}
+			if !strings.HasPrefix(r.URL.Query().Get("scope"), "repository:") {
+				http.Error(w, "bad scope", http.StatusBadRequest)
+				return
+			}
+			body := a.token
+			if body == "" {
+				body = `{"token":"anon"}`
+			}
+			_, _ = w.Write([]byte(body))
+		case strings.Contains(p, "/manifests/"):
+			if !a.noAuth && r.Header.Get("Authorization") != "Bearer anon" {
+				challenge := a.challenge
+				if challenge == "" {
+					challenge = `Bearer realm="https://auth.example.test/token",service="fake"`
+				}
+				w.Header().Set("WWW-Authenticate", challenge)
+				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
+			file, ok := a.manifests[p]
+			if !ok {
+				file = "testdata/index-alpine.json"
+			}
+			if file == "" {
+				http.NotFound(w, r)
+				return
+			}
+			body, err := os.ReadFile(file)
+			if err != nil {
+				t.Error(err)
+			}
+			_, _ = w.Write(body)
+		case strings.HasSuffix(p, ".missing.sha256sum") || strings.HasSuffix(p, "/missing.json"):
+			http.NotFound(w, r)
+		case strings.HasSuffix(p, ".html.sha256sum"):
+			_, _ = w.Write([]byte("<html>moved</html>\n"))
+		case strings.HasSuffix(p, ".sha256sum"):
+			sum := sha256.Sum256([]byte("archive " + p))
+			_, _ = w.Write([]byte(hex.EncodeToString(sum[:]) + "  " + path.Base(strings.TrimSuffix(p, ".sha256sum")) + "\n"))
+		default:
+			_, _ = w.Write([]byte("content of " + p))
+		}
+	}))
+	t.Cleanup(srv.Close)
+	to, _ := url.Parse(srv.URL)
+	return &http.Client{Transport: rewrite{to: to, base: srv.Client().Transport}}
+}
+
+// rewrite sends every request to the fake server, keeping its path.
+type rewrite struct {
+	to   *url.URL
+	base http.RoundTripper
+}
+
+func (r rewrite) RoundTrip(req *http.Request) (*http.Response, error) {
+	req = req.Clone(req.Context())
+	req.URL.Scheme, req.URL.Host = r.to.Scheme, r.to.Host
+	return r.base.RoundTrip(req)
+}
+
+type runCase struct {
+	Name     string            `json:"name"`
+	Args     []string          `json:"args"`
+	Refused  map[string]string `json:"manifests"`
+	ExitCode int               `json:"exitCode"`
+	Stdout   string            `json:"stdout"`
+	Stderr   string            `json:"stderr"`
+}
+
+type lookupCase struct {
+	Name   string `json:"name"`
+	Kind   string `json:"kind"` // "image", "checksum", "file"
+	Repo   string `json:"repo,omitempty"`
+	Tag    string `json:"tag,omitempty"`
+	URL    string `json:"url,omitempty"`
+	Answer struct {
+		Manifests   map[string]string `json:"manifests,omitempty"`
+		Challenge   string            `json:"challenge,omitempty"`
+		Token       string            `json:"token,omitempty"`
+		TokenStatus int               `json:"tokenStatus,omitempty"`
+		NoAuth      bool              `json:"noAuth,omitempty"`
+	} `json:"answer"`
+	Result string `json:"result"`
+	Err    string `json:"err"`
+}
+
+func TestZZOracle(t *testing.T) {
+	ctx := context.Background()
+	table := "../../internal/toolset"
+
+	var runs []runCase
+	for _, c := range []runCase{
+		{Name: "dry run of the real table", Args: []string{"-dry-run", "-dir", table}},
+		{Name: "dry run with refused images", Args: []string{"-dry-run", "-dir", table}, Refused: map[string]string{
+			"/v2/library/node/manifests/24.22.1":      "testdata/index-alpine-without-arm64.json",
+			"/v2/hadolint/hadolint/manifests/v2.15.1": "testdata/single-manifest.json",
+		}},
+		{Name: "an unknown flag", Args: []string{"-x"}},
+		{Name: "help", Args: []string{"-h"}},
+		{Name: "a flag without its value", Args: []string{"-dir"}},
+		{Name: "a bad boolean", Args: []string{"-dry-run=nope"}},
+		{Name: "a folder without a table", Args: []string{"-dir", "testdata"}},
+		{Name: "a folder that does not exist", Args: []string{"-dir", "testdata/nothing-here"}},
+	} {
+		client := fakeServer(t, fakeAnswers{manifests: c.Refused})
+		src := liveSources{&Registry{HTTP: client}, &ReleaseServer{HTTP: client}}
+		var stdout, stderr bytes.Buffer
+		c.ExitCode = run(ctx, c.Args, &stdout, &stderr, src)
+		c.Stdout, c.Stderr = stdout.String(), stderr.String()
+		runs = append(runs, c)
+	}
+
+	var lookups []lookupCase
+	add := func(c lookupCase) {
+		client := fakeServer(t, fakeAnswers{manifests: c.Answer.Manifests, challenge: c.Answer.Challenge,
+			token: c.Answer.Token, tokenStatus: c.Answer.TokenStatus, noAuth: c.Answer.NoAuth})
+		var res string
+		var err error
+		switch c.Kind {
+		case "image":
+			res, err = (&Registry{HTTP: client}).IndexDigest(ctx, c.Repo, c.Tag)
+		case "checksum":
+			res, err = (&ReleaseServer{HTTP: client}).Checksum(ctx, c.URL)
+		case "file":
+			res, err = (&ReleaseServer{HTTP: client}).FileChecksum(ctx, c.URL)
+		}
+		c.Result = res
+		if err != nil {
+			c.Err = err.Error()
+		}
+		lookups = append(lookups, c)
+	}
+	img := func(name, repo, tag string) lookupCase {
+		return lookupCase{Name: name, Kind: "image", Repo: repo, Tag: tag}
+	}
+	c := img("a multi-arch index", "alpine", "3.24.3")
+	add(c)
+	c = img("an index without arm64", "alpine", "3.24.3")
+	c.Answer.Manifests = map[string]string{"/v2/library/alpine/manifests/3.24.3": "testdata/index-alpine-without-arm64.json"}
+	add(c)
+	c = img("a single manifest", "alpine", "3.24.3")
+	c.Answer.Manifests = map[string]string{"/v2/library/alpine/manifests/3.24.3": "testdata/single-manifest.json"}
+	add(c)
+	c = img("a manifest that is not JSON", "alpine", "3.24.3")
+	c.Answer.Manifests = map[string]string{"/v2/library/alpine/manifests/3.24.3": "testdata/go-oracle.go.txt"}
+	add(c)
+	c = img("a missing tag", "alpine", "3.24.3")
+	c.Answer.Manifests = map[string]string{"/v2/library/alpine/manifests/3.24.3": ""}
+	add(c)
+	add(img("a GitHub registry image", "ghcr.io/gitleaks/gitleaks", "v8.30.1"))
+	add(img("a tag that needs escaping", "vendor/tool", "v1+build"))
+	c = img("without a token round", "alpine", "3.24.3")
+	c.Answer.NoAuth = true
+	add(c)
+	c = img("a Basic challenge", "alpine", "3.24.3")
+	c.Answer.Challenge = `Basic realm="registry"`
+	add(c)
+	c = img("a challenge without a realm", "alpine", "3.24.3")
+	c.Answer.Challenge = `Bearer service="fake"`
+	add(c)
+	c = img("a token endpoint that fails", "alpine", "3.24.3")
+	c.Answer.TokenStatus = http.StatusInternalServerError
+	add(c)
+	c = img("a token endpoint without a token", "alpine", "3.24.3")
+	c.Answer.Token = `{}`
+	add(c)
+	c = img("an access token", "alpine", "3.24.3")
+	c.Answer.Token = `{"access_token":"anon"}`
+	add(c)
+	c = img("a token that is not accepted", "alpine", "3.24.3")
+	c.Answer.Token = `{"token":"wrong"}`
+	add(c)
+	add(lookupCase{Name: "a release checksum", Kind: "checksum", URL: "https://get.helm.sh/helm-v3.22.1-linux-amd64.tar.gz"})
+	add(lookupCase{Name: "a missing release checksum", Kind: "checksum", URL: "https://get.helm.sh/a.missing"})
+	add(lookupCase{Name: "a release checksum that is not a SHA-256", Kind: "checksum", URL: "https://get.helm.sh/moved.html"})
+	add(lookupCase{Name: "a plain file", Kind: "file", URL: "https://raw.githubusercontent.com/x/pod-v1.json"})
+	add(lookupCase{Name: "a missing plain file", Kind: "file", URL: "https://raw.githubusercontent.com/x/missing.json"})
+
+	out, err := json.MarshalIndent(map[string]any{
+		"recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8",
+		"runs":         runs,
+		"lookups":      lookups,
+	}, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/go-oracle.json", append(out, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}

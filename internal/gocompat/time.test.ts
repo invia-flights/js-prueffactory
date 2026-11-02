@@ -8,7 +8,7 @@ import {
   formatCompactUTC,
   hours,
   parseDuration,
-  parseRFC3339,
+  parseRFC3339Nano,
   second,
   sub,
   wrapInt64,
@@ -69,7 +69,7 @@ test("the layout 20060102T150405Z is in UTC and leaves out the fraction", () => 
   assert.equal(formatCompactUTC(t), "20261025T101500Z");
 });
 
-test("parseRFC3339 and hours of the time between give Go's values", () => {
+test("parseRFC3339Nano and hours of the time between give Go's values", () => {
   const oracle = JSON.parse(
     readFileSync(
       new URL("testdata/go-oracle-rfc3339.json", import.meta.url),
@@ -85,7 +85,7 @@ test("parseRFC3339 and hours of the time between give Go's values", () => {
   };
   let prev: bigint | undefined;
   for (const want of oracle.parse) {
-    const got = parseRFC3339(want.in);
+    const got = parseRFC3339Nano(want.in);
     assert.equal(got !== undefined, want.ok, want.in);
     if (got === undefined) continue;
     const [secs = "", nanos = ""] = want.unix_nano.split(".");

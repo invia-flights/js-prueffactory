@@ -202,12 +202,11 @@ export function fromRegistry(e: Entry): boolean {
   if (e.resolved === "") {
     return true;
   }
-  try {
-    const u = parseURL(e.resolved);
-    return u.scheme === "http" || u.scheme === "https";
-  } catch {
-    return false;
-  }
+  const parsed = parseURL(e.resolved);
+  return (
+    "url" in parsed &&
+    (parsed.url.scheme === "http" || parsed.url.scheme === "https")
+  );
 }
 
 /**
