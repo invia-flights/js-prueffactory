@@ -41,6 +41,7 @@ import {
 } from "./tests_coverage_report.ts";
 import { runnable, testsExisting, testsExistingID } from "./tests_existing.ts";
 import { errorMessage } from "../gocompat/errors.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 export { testsCoverageID };
 
@@ -126,7 +127,7 @@ export interface CoverageRun {
    * "toolset_unavailable" when empty.
    */
   unavailable: string;
-  unavailableCode: string;
+  unavailableCode: ReasonCode | "";
   /**
    * summary and perFile are c8's JSON summary and per-file JSON, null when
    * c8 wrote none.
@@ -146,7 +147,7 @@ export function wantsCoverage(input: Input): boolean {
   return input.selection === null || selected(input.selection, testsCoverageID);
 }
 
-function unavailable(why: string, code = ""): CoverageRun {
+function unavailable(why: string, code: ReasonCode | "" = ""): CoverageRun {
   return {
     unavailable: why,
     unavailableCode: code,

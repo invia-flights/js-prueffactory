@@ -11,6 +11,7 @@ import { tempDir } from "./discovery.testutil.ts";
 import {
   discover,
   type File,
+  type NotStarted,
   type Project,
   resolveTestScript,
   type TestSetup,
@@ -40,7 +41,7 @@ function pairs(m: ReadonlyMap<string, string> | null): string[][] | null {
   return [...m].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
-function unsupported(u: Unsupported | null): unknown {
+function unsupported(u: Unsupported | NotStarted | null): unknown {
   return u === null ? null : { code: u.code, reason: u.reason };
 }
 

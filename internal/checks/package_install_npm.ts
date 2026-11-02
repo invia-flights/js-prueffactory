@@ -14,6 +14,7 @@ import {
   StatusInfrastructureError,
   StatusToolError,
 } from "../resultset/types.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 /**
  * InstallVerdict is what npm's result of an install means for the Report. It
@@ -22,7 +23,7 @@ import {
  */
 export interface InstallVerdict {
   status: ExecStatus;
-  reasonCode: string;
+  reasonCode: ReasonCode | "";
   reason: string;
   /**
    * projectFault is true when the project's own files make the install

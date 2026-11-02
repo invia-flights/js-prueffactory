@@ -16,6 +16,7 @@ import {
   type Suite,
   type TestSetup,
 } from "./testcommand.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 // MaxScriptDepth is how many levels of `npm run` references a script may
 // nest, for a test script and for the script of a deployment file. The
@@ -80,7 +81,7 @@ export function parseTestScript(script: string): TestSetup {
 }
 
 interface StepProblem {
-  code: string;
+  code: ReasonCode;
   reason: string;
 }
 
@@ -266,7 +267,7 @@ function parseStep(
   inherited: ReadonlyMap<string, string>,
   subject: string,
 ): ParsedStep | { problem: StepProblem } {
-  const unsupported = (code: string, msg: string) => ({
+  const unsupported = (code: ReasonCode, msg: string) => ({
     problem: { code, reason: `${subject} ${msg}; ${onlyRunners}` },
   });
   const cmd = newSuite();
@@ -380,7 +381,7 @@ function parseNPMReference(
   words: readonly string[],
   subject: string,
 ): ScriptReference | { problem: StepProblem } {
-  const fail = (msg: string) => ({
+  const fail = (msg: string): { problem: StepProblem } => ({
     problem: {
       code: CodeTestCommandUnsupported,
       reason: `${subject} ${msg}; ${onlyRunners}`,

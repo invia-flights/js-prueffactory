@@ -23,6 +23,7 @@ import type {
   Tool,
   ToolRef,
 } from "../resultset/types.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 import { TrustUntrusted } from "../resultset/types.ts";
 import { newLocation } from "../resultset/zero.ts";
 import { sha256File } from "./readcap.ts";
@@ -273,7 +274,8 @@ export interface SuiteTestCase {
  */
 export interface Result {
   status: ExecStatus;
-  reasonCode?: string;
+  /** reasonCode is one of reasonCodes; "" (Go's zero value) says there is none. */
+  reasonCode?: ReasonCode | "";
   reason?: string;
   findings?: Finding[];
   metrics?: Metric[];

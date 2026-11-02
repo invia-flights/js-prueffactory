@@ -63,6 +63,7 @@ import {
   unmarshalText,
 } from "./security_dependencies_osv.ts";
 import { errorMessage } from "../gocompat/errors.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 export const depsSecurityID = "security.dependencies";
 
@@ -300,7 +301,7 @@ async function runDependencies(
 /** ScanFailure says why a scan cannot be trusted at all. */
 export interface ScanFailure {
   status: ExecStatus;
-  code: string;
+  code: ReasonCode;
   reason: string;
 }
 

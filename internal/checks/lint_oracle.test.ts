@@ -15,6 +15,7 @@ import type { Finding } from "../resultset/types.ts";
 import { ToolBin } from "../toolvolume/toolvolume.ts";
 import "./all.ts";
 import { packageContext, writeTree } from "./checks.testutil.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 import { engineNodeVersion, interpretDepsEngines } from "./deps_engines.ts";
 import {
   configHash,
@@ -112,7 +113,7 @@ interface Cases {
     name: string;
     files: Record<string, string>;
     answers: Record<string, Answer>;
-    unsupported?: { code: string; reason: string };
+    unsupported?: { code: ReasonCode; reason: string };
   }[];
 }
 

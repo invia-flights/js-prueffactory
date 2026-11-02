@@ -44,6 +44,7 @@ import {
 import { lstatRegular } from "./readcap.ts";
 import { rawJSON, repoFinding } from "./repo_findings.ts";
 import { atoiClamped } from "../gocompat/strconv.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 export const typesJavascriptID = "types.javascript";
 
@@ -155,7 +156,9 @@ export function typesApplicability(c: Context): [Applicability, string] {
  * emits next to TypeScript sources); a tsconfig.json only for the editor does
  * not.
  */
-export function typesUnsupported(pkg: Package): [code: string, reason: string] {
+export function typesUnsupported(
+  pkg: Package,
+): [code: ReasonCode | "", reason: string] {
   if (pkg.buildStepReason === "") {
     return ["", ""];
   }

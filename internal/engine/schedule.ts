@@ -37,6 +37,7 @@ import {
 import { takeSecretScan } from "./redaction.ts";
 import { recordNPM, recordTools } from "./tools.ts";
 import { errorMessage } from "../gocompat/errors.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 /** usesDocker says whether an execution starts a container and so needs the Preparation phase. */
 export function usesDocker(p: Planned): boolean {
@@ -187,7 +188,7 @@ export function orderJobs(jobs: Job[]): void {
 export function reasonFor(
   status: ExecStatus,
   limit: Duration,
-): [string, string] {
+): [ReasonCode, string] {
   switch (status) {
     case StatusCancelled:
       return ["cancelled", "the Run was cancelled"];

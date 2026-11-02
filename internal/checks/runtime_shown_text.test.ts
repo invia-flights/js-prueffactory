@@ -79,7 +79,11 @@ test("a suite that did not run is named in the coverage note only when its name 
   input.shared = new Shared();
   stubSuites(t, (_i, ran) =>
     ran === 1
-      ? { status: "infrastructure_error", reasonCode: "x", reason: "no" }
+      ? {
+          status: "infrastructure_error",
+          reasonCode: "helper_failed",
+          reason: "no",
+        }
       : {
           status: StatusCompleted,
           coverage: {

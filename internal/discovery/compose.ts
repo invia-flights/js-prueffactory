@@ -8,11 +8,19 @@ import { type ServiceFamily, serviceFamilyOf } from "../toolset/services.ts";
 import * as yaml from "../yamlv3/yaml.ts";
 import { interpolate, readDotEnv } from "./compose_env.ts";
 import { cut } from "./nodetestargs.ts";
-import type { Unsupported } from "./testcommand.ts";
 import { errorMessage } from "../gocompat/errors.ts";
 
 // ComposeService is one service of the project's compose files: either a
 // test Service the Run starts for its test suites, or one it never starts.
+/**
+ * NotStarted says why the Run never starts a compose service. Its code is a
+ * vocabulary of its own (not a reason code of an execution).
+ */
+export interface NotStarted {
+  readonly code: string;
+  readonly reason: string;
+}
+
 export interface ComposeService {
   // name is the compose service name. It is the host name tests reach the
   // Service under.
@@ -28,7 +36,7 @@ export interface ComposeService {
   family: string;
   // notStarted says why the Run never starts the service. It is null for a
   // test Service the Run starts, also when its variables are unresolved.
-  notStarted: Unsupported | null;
+  notStarted: NotStarted | null;
   // env holds the service's `environment` entries, interpolated from the
   // project's .env file. Only test Services have it (null otherwise, as
   // Go's nil map).

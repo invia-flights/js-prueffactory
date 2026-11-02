@@ -1,5 +1,6 @@
 import { base } from "../gocompat/path.ts";
 import type { LeftOutStep } from "./testchain.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 // TestRunner is a test runner milestone 1 can run.
 export type TestRunner = "mocha" | "node:test";
@@ -18,7 +19,7 @@ export const CodeTestCommandUnsupported = "test_command_unsupported";
 // Unsupported says why a package cannot be handled in this release. code is
 // a stable reason code for the Report.
 export interface Unsupported {
-  readonly code: string;
+  readonly code: ReasonCode;
   readonly reason: string;
 }
 
