@@ -509,11 +509,12 @@ dev/
 testdata/projects/  made-up projects with deliberate defects
 ```
 
-`dev/ci-readiness.sh` tests the CI setup locally without GitLab. It builds a Linux binary, starts `docker:dind` and a container with the binary, runs the tool against a testdata project with `DOCKER_HOST=tcp://docker:2375` and no TTY, and checks the exit code, the Report and that nothing was left behind.
+`dev/ci-readiness.sh` tests the CI setup locally without GitLab. It packs the npm tarball, starts `docker:dind` and a Node container with the Docker CLI, installs the tarball there with `npm install --global`, runs the tool against a testdata project with `DOCKER_HOST=tcp://docker:2375` and no TTY, and checks the exit code, the Report and that nothing was left behind. It needs `npm ci` first.
 
 ```sh
 dev/ci-readiness.sh                  # clean-mocha
 dev/ci-readiness.sh valkey-service   # another project from testdata/projects
+ONLY=package.manifest dev/ci-readiness.sh   # run only some Checks (--only)
 KEEP=1 dev/ci-readiness.sh           # keep the containers for inspection
 ```
 

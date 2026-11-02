@@ -382,9 +382,13 @@ const superscript: Record<string, string> = {
 /**
  * englishFloat is %v of a float64 through Go's English message printer: the
  * shortest digits, in exponent form ("1.5×10⁰⁶") where %v would use one
- * (exponent below -4 or from 6 on), else plain with grouped thousands.
+ * (exponent below -4 or from 6 on), else plain with grouped thousands. A
+ * number beyond float64 (1e400 in a document) is infinite: "∞" or "-∞".
  */
 export function englishFloat(x: number): string {
+  if (!Number.isFinite(x)) {
+    return x < 0 ? "-∞" : "∞";
+  }
   if (x === 0) {
     return Object.is(x, -0) ? "-0" : "0";
   }
