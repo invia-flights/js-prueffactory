@@ -6,9 +6,10 @@
 // result is the text itself.
 
 // shownSpecifierPattern is what the specifier of an import may look like: a
-// package name, a relative path, an alias such as `@app/x`, `~/x` or `#lib/x`.
+// package name, a relative path, an alias such as `@app/x`, `~/x` or `#lib/x`,
+// or a path with a folder named after a route parameter such as `{id}`.
 const shownSpecifierPattern =
-  /^[A-Za-z0-9_@~#$.+-][A-Za-z0-9_@~#$.+:/-]{0,199}$/;
+  /^[A-Za-z0-9_@~#$.+-][A-Za-z0-9_@~#$.+:/{}-]{0,199}$/;
 
 // shownGlobbedPathPattern is what the path of a file may look like when the
 // file is listed because its name has glob characters: shownPath's, and the
