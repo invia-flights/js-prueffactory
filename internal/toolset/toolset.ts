@@ -9,6 +9,8 @@
 // have been imported; the module that needs the version imports them all.
 import { createHash } from "node:crypto";
 
+import { sortStrings } from "../gocompat/strings.ts";
+
 // Image is an official upstream image pinned by the digest of its multi-arch
 // index, so the same digest works on arm64 and amd64.
 export interface Image {
@@ -53,7 +55,7 @@ record(
 export function version(): string {
   // Go sorts strings byte-wise; UTF-16 order differs outside the BMP.
   const lines = [...entries].map(([k, v]) => k + "=" + v);
-  lines.sort((a, b) => Buffer.compare(Buffer.from(a), Buffer.from(b)));
+  sortStrings(lines);
   const sum = createHash("sha256").update(lines.join("\n")).digest();
   return sum.subarray(0, 6).toString("hex");
 }

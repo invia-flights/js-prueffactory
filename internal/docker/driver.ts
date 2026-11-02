@@ -16,7 +16,7 @@ import { statSync } from "node:fs";
 import { delimiter, join } from "node:path";
 import type { Writable } from "node:stream";
 
-import { quote } from "../gostrings/quote.ts";
+import { quote } from "../gocompat/fmt.ts";
 import { ContainerCPUs, ContainerMemoryMB } from "../toolset/toolset.ts";
 import {
   cacheVolume,

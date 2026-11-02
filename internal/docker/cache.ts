@@ -1,7 +1,7 @@
 // Cache volumes outlive a Run. They carry cache labels and never a run label,
 // so removeRunResources keeps them. Their names and labels are the Go build's,
 // so a Run of either build reuses what the other downloaded.
-import { quote } from "../gostrings/quote.ts";
+import { quote } from "../gocompat/fmt.ts";
 import {
   byteOrder,
   fields,
