@@ -15,7 +15,9 @@ import { afterEach, describe, test } from "node:test";
 
 import { checkValid } from "../gocompat/unmarshal.ts";
 import { sortStrings } from "../gocompat/strings.ts";
+import { ExitInternalError } from "../resultset/exitcode.ts";
 import { finalize } from "../resultset/finalize.ts";
+import { normalizePointers } from "../resultset/helpers.testutil.ts";
 import { newFingerprint } from "../resultset/fingerprint.ts";
 import { minimal, SHA } from "../resultset/resultsettest/sample.testutil.ts";
 import {
@@ -118,6 +120,46 @@ test("an inconsistent set is kept as report.invalid.json and nothing else is wri
     undefined,
     "report.invalid.json is not JSON",
   );
+});
+
+// The message of the error is what the CLI writes to stderr after
+// "js-prueffactory: " before it exits with ExitInternalError (3). It matches
+// the Go writer's message, recorded in testdata/go-oracle.json.
+describe("an invalid Report reads as in the Go build", () => {
+  const oracle = JSON.parse(
+    readFileSync(new URL("testdata/go-oracle.json", import.meta.url), "utf8"),
+  ) as { invalid: { name: string; message: string }[] };
+  const mutations: Record<string, (s: Set) => void> = {
+    "gates contradict the Findings": (s) => {
+      s.summary.gates = 5;
+    },
+    "made-up budget source": (s) => {
+      s.run.budget_source = "made-up";
+    },
+    both: (s) => {
+      s.summary.gates = 5;
+      s.run.budget_source = "made-up";
+      const e = s.checks[0];
+      assert.ok(e);
+      e.status = "weird" as typeof e.status;
+    },
+  };
+  for (const c of oracle.invalid) {
+    test(c.name, () => {
+      const s = minimal();
+      mutations[c.name]?.(s);
+      const dir = join(tempDir(), "run");
+      const err = invalidError(() => {
+        write(dir, s, { json: true, markdown: true });
+      });
+      assert.equal(
+        normalizePointers([err.message.replaceAll(dir, "<DIR>")])[0],
+        c.message,
+      );
+      assert.equal(ExitInternalError, 3);
+      assert.deepEqual(names(dir), ["report.invalid.json"]);
+    });
+  }
 });
 
 // Go: TestTheMessageOfAnInvalidReportIsShortAndCarriesNotes.

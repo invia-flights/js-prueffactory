@@ -1,0 +1,17 @@
+{
+  "invalid": [
+    {
+      "message": "the Report failed its own validation (kept as \u003cDIR\u003e/report.invalid.json):\n  summary.gates is 5 but 0 Findings are Gates",
+      "name": "gates contradict the Findings"
+    },
+    {
+      "message": "the Report failed its own validation (kept as \u003cDIR\u003e/report.invalid.json):\n  /run/budget_source: value must be one of 'default', 'fast_default', 'flag', 'ci_job_timeout'",
+      "name": "made-up budget source"
+    },
+    {
+      "message": "the Report failed its own validation (kept as \u003cDIR\u003e/report.invalid.json):\n  /checks/0/status: value must be one of 'not_started', 'completed', 'partial', 'blocked', 'unsupported', 'timed_out', 'budget_exhausted', 'cancelled', 'tool_error', 'infrastructure_error'\n  /run/budget_source: value must be one of 'default', 'fast_default', 'flag', 'ci_job_timeout'\n  execution E-0001 has outcome passed with status \"weird\" and 0 Findings\n  summary.gates is 5 but 0 Findings are Gates\n  summary.scope_completeness {Required:1 Completed:1 Ratio:\u003cpointer\u003e} does not match the executions {Required:1 Completed:0 Ratio:\u003cpointer\u003e}\n  summary.standard_completeness {Required:1 Completed:1 Ratio:\u003cpointer\u003e} does not match the executions {Required:1 Completed:0 Ratio:\u003cpointer\u003e}\n  run.status is \"completed\" but selected Checks incomplete is true\n  run.exit_code is 0 but the results map to 2",
+      "name": "both"
+    }
+  ],
+  "recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8"
+}
