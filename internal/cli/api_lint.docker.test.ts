@@ -1,0 +1,153 @@
+// Seam A for api.lint with a real Docker daemon (Go:
+// api_lint_unparseable_docker_test.go and the api.lint parts of
+// repository_files_docker_test.go). The Go tests run the default Selection;
+// these select api.lint, and artifacts.structured where it matters.
+import assert from "node:assert/strict";
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { test } from "node:test";
+
+import {
+  benchmarkPart,
+  executionIn,
+  findingsIn,
+  gatesIn,
+  parseReport,
+} from "./parse.testutil.ts";
+import { assertNothingLeft, copyProject, realRun } from "./realrun.testutil.ts";
+
+// unparseable-openapi's only defect is a control character (U+0001) YAML
+// 1.2 forbids in openapi.yaml.
+
+test("an unparseable OpenAPI file is one Gate of artifacts.structured and api.lint leaves it alone", async (t) => {
+  const original = copyProject(t, "unparseable-openapi");
+
+  const r = await realRun(t, [
+    "benchmark",
+    original,
+    "--only",
+    "artifacts.structured,api.lint",
+  ]);
+
+  assert.equal(r.code, 1, r.stderr);
+  const s = parseReport(r);
+  const structured = gatesIn(s, "artifacts.structured");
+  assert.deepEqual([...structured.keys()], ["openapi.yaml"]);
+  assert.equal(structured.get("openapi.yaml")?.rule_id, "invalid-yaml");
+  assert.equal(gatesIn(s, "api.lint").size, 0, "api.lint adds no second Gate");
+  const e = executionIn(s, "api.lint");
+  assert.deepEqual([e.status, e.reason_code], ["completed", null]);
+  assert.ok(
+    s.limitations.some(
+      (l) =>
+        l.reason_code === "file_not_parseable" &&
+        l.check_id === "api.lint" &&
+        l.path === "openapi.yaml" &&
+        l.message.includes("artifacts.structured"),
+    ),
+    JSON.stringify(s.limitations),
+  );
+
+  // The file counts once, in the Structured files part, and OpenAPI is not unknown.
+  const structuredPart = benchmarkPart(s, "structured_files");
+  assert.deepEqual(
+    [structuredPart.state, structuredPart.raw_value],
+    ["measured", 1],
+  );
+  const openapi = benchmarkPart(s, "openapi");
+  assert.deepEqual([openapi.state, openapi.raw_value], ["measured", 0]);
+  assertNothingLeft(r);
+});
+
+test("an unparseable OpenAPI file is a Gate of api.lint when artifacts.structured is not selected", async (t) => {
+  const original = copyProject(t, "unparseable-openapi");
+
+  const r = await realRun(t, ["test", original, "--only", "api.lint"]);
+
+  assert.equal(r.code, 1, r.stderr);
+  const s = parseReport(r);
+  const e = executionIn(s, "api.lint");
+  assert.deepEqual(
+    [e.status, e.outcome, e.gate],
+    ["completed", "failed", 1],
+    `${e.reason_code ?? ""} ${e.reason ?? ""}`,
+  );
+  const f = gatesIn(s, "api.lint").get("openapi.yaml");
+  assert.equal(f?.rule_id, "unparseable");
+  assert.equal(f.evidence.length, 1);
+  assert.notEqual(f.evidence[0]?.text.trim(), "");
+  assertNothingLeft(r);
+});
+
+test("repository OpenAPI files are linted with Redocly and errors are Gates", async (t) => {
+  // Go: the api.lint part of TestRepositoryFilesAreLintedWithTheirStandardToolsAndErrorsAreGates
+  const original = copyProject(t, "repository-files");
+
+  const r = await realRun(t, ["test", original, "--only", "api.lint"]);
+
+  assert.equal(r.code, 1, r.stderr);
+  const s = parseReport(r);
+  const e = executionIn(s, "api.lint");
+  assert.deepEqual(
+    [e.status, e.outcome, e.context_id, e.gate > 0],
+    ["completed", "failed", "C-0001", true],
+  );
+  assert.ok(e.tool?.version, JSON.stringify(e.tool));
+
+  // The invalid file in a folder with glob characters is a Gate, the valid
+  // file is clean and Test data is left alone.
+  const gates = gatesIn(s, "api.lint");
+  assert.equal(gates.get("api [v1] {draft}*/openapi.yaml")?.rule_id, "struct");
+  for (const f of findingsIn(s, "api.lint")) {
+    assert.equal(f.locations[0]?.path, "api [v1] {draft}*/openapi.yaml");
+  }
+  const redocly = (s.contexts[0]?.tools ?? []).find(
+    (x) => x.name === "redocly",
+  );
+  assert.ok(redocly?.version);
+  assert.match(redocly.digest ?? "", /^sha256:/);
+  assertNothingLeft(r);
+});
+
+test("a remote ref makes an OpenAPI file partial with a Limitation", async (t) => {
+  // Go: TestARemoteRefMakesAnOpenAPIFilePartialWithALimitation
+  const original = copyProject(t, "repository-files");
+  writeFileSync(
+    join(original, "api", "remote.yaml"),
+    'openapi: 3.0.3\ninfo:\n  title: Remote\n  version: "1"\npaths:\n  /a:\n    $ref: "https://example.com/a.yaml"\n',
+  );
+
+  const r = await realRun(t, ["test", original, "--only", "api.lint"]);
+
+  const s = parseReport(r);
+  assert.equal(executionIn(s, "api.lint").status, "partial", r.stderr);
+  assert.ok(
+    s.limitations.some(
+      (l) => l.check_id === "api.lint" && l.path === "api/remote.yaml",
+    ),
+    JSON.stringify(s.limitations),
+  );
+  for (const f of findingsIn(s, "api.lint")) {
+    assert.notEqual(
+      f.locations[0]?.path,
+      "api/remote.yaml",
+      "a remote $ref that cannot be fetched must not become a Finding",
+    );
+  }
+  assertNothingLeft(r);
+});
+
+test("a project without OpenAPI files has nothing to lint", async (t) => {
+  // Go: the api.lint part of TestAProjectWithoutRepositoryFilesHasNothingToLint
+  const original = copyProject(t, "clean-mocha");
+
+  const r = await realRun(t, ["test", original, "--only", "api.lint"]);
+
+  const s = parseReport(r);
+  assert.equal(executionIn(s, "api.lint").applicability, "not_applicable");
+  assert.ok(
+    !(s.contexts[0]?.tools ?? []).some((x) => x.name === "redocly"),
+    "Redocly did not run",
+  );
+  assertNothingLeft(r);
+});

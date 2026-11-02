@@ -33,6 +33,7 @@ import {
   readProjectFile,
   tooLargeLimitation,
 } from "./readcap.ts";
+import { shownPath } from "./shown_text.ts";
 import { buildOutputRoot } from "./syntax_parse.ts";
 
 export const structuredID = "artifacts.structured";
@@ -86,7 +87,9 @@ function runStructured(input: Input): Result {
         continue;
       }
       unreadable.push(
-        f.path + ": " + (err instanceof Error ? err.message : String(err)),
+        shownPath(f.path) +
+          ": " +
+          (err instanceof Error ? err.message : String(err)),
       );
       continue;
     }

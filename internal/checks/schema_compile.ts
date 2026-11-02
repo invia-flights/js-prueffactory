@@ -45,6 +45,7 @@ import {
 } from "./helper_result.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
 import { inNodeModules, readRegular } from "./repo_targets.ts";
+import { shownPath, shownURL, shownWord } from "./shown_text.ts";
 
 export const schemaCompileID = "schema.compile";
 
@@ -585,7 +586,7 @@ function interpretSchemaCompileTargets(
         reason_code: "remote_ref_not_fetched",
         message:
           "the schema refers to " +
-          s.remote.join(", ") +
+          s.remote.map((r) => shownURL(r, "reference")).join(", ") +
           ", which cannot be fetched without network access, so what it points to was not compiled",
         check_id: schemaCompileID,
         path: s.path,
@@ -643,12 +644,12 @@ function schemaFinding(
   });
   if (p.kind === "strict-mode") {
     f.title = "JSON Schema breaks strict mode";
-    f.message = `${s.path} (${s.draft}) compiles, but Ajv in strict mode reports: ${p.message}`;
+    f.message = `${shownPath(s.path)} (${shownWord(s.draft, "draft")}) compiles, but Ajv in strict mode reports: ${p.message}`;
     f.severity = SeverityWarning;
     f.confidence = ConfidenceLikely;
   } else {
     f.title = "JSON Schema does not compile";
-    f.message = `${s.path} (${s.draft}) does not compile with Ajv: ${p.message}`;
+    f.message = `${shownPath(s.path)} (${shownWord(s.draft, "draft")}) does not compile with Ajv: ${p.message}`;
     f.severity = SeverityError;
     f.confidence = ConfidenceConfirmed;
     f.gate = true;

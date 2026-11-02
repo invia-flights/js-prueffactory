@@ -42,6 +42,7 @@ import {
   toolRef,
 } from "./repo_tools.ts";
 import { selected } from "./selection.ts";
+import { shownPath } from "./shown_text.ts";
 
 export const apiLintID = "api.lint";
 const reasonNotParseable = "file_not_parseable";
@@ -211,7 +212,7 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
       }
     } catch (err) {
       unreadable.push(
-        `${target.path}: ${err instanceof Error ? err.message : String(err)}`,
+        `${shownPath(target.path)}: ${err instanceof Error ? err.message : String(err)}`,
       );
       continue;
     }

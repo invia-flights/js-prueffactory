@@ -29,6 +29,7 @@ import { newFinding } from "../resultset/zero.ts";
 import { type Check, register } from "./check.ts";
 import { failedToRun, helperFailed } from "./helper_result.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
+import { shownPath } from "./shown_text.ts";
 
 export const syntaxParseID = "syntax.parse";
 
@@ -305,7 +306,7 @@ async function runSyntaxParse(
   if (first !== undefined) {
     res.status = StatusPartial;
     res.reasonCode = "check_could_not_run_on_some_files";
-    res.reason = `node --check could not be run on ${String(errors.length)} of ${String(out.checked)} files, for example ${first.path}: ${first.message}`;
+    res.reason = `node --check could not be run on ${String(errors.length)} of ${String(out.checked)} files, for example ${shownPath(first.path)}: ${first.message}`;
     return res;
   }
   res.status = StatusCompleted;

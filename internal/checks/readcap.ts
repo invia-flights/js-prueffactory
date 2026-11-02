@@ -11,6 +11,7 @@ import { pathError } from "../gocompat/os.ts";
 import { join } from "../gocompat/path.ts";
 import type { Limitation } from "../resultset/types.ts";
 import { cutList } from "./cut_text.ts";
+import { shownPath } from "./shown_text.ts";
 
 /**
  * maxProjectFileBytes is the size above which a native Check does not read a
@@ -38,7 +39,7 @@ export function tooLargeLimitation(
   return [
     {
       reason_code: reasonTooLarge,
-      message: `${String(paths.length)} file(s) are over ${String(maxProjectFileBytes >> 20)} MiB and were not read: ${cutList(paths, 20).join(", ")}`,
+      message: `${String(paths.length)} file(s) are over ${String(maxProjectFileBytes >> 20)} MiB and were not read: ${cutList(paths.map(shownPath), 20).join(", ")}`,
       check_id: checkID,
       path: null,
     },
