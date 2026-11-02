@@ -1,6 +1,6 @@
 {
   "name": "js-prueffactory",
-  "version": "0.0.0",
+  "version": "0.1.0-dev",
   "private": true,
   "description": "Checks a JavaScript project in Docker and writes a Report.",
   "license": "MIT",
@@ -19,6 +19,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc",
     "parity": "node dev/parity/main.ts",
+    "pack:tarball": "node dev/pack/main.ts -o js-prueffactory.tgz",
     "test:golden-update": "UPDATE_GOLDEN=1 node --test internal/writer/golden.test.ts"
   },
   "devDependencies": {
