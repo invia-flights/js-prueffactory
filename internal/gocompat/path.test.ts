@@ -1,7 +1,17 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { base, clean, dir, join, match } from "./path.ts";
+import { base, clean, dir, ext, join, match, split } from "./path.ts";
+
+test("ext and split are Go's path.Ext and path.Split", () => {
+  assert.equal(ext(".env"), ".env");
+  assert.equal(ext("a/b.test.js"), ".js");
+  assert.equal(ext("a.b/c"), "");
+  assert.equal(ext("Dockerfile"), "");
+  assert.deepEqual(split("a/b/c.js"), ["a/b/", "c.js"]);
+  assert.deepEqual(split("c.js"), ["", "c.js"]);
+  assert.deepEqual(split("a/"), ["a/", ""]);
+});
 
 // The examples of Go's path.Clean documentation, and a few more edges.
 test("clean is Go's path.Clean", () => {

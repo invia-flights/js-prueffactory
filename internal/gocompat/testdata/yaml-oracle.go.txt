@@ -1,0 +1,412 @@
+// Generator of yaml-oracle.json: what gopkg.in/yaml.v3 v3.0.1 and
+// encoding/json of the freeze commit's toolchain (Go 1.27.3) judge for every
+// YAML and JSON file under testdata/ and for the inline YAML cases below.
+// Kept as text; regenerate from the repository root with:
+//
+//	mkdir -p dev/zzyamloracle && cp internal/gocompat/testdata/yaml-oracle.go.txt dev/zzyamloracle/main.go
+//	go run ./dev/zzyamloracle > internal/gocompat/testdata/yaml-oracle.json && rm -r dev/zzyamloracle
+package main
+
+import (
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"io/fs"
+	"math"
+	"os"
+	"path/filepath"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+	"unicode/utf8"
+
+	"gopkg.in/yaml.v3"
+
+	"github.com/invia-flights/jscript-bench/internal/discovery"
+)
+
+// Inline YAML cases: scalar resolution, tags, anchors, merges, duplicate keys,
+// syntax errors and encodings. Keep them short; the name says what it shows.
+var cases = []struct{ name, text string }{
+	{"empty", ""},
+	{"only a comment", "# nothing\n"},
+	{"document start only", "---\n"},
+	{"document end only", "...\n"},
+	{"plain string", "hello\n"},
+	{"null forms", "a: ~\nb: null\nc: Null\nd: NULL\ne:\nf: nULL\n"},
+	{"bool forms", "a: true\nb: True\nc: TRUE\nd: false\ne: yes\nf: on\ng: off\nh: y\ni: tRUE\n"},
+	{"ints", "a: 1\nb: -5\nc: +5\nd: 1_000\ne: 017\nf: 0o17\ng: 0x1F\nh: 0b101\ni: -0b101\nj: -0o17\nk: 0\nl: 09\nm: 0x\nn: 1__0\n"},
+	{"big ints", "a: 9223372036854775807\nb: 9223372036854775808\nc: 18446744073709551615\nd: 18446744073709551616\ne: -9223372036854775808\nf: -9223372036854775809\n"},
+	{"floats", "a: 1.5\nb: .5\nc: 1.\nd: 1e3\ne: 1E-3\nf: -2.5e+2\ng: .inf\nh: -.Inf\ni: +.INF\nj: .nan\nk: 1_000.5\nl: 1.5e\nm: 0.1\nn: 1e400\no: .5.\np: 6.8523015e+5\n"},
+	{"timestamps", "a: 2001-12-14\nb: 2001-12-14T21:59:43.10-05:00\nc: 2001-12-14 21:59:43.10\nd: 2001-12-14t21:59:43Z\ne: 2001-1-2\nf: \"2001-12-14\"\ng: 2001-12-14 21:59:43.10 -5\nh: 20011-12-14\ni: 2001-13-14\n"},
+	{"quoted scalars stay strings", "a: \"1\"\nb: '1'\nc: \"true\"\nd: 'null'\ne: \"\"\nf: ''\n"},
+	{"block scalars", "a: |\n  line one\n  line two\nb: >\n  folded\n  text\nc: |-\n  strip\nd: |+\n  keep\n\ne: 1\n"},
+	{"explicit tags", "a: !!str 5\nb: !!int \"7\"\nc: !!float 3\nd: !!bool true\ne: !!null ''\nf: !custom value\ng: !!binary aGVsbG8=\nh: !<tag:yaml.org,2002:str> 9\ni: ! 12\n"},
+	{"tag that does not fit", "a: !!int hello\n"},
+	{"float tag on an int", "a: !!float 3\n"},
+	{"bad binary", "a: !!binary '%%%'\n"},
+	{"gitlab reference tag", "test:\n  script:\n    - !reference [.setup, script]\n    - echo done\n"},
+	{"anchors and aliases", "base: &b\n  x: 1\nref: *b\nlist: [&i 1, *i]\n"},
+	{"merge key", "base: &b\n  x: 1\n  y: 2\nderived:\n  <<: *b\n  y: 3\n"},
+	{"merge of a sequence", "a: &a {x: 1}\nb: &b {y: 2}\nc:\n  <<: [*a, *b]\n  z: 3\n"},
+	{"merge of a scalar", "a: &a 1\nb:\n  <<: *a\n"},
+	{"quoted merge key is a plain key", "a: {x: 1}\nb:\n  \"<<\": 1\n"},
+	{"unknown anchor", "a: *nope\n"},
+	{"duplicate key", "a: 1\nb: 2\na: 3\n"},
+	{"duplicate key quoted and plain", "a: 1\n\"a\": 2\n"},
+	{"duplicate key int and string", "1: a\n\"1\": b\n"},
+	{"duplicate key nested", "x:\n  k: 1\n  k: 2\n"},
+	{"duplicate key in flow", "{a: 1, a: 2}\n"},
+	{"duplicate null keys", "? \n: 1\n? \n: 2\n"},
+	{"non-string keys", "1: a\ntrue: b\n~: c\n1.5: d\n"},
+	{"sequence key", "? [a, b]\n: 1\n"},
+	{"mapping key", "? {a: 1}\n: 1\n"},
+	{"flow collections", "a: [1, two, {k: v}]\nb: {x: [], y: {}}\n"},
+	{"nested block", "a:\n  - b: 1\n    c:\n      - 2\n      - 3\n  - d\n"},
+	{"indentless sequence", "key:\n- a\n- b\n"},
+	{"multiple documents", "a: 1\n---\nb: 2\n"},
+	{"multiple documents with end markers", "--- \na: 1\n...\n---\nb: 2\n...\n"},
+	{"directive", "%YAML 1.2\n---\na: 1\n"},
+	{"yaml 1.1 directive", "%YAML 1.1\n---\na: 1\n"},
+	{"tag directive", "%TAG !e! tag:example.com,2000:\n---\na: !e!foo 1\n"},
+	{"bad yaml version", "%YAML 2.0\n---\na: 1\n"},
+	{"comments everywhere", "# head\na: 1 # line\n# foot\nb:\n  # inside\n  c: 2\n"},
+	{"tab indentation", "replicas: 2\nimage:\n\tname: demo\n"},
+	{"tab after value", "a: 1\t\nb: 2\n"},
+	{"tab separating key and value", "a:\t1\n"},
+	{"unclosed flow sequence", "services: [this is: not valid"},
+	{"unclosed flow mapping", "a: {b: 1\n"},
+	{"unclosed double quote", "a: \"abc\n"},
+	{"unclosed single quote", "a: 'abc\n"},
+	{"bad indentation", "a:\n  b: 1\n c: 2\n"},
+	{"mapping values not allowed", "a: b: c\n"},
+	{"block sequence in a mapping value line", "a: - b\n"},
+	{"key without colon after mapping", "a: 1\nb\n"},
+	{"sequence then mapping at same level", "- a\nb: 1\n"},
+	{"mapping then sequence at same level", "a: 1\n- b\n"},
+	{"stray closing bracket", "a: 1]\n"},
+	{"flow end at top", "]\n"},
+	{"comma in plain scalar", "a: b, c\n"},
+	{"colon at start of plain", "a: :b\n"},
+	{"at sign starts a token", "a: @b\n"},
+	{"backtick starts a token", "a: `b`\n"},
+	{"percent in value", "a: %b\n"},
+	{"invalid escape", "a: \"\\q\"\n"},
+	{"valid escapes", "a: \"\\t\\n\\x41\\u00e9\\U0001F600\\\\\\\"\\/\\0\\a\\e\\N\\_\\L\\P\"\n"},
+	{"multiline plain", "a: one\n  two\n  three\n"},
+	{"multiline implicit key", "a\nb: 1\n"},
+	{"long implicit key", "\"" + strings.Repeat("k", 1100) + "\": 1\n"},
+	{"anchor without node", "a: &x\nb: 1\n"},
+	{"alias with properties", "a: &x 1\nb: !t *x\n"},
+	{"two anchors", "a: &x &y 1\n"},
+	{"document with only a scalar after directive end", "--- 5\n"},
+	{"block scalar bad indent", "a: |\n  one\n two\n"},
+	{"block scalar indicator", "a: |2\n   x\n"},
+	{"block scalar invalid indicator", "a: |0\n  x\n"},
+	{"control character", "a: \"x\x01y\"\n"},
+	{"control character in a comment", "# \x07 bell\na: 1\n"},
+	{"delete character", "a: x\x7fy\n"},
+	{"nel character", "a: x\u0085y\n"},
+	{"line separator", "a: x\u2028y\n"},
+	{"invalid utf-8", "a: \xff\n"},
+	{"truncated utf-8", "a: \xe2\x82\n"},
+	{"utf-8 bom", "\xef\xbb\xbfa: 1\n"},
+	{"utf-16le bom", "\xff\xfea\x00:\x00 \x001\x00\n\x00"},
+	{"utf-16be bom", "\xfe\xff\x00a\x00:\x00 \x001\x00\n"},
+	{"bom in the middle", "a: 1\n\xef\xbb\xbfb: 2\n"},
+	{"carriage returns", "a: 1\r\nb:\r\n  c: 2\r\n"},
+	{"lone carriage returns", "a: 1\rb: 2\r"},
+	{"unicode keys and values", "schlüssel: wert\n日本: 語\nemoji: 😀\n"},
+	{"astral key position", "😀😀: [a, b]\nk: {x: 😀}\n"},
+	{"question mark key", "? a\n: 1\n? b\n"},
+	{"empty values in flow", "[a, , b]\n"},
+	{"empty flow mapping entry", "{a, b: }\n"},
+	{"flow mapping in a sequence", "- {a: 1}\n- [b]\n"},
+	{"nested flow mapping without space", "{a:1}\n"},
+	{"plain scalar with hash", "a: b#c\nd: e #f\n"},
+	{"key with trailing spaces", "a  : 1\n"},
+	{"document end then content", "a: 1\n...\nb: 2\n"},
+	{"content after document end without start", "a\n...\n# c\n"},
+	{"stray document marker inside block", "a:\n  b: 1\n---\n"},
+	{"invalid tag", "a: !<> x\n"},
+	{"undefined tag handle", "a: !x!y z\n"},
+	{"reserved directive", "%FOO bar\n---\na: 1\n"},
+	{"compose with services list", "services: [a, b]\n"},
+	{"compose with a scalar service", "services:\n  web: nginx\n"},
+	{"compose with an image map", "services:\n  web:\n    image: {name: x}\n"},
+	{"compose with a numeric image", "services:\n  web:\n    image: 5\n"},
+	{"compose with a null service", "services:\n  web:\n"},
+	{"compose top-level list", "- a\n"},
+	{"compose top-level scalar", "services\n"},
+	{"compose duplicate service", "services:\n  a:\n    image: redis\n  a:\n    image: valkey\n"},
+	{"compose environment forms", "services:\n  db:\n    image: postgres:16\n    environment:\n      A: 1\n      B: 1.5\n      C: true\n      D: 2001-12-14\n      E: [x]\n      F: {y: 1}\n      G: 0x1F\n      H: 1e3\n      I: .inf\n      J: 017\n      K: 9223372036854775808\n      L: 18446744073709551616\n      M: -0b101\n      N: 1.0\n      O: 100000000000000000000.0\n      P: 1e-7\n      Q: 2001-12-14T21:59:43.10-05:00\n      R: -.inf\n      S: .nan\n"},
+	{"compose environment with int keys", "services:\n  db:\n    image: postgres:16\n    environment:\n      1: a\n"},
+	{"compose environment list with non-strings", "services:\n  db:\n    image: postgres:16\n    environment:\n      - A=1\n      - 5\n      - B\n"},
+	{"compose services key twice in struct", "services:\n  a:\n    image: x\n    image: y\n"},
+	{"mocharc forms", "spec:\n  - 'suites/**/*.spec.js'\nrequire: helpers/setup.js\nrecursive: true\n"},
+	{"deeply nested flow", strings.Repeat("[", 50) + strings.Repeat("]", 50) + "\n"},
+	{"control character after the first document", "a: 1\n---\n" + strings.Repeat("b: x\n", 200) + "c: \x01\n"},
+	{"invalid utf-8 late", "a: 1\n---\n" + strings.Repeat("# padding\n", 120) + "b: \xff\n"},
+	{"multibyte characters across chunks", "a: " + strings.Repeat("\u00e9", 600) + "\nb: " + strings.Repeat("\u20ac", 400) + "\n"},
+	{"utf-16le with a surrogate pair", "\xff\xfea\x00:\x00 \x00\x3d\xd8\x00\xde\n\x00"},
+	{"utf-16le odd length", "\xff\xfea\x00:\x00 \x001"},
+	{"utf-16be lone low surrogate", "\xfe\xff\x00a\x00:\x00 \xdc\x00"},
+	{"comments in block sequences", "# head of a\na:\n  # head of one\n  - one # line of one\n  # foot of one\n\n  - two\n# foot of a\n\nb: 2 # line\n"},
+	{"comments in flow collections", "a: [1, # one\n  2] # after\nb: {x: 1, # x\n  y: 2}\n# end\n"},
+	{"comments between documents", "# first\na: 1\n# foot\n---\n# second\nb: 2\n...\n# trailing\n"},
+	{"nested sequence comments", "- # stem\n  - a\n  - b\n- c # line\n"},
+	{"long key over 1024 characters", strings.Repeat("k", 1030) + ": 1\n"},
+	{"many tokens", strings.Repeat("- [a, b, {c: d}]\n", 120)},
+	{"very deeply nested flow", strings.Repeat("[", 10001) + strings.Repeat("]", 10001) + "\n"},
+}
+
+type caseOut struct {
+	Name   string `json:"name"`
+	Text   string `json:"text,omitempty"`
+	Base64 string `json:"base64,omitempty"`
+	// Unmarshal is yaml.Unmarshal into an `any`: the error or the value.
+	Unmarshal result `json:"unmarshal"`
+	// Documents decodes every document into a yaml.Node with a Decoder.
+	Documents result `json:"documents"`
+	// Compose is Discovery's decode of a compose file: the reason text, or "".
+	Compose string `json:"compose"`
+}
+
+type result struct {
+	Error string `json:"error,omitempty"`
+	Value any    `json:"value,omitempty"`
+}
+
+type jsonOut struct {
+	Path string `json:"path"`
+	// Error is json.Unmarshal into an `any`; Offset is the SyntaxError offset.
+	Error  string `json:"error,omitempty"`
+	Offset int64  `json:"offset,omitempty"`
+	// JSONC is the same after discovery.StripJSONC with trailing commas.
+	JSONCError string `json:"jsoncError,omitempty"`
+}
+
+func main() {
+	var yamlOut []caseOut
+	var jsonOuts []jsonOut
+	err := filepath.WalkDir(".", func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			if d.Name() == "node_modules" || d.Name() == ".git" || d.Name() == ".claude" || d.Name() == ".scratch" {
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if !d.Type().IsRegular() || !strings.Contains(filepath.ToSlash(p), "testdata/") || strings.HasPrefix(p, "internal/gocompat/testdata/yaml-oracle") {
+			return nil
+		}
+		data, err := os.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		switch ext := strings.ToLower(filepath.Ext(p)); ext {
+		case ".yml", ".yaml":
+			c := judge(filepath.ToSlash(p), data)
+			c.Text, c.Base64 = "", ""
+			yamlOut = append(yamlOut, c)
+		case ".json", ".jsonc":
+			jsonOuts = append(jsonOuts, judgeJSON(filepath.ToSlash(p), data))
+		}
+		return nil
+	})
+	if err != nil {
+		panic(err)
+	}
+	var inline []caseOut
+	for _, c := range cases {
+		inline = append(inline, judge(c.name, []byte(c.text)))
+	}
+	out := map[string]any{
+		"recordedFrom": "gopkg.in/yaml.v3 v3.0.1 and Go 1.27.3 encoding/json, the versions of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8",
+		"files":        yamlOut,
+		"cases":        inline,
+		"json":         jsonOuts,
+	}
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", " ")
+	if err := enc.Encode(out); err != nil {
+		panic(err)
+	}
+}
+
+func judge(name string, data []byte) caseOut {
+	c := caseOut{Name: name}
+	if utf8.Valid(data) {
+		c.Text = string(data)
+	} else {
+		c.Base64 = base64.StdEncoding.EncodeToString(data)
+	}
+	c.Unmarshal = safely(func() result {
+		var v any
+		if err := yaml.Unmarshal(data, &v); err != nil {
+			return result{Error: err.Error()}
+		}
+		return result{Value: dump(v)}
+	})
+	c.Documents = safely(func() result {
+		dec := yaml.NewDecoder(bytes.NewReader(data))
+		docs := []any{}
+		for {
+			var n yaml.Node
+			err := dec.Decode(&n)
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			if err != nil {
+				return result{Error: err.Error(), Value: docs}
+			}
+			docs = append(docs, dumpNode(&n))
+		}
+		return result{Value: docs}
+	})
+	c.Compose = composeReason(data)
+	return c
+}
+
+// composeReason repeats the decode of discovery.readCompose (compose.go:99-110).
+func composeReason(data []byte) (reason string) {
+	defer func() {
+		if e := recover(); e != nil {
+			reason = fmt.Sprintf("panic: %v", e)
+		}
+	}()
+	var doc struct {
+		Services map[string]*struct {
+			Image       string `yaml:"image"`
+			Build       any    `yaml:"build"`
+			Environment any    `yaml:"environment"`
+		} `yaml:"services"`
+	}
+	if err := yaml.Unmarshal(data, &doc); err != nil {
+		line, _, _ := strings.Cut(err.Error(), "\n")
+		return "it is not valid YAML of the compose format: " + line
+	}
+	return ""
+}
+
+func safely(f func() result) (r result) {
+	defer func() {
+		if e := recover(); e != nil {
+			r = result{Error: fmt.Sprintf("panic: %v", e)}
+		}
+	}()
+	return f()
+}
+
+// dump renders a decoded `any` with its Go type.
+func dump(v any) any {
+	switch x := v.(type) {
+	case nil:
+		return map[string]any{"null": true}
+	case string:
+		return map[string]any{"str": x}
+	case bool:
+		return map[string]any{"bool": x}
+	case int:
+		return map[string]any{"int": strconv.Itoa(x)}
+	case int64:
+		return map[string]any{"int64": strconv.FormatInt(x, 10)}
+	case uint64:
+		return map[string]any{"uint64": strconv.FormatUint(x, 10)}
+	case float64:
+		s := strconv.FormatFloat(x, 'g', -1, 64)
+		if math.IsInf(x, 1) {
+			s = "+Inf"
+		}
+		return map[string]any{"float": s}
+	case time.Time:
+		return map[string]any{"time": x.Format(time.RFC3339Nano), "sprint": fmt.Sprint(x)}
+	case []any:
+		out := []any{}
+		for _, e := range x {
+			out = append(out, dump(e))
+		}
+		return map[string]any{"seq": out}
+	case map[string]any:
+		keys := make([]string, 0, len(x))
+		for k := range x {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		out := []any{}
+		for _, k := range keys {
+			out = append(out, []any{k, dump(x[k])})
+		}
+		return map[string]any{"smap": out}
+	case map[any]any:
+		type kv struct {
+			key string
+			k   any
+			v   any
+		}
+		var kvs []kv
+		for k, e := range x {
+			kvs = append(kvs, kv{fmt.Sprintf("%T %v", k, k), dump(k), dump(e)})
+		}
+		sort.Slice(kvs, func(i, j int) bool { return kvs[i].key < kvs[j].key })
+		out := []any{}
+		for _, e := range kvs {
+			out = append(out, []any{e.k, e.v})
+		}
+		return map[string]any{"gmap": out}
+	}
+	return map[string]any{"other": fmt.Sprintf("%T %v", v, v)}
+}
+
+func dumpNode(n *yaml.Node) any {
+	out := map[string]any{"kind": int(n.Kind), "tag": n.Tag, "style": int(n.Style), "line": n.Line, "column": n.Column}
+	if n.Value != "" {
+		out["value"] = n.Value
+	}
+	if n.Anchor != "" {
+		out["anchor"] = n.Anchor
+	}
+	if n.Kind == yaml.AliasNode && n.Alias != nil {
+		out["alias"] = []int{n.Alias.Line, n.Alias.Column}
+	}
+	if n.HeadComment != "" {
+		out["head"] = n.HeadComment
+	}
+	if n.LineComment != "" {
+		out["lineComment"] = n.LineComment
+	}
+	if n.FootComment != "" {
+		out["foot"] = n.FootComment
+	}
+	if len(n.Content) > 0 {
+		var content []any
+		for _, c := range n.Content {
+			content = append(content, dumpNode(c))
+		}
+		out["content"] = content
+	}
+	return out
+}
+
+func judgeJSON(p string, data []byte) jsonOut {
+	o := jsonOut{Path: p}
+	var v any
+	if err := json.Unmarshal(data, &v); err != nil {
+		o.Error = err.Error()
+		var se *json.SyntaxError
+		if errors.As(err, &se) {
+			o.Offset = se.Offset
+		}
+	}
+	if err := json.Unmarshal(discovery.StripJSONC(data, true), &v); err != nil {
+		o.JSONCError = err.Error()
+	}
+	return o
+}
