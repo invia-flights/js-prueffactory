@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { join as joinPath } from "node:path";
 
 import { clean, ext, isAbs, match } from "../gocompat/path.ts";
@@ -17,6 +16,7 @@ import {
   type Suite,
   type TestSetup,
 } from "./testcommand.ts";
+import { readRegular } from "./tsemit.ts";
 
 // mochaConfigNames are the Mocha config files in a package's folder, in the
 // order Mocha looks for them.
@@ -37,13 +37,13 @@ export function readTestInfo(root: string, proj: Project): void {
   const loaded = new Set<string>();
   for (const pkg of proj.packages) {
     const dir = joinPath(root, pkg.path);
-    pkg.tests = testCommandOf(dir, pkg);
-    pkg.mochaDependency = readMochaDependency(dir);
-    pkg.generatorScripts = generatorScripts(readScripts(dir));
+    pkg.tests = testCommandOf(root, dir, pkg);
+    pkg.mochaDependency = readMochaDependency(root, dir);
+    pkg.generatorScripts = generatorScripts(readScripts(root, dir));
     if (pkg.tests?.unsupported !== null) continue;
     for (const suite of pkg.tests.suites) {
       if (suite.runner !== RunnerMocha) continue;
-      for (const f of loadedByMocha(dir, pkg, suite)) loaded.add(f);
+      for (const f of loadedByMocha(root, dir, pkg, suite)) loaded.add(f);
     }
   }
   if (loaded.size === 0) return;
@@ -60,8 +60,12 @@ export function readTestInfo(root: string, proj: Project): void {
 // Mocha when a `.mocharc.*` file sits in the package folder and the script
 // is missing or only npm's placeholder. It returns null for a package
 // without tests.
-function testCommandOf(dir: string, pkg: Package): TestSetup | null {
-  const scripts = readScripts(dir);
+function testCommandOf(
+  root: string,
+  dir: string,
+  pkg: Package,
+): TestSetup | null {
+  const scripts = readScripts(root, dir);
   const script = trimSpace(scripts.get("test") ?? "");
   if (script !== "" && !placeholderTest.test(script)) {
     scripts.set("test", script);
@@ -79,12 +83,12 @@ function testCommandOf(dir: string, pkg: Package): TestSetup | null {
   return null;
 }
 
-function readManifest(dir: string): Uint8Array | null {
-  try {
-    return readFileSync(joinPath(dir, "package.json"));
-  } catch {
-    return null;
-  }
+// readManifest reads the package's package.json, or null when it is
+// missing, not a regular file below root, or larger than the config cap. Go
+// reads it with a plain os.ReadFile (testfiles.go:77,99); the port reads it
+// as the build step rules do (hardening beyond Go).
+function readManifest(root: string, dir: string): Uint8Array | null {
+  return readRegular(root, joinPath(dir, "package.json"));
 }
 
 const scriptsSchema: json.Schema = {
@@ -104,9 +108,9 @@ const scriptsSchema: json.Schema = {
 
 // readScripts reads the string-valued `scripts` of the package's manifest. A
 // manifest that is missing or not JSON has none.
-export function readScripts(dir: string): Map<string, string> {
+export function readScripts(root: string, dir: string): Map<string, string> {
   const scripts = new Map<string, string>();
-  const data = readManifest(dir);
+  const data = readManifest(root, dir);
   if (data === null) return scripts;
   let m: { scripts: Map<string, json.AnyValue> | null };
   try {
@@ -138,8 +142,8 @@ const dependenciesSchema: json.Schema = {
 // readMochaDependency says whether the package's manifest lists `mocha`
 // under `dependencies` or `devDependencies`. A manifest that is missing or
 // not JSON counts as no.
-function readMochaDependency(dir: string): boolean {
-  const data = readManifest(dir);
+function readMochaDependency(root: string, dir: string): boolean {
+  const data = readManifest(root, dir);
   if (data === null) return false;
   try {
     const m = json.unmarshal(data, dependenciesSchema) as {
@@ -329,16 +333,21 @@ function stringsOf(v: unknown): string[] {
 // folder or glob, and the files it requires first. A file name that cannot
 // be resolved from the text alone, such as a module name, loads nothing
 // here.
-function loadedByMocha(dir: string, pkg: Package, suite: Suite): string[] {
+function loadedByMocha(
+  root: string,
+  dir: string,
+  pkg: Package,
+  suite: Suite,
+): string[] {
   const sel = new MochaSelection();
   sel.addArgs(suite.args);
   const name = mochaConfigName(pkg);
   if (name !== "") {
-    try {
-      sel.addConfig(readFileSync(joinPath(dir, name)), name);
-    } catch {
-      // An unreadable config names nothing.
-    }
+    // Go reads the config with a plain os.ReadFile (testfiles.go:268); the
+    // port reads it as the build step rules do (hardening beyond Go). A
+    // config that cannot be read names nothing.
+    const data = readRegular(root, joinPath(dir, name));
+    if (data !== null) sel.addConfig(data, name);
   }
   const rels = pkg.files.map((f) => f.packageRel);
   const out: string[] = [];

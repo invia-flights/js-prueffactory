@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
+import { symlinkSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { test } from "node:test";
 
-import { fileOf, project } from "./discovery.testutil.ts";
+import { fileOf, project, tempDir, writeFiles } from "./discovery.testutil.ts";
 import {
+  discover,
   type FileClass,
   type Project,
   RunnerMocha,
@@ -181,6 +184,51 @@ test("Mocha config files name the test files too", () => {
     "suites/a/not-a-spec.js": Source,
     "helpers/setup.js": TestCode,
   });
+});
+
+// Go reads the Mocha config with a plain os.ReadFile (testfiles.go:268);
+// the port reads it like the build step rules do. Hardening beyond Go, see
+// traps.md.
+test("a Mocha config linked out of the package or huge names no files", () => {
+  const config = "spec:\n  - 'lib/**/*.js'\n";
+  const outside = tempDir();
+  writeFileSync(join(outside, "mocharc.yml"), config);
+  const cases: [string, (root: string) => void, FileClass][] = [
+    [
+      "a small config is read",
+      (root) => {
+        writeFileSync(join(root, ".mocharc.yml"), config);
+      },
+      TestCode,
+    ],
+    [
+      "a config symlinked to a file outside the project",
+      (root) => {
+        symlinkSync(join(outside, "mocharc.yml"), join(root, ".mocharc.yml"));
+      },
+      Source,
+    ],
+    [
+      "a huge config",
+      (root) => {
+        writeFileSync(
+          join(root, ".mocharc.json"),
+          JSON.stringify({ spec: "lib/**/*.js", x: "a".repeat(2 << 20) }),
+        );
+      },
+      Source,
+    ],
+  ];
+  for (const [name, setup, want] of cases) {
+    const root = tempDir();
+    writeFiles(root, {
+      "package.json": '{"scripts":{"test":"mocha"}}',
+      "lib/a.js": "",
+    });
+    setup(root);
+    const proj = discover(root);
+    assert.equal(fileOf(proj, "lib/a.js").class, want, name);
+  }
 });
 
 test("recursive directories and braces are followed", () => {

@@ -1,4 +1,12 @@
-import { lstatSync, readFileSync, realpathSync } from "node:fs";
+import {
+  closeSync,
+  constants,
+  fstatSync,
+  lstatSync,
+  openSync,
+  readSync,
+  realpathSync,
+} from "node:fs";
 
 import { rel as filepathRel } from "../gocompat/filepath.ts";
 import { base, dir, join as joinPath } from "../gocompat/path.ts";
@@ -28,16 +36,33 @@ function isLocal(p: string): boolean {
 
 // regularJSON reads a JSON or JSONC file that is a regular file below root,
 // up to maxConfigBytes, and decodes it into schema; null when it cannot.
-// Go confines the read with os.Root: the folders on the way may be symlinks
-// only if they stay inside root, and the file itself must not be a link or
-// a special file. Here the folder's real path must lie inside root's.
 export function regularJSON(
   root: string,
   file: string,
   schema: json.Schema,
 ): unknown {
+  const data = readRegular(root, file);
+  if (data === null) return null;
+  try {
+    return json.unmarshal(stripJSONC(data, true), schema);
+  } catch {
+    return null;
+  }
+}
+
+// readRegular reads a file that is a regular file below root, up to
+// maxConfigBytes; null when it cannot. Go confines the read with os.Root
+// (tsemit.go:24): the folders on the way may be symlinks only if they stay
+// inside root, and the file itself must not be a link or a special file.
+// Here the folder's real path must lie inside root's, the file is opened
+// without following a link, and no more than maxConfigBytes+1 bytes are
+// read. Go reads package.json for install and test decisions and the Mocha
+// config with a plain os.ReadFile; the port reads them through here
+// (hardening beyond Go, see install.ts and testfiles.ts).
+export function readRegular(root: string, file: string): Uint8Array | null {
   const rel = filepathRel(root, file);
   if (rel === undefined || !isLocal(rel)) return null;
+  let fd: number | undefined;
   try {
     const realRoot = realpathSync(root);
     const realDir = realpathSync(dir(joinPath(root, rel)));
@@ -45,13 +70,34 @@ export function regularJSON(
       return null;
     }
     const target = joinPath(realDir, base(rel));
+    // lstat before open: opening a FIFO for reading would block.
     const info = lstatSync(target);
     if (!info.isFile() || info.size > maxConfigBytes) return null;
-    const data = readFileSync(target);
-    if (data.length > maxConfigBytes) return null;
-    return json.unmarshal(stripJSONC(data, true), schema);
+    fd = openSync(
+      target,
+      constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
+    );
+    const opened = fstatSync(fd);
+    if (!opened.isFile() || opened.size > maxConfigBytes) return null;
+    let buf = Buffer.alloc(opened.size + 1);
+    let n = 0;
+    for (;;) {
+      if (n === buf.length) {
+        // The file grew after fstat.
+        if (n > maxConfigBytes) return null;
+        const grown = Buffer.alloc(Math.min(2 * n, maxConfigBytes + 1));
+        buf.copy(grown, 0, 0, n);
+        buf = grown;
+      }
+      const got = readSync(fd, buf, n, buf.length - n, null);
+      if (got === 0) break;
+      n += got;
+    }
+    return n > maxConfigBytes ? null : buf.subarray(0, n);
   } catch {
     return null;
+  } finally {
+    if (fd !== undefined) closeSync(fd);
   }
 }
 

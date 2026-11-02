@@ -9,6 +9,7 @@ import {
 import { join } from "node:path";
 import { test } from "node:test";
 
+import { NPM } from "../lockfile/detect.ts";
 import { fileOf, project, tempDir } from "./discovery.testutil.ts";
 import {
   BuildOutput,
@@ -298,6 +299,59 @@ test("discover never follows a symlink out of the root", () => {
   writeFileSync(join(root, "package.json"), "{}");
   symlinkSync(outside, join(root, "linked"));
   assert.equal(discover(root).packages.length, 1);
+});
+
+// Go reads package.json for install and test decisions with a plain
+// os.ReadFile (install.go:28, testfiles.go:77,99); the port reads it like
+// the build step rules do. Hardening beyond Go, see traps.md.
+test("a package.json linked out of the project or huge is never read for install or test decisions", () => {
+  const manifest = {
+    packageManager: "pnpm@9.0.0",
+    workspaces: ["sub"],
+    scripts: {
+      test: "mocha",
+      "generate:api": "node scripts/gen.js",
+    },
+    devDependencies: { mocha: "10.0.0" },
+  };
+  const outside = tempDir();
+  writeFileSync(join(outside, "package.json"), JSON.stringify(manifest));
+  const cases: Record<string, (root: string) => void> = {
+    "a package.json symlinked to a file outside the project": (root) => {
+      symlinkSync(join(outside, "package.json"), join(root, "package.json"));
+    },
+    "a huge package.json": (root) => {
+      writeFileSync(
+        join(root, "package.json"),
+        JSON.stringify({ x: "a".repeat(2 << 20), ...manifest }),
+      );
+    },
+  };
+  for (const [name, setup] of Object.entries(cases)) {
+    const root = tempDir();
+    mkdirSync(join(root, "sub"));
+    writeFileSync(join(root, "sub", "package.json"), "{}");
+    mkdirSync(join(root, "scripts"));
+    writeFileSync(join(root, "scripts", "gen.js"), "");
+    setup(root);
+    const p = discover(root);
+    assert.deepEqual(
+      p.packages.map((x) => x.path),
+      [".", "sub"],
+      name,
+    );
+    const [top, sub] = p.packages;
+    assert.equal(top?.manager, NPM, `${name}: packageManager is not read`);
+    assert.equal(top.installUnsupported, null, name);
+    assert.equal(top.tests, null, `${name}: scripts.test is not read`);
+    assert.equal(top.mochaDependency, false, `${name}: mocha is not read`);
+    assert.deepEqual(top.generatorScripts, [], name);
+    assert.equal(
+      sub?.installUnsupported,
+      null,
+      `${name}: workspaces is not read`,
+    );
+  }
 });
 
 test("an unreadable folder fails the discovery with Go's error text", (t) => {
