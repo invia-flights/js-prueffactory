@@ -1,0 +1,906 @@
+{
+ "recordedFrom": "Go build at freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8 (internal/snapshot)",
+ "snapshots": [
+  {
+   "name": "testdata/projects/alpine-missing-program",
+   "hash": "77661b48168d5cb03d23fb9559c91a2a70dd1f854cfbeef8cd9a0dce70f706b1",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/bail-and-retries",
+   "hash": "1c1404ac11453d23ffd180b794807375a8c70647f1935486f8dd2d04d7498c98",
+   "fileCount": 6,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/broken-structured-files",
+   "hash": "a9192f87633c85965423e6087f80661ecd6db3a25dcaea3b494e475cfe86608f",
+   "fileCount": 6,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/ci-files",
+   "hash": "63b04749d18ca5b4490d2d1e48f585a88d9908996830c89408830229e0ef3d1a",
+   "fileCount": 15,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/clean-mocha",
+   "hash": "f04dfb32552c82865fca168f7b2927d154c44daeea785d44aae358cf9000de86",
+   "fileCount": 6,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/closed-vocabulary-env",
+   "hash": "8de35c2841e4b3e358d6a117694ca98ea24eebc477999d861b9a6dc14149b9e7",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/colocated-tests",
+   "hash": "53935dc38a087b25c68d58fa7eb006635719cb0759f225ab3461d11fc6254f33",
+   "fileCount": 7,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/colocated-tests-broken-config",
+   "hash": "661d392b8949dc7a4bbe8c068ab2a7e2bcf31a8d4786acbf20b8a764cbe9c96d",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/committed-only",
+   "hash": "e6c58c1760b5e59c5adaf8e93cf688a220ff6370fa8f2fbbc05dc73ab8d63016",
+   "fileCount": 6,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/deprecations",
+   "hash": "27fd3724738c12d27be5ee778576cd79f5994a05587afd1d295256ac3f6d07a3",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/dev-dependency-scripts",
+   "hash": "bbbab0eef07699a908f45924559f831882332c68670600f03b78480730759e34",
+   "fileCount": 6,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/eslint-legacy",
+   "hash": "50d21968f7181d05fce8e329b1ba4aee7b116d46d8184de8825230658d06ca24",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/eslint-no-config",
+   "hash": "eac6e11d568e9b5e48430bf0c8599ac2c6c9e65b896a59567706ffacf0f18ec0",
+   "fileCount": 3,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/eslint-problems",
+   "hash": "f7a435cdffe329e0298fae7a540cdb8d2558fda5c6bca7cb630d3794c8a3daef",
+   "fileCount": 9,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/failing-install-script",
+   "hash": "9e385b6c0c7eb6a1e71e65b2363f3abdad1a35a8ee0d21733021a0bca580fe12",
+   "fileCount": 3,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/failing-root-hook",
+   "hash": "a92d16365cd0b71f0eef7e71d312579b08979d459c3de4c50c7b463f8939de54",
+   "fileCount": 7,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/failing-test",
+   "hash": "77c0c0ae20bb07c7c88f16c3272db09aad311367fcdd6ae6f813aa00dc8202ef",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/fake-secret",
+   "hash": "1507909da0ad48110c9416078ed5f34521cc85a5d111286b1f86f21964a29a43",
+   "fileCount": 8,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/flaky-test",
+   "hash": "1f22054784a81e533af0d1951ec0ba6df6610739cb9000679cedd962e32dcacf",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/install-script-stray",
+   "hash": "24364f28b34a70598dfc1e59cf04efd8504a39f6211d9906d6068e3141c09310",
+   "fileCount": 3,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/jest-unsupported",
+   "hash": "0bdb4427dc22b994019a802bf37f2c612df5cc32e09f069480ea1503af12b905",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/lockfile-mismatch",
+   "hash": "8f850773f7a30852999e05e1af18c18ac0715cb2643bbc4b5182ec4e557e28d7",
+   "fileCount": 6,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/lockfile-problems",
+   "hash": "a4b60bc1091473ebf825d2c37dede95db378e96ead6a5ac4c7cdf8ad051b6497",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/missing-service",
+   "hash": "00a09e6541deae6f8f3487a062773d48c265b3fab9eb3f8ed063c19789c5130d",
+   "fileCount": 7,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/mocha-config-unused",
+   "hash": "5f16384b4a3b3e1cbd672898465fb541c45f225814dc61d0893061507cf86049",
+   "fileCount": 14,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/mocha-npm-run",
+   "hash": "ae4000f980a79f9a1f7d1def379a69718d281290f05dda4e4b7800caea843e1d",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/mocha-test-folder",
+   "hash": "cf4023ea144cfbc212a82b486d6131fbea87034e4a2fbd9f353733efaaa97287",
+   "fileCount": 8,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/needs-build",
+   "hash": "93849efee09ac54f5f83fb1e5943f5a5c8d5cb4a1f221c9faecc69b5d1f0d496",
+   "fileCount": 3,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/network-egress",
+   "hash": "621e459e3c2ad6dcf0367332b9dabfc9f75eca665c3e9641d019f7b7eb0c6deb",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/no-lockfile",
+   "hash": "93350cce0eb5462dbc98b8b2110f29f2e5b45f32d2d52bc24a176f641eaabcea",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/node-test",
+   "hash": "7b0ca2fdfd51b7a984f43bca94a11e0cf15d75426918b785687faf1272abdf4d",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/node-test-service",
+   "hash": "9e688ebfa53b52c58ce62cfb09894d047dbb2bb3b4465a670d3ff3df046fe05c",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/npm-run-chain",
+   "hash": "b535c67ff4e3cc061ce013854cd7e0f084246edab9df063b435693230f19d195",
+   "fileCount": 13,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/npm-run-chain-unsupported",
+   "hash": "493a78024d7ee7317ca29bb6460e648b7469bb687370e5d7beba9473343056bd",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/open-handles",
+   "hash": "73393afb3bf9d8d5fd6410cdaee19ac535c0622a078190fd9cd816f2235e861d",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/ordinary-env-values",
+   "hash": "f2c133adee3e96d7463c2697287e48d70f326b6ec8392399e03b7c0b9182fb8b",
+   "fileCount": 6,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/placeholder-env-values",
+   "hash": "9c9f468e04ab33952236143a312f15d0c74a2293360b0a33f3a10b4ad9eeff95",
+   "fileCount": 7,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/project-biome",
+   "hash": "76ea827dff425f62d1cde2a140ee426073a05ac2a6723256da6ae6b46ec07eb4",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/project-eslint",
+   "hash": "19122804741caff0c175b866e09d5d76a5366193f517241172578109e0cd3d8a",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/quality-signals",
+   "hash": "11fff0a666cc0313d5367e52ba976d7454b2ee7ad36ad36da579551f8227b28d",
+   "fileCount": 13,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/registry-data",
+   "hash": "f35a3077aa51ae9f133ce50445029d5343787815e5df18613b41a528512720e7",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/repository-files",
+   "hash": "a2c00d1196c88eb0a2f9c607915bb7599b5fb42a8e758ed970741cd760c45c3c",
+   "fileCount": 16,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/schema-drift",
+   "hash": "3c1a3c3fdc1593b600c7839c3ec7848bf7f41531757071cebe3386dd449657cf",
+   "fileCount": 9,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/secret-in-test-code",
+   "hash": "c90e39d4880c2692b050197d98f0b2fcbb5fc9627a6f71ea8ba152f6212db962",
+   "fileCount": 7,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/security-patterns",
+   "hash": "4bb9c1478765b21cdbb92169083bb1d8a84d7b2024f53c7317f74dd3ff99df4f",
+   "fileCount": 7,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/security-patterns-html-comment",
+   "hash": "88d77b36a4d8ef21deebde0cb9e8ab0bc312ff396c8a8349df03027ec2a7fb14",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/security-patterns-unparsable",
+   "hash": "41f355949c9e98954b9297eb36eeb4b2a076f65f91ea91789c940367b96fa7e7",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/sub-package",
+   "hash": "93d037094a90a4a8e1141ff2159791d0504ef996b5681b81a4822baeff859d0a",
+   "fileCount": 8,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/suppressions",
+   "hash": "6ad2a33f543b78449a8c7f001aa73b00c0d8334d40fe316c12687f50f7b39f8f",
+   "fileCount": 19,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/symlinks",
+   "hash": "d4b5604ac6c27adadd22fe57c26bb786d3abab105e799b1956715763b0570ec5",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": [
+    {
+     "code": "symlink_outside_root",
+     "message": "symlink outside-link.md points outside the project and was left out",
+     "path": "outside-link.md"
+    }
+   ]
+  },
+  {
+   "name": "testdata/projects/syntax-error",
+   "hash": "1944848581e0b4e763c7f893c863e434a51a79020a8e56310dcfbaf45f4dcf3b",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/typed-js",
+   "hash": "26f866cb9faf6958d79e2ee73811e5245ef987d4a7fe11187028507874a1ce67",
+   "fileCount": 7,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/typed-js-handlers",
+   "hash": "3104b83c94a0e1fee7dd451dd77c60c71ce90bd0b21787851ca5879e468ddd9e",
+   "fileCount": 3,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/typed-js-node-test",
+   "hash": "0be9e6ec7fa0851dbcc265de46b078e0f247d884b2424dbde641fd1f64c6b74c",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/types-jsdoc",
+   "hash": "dfe102b9f15c334452fbe33f0a5ebef3e3d52c84730f29b71a73399bcc4453c5",
+   "fileCount": 6,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/types-mixed-ts",
+   "hash": "a96cd7fd61d449f5d59efe3541100b6ff28cf227d833b019ba15eb89a26c3c27",
+   "fileCount": 6,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/types-path-aliases",
+   "hash": "aa3d9f65a2a388be70e9a1df804c17494d4d41ee68394075b1df4229d68bc17a",
+   "fileCount": 11,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/types-tsx",
+   "hash": "9fca6d0f3d072fead46c64f0da8d169ae88442b1fd0d0ceec403794d0d5dc755",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/typescript-build-step",
+   "hash": "fb2411bc6491828236418afd94077baedfb57f1a9ccfd08414a1ca2a5e0e9c09",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/typescript-source",
+   "hash": "b419234a6e07b97c06eb09c77c0aa59256e3558ce2d0c05add529f7d15858e1b",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/unhandled-rejection",
+   "hash": "8f75fcbadb126f2ddf47f6a8dd004d97c0ee95a7d6c9148ace5082ea5215c744",
+   "fileCount": 10,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/unhandled-rejection-crash",
+   "hash": "168f7e3d83aa8ae4f6acc83ca61d8df2d9a30ca57f7794ef8312888a84acbc5e",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/unknown-host",
+   "hash": "fe2916b9fb27a20c86173b09f7f9ae1dee545bda5f24813e38a6567f17f0aa51",
+   "fileCount": 5,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/unparsable-syntax",
+   "hash": "b0922f64c4b76026e7d6e123a06dde95fb209b5965487242bfdc5a2806a4ca93",
+   "fileCount": 7,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/unparseable-openapi",
+   "hash": "29093298ed8f2e97ab7a466e02437ab2fbbde8fff514f56985410a41dde7a12f",
+   "fileCount": 7,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/valkey-service",
+   "hash": "9089c5d816085aa2b4acfeaef4e6228741ae1f931a38da036bcf3b15099a8a17",
+   "fileCount": 9,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/vulnerable-dependency",
+   "hash": "ef9921915ca9dab872205586eb2c7fba692dd4dd0e408300b796313c1aaf905a",
+   "fileCount": 3,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "testdata/projects/yarn-unsupported",
+   "hash": "a777c4e557152b1a53e08b71af8f3a72fe3297749f532a793f5514b16f5663bb",
+   "fileCount": 4,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "names in UTF-16 and byte order",
+   "spec": [
+    {
+     "path": "｡",
+     "content": "halfwidth"
+    },
+    {
+     "path": "😀",
+     "content": "emoji"
+    },
+    {
+     "path": "b",
+     "content": "b"
+    },
+    {
+     "path": "Z",
+     "content": "Z"
+    },
+    {
+     "path": "é",
+     "content": "e"
+    },
+    {
+     "path": "｡dir/x",
+     "content": "x"
+    },
+    {
+     "path": "😀dir/y",
+     "content": "y"
+    },
+    {
+     "path": "",
+     "content": "private"
+    },
+    {
+     "path": "a b",
+     "content": "space"
+    },
+    {
+     "path": "a-b",
+     "content": "dash"
+    },
+    {
+     "path": "a/b",
+     "content": "nested"
+    },
+    {
+     "path": "a.b",
+     "content": "dot"
+    }
+   ],
+   "hash": "f845132c020cc0eb8d07f24421958bda5b0c1996bf54eaa61734be7eb841c674",
+   "fileCount": 12,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  },
+  {
+   "name": "exclusions, links and modes",
+   "spec": [
+    {
+     "path": "README.md",
+     "content": "readme"
+    },
+    {
+     "path": "run.sh",
+     "content": "#!/bin/sh\n",
+     "mode": 493
+    },
+    {
+     "path": "empty.txt"
+    },
+    {
+     "path": "group-exec",
+     "content": "g",
+     "mode": 428
+    },
+    {
+     "path": "node_modules/dep/index.js",
+     "content": "x"
+    },
+    {
+     "path": "sub/node_modules/dep/index.js",
+     "content": "x"
+    },
+    {
+     "path": ".git/HEAD",
+     "content": "ref: refs/heads/main\n"
+    },
+    {
+     "path": "sub/.git/HEAD",
+     "content": "kept"
+    },
+    {
+     "path": "sub/.git",
+     "dir": true
+    },
+    {
+     "path": "emptydir",
+     "dir": true
+    },
+    {
+     "path": "deep/er/est/f.txt",
+     "content": "deep"
+    },
+    {
+     "path": "docs/index.md",
+     "link": "../README.md"
+    },
+    {
+     "path": "abs-link.md",
+     "link": "@ROOT/README.md"
+    },
+    {
+     "path": "escape.txt",
+     "link": "@OUTSIDE/secret.txt"
+    },
+    {
+     "path": "dangling-inside",
+     "link": "missing.txt"
+    },
+    {
+     "path": "dir-link",
+     "link": "deep"
+    },
+    {
+     "path": "self-root",
+     "link": "."
+    },
+    {
+     "path": "dot-dot",
+     "link": ".."
+    },
+    {
+     "path": "loop-a",
+     "link": "loop-b"
+    },
+    {
+     "path": "loop-b",
+     "link": "loop-a"
+    },
+    {
+     "path": "through-file",
+     "link": "README.md/x"
+    },
+    {
+     "path": "trailing-slash",
+     "link": "deep/"
+    },
+    {
+     "path": "dot-slash",
+     "link": "./README.md"
+    },
+    {
+     "path": "double-slash",
+     "link": "deep//er"
+    }
+   ],
+   "hash": "f5f3abc54b505e9603f70f219353c824716b4fc842605af7b53ab10c0caf441d",
+   "fileCount": 14,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": [
+    {
+     "code": "symlink_outside_root",
+     "message": "symlink dot-dot points outside the project and was left out",
+     "path": "dot-dot"
+    },
+    {
+     "code": "symlink_outside_root",
+     "message": "symlink escape.txt points outside the project and was left out",
+     "path": "escape.txt"
+    },
+    {
+     "code": "symlink_outside_root",
+     "message": "symlink loop-a cannot be resolved: EvalSymlinks: too many links and was left out",
+     "path": "loop-a"
+    },
+    {
+     "code": "symlink_outside_root",
+     "message": "symlink loop-b cannot be resolved: EvalSymlinks: too many links and was left out",
+     "path": "loop-b"
+    },
+    {
+     "code": "symlink_outside_root",
+     "message": "symlink through-file cannot be resolved: not a directory and was left out",
+     "path": "through-file"
+    }
+   ]
+  },
+  {
+   "name": "git file at the root",
+   "spec": [
+    {
+     "path": ".git",
+     "content": "gitdir: /elsewhere\n"
+    },
+    {
+     "path": "a.txt",
+     "content": "a"
+    }
+   ],
+   "hash": "e621a7b2557509eddc678fcf069c684613755d67420f2f216f51d624f8078ee8",
+   "fileCount": 1,
+   "excluded": [
+    "node_modules/",
+    ".git"
+   ],
+   "limitations": []
+  }
+ ]
+}

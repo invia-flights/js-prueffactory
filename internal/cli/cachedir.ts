@@ -1,4 +1,5 @@
-import { isAbs, join, tempDir } from "../gocompat/filepath.ts";
+import { tempDir } from "../gocompat/filepath.ts";
+import { isAbs, join } from "../gocompat/path.ts";
 
 /**
  * cacheDir returns the host folder for js-prueffactory's caches:

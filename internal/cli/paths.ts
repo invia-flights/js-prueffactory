@@ -3,16 +3,14 @@
 
 import {
   abs,
-  base,
-  dir,
-  evalSymlinks,
-  isNotExist,
-  join,
+  evalSymlinksText as evalSymlinks,
   readDirNames,
+  rel,
   stat,
 } from "../gocompat/filepath.ts";
 import { quote } from "../gocompat/fmt.ts";
-import { clean } from "../gocompat/path.ts";
+import { isNotExist } from "../gocompat/os.ts";
+import { base, clean, dir, join } from "../gocompat/path.ts";
 import { usageError } from "./usage.ts";
 
 function message(err: unknown): string {
@@ -175,10 +173,8 @@ function resolveThroughExisting(path: string): string {
   }
 }
 
-// within says whether p is root or lies below it (Go: filepath.Rel gives
-// neither ".." nor "../…"). Both are absolute here.
+// within says whether p is root or lies below it.
 function within(root: string, p: string): boolean {
-  const r = clean(root);
-  const q = clean(p);
-  return q === r || r === "/" || q.startsWith(r + "/");
+  const r = rel(root, p);
+  return r !== undefined && r !== ".." && !r.startsWith("../");
 }

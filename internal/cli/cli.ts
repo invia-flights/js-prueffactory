@@ -5,7 +5,7 @@
 import type { Writable } from "node:stream";
 
 import type { Selection } from "../checks/selection.ts";
-import { base } from "../gocompat/filepath.ts";
+import { base } from "../gocompat/path.ts";
 import { quote } from "../gocompat/fmt.ts";
 import { type Duration, durationString } from "../gocompat/time.ts";
 import { Logger } from "../progress/progress.ts";

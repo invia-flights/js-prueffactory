@@ -2,7 +2,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 
-import { formatFloatFixed, formatFloatV, quote } from "./fmt.ts";
+import {
+  formatFloatFixed,
+  formatFloatV,
+  quote,
+  quoteBytes,
+  quoteRune,
+} from "./fmt.ts";
 
 // What the Go standard library computes for the same inputs (see recordedFrom).
 const oracle = JSON.parse(
@@ -56,5 +62,20 @@ describe("%.Nf of a float64", () => {
   test("a tie rounds to even, where toFixed rounds up", () => {
     assert.equal((0.25).toFixed(1), "0.3");
     assert.equal(formatFloatFixed(0.25, 1), "0.2");
+  });
+});
+
+describe("strconv.QuoteRune and Quote of bytes", () => {
+  test("quoteRune", () => {
+    assert.equal(quoteRune(0x27), "'\\''");
+    assert.equal(quoteRune(0xa0), "'\\u00a0'");
+    assert.equal(quoteRune(0x0b), "'\\v'");
+    assert.equal(quoteRune(0x1f600), "'\u{1f600}'");
+  });
+  test("quoteBytes writes invalid bytes as \\x escapes", () => {
+    assert.equal(
+      quoteBytes(Buffer.from([0x5c, 0xff, 0x22, 0x09])),
+      '"\\\\\\xff\\"\\t"',
+    );
   });
 });

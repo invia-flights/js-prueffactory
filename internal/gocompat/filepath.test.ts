@@ -15,14 +15,68 @@ import { after, before, describe, test } from "node:test";
 
 import {
   abs,
-  base,
-  dir,
   evalSymlinks,
-  isNotExist,
-  join,
+  evalSymlinksText,
   readDirNames,
+  rel,
   stat,
 } from "./filepath.ts";
+import { byteString, fromByteString, GoError, isNotExist } from "./os.ts";
+import { base, dir, join } from "./path.ts";
+
+test("rel is Go's filepath.Rel", () => {
+  // The examples of the Go documentation.
+  assert.equal(rel("/a", "/a/b/c"), "b/c");
+  assert.equal(rel("/a", "/b/c"), "../b/c");
+  assert.equal(rel("/a", "./b/c"), undefined);
+  assert.equal(rel("/a/b/c", "/a"), "../..");
+  assert.equal(rel("/a", "/a"), ".");
+  assert.equal(rel("/a/..b", "/a"), "..");
+});
+
+test("evalSymlinks walks links one element at a time", (t) => {
+  const dir = realpathSync(mkdtempSync(nodeJoin(tmpdir(), "gocompat-")));
+  t.after(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+  writeFileSync(nodeJoin(dir, "file"), "x");
+  symlinkSync("file", nodeJoin(dir, "link"));
+  symlinkSync("loop", nodeJoin(dir, "loop"));
+  const b = byteString(dir);
+  assert.equal(evalSymlinks(b + "/link"), b + "/file");
+  // The Go build's texts (see the Snapshot fixture).
+  assert.throws(() => evalSymlinks(b + "/file/x"), {
+    message: "not a directory",
+  });
+  assert.throws(() => evalSymlinks(b + "/loop"), {
+    message: "EvalSymlinks: too many links",
+  });
+  assert.throws(
+    () => evalSymlinks(b + "/missing/x"),
+    (err) =>
+      err instanceof GoError &&
+      err.notExist &&
+      fromByteString(err.message) ===
+        `lstat ${dir}/missing: no such file or directory`,
+  );
+});
+
+test("evalSymlinksText takes and gives text, also for names beyond ASCII", (t) => {
+  const root = realpathSync(mkdtempSync(nodeJoin(tmpdir(), "gocompat-")));
+  t.after(() => {
+    rmSync(root, { recursive: true, force: true });
+  });
+  mkdirSync(nodeJoin(root, "déjà"));
+  symlinkSync("déjà", nodeJoin(root, "日本"));
+  assert.equal(evalSymlinksText(`${root}/日本`), `${root}/déjà`);
+  assert.throws(
+    () => evalSymlinksText(`${root}/ü/x`),
+    (err) =>
+      err instanceof GoError &&
+      err.notExist &&
+      err.message === `lstat ${root}/ü: no such file or directory`,
+  );
+});
 
 // What Go returns on the same tree (see recordedFrom and the generator).
 const oracle = JSON.parse(
@@ -74,7 +128,7 @@ describe("on the oracle's tree", () => {
     const permission = c.Err.includes("permission denied");
     test(`EvalSymlinks <root>/${c.In}`, { skip: permission && asRoot }, () => {
       let out = "";
-      const err = errText(() => (out = evalSymlinks(`${root}/${c.In}`)));
+      const err = errText(() => (out = evalSymlinksText(`${root}/${c.In}`)));
       assert.equal(err, c.Err);
       assert.equal(hide(out), c.Out);
     });

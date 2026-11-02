@@ -1,8 +1,8 @@
-// Go's path/filepath and os file functions on Unix, with Go's error texts
-// ("lstat /x: no such file or directory"), which reach usage errors. Node's
-// own messages ("ENOENT: no such file or directory, lstat '/x'") differ, and
-// Node's realpath does not fail where EvalSymlinks fails.
-
+// Go's path/filepath functions that differ from package path or touch the
+// file system, for Unix paths. Node's path.relative and fs.realpath differ
+// in the corners (trailing slashes, "..", where a walk stops), and those
+// corners decide what a Snapshot keeps and which usage error a user sees.
+// join, dir, base and isAbs are in path.ts (the same on Unix).
 import {
   lstatSync,
   readdirSync,
@@ -11,126 +11,154 @@ import {
   statSync,
 } from "node:fs";
 
-import { clean } from "./path.ts";
+import {
+  byteString,
+  fromByteString,
+  fsPath,
+  GoError,
+  pathError,
+} from "./os.ts";
+import { clean, isAbs, join } from "./path.ts";
 import { sortStrings } from "./strings.ts";
 
-// Go's text of the errno values file functions return (syscall.Errno.Error).
-const errnoText: Record<string, string> = {
-  ENOENT: "no such file or directory",
-  ENOTDIR: "not a directory",
-  EACCES: "permission denied",
-  EPERM: "operation not permitted",
-  ELOOP: "too many levels of symbolic links",
-  ENAMETOOLONG: "file name too long",
-  EISDIR: "is a directory",
-  EIO: "input/output error",
-  EINVAL: "invalid argument",
-  EMFILE: "too many open files",
-  ENFILE: "too many open files in system",
-};
-
-function codeOf(err: unknown): string {
-  if (typeof err === "object" && err !== null && "code" in err) {
-    const { code } = err;
-    return typeof code === "string" ? code : "";
+// rel is filepath.Rel. It returns undefined where Go returns an error.
+export function rel(basePath: string, targPath: string): string | undefined {
+  let b = clean(basePath);
+  const t = clean(targPath);
+  if (t === b) return ".";
+  if (b === ".") b = "";
+  if (b.startsWith("/") !== t.startsWith("/")) return undefined;
+  const bl = b.length;
+  const tl = t.length;
+  let b0 = 0;
+  let bi = 0;
+  let t0 = 0;
+  let ti = 0;
+  for (;;) {
+    while (bi < bl && b[bi] !== "/") bi++;
+    while (ti < tl && t[ti] !== "/") ti++;
+    if (t.slice(t0, ti) !== b.slice(b0, bi)) break;
+    if (bi < bl) bi++;
+    if (ti < tl) ti++;
+    b0 = bi;
+    t0 = ti;
   }
-  return "";
-}
-
-/** errText is Go's Error() text of the errno behind a Node error. */
-export function errText(err: unknown): string {
-  return (
-    errnoText[codeOf(err)] ?? (err instanceof Error ? err.message : String(err))
-  );
-}
-
-/**
- * PathError is Go's *fs.PathError: "op path: errno text". code keeps the
- * Node error code (ENOENT, ...).
- */
-export class PathError extends Error {
-  readonly code: string;
-  constructor(op: string, path: string, cause: unknown) {
-    super(`${op} ${path}: ${errText(cause)}`, { cause });
-    this.code = codeOf(cause);
+  if (b.slice(b0, bi) === "..") return undefined;
+  if (b0 !== bl) {
+    const seps = b.slice(b0, bl).split("/").length - 1;
+    let out = ".." + "/..".repeat(seps);
+    if (t0 !== tl) out += "/" + t.slice(t0);
+    return out;
   }
+  return t.slice(t0);
 }
 
-/** isNotExist is errors.Is(err, fs.ErrNotExist): ENOENT only. */
-export function isNotExist(err: unknown): boolean {
-  return codeOf(err) === "ENOENT";
+// evalSymlinks is filepath.EvalSymlinks: it walks the path one element at
+// a time with lstat and readlink, so its errors name the element where the
+// walk stopped, as Go's do. path, the result and the paths in the error
+// texts are byte strings (see byteString), so names that are not valid
+// UTF-8 survive.
+export function evalSymlinks(path: string): string {
+  let vol = isAbs(path) ? "/" : "";
+  let volLen = vol.length;
+  let dest = vol;
+  let linksWalked = 0;
+  let start = volLen;
+  let end: number;
+  for (; start < path.length; start = end) {
+    while (start < path.length && path[start] === "/") start++;
+    end = start;
+    while (end < path.length && path[end] !== "/") end++;
+    const elem = path.slice(start, end);
+    if (end === start) break;
+    if (elem === ".") continue;
+    if (elem === "..") {
+      let r = dest.length - 1;
+      while (r >= volLen && dest[r] !== "/") r--;
+      if (r < volLen || dest.slice(r + 1) === "..") {
+        if (dest.length > volLen) dest += "/";
+        dest += "..";
+      } else {
+        dest = dest.slice(0, r);
+      }
+      continue;
+    }
+    if (dest.length > 0 && !dest.endsWith("/")) dest += "/";
+    dest += elem;
+    let isLink: boolean;
+    let isDir: boolean;
+    try {
+      const st = lstatSync(fsPath(dest));
+      isLink = st.isSymbolicLink();
+      isDir = st.isDirectory();
+    } catch (err) {
+      throw pathError("lstat", dest, err);
+    }
+    if (!isLink) {
+      if (!isDir && end < path.length) throw new GoError("not a directory");
+      continue;
+    }
+    linksWalked++;
+    if (linksWalked > 255) throw new GoError("EvalSymlinks: too many links");
+    let link: string;
+    try {
+      link = readlinkSync(fsPath(dest), { encoding: "buffer" }).toString(
+        "latin1",
+      );
+    } catch (err) {
+      throw pathError("readlink", dest, err);
+    }
+    path = link + path.slice(end);
+    if (link.startsWith("/")) {
+      dest = "/";
+      end = 1;
+      vol = "/";
+      volLen = 1;
+    } else {
+      let r = dest.length - 1;
+      while (r >= volLen && dest[r] !== "/") r--;
+      dest = r < volLen ? vol : dest.slice(0, r);
+      end = 0;
+    }
+  }
+  return clean(dest);
 }
 
-/** lstat is os.Lstat. */
-export function lstat(path: string): Stats {
+// evalSymlinksText is evalSymlinks for a path held as text (a command-line
+// argument): the result and the error text are text again.
+export function evalSymlinksText(path: string): string {
   try {
-    return lstatSync(path);
+    return fromByteString(evalSymlinks(byteString(path)));
   } catch (err) {
-    throw new PathError("lstat", path, err);
+    if (err instanceof GoError) {
+      throw new GoError(fromByteString(err.message), err.notExist);
+    }
+    throw err;
   }
 }
 
-/** stat is os.Stat. */
+// stat is os.Stat.
 export function stat(path: string): Stats {
   try {
     return statSync(path);
   } catch (err) {
-    throw new PathError("stat", path, err);
+    throw pathError("stat", path, err);
   }
 }
 
-/** readDirNames is the names of os.ReadDir, sorted byte-wise as Go sorts them. */
+// readDirNames is the names of os.ReadDir, sorted byte-wise as Go sorts them.
 export function readDirNames(path: string): string[] {
   try {
     return sortStrings(readdirSync(path));
   } catch (err) {
-    throw new PathError("open", path, err);
+    throw pathError("open", path, err);
   }
 }
 
-function readlink(path: string): string {
-  try {
-    return readlinkSync(path);
-  } catch (err) {
-    throw new PathError("readlink", path, err);
-  }
-}
-
-/** isAbs is filepath.IsAbs on Unix. */
-export function isAbs(path: string): boolean {
-  return path.startsWith("/");
-}
-
-/** join is filepath.Join: the non-empty elements joined by "/" and cleaned. */
-export function join(...elems: string[]): string {
-  const parts = elems.filter((e) => e !== "");
-  return parts.length === 0 ? "" : clean(parts.join("/"));
-}
-
-/** dir is filepath.Dir: everything before the last "/", cleaned. */
-export function dir(path: string): string {
-  return clean(path.slice(0, path.lastIndexOf("/") + 1));
-}
-
-/** base is filepath.Base: the last element, "." for "", "/" for slashes only. */
-export function base(path: string): string {
-  if (path === "") {
-    return ".";
-  }
-  const trimmed = path.replace(/\/+$/, "");
-  if (trimmed === "") {
-    return "/";
-  }
-  return trimmed.slice(trimmed.lastIndexOf("/") + 1);
-}
-
-/**
- * getwd is os.Getwd: $PWD of the process when it is absolute and names the
- * working folder (so a folder reached through a symlink keeps that name),
- * else the real working folder.
- */
+// getwd is os.Getwd: $PWD of the process when it is absolute and names the
+// working folder (so a folder reached through a symlink keeps that name),
+// else the real working folder.
 export function getwd(): string {
-  const cwd = process.cwd();
   const pwd = process.env.PWD ?? "";
   if (pwd.startsWith("/")) {
     try {
@@ -143,86 +171,16 @@ export function getwd(): string {
       // fall back to the real working folder
     }
   }
-  return cwd;
+  return process.cwd();
 }
 
-/** abs is filepath.Abs. */
+// abs is filepath.Abs.
 export function abs(path: string): string {
   return isAbs(path) ? clean(path) : join(getwd(), path);
 }
 
-/** tempDir is os.TempDir on Unix: $TMPDIR, else /tmp. */
+// tempDir is os.TempDir on Unix: $TMPDIR of the process, else /tmp.
 export function tempDir(): string {
   const dir = process.env.TMPDIR ?? "";
   return dir === "" ? "/tmp" : dir;
-}
-
-/**
- * evalSymlinks is filepath.EvalSymlinks on Unix: every symlink in path
- * resolved, component by component, with Go's errors: "lstat <prefix>: ..."
- * for a missing component, a bare "not a directory" for a file followed by
- * more components, "EvalSymlinks: too many links" after 255 links.
- */
-export function evalSymlinks(path: string): string {
-  let volLen = path.startsWith("/") ? 1 : 0;
-  let vol = path.slice(0, volLen);
-  let dest = vol;
-  let linksWalked = 0;
-  for (let start = volLen, end: number; start < path.length; start = end) {
-    while (start < path.length && path.charAt(start) === "/") {
-      start++;
-    }
-    end = start;
-    while (end < path.length && path.charAt(end) !== "/") {
-      end++;
-    }
-    const component = path.slice(start, end);
-    if (end === start) {
-      break;
-    } else if (component === ".") {
-      continue;
-    } else if (component === "..") {
-      const r = dest.lastIndexOf("/");
-      if (r < volLen || dest.slice(r + 1) === "..") {
-        if (dest.length > volLen) {
-          dest += "/";
-        }
-        dest += "..";
-      } else {
-        dest = dest.slice(0, r);
-      }
-      continue;
-    }
-
-    if (dest.length > 0 && !dest.endsWith("/")) {
-      dest += "/";
-    }
-    dest += component;
-
-    const fi = lstat(dest);
-    if (!fi.isSymbolicLink()) {
-      if (!fi.isDirectory() && end < path.length) {
-        throw Object.assign(new Error("not a directory"), { code: "ENOTDIR" });
-      }
-      continue;
-    }
-
-    linksWalked++;
-    if (linksWalked > 255) {
-      throw new Error("EvalSymlinks: too many links");
-    }
-    const link = readlink(dest);
-    path = link + path.slice(end);
-    if (link.startsWith("/")) {
-      dest = "/";
-      end = 1;
-      vol = "/";
-      volLen = 1;
-    } else {
-      const r = dest.lastIndexOf("/");
-      dest = r < volLen ? vol : dest.slice(0, r);
-      end = 0;
-    }
-  }
-  return clean(dest);
 }
