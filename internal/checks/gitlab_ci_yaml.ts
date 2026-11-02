@@ -18,6 +18,35 @@ export interface CIPos {
 
 const noPos: CIPos = { line: 0, column: 0 };
 
+/**
+ * Ptr is one JSON pointer, as a node of the tree of every pointer the
+ * conversion visited: its token below its parent. Go kept a map from pointer
+ * strings, built by appending a token per level; a deep document makes such
+ * strings quadratic in its depth, while the tree holds each token once. The
+ * same pointer is always the same node, so what Go recorded per pointer
+ * string is recorded per node.
+ */
+class Ptr {
+  readonly children = new Map<string, Ptr>();
+  /** pos is where the value at the pointer starts, if recorded. */
+  pos: CIPos | undefined;
+  /** reference says that a node tagged !reference was read here. */
+  reference = false;
+
+  child(token: string): Ptr {
+    let c = this.children.get(token);
+    if (c === undefined) {
+      c = new Ptr();
+      this.children.set(token, c);
+    }
+    return c;
+  }
+}
+
+function unescapeToken(t: string): string {
+  return t.replaceAll("~1", "/").replaceAll("~0", "~");
+}
+
 /** CIDoc is one CI file after reading. */
 export class CIDoc {
   /**
@@ -26,21 +55,43 @@ export class CIDoc {
    */
   value: Value = null;
   /**
-   * pos maps the JSON pointer of a value to where it starts: a map entry at
-   * its key, a sequence item at the item.
+   * root is the empty pointer. Its tree records where the value at a
+   * pointer starts (a map entry at its key, a sequence item at the item) and
+   * the pointers of the nodes tagged !reference.
    */
-  readonly pos = new Map<string, CIPos>();
-  /** references holds the JSON pointers of the nodes tagged !reference. */
-  readonly references: string[] = [];
+  readonly root = new Ptr();
+
+  // walk visits the nodes of a pointer string's tokens, root first, and
+  // stops when one does not exist.
+  *walk(ptr: string): Generator<Ptr> {
+    let at: Ptr | undefined = this.root;
+    yield at;
+    if (ptr === "") return;
+    for (const token of ptr.slice(1).split("/")) {
+      at = at.children.get(unescapeToken(token));
+      if (at === undefined) return;
+      yield at;
+    }
+  }
 
   /** position returns where the value at the JSON pointer is, or the zero position. */
   position(ptr: string): CIPos {
-    return this.pos.get(ptr) ?? noPos;
+    let last: Ptr | undefined;
+    let depth = 0;
+    const want = ptr === "" ? 1 : ptr.split("/").length;
+    for (const p of this.walk(ptr)) {
+      last = p;
+      depth++;
+    }
+    return depth === want ? (last?.pos ?? noPos) : noPos;
   }
 
   /** underReference says whether the pointer is a !reference node or lies below one. */
   underReference(ptr: string): boolean {
-    return this.references.some((r) => ptr === r || ptr.startsWith(r + "/"));
+    for (const p of this.walk(ptr)) {
+      if (p.reference) return true;
+    }
+    return false;
   }
 }
 
@@ -78,7 +129,7 @@ export function readCIDoc(data: Uint8Array): CIDoc {
     root = root.content[0];
   }
   const c = new Converter(doc);
-  doc.value = c.convert(root, "");
+  doc.value = c.convert(root, doc.root);
   if (c.tooBig) {
     throw new CIReadError(
       `the file expands to more than ${String(maxCINodes)} YAML nodes through aliases`,
@@ -124,7 +175,7 @@ class Converter {
   // step is a generator that asks the loop below for its children, so a
   // deeply nested file cannot exhaust the JavaScript stack. The order of
   // the work, and so of every position recorded, is Go's.
-  convert(root: yaml.Node, ptr: string): Value {
+  convert(root: yaml.Node, ptr: Ptr): Value {
     const stack: Step[] = [this.convertStep(root, ptr)];
     let input: Value = null;
     for (;;) {
@@ -145,7 +196,7 @@ class Converter {
     }
   }
 
-  *convertStep(n: yaml.Node, ptr: string): Step {
+  *convertStep(n: yaml.Node, ptr: Ptr): Step {
     if (!this.count()) {
       return null;
     }
@@ -156,14 +207,14 @@ class Converter {
         return yield [n, ptr, true];
       case yaml.SequenceNode: {
         if (n.tag === "!reference") {
-          this.doc.references.push(ptr);
+          ptr.reference = true;
         }
         const out: Value[] = [];
         for (let i = 0; i < n.content.length; i++) {
           const item = n.content[i];
           if (item === undefined) continue;
-          const child = `${ptr}/${String(i)}`;
-          this.doc.pos.set(child, { line: item.line, column: item.column });
+          const child = ptr.child(String(i));
+          child.pos = { line: item.line, column: item.column };
           out.push(yield [item, child, false]);
         }
         if (n.tag === "!reference") {
@@ -185,7 +236,7 @@ class Converter {
   // mappingStep reads a mapping, applying `<<` merge keys: explicit keys
   // win over merged ones, and an earlier mapping of a merged sequence wins
   // over a later one.
-  *mappingStep(n: yaml.Node, ptr: string): Step {
+  *mappingStep(n: yaml.Node, ptr: Ptr): Step {
     const out = new Map<string, Value>();
     if (!this.count()) {
       return out;
@@ -227,8 +278,8 @@ class Converter {
       }
       const name =
         key.kind === yaml.AliasNode && key.alias ? key.alias.value : key.value;
-      const child = ptr + "/" + jsonPointerToken(name);
-      this.doc.pos.set(child, { line: key.line, column: key.column });
+      const child = ptr.child(name);
+      child.pos = { line: key.line, column: key.column };
       // A later key of the same name replaces the value, as a Go map
       // assignment does; the Map keeps the first key's place.
       out.set(name, yield [val, child, false]);
@@ -239,7 +290,7 @@ class Converter {
 
 // A Step converts one node; it yields [node, pointer, isMapping] for each
 // child and gets the child's value back.
-type Step = Generator<[yaml.Node, string, boolean], Value, Value>;
+type Step = Generator<[yaml.Node, Ptr, boolean], Value, Value>;
 
 // scalarValue is the value of a scalar: booleans and numbers by yaml.v3's
 // resolution, everything else as its text.

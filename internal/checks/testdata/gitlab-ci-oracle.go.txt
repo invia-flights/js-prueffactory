@@ -37,6 +37,16 @@ type zzResult struct {
 	ContextTools json.RawMessage   `json:"context_tools"`
 }
 
+// storedFiles are the files a case keeps in the oracle: the generated ones
+// (bombs and deep documents) are rebuilt by the TypeScript test, which has
+// the same builders, so they are left out.
+func storedFiles(c zzCase) map[string]string {
+	if strings.HasPrefix(c.Name, "bomb-") || strings.HasPrefix(c.Name, "deep-") || c.Name == "aliases-under-limit" {
+		return nil
+	}
+	return c.Files
+}
+
 func zzBombs() []zzCase {
 	var merge strings.Builder
 	merge.WriteString(".l0: &l0 {}\n")
@@ -58,7 +68,18 @@ func zzBombs() []zzCase {
 		refs := strings.Repeat(fmt.Sprintf("*a%d, ", i-1), 9)
 		fmt.Fprintf(&small, "a%d: &a%d [%s]\n", i, i, strings.TrimSuffix(refs, ", "))
 	}
+	// Deep documents: steps nest through the schema's recursive step, and
+	// yaml.v3 refuses more than 10000 levels.
+	steps := func(n int, leaf string) string {
+		return "test:\n  run: [" + strings.Repeat("{run: [", n) + leaf + strings.Repeat("]}", n) + "]\n"
+	}
 	return []zzCase{
+		{"deep-steps-valid", map[string]string{".gitlab-ci.yml": steps(4900, "{name: a, script: x}")}},
+		{"deep-steps-invalid", map[string]string{".gitlab-ci.yml": steps(4900, "{name: a, script: 5}")}},
+		{"deep-sequence", map[string]string{".gitlab-ci.yml": "test:\n  script: " + strings.Repeat("[", 9990) + "x" + strings.Repeat("]", 9990) + "\n"}},
+		{"deep-mapping", map[string]string{".gitlab-ci.yml": ".h: " + strings.Repeat("{a: ", 9990) + "1" + strings.Repeat("}", 9990) + "\n"}},
+		{"deep-too-deep", map[string]string{".gitlab-ci.yml": "test:\n  script: " + strings.Repeat("[", 20000) + "x" + strings.Repeat("]", 20000) + "\n"}},
+		{"deep-long-keys", map[string]string{".gitlab-ci.yml": "test:\n  script: make\n  variables: " + strings.Repeat("{"+strings.Repeat("k", 200)+": ", 5000) + "1" + strings.Repeat("}", 5000) + "\n"}},
 		{"bomb-merge", map[string]string{".gitlab-ci.yml": merge.String()}},
 		{"bomb-plain", map[string]string{".gitlab-ci.yml": plain.String()}},
 		{"aliases-under-limit", map[string]string{".gitlab-ci.yml": small.String()}},
@@ -103,7 +124,7 @@ func TestZZGitlabOracle(t *testing.T) {
 		limitations, _ := json.Marshal(res.Limitations)
 		tools, _ := json.Marshal(res.ContextTools)
 		out = append(out, zzResult{
-			Name: c.Name, Files: c.Files, Status: string(res.Status), ReasonCode: res.ReasonCode, Reason: res.Reason,
+			Name: c.Name, Files: storedFiles(c), Status: string(res.Status), ReasonCode: res.ReasonCode, Reason: res.Reason,
 			Findings: findings, Limitations: limitations, ContextTools: tools,
 		})
 	}

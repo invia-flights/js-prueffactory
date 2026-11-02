@@ -3,6 +3,7 @@
 // recursively. The others need the network or GitLab's own files, so each is
 // a Limitation.
 import { type FileClass, Source, TestData } from "../discovery/discovery.ts";
+import { quote } from "../gocompat/fmt.ts";
 import { GoError } from "../gocompat/os.ts";
 import { clean } from "../gocompat/path.ts";
 import { sortStrings } from "../gocompat/strings.ts";
@@ -27,6 +28,9 @@ export const reasonIncludeNotResolved = "include_not_resolved";
 // maxCIFiles is GitLab's limit of includes in one pipeline, so a glob
 // cannot make the Check read without bound.
 const maxCIFiles = 150;
+// matchWorkPerYield is how many glob state steps run between two looks at
+// the execution's signal.
+const matchWorkPerYield = 1_000_000;
 
 /** CIFile is one resolved CI file. */
 export interface CIFile {
@@ -163,11 +167,19 @@ class Resolver {
     }
     let targets: string[] = [];
     if (/[*?]/.test(value)) {
-      const glob = globMatcher(localCIPath(value));
-      for (let i = 0; i < this.paths.length; i++) {
-        // Matching is linear, but a project may have many files: let the
-        // execution's time limit and a cancellation get through.
-        if (i % 256 === 0) {
+      const pattern = localCIPath(value);
+      const failure = globCompileFailure(pattern);
+      if (failure !== undefined) {
+        // Go's regexp.MustCompile panicked here, which ended the Check.
+        throw new Error(failure);
+      }
+      const glob = globMatcher(pattern);
+      let yielded = 0;
+      for (const p of this.paths) {
+        // Let the execution's time limit and a cancellation get through
+        // after every bit of matching work.
+        if (glob.work - yielded >= matchWorkPerYield) {
+          yielded = glob.work;
           await new Promise((resolve) => setImmediate(resolve));
           if (this.signal.aborted) {
             throw new Error(
@@ -175,7 +187,6 @@ class Resolver {
             );
           }
         }
-        const p = this.paths[i] ?? "";
         if (glob.test(p) && !inNodeModules(p)) {
           targets.push(p);
         }
@@ -331,9 +342,177 @@ type GlobToken =
   | { kind: "literal"; char: number }
   | { kind: "star" | "doubleStar" | "anyDirs" | "one" };
 
+// globTokens reads a pattern byte by byte, as Go's globRegexp did.
+export function globTokens(b: Uint8Array): GlobToken[] {
+  const tokens: GlobToken[] = [];
+  for (let i = 0; i < b.length; i++) {
+    const c = b[i] ?? 0;
+    if (c === 0x2a && b[i + 1] === 0x2a) {
+      i++;
+      if (b[i + 1] === 0x2f) {
+        i++;
+        tokens.push({ kind: "anyDirs" });
+      } else {
+        tokens.push({ kind: "doubleStar" });
+      }
+    } else if (c === 0x2a) {
+      tokens.push({ kind: "star" });
+    } else if (c === 0x3f) {
+      tokens.push({ kind: "one" });
+    } else {
+      tokens.push({ kind: "literal", char: c });
+    }
+  }
+  return tokens;
+}
+
+// maxRegexpSize is Go's regexp/syntax maxSize: 128 MB of 40-byte
+// instructions.
+const maxRegexpSize = Math.floor((128 << 20) / 40);
+
+/**
+ * globTooLarge says whether Go's regexp.Compile refused the regexp the Go
+ * build made of the glob as "expression too large", which made its
+ * MustCompile panic. It replays what regexp/syntax's parser allocates for
+ * that regexp (^, one literal per byte, [^/]* for `*`, .* for `**`,
+ * (?:.*\/)? for `**\/`, [^/] for `?`, $): the size check starts once the
+ * parser has allocated maxRegexpSize nodes (literal runs merge and their
+ * nodes are reused), and then fails when the whole expression compiles to
+ * more than maxRegexpSize instructions.
+ */
+export function globTooLarge(tokens: readonly GlobToken[]): boolean {
+  // stack holds whether each entry is a literal; free counts reusable nodes.
+  const stack: boolean[] = [];
+  let free = 0;
+  let allocated = 0;
+  let size = 2; // ^ and $
+  const alloc = (): void => {
+    if (free > 0) free--;
+    else allocated++;
+  };
+  const maybeConcat = (): void => {
+    const n = stack.length;
+    if (n >= 2 && stack[n - 1] === true && stack[n - 2] === true) {
+      stack.pop();
+      free++;
+    }
+  };
+  const push = (literal: boolean): void => {
+    maybeConcat();
+    stack.push(literal);
+  };
+  alloc(); // ^
+  push(false);
+  for (const t of tokens) {
+    switch (t.kind) {
+      case "literal":
+        alloc();
+        push(true);
+        size += 1;
+        break;
+      case "one":
+        alloc();
+        push(false);
+        size += 1;
+        break;
+      case "star":
+      case "doubleStar":
+        alloc(); // [^/] or .
+        push(false);
+        alloc(); // the star replaces it on the stack
+        stack[stack.length - 1] = false;
+        size += 3;
+        break;
+      case "anyDirs":
+        alloc(); // (?:
+        push(false);
+        alloc(); // .
+        push(false);
+        alloc(); // *
+        alloc(); // the literal /
+        push(true);
+        // ): concat makes a new node of .* and /, alternate pushes it again,
+        // and the group pushes it in place of the parenthesis.
+        maybeConcat();
+        stack.length -= 2;
+        alloc();
+        push(false);
+        stack.pop();
+        push(false);
+        stack.length -= 2;
+        push(false);
+        alloc(); // ?
+        size += 5;
+        break;
+    }
+  }
+  alloc(); // $
+  push(false);
+  maybeConcat();
+  if (stack.length > 1) alloc(); // the concatenation of everything
+  return allocated >= maxRegexpSize && size > maxRegexpSize;
+}
+
+const metaBytes = new Set(
+  Array.from("\\.+*?()|[]{}^$", (c) => c.charCodeAt(0)),
+);
+
+/** globRegexpSource is the regexp source Go's globRegexp built. */
+function globRegexpSource(b: Uint8Array): string {
+  let out = "^";
+  for (let i = 0; i < b.length; i++) {
+    const c = b[i] ?? 0;
+    if (c === 0x2a && b[i + 1] === 0x2a) {
+      i++;
+      if (b[i + 1] === 0x2f) {
+        i++;
+        out += "(?:.*/)?";
+      } else {
+        out += ".*";
+      }
+    } else if (c === 0x2a) {
+      out += "[^/]*";
+    } else if (c === 0x3f) {
+      out += "[^/]";
+    } else {
+      out += (metaBytes.has(c) ? "\\" : "") + String.fromCharCode(c);
+    }
+  }
+  return out + "$";
+}
+
+// regexpQuote is regexp's quote: backquotes when strconv.CanBackquote, else
+// strconv.Quote.
+function regexpQuote(s: string): string {
+  for (const ch of s) {
+    const r = ch.codePointAt(0) ?? 0;
+    if (r === 0xfeff || r === 0x60 || r === 0x7f || (r < 0x20 && r !== 0x09)) {
+      return quote(s);
+    }
+  }
+  return "`" + s + "`";
+}
+
+/**
+ * globCompileFailure is the text of the panic Go's regexp.MustCompile raised
+ * for a glob too large to compile, or undefined when Go compiled it. The
+ * panic ended the Go build's Check, which the engine reported as a
+ * tool_error "the Check panicked: ...".
+ */
+export function globCompileFailure(pattern: string): string | undefined {
+  const b = Buffer.from(pattern, "utf8");
+  if (!globTooLarge(globTokens(b))) {
+    return undefined;
+  }
+  const src = globRegexpSource(b);
+  return `regexp: Compile(${regexpQuote(src)}): error parsing regexp: expression too large: \`${src}\``;
+}
+
 /** GlobMatcher says whether a project path matches a local include glob. */
 export interface GlobMatcher {
   test(path: string): boolean;
+  /** work counts the state steps all tests took so far. */
+  readonly work: number;
 }
 
 /**
@@ -342,52 +521,36 @@ export interface GlobMatcher {
  * number of folders, and `?` one character. As in Go, the pattern is read
  * byte by byte, so each byte of a non-ASCII character becomes the character
  * U+0080 to U+00FF and such a pattern matches no real UTF-8 path. Matching
- * runs the pattern as a set of states over the path, as RE2 does, so it
- * takes time linear in the path for any pattern the project writes.
+ * runs the pattern as a set of states over the path, as RE2 does: the time
+ * is at most the path's length times the pattern's, whatever the pattern.
  */
 export function globMatcher(pattern: string): GlobMatcher {
-  const b = Buffer.from(pattern, "utf8");
   const tokens: GlobToken[] = [];
-  const push = (t: GlobToken): void => {
+  for (const t of globTokens(Buffer.from(pattern, "utf8"))) {
     // Two `*`, two `**` or two `**/` in a row match what one does; keeping
     // one keeps the state set small.
     const last = tokens.at(-1);
     if (t.kind !== "literal" && t.kind !== "one" && last?.kind === t.kind) {
-      return;
+      continue;
     }
     tokens.push(t);
-  };
-  for (let i = 0; i < b.length; i++) {
-    const c = b[i] ?? 0;
-    if (c === 0x2a && b[i + 1] === 0x2a) {
-      i++;
-      if (b[i + 1] === 0x2f) {
-        i++;
-        push({ kind: "anyDirs" });
-      } else {
-        push({ kind: "doubleStar" });
-      }
-    } else if (c === 0x2a) {
-      push({ kind: "star" });
-    } else if (c === 0x3f) {
-      push({ kind: "one" });
-    } else {
-      push({ kind: "literal", char: c });
-    }
   }
   const m = tokens.length;
   const slash = 0x2f;
   const newline = 0x0a;
   // A state is a position in the tokens: 2*i is "before token i", 2*i+1 is
   // "inside the run of the `**/` at i, waiting for its slash", and 2*m
-  // accepts. The active states are kept as a list, each at most once.
+  // accepts. The active states are kept as a list, each at most once; the
+  // two lists and the marks are reused for every character and path.
   const empty = (t: GlobToken): boolean =>
     t.kind === "star" || t.kind === "doubleStar" || t.kind === "anyDirs";
-  return {
+  const mark = new Float64Array(2 * m + 1).fill(-1);
+  let step = 0;
+  let active: number[] = [];
+  let next: number[] = [];
+  const matcher = {
+    work: 0,
     test(path: string): boolean {
-      const mark = new Int32Array(2 * m + 1).fill(-1);
-      let step = 0;
-      let active: number[] = [];
       // add puts a "before" state and the ones it reaches by matching
       // nothing into the list.
       const add = (list: number[], i0: number): void => {
@@ -405,11 +568,14 @@ export function globMatcher(pattern: string): GlobMatcher {
           list.push(2 * i + 1);
         }
       };
+      step++;
+      active.length = 0;
       add(active, 0);
       for (const ch of path) {
         const c = ch.codePointAt(0) ?? 0;
         step++;
-        const next: number[] = [];
+        next.length = 0;
+        matcher.work += active.length;
         for (const s of active) {
           const i = s >> 1;
           const t = tokens[i];
@@ -439,9 +605,10 @@ export function globMatcher(pattern: string): GlobMatcher {
           }
         }
         if (next.length === 0) return false;
-        active = next;
+        [active, next] = [next, active];
       }
       return active.includes(2 * m);
     },
   };
+  return matcher;
 }

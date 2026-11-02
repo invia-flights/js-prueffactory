@@ -27,6 +27,8 @@ export type Value =
 export interface ValidationError {
   /** instanceLocation holds the unescaped JSON pointer tokens of the value. */
   readonly instanceLocation: readonly string[];
+  /** depth is the length of instanceLocation. */
+  readonly depth: number;
   readonly kind: ErrorKind;
   readonly causes: ValidationError[];
 }
@@ -107,10 +109,11 @@ export class CompiledSchema {
    * root is the library's kind.Schema error with the failures as causes.
    */
   validate(v: Value): ValidationError | null {
-    const err = run({ sch: this.#root, v, vloc: [], boolResult: false });
+    const err = run({ sch: this.#root, v, vloc: null, boolResult: false });
     if (err === null) return null;
     return {
       instanceLocation: [],
+      depth: 0,
       kind: {
         name: "Schema",
         keywordPath: [],
@@ -416,23 +419,23 @@ function kind(name: string, keywordPath: string[], message: string): ErrorKind {
 
 class Validator {
   readonly v: Value;
-  readonly vloc: string[];
+  readonly vloc: Loc | null;
   readonly sch: Schema;
   readonly boolResult: boolean;
   errors: ValidationError[] = [];
 
-  constructor(v: Value, vloc: string[], sch: Schema, boolResult: boolean) {
+  constructor(v: Value, vloc: Loc | null, sch: Schema, boolResult: boolean) {
     this.v = v;
     this.vloc = vloc;
     this.sch = sch;
     this.boolResult = boolResult;
   }
 
-  error(k: () => ErrorKind): ValidationError {
+  error(k: () => ErrorKind, causes: ValidationError[] = []): ValidationError {
     if (this.boolResult) {
-      return { instanceLocation: [], kind: emptyKind, causes: [] };
+      return { instanceLocation: [], depth: 0, kind: emptyKind, causes };
     }
-    return { instanceLocation: this.vloc, kind: k(), causes: [] };
+    return located(this.vloc, k(), causes);
   }
 
   addErr(err: ValidationError | null): void {
@@ -444,8 +447,7 @@ class Validator {
   }
 
   addErrors(errors: ValidationError[], k: () => ErrorKind): void {
-    const err = this.error(k);
-    this.errors.push({ ...err, causes: errors });
+    this.errors.push(this.error(k, errors));
   }
 
   // self asks for the validation of this value against another schema.
@@ -460,7 +462,16 @@ class Validator {
 
   // val asks for the validation of a child value.
   val(sch: Schema, v: Value, tok: string): Request {
-    return { sch, v, vloc: [...this.vloc, tok], boolResult: this.boolResult };
+    return {
+      sch,
+      v,
+      vloc: {
+        parent: this.vloc,
+        token: tok,
+        depth: (this.vloc?.depth ?? 0) + 1,
+      },
+      boolResult: this.boolResult,
+    };
   }
 
   *validate(): Step {
@@ -556,8 +567,10 @@ class Validator {
       case 1:
         return this.errors[0] ?? null;
       default: {
-        const err = this.error(() => kind("Group", [], "validation failed"));
-        return { ...err, causes: this.errors };
+        return this.error(
+          () => kind("Group", [], "validation failed"),
+          this.errors,
+        );
       }
     }
   }
@@ -565,13 +578,10 @@ class Validator {
   *validateRef(sch: Schema): Step {
     const err = yield this.self(sch, false);
     if (err === null) return null;
-    const refErr = this.error(() =>
-      kind("Reference", ["$ref"], "validation failed"),
+    return this.error(
+      () => kind("Reference", ["$ref"], "validation failed"),
+      err.kind.name === "Group" ? err.causes : [err],
     );
-    return {
-      ...refErr,
-      causes: err.kind.name === "Group" ? err.causes : [err],
-    };
   }
 
   findMissing(
@@ -684,21 +694,21 @@ class Validator {
         const err = yield {
           sch: s.propertyNames,
           v: name,
-          vloc: [],
+          vloc: null,
           boolResult: this.boolResult,
         };
         if (err !== null) {
-          const e = this.error(() =>
-            kind(
-              "PropertyNames",
-              ["propertyNames"],
-              `invalid propertyName ${goQuote(name)}`,
+          this.errors.push(
+            this.error(
+              () =>
+                kind(
+                  "PropertyNames",
+                  ["propertyNames"],
+                  `invalid propertyName ${goQuote(name)}`,
+                ),
+              err.kind.name === "Group" ? err.causes : [err],
             ),
           );
-          this.errors.push({
-            ...e,
-            causes: err.kind.name === "Group" ? err.causes : [err],
-          });
         }
       }
     }
@@ -944,11 +954,42 @@ class Validator {
 
 const emptyKind: ErrorKind = { name: "", keywordPath: [], message: "" };
 
+// Loc is an instance location as a list from the value up to the root. Go
+// appended a token per level to a slice; sharing the parents keeps a deep
+// value's locations linear in its depth.
+interface Loc {
+  readonly parent: Loc | null;
+  readonly token: string;
+  readonly depth: number;
+}
+
+// located is an error at loc whose token list is built when first read.
+function located(
+  loc: Loc | null,
+  k: ErrorKind,
+  causes: ValidationError[],
+): ValidationError {
+  let tokens: string[] | undefined;
+  return {
+    get instanceLocation(): readonly string[] {
+      if (tokens === undefined) {
+        tokens = [];
+        for (let l = loc; l !== null; l = l.parent) tokens.push(l.token);
+        tokens.reverse();
+      }
+      return tokens;
+    },
+    depth: loc?.depth ?? 0,
+    kind: k,
+    causes,
+  };
+}
+
 // A Request asks for the validation of a value against a schema.
 interface Request {
   sch: Schema;
   v: Value;
-  vloc: string[];
+  vloc: Loc | null;
   boolResult: boolean;
 }
 

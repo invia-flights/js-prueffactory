@@ -13864,10 +13864,345 @@
    ]
   },
   {
+   "name": "deep-steps-valid",
+   "files": null,
+   "status": "completed",
+   "reason_code": "",
+   "reason": "",
+   "findings": null,
+   "limitations": null,
+   "context_tools": [
+    {
+     "name": "gitlab-ci-schema",
+     "version": "18.5.0-b1b924d59f72",
+     "digest": "b1b924d59f72be9c3227010bd78725cd5b0d532f44cacb85df67b476887cd49a"
+    }
+   ]
+  },
+  {
+   "name": "deep-steps-invalid",
+   "files": null,
+   "status": "completed",
+   "reason_code": "",
+   "reason": "",
+   "findings": [
+    {
+     "id": "",
+     "check_id": "repository.gitlab-ci",
+     "execution_id": "",
+     "context_id": "C-0001",
+     "rule_id": "gitlab-ci.schema",
+     "fingerprint": {
+      "algorithm": "v1",
+      "value": "fd4c6e8c0d8076c3f89ca3656476bf95a1e8c553b5faba82d5e77eb1b423c977"
+     },
+     "kind": "defect",
+     "severity": "error",
+     "confidence": "confirmed",
+     "gate": true,
+     "in_test_data": false,
+     "in_test_code": false,
+     "title": "GitLab CI file does not match the schema",
+     "message": "The file does not match GitLab's CI schema, so GitLab rejects the pipeline.",
+     "locations": [
+      {
+       "role": "primary",
+       "path_base": "project_root",
+       "path": ".gitlab-ci.yml",
+       "start": {
+        "line": 2,
+        "column": 34319
+       },
+       "end": null,
+       "file_sha256": "6a869ceabe1f32ef0686ce9bcc40f3ee38478b864b790f4199a42fb0fe88487d",
+       "snippet": null
+      }
+     ],
+     "expected": null,
+     "actual": null,
+     "evidence": [
+      {
+       "kind": "tool_output",
+       "text": "/test/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/run/0/script: got number, want string",
+       "origin": "GitLab CI JSON Schema 18.5.0",
+       "trust": "untrusted_data",
+       "original_size": null,
+       "artifact_id": null
+      }
+     ],
+     "reproduction": {
+      "rerun_command": [
+       "js-prueffactory",
+       "test",
+       "/work/project",
+       "--only",
+       "repository.gitlab-ci"
+      ],
+      "test": null,
+      "verified_by": [
+       "repository.gitlab-ci"
+      ]
+     },
+     "limitations": [],
+     "suite": null
+    }
+   ],
+   "limitations": null,
+   "context_tools": [
+    {
+     "name": "gitlab-ci-schema",
+     "version": "18.5.0-b1b924d59f72",
+     "digest": "b1b924d59f72be9c3227010bd78725cd5b0d532f44cacb85df67b476887cd49a"
+    }
+   ]
+  },
+  {
+   "name": "deep-sequence",
+   "files": null,
+   "status": "completed",
+   "reason_code": "",
+   "reason": "",
+   "findings": [
+    {
+     "id": "",
+     "check_id": "repository.gitlab-ci",
+     "execution_id": "",
+     "context_id": "C-0001",
+     "rule_id": "gitlab-ci.schema",
+     "fingerprint": {
+      "algorithm": "v1",
+      "value": "d9ce630d1fc7da348a0d8548ee53cffccda93d8b22dd9590b6c0b21120ebd92b"
+     },
+     "kind": "defect",
+     "severity": "error",
+     "confidence": "confirmed",
+     "gate": true,
+     "in_test_data": false,
+     "in_test_code": false,
+     "title": "GitLab CI file does not match the schema",
+     "message": "The file does not match GitLab's CI schema, so GitLab rejects the pipeline.",
+     "locations": [
+      {
+       "role": "primary",
+       "path_base": "project_root",
+       "path": ".gitlab-ci.yml",
+       "start": {
+        "line": 2,
+        "column": 13
+       },
+       "end": null,
+       "file_sha256": "c65c820917128908f53a01a4896aeffdf398826fa72ed5dd07b1b478f97a59e7",
+       "snippet": null
+      }
+     ],
+     "expected": null,
+     "actual": null,
+     "evidence": [
+      {
+       "kind": "tool_output",
+       "text": "/test/script/0/0: got array, want string",
+       "origin": "GitLab CI JSON Schema 18.5.0",
+       "trust": "untrusted_data",
+       "original_size": null,
+       "artifact_id": null
+      }
+     ],
+     "reproduction": {
+      "rerun_command": [
+       "js-prueffactory",
+       "test",
+       "/work/project",
+       "--only",
+       "repository.gitlab-ci"
+      ],
+      "test": null,
+      "verified_by": [
+       "repository.gitlab-ci"
+      ]
+     },
+     "limitations": [],
+     "suite": null
+    }
+   ],
+   "limitations": null,
+   "context_tools": [
+    {
+     "name": "gitlab-ci-schema",
+     "version": "18.5.0-b1b924d59f72",
+     "digest": "b1b924d59f72be9c3227010bd78725cd5b0d532f44cacb85df67b476887cd49a"
+    }
+   ]
+  },
+  {
+   "name": "deep-mapping",
+   "files": null,
+   "status": "completed",
+   "reason_code": "",
+   "reason": "",
+   "findings": null,
+   "limitations": null,
+   "context_tools": [
+    {
+     "name": "gitlab-ci-schema",
+     "version": "18.5.0-b1b924d59f72",
+     "digest": "b1b924d59f72be9c3227010bd78725cd5b0d532f44cacb85df67b476887cd49a"
+    }
+   ]
+  },
+  {
+   "name": "deep-too-deep",
+   "files": null,
+   "status": "completed",
+   "reason_code": "",
+   "reason": "",
+   "findings": [
+    {
+     "id": "",
+     "check_id": "repository.gitlab-ci",
+     "execution_id": "",
+     "context_id": "C-0001",
+     "rule_id": "gitlab-ci.yaml",
+     "fingerprint": {
+      "algorithm": "v1",
+      "value": "ba410b08d38eeafdac1b36636f286a87255cc1072f294fc340744d3c6b99acff"
+     },
+     "kind": "defect",
+     "severity": "error",
+     "confidence": "confirmed",
+     "gate": true,
+     "in_test_data": false,
+     "in_test_code": false,
+     "title": "GitLab CI file does not parse",
+     "message": "The file is not valid YAML, so GitLab rejects the pipeline.",
+     "locations": [
+      {
+       "role": "primary",
+       "path_base": "project_root",
+       "path": ".gitlab-ci.yml",
+       "start": null,
+       "end": null,
+       "file_sha256": "ad08e0b1666c54d1517527f624763ca43fcfea73f82a6caf18f99b17bd68e70a",
+       "snippet": null
+      }
+     ],
+     "expected": null,
+     "actual": null,
+     "evidence": [
+      {
+       "kind": "tool_output",
+       "text": "line 2: exceeded max depth of 10000",
+       "origin": "GitLab CI JSON Schema 18.5.0",
+       "trust": "untrusted_data",
+       "original_size": null,
+       "artifact_id": null
+      }
+     ],
+     "reproduction": {
+      "rerun_command": [
+       "js-prueffactory",
+       "test",
+       "/work/project",
+       "--only",
+       "repository.gitlab-ci"
+      ],
+      "test": null,
+      "verified_by": [
+       "repository.gitlab-ci"
+      ]
+     },
+     "limitations": [],
+     "suite": null
+    }
+   ],
+   "limitations": null,
+   "context_tools": [
+    {
+     "name": "gitlab-ci-schema",
+     "version": "18.5.0-b1b924d59f72",
+     "digest": "b1b924d59f72be9c3227010bd78725cd5b0d532f44cacb85df67b476887cd49a"
+    }
+   ]
+  },
+  {
+   "name": "deep-long-keys",
+   "files": null,
+   "status": "completed",
+   "reason_code": "",
+   "reason": "",
+   "findings": [
+    {
+     "id": "",
+     "check_id": "repository.gitlab-ci",
+     "execution_id": "",
+     "context_id": "C-0001",
+     "rule_id": "gitlab-ci.schema",
+     "fingerprint": {
+      "algorithm": "v1",
+      "value": "906087de23e60f6e9aff5291eea2aaedb5118c995a34e9adb36f244460cbfd3c"
+     },
+     "kind": "defect",
+     "severity": "error",
+     "confidence": "confirmed",
+     "gate": true,
+     "in_test_data": false,
+     "in_test_code": false,
+     "title": "GitLab CI file does not match the schema",
+     "message": "The file does not match GitLab's CI schema, so GitLab rejects the pipeline.",
+     "locations": [
+      {
+       "role": "primary",
+       "path_base": "project_root",
+       "path": ".gitlab-ci.yml",
+       "start": {
+        "line": 3,
+        "column": 15
+       },
+       "end": null,
+       "file_sha256": "c9906cf10525325378104b5917bd9be0846b0869dae3252c88021a57a8555de8",
+       "snippet": null
+      }
+     ],
+     "expected": null,
+     "actual": null,
+     "evidence": [
+      {
+       "kind": "tool_output",
+       "text": "/test/variables/kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk: got object, want boolean or number or string; additional properties 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk' not allowed",
+       "origin": "GitLab CI JSON Schema 18.5.0",
+       "trust": "untrusted_data",
+       "original_size": null,
+       "artifact_id": null
+      }
+     ],
+     "reproduction": {
+      "rerun_command": [
+       "js-prueffactory",
+       "test",
+       "/work/project",
+       "--only",
+       "repository.gitlab-ci"
+      ],
+      "test": null,
+      "verified_by": [
+       "repository.gitlab-ci"
+      ]
+     },
+     "limitations": [],
+     "suite": null
+    }
+   ],
+   "limitations": null,
+   "context_tools": [
+    {
+     "name": "gitlab-ci-schema",
+     "version": "18.5.0-b1b924d59f72",
+     "digest": "b1b924d59f72be9c3227010bd78725cd5b0d532f44cacb85df67b476887cd49a"
+    }
+   ]
+  },
+  {
    "name": "bomb-merge",
-   "files": {
-    ".gitlab-ci.yml": ".l0: \u0026l0 {}\n.l1: \u0026l1\n  \u003c\u003c: [*l0, *l0, *l0, *l0, *l0, *l0, *l0, *l0, *l0]\n.l2: \u0026l2\n  \u003c\u003c: [*l1, *l1, *l1, *l1, *l1, *l1, *l1, *l1, *l1]\n.l3: \u0026l3\n  \u003c\u003c: [*l2, *l2, *l2, *l2, *l2, *l2, *l2, *l2, *l2]\n.l4: \u0026l4\n  \u003c\u003c: [*l3, *l3, *l3, *l3, *l3, *l3, *l3, *l3, *l3]\n.l5: \u0026l5\n  \u003c\u003c: [*l4, *l4, *l4, *l4, *l4, *l4, *l4, *l4, *l4]\n.l6: \u0026l6\n  \u003c\u003c: [*l5, *l5, *l5, *l5, *l5, *l5, *l5, *l5, *l5]\n.l7: \u0026l7\n  \u003c\u003c: [*l6, *l6, *l6, *l6, *l6, *l6, *l6, *l6, *l6]\n.l8: \u0026l8\n  \u003c\u003c: [*l7, *l7, *l7, *l7, *l7, *l7, *l7, *l7, *l7]\n.l9: \u0026l9\n  \u003c\u003c: [*l8, *l8, *l8, *l8, *l8, *l8, *l8, *l8, *l8]\n.l10: \u0026l10\n  \u003c\u003c: [*l9, *l9, *l9, *l9, *l9, *l9, *l9, *l9, *l9]\n.l11: \u0026l11\n  \u003c\u003c: [*l10, *l10, *l10, *l10, *l10, *l10, *l10, *l10, *l10]\n.l12: \u0026l12\n  \u003c\u003c: [*l11, *l11, *l11, *l11, *l11, *l11, *l11, *l11, *l11]\ntest:\n  script: make\n"
-   },
+   "files": null,
    "status": "completed",
    "reason_code": "",
    "reason": "",
@@ -13941,9 +14276,7 @@
   },
   {
    "name": "bomb-plain",
-   "files": {
-    ".gitlab-ci.yml": "a0: \u0026a0 [x, x, x, x, x, x, x, x, x]\na1: \u0026a1 [*a0, *a0, *a0, *a0, *a0, *a0, *a0, *a0, *a0]\na2: \u0026a2 [*a1, *a1, *a1, *a1, *a1, *a1, *a1, *a1, *a1]\na3: \u0026a3 [*a2, *a2, *a2, *a2, *a2, *a2, *a2, *a2, *a2]\na4: \u0026a4 [*a3, *a3, *a3, *a3, *a3, *a3, *a3, *a3, *a3]\na5: \u0026a5 [*a4, *a4, *a4, *a4, *a4, *a4, *a4, *a4, *a4]\na6: \u0026a6 [*a5, *a5, *a5, *a5, *a5, *a5, *a5, *a5, *a5]\na7: \u0026a7 [*a6, *a6, *a6, *a6, *a6, *a6, *a6, *a6, *a6]\na8: \u0026a8 [*a7, *a7, *a7, *a7, *a7, *a7, *a7, *a7, *a7]\na9: \u0026a9 [*a8, *a8, *a8, *a8, *a8, *a8, *a8, *a8, *a8]\na10: \u0026a10 [*a9, *a9, *a9, *a9, *a9, *a9, *a9, *a9, *a9]\na11: \u0026a11 [*a10, *a10, *a10, *a10, *a10, *a10, *a10, *a10, *a10]\na12: \u0026a12 [*a11, *a11, *a11, *a11, *a11, *a11, *a11, *a11, *a11]\n"
-   },
+   "files": null,
    "status": "completed",
    "reason_code": "",
    "reason": "",
@@ -14017,9 +14350,7 @@
   },
   {
    "name": "aliases-under-limit",
-   "files": {
-    ".gitlab-ci.yml": "a0: \u0026a0 [x, x, x, x, x, x, x, x, x]\na1: \u0026a1 [*a0, *a0, *a0, *a0, *a0, *a0, *a0, *a0, *a0]\na2: \u0026a2 [*a1, *a1, *a1, *a1, *a1, *a1, *a1, *a1, *a1]\na3: \u0026a3 [*a2, *a2, *a2, *a2, *a2, *a2, *a2, *a2, *a2]\na4: \u0026a4 [*a3, *a3, *a3, *a3, *a3, *a3, *a3, *a3, *a3]\n"
-   },
+   "files": null,
    "status": "completed",
    "reason_code": "",
    "reason": "",

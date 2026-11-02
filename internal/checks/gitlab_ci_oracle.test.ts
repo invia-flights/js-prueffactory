@@ -106,11 +106,65 @@ function normalise(v: unknown): unknown {
   return v;
 }
 
+// generated holds the cases whose files the oracle leaves out, built as the
+// generator builds them (zzBombs in gitlab-ci-oracle.go.txt).
+function generated(name: string): string | undefined {
+  const chain = (prefix: string, levels: number, start: string): string => {
+    let b = start;
+    for (let i = 1; i <= levels; i++) {
+      const refs = Array<string>(9)
+        .fill(`*${prefix}${String(i - 1)}`)
+        .join(", ");
+      b +=
+        prefix === "l"
+          ? `.l${String(i)}: &l${String(i)}\n  <<: [${refs}]\n`
+          : `a${String(i)}: &a${String(i)} [${refs}]\n`;
+    }
+    return b;
+  };
+  const steps = (n: number, leaf: string): string =>
+    "test:\n  run: [" + "{run: [".repeat(n) + leaf + "]}".repeat(n) + "]\n";
+  const plain = "a0: &a0 [x, x, x, x, x, x, x, x, x]\n";
+  switch (name) {
+    case "bomb-merge":
+      return chain("l", 12, ".l0: &l0 {}\n") + "test:\n  script: make\n";
+    case "bomb-plain":
+      return chain("a", 12, plain);
+    case "aliases-under-limit":
+      return chain("a", 4, plain);
+    case "deep-steps-valid":
+      return steps(4900, "{name: a, script: x}");
+    case "deep-steps-invalid":
+      return steps(4900, "{name: a, script: 5}");
+    case "deep-sequence":
+      return (
+        "test:\n  script: " + "[".repeat(9990) + "x" + "]".repeat(9990) + "\n"
+      );
+    case "deep-mapping":
+      return ".h: " + "{a: ".repeat(9990) + "1" + "}".repeat(9990) + "\n";
+    case "deep-too-deep":
+      return (
+        "test:\n  script: " + "[".repeat(20000) + "x" + "]".repeat(20000) + "\n"
+      );
+    case "deep-long-keys":
+      return (
+        "test:\n  script: make\n  variables: " +
+        `{${"k".repeat(200)}: `.repeat(5000) +
+        "1" +
+        "}".repeat(5000) +
+        "\n"
+      );
+  }
+  return undefined;
+}
+
 describe("repository.gitlab-ci reports what the Go build reports", () => {
   for (const c of oracle.cases) {
     test(c.name, async (t) => {
       const dir = tempDir(t);
-      for (const [rel, content] of Object.entries(c.files)) {
+      const built = generated(c.name);
+      const files = built === undefined ? c.files : { ".gitlab-ci.yml": built };
+      for (const [rel, content] of Object.entries(files)) {
         const p = join(dir, rel);
         mkdirSync(dirname(p), { recursive: true });
         writeFileSync(p, content);
@@ -124,7 +178,12 @@ describe("repository.gitlab-ci reports what the Go build reports", () => {
       });
       const check = impl("repository.gitlab-ci");
       assert.ok(check.run !== undefined);
+      const start = performance.now();
       const res = await check.run(AbortSignal.timeout(60_000), input);
+      if (c.name.startsWith("deep-")) {
+        const ms = performance.now() - start;
+        assert.ok(ms < 1000, `took ${String(Math.round(ms))} ms`);
+      }
       assert.equal(res.status, c.status);
       assert.equal(res.reasonCode ?? "", c.reason_code);
       assert.equal(res.reason ?? "", c.reason);

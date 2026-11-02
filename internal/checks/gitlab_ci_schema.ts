@@ -82,7 +82,7 @@ function failingLeaves(root: ValidationError): ValidationError[] {
     let branches = e.causes.map((c) => done.get(c) ?? []);
     if (e.kind.name === "AnyOf" || e.kind.name === "OneOf") {
       const deepest = (leaves: ValidationError[]): number =>
-        leaves.reduce((d, l) => Math.max(d, l.instanceLocation.length), 0);
+        leaves.reduce((d, l) => Math.max(d, l.depth), 0);
       const best = branches.reduce((d, b) => Math.max(d, deepest(b)), 0);
       branches = branches.filter((b) => deepest(b) === best);
     }
