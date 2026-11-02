@@ -1,0 +1,111 @@
+// Generator of go-oracle.json: what the Go standard library of the freeze
+// commit's toolchain computes for the inputs of the gocompat tests. Kept as
+// text; regenerate with: cp go-oracle.go.txt /tmp/x/main.go && go run /tmp/x/main.go > go-oracle.json
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"math"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+	"unicode"
+)
+
+func main() {
+	out := map[string]any{"recordedFrom": "Go 1.27.3 standard library, the toolchain of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8"}
+	strs := []string{"", "plain", "a\"b\\c", "\a\b\f\n\r\t\v", "\x00\x01\x1f\x7f", "\u0080\u009f\u00a0\u00ad", "\u00e9\u20ac\U0001F600",
+		"\u200b\u2028\u2029\ufeff", "\ue000\U000F0000", "\U0001F3FB\u0301", "<b>&amp;</b>", "\u0378", "\U0001FFFF", "line\nnext", "\u65e5\u672c", "\u061c\u2066"}
+	type q struct{ In, Quote string }
+	var quotes []q
+	for _, s := range strs {
+		quotes = append(quotes, q{s, strconv.Quote(s)})
+	}
+	out["quote"] = quotes
+
+	floats := []float64{0, 1, -1, 0.5, 100, 101, 80.25, 1e-7, 1e-5, 0.0001, 1234567, 123456, 999999, 1e6, 1e20, 1e21, 1e100, 1.5e-300, 3.14159, -0.25, 2.5, 0.1 + 0.2, 1.0 / 3, math.MaxFloat64, 5e-324, 46.6, 80.6}
+	type fl struct {
+		In             float64
+		V, F1, F2, F0  string
+		JSON           string
+	}
+	var fls []fl
+	for _, f := range floats {
+		j, _ := json.Marshal(f)
+		fls = append(fls, fl{f, fmt.Sprintf("%v", f), fmt.Sprintf("%.1f", f), fmt.Sprintf("%.2f", f), fmt.Sprintf("%.0f", f), string(j)})
+	}
+	out["floats"] = fls
+	negZero := math.Copysign(0, -1)
+	type tie struct {
+		In         float64
+		Neg        bool
+		F0, F1, F2 string
+	}
+	var ts []tie
+	for _, f := range []float64{0.25, 0.75, -0.25, 0.125, 2.5, 3.5, -2.5, 0.05, 0.15, 0.35, 1.25, 46.65, 80.55, 0.5, 1.5, 0, negZero, -0.04} {
+		ts = append(ts, tie{f, math.Signbit(f), fmt.Sprintf("%.0f", f), fmt.Sprintf("%.1f", f), fmt.Sprintf("%.2f", f)})
+	}
+	out["fixed"] = ts
+
+	type js struct{ In, HTML, NoHTML string }
+	var jss []js
+	for _, s := range append(strs, "\u2028x\u2029", "a\x00b") {
+		h, _ := json.Marshal(s)
+		var b bytes.Buffer
+		enc := json.NewEncoder(&b)
+		enc.SetEscapeHTML(false)
+		_ = enc.Encode(s)
+		jss = append(jss, js{s, string(h), strings.TrimSuffix(b.String(), "\n")})
+	}
+	out["jsonStrings"] = jss
+
+	times := []time.Time{
+		time.Date(2026, 10, 25, 10, 15, 0, 0, time.UTC),
+		time.Date(2026, 10, 25, 10, 15, 0, 120000000, time.UTC),
+		time.Date(2026, 1, 2, 3, 4, 5, 1000000, time.UTC),
+		time.Date(1999, 12, 31, 23, 59, 59, 999000000, time.UTC),
+	}
+	type tm struct {
+		UnixMS        int64
+		JSON, RFC3339 string
+	}
+	var tms []tm
+	for _, t := range times {
+		j, _ := json.Marshal(t)
+		tms = append(tms, tm{t.UnixMilli(), string(j), t.Format(time.RFC3339)})
+	}
+	out["times"] = tms
+
+	cps := []rune{0, 7, 9, 10, 11, 12, 13, 0x1c, 0x1f, ' ', 'a', 0x7f, 0x80, 0x85, 0x9f, 0xa0, 0xad, 0x1680, 0x180e, 0x2000, 0x200a, 0x200b, 0x2028, 0x2029, 0x202f, 0x205f, 0x3000, 0xfeff, 0xe000, 0xfffd, 0x1f600, 0x0378, 0xf0000, 0x0301, 0x00e9}
+	type cls struct {
+		CP                    rune
+		Space, Control, Print bool
+	}
+	var cl []cls
+	for _, r := range cps {
+		cl = append(cl, cls{r, unicode.IsSpace(r), unicode.IsControl(r), strconv.IsPrint(r)})
+	}
+	out["classes"] = cl
+
+	type fs struct {
+		In        string
+		Fields    []string
+		TrimSpace string
+	}
+	var fss []fs
+	for _, s := range []string{"  a  b\t\nc ", "\u0085x\u00a0y\ufeffz\u3000", "", "   ", "\u200bq\u2028r", "a\x00b \x1cc\x1fd"} {
+		fss = append(fss, fs{s, append([]string{}, strings.Fields(s)...), strings.TrimSpace(s)})
+	}
+	out["fields"] = fss
+
+	sorted := []string{"\ue000", "\U0001F600", "\uff5e", "z", "\u00e9", "Z", "\uffff", "\U00010000", "\ud7ff", "", "a", "ab", "\u0080", "a\x00", "A"}
+	sort.Strings(sorted)
+	out["sortedStrings"] = sorted
+
+	b, _ := json.MarshalIndent(out, "", "  ")
+	os.Stdout.Write(append(b, '\n'))
+}

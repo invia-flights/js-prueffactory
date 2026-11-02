@@ -1,0 +1,447 @@
+package resultset_test
+
+// Generator of go-oracle.json: what the frozen Go build computes for the
+// inputs of the TypeScript port's result-set tests. The Go code is frozen, so
+// this is kept as text. To regenerate at the freeze commit: copy it to
+// internal/resultset/zz_oracle_test.go, run
+// go test -count=1 -run TestZZOracle ./internal/resultset, delete the copy.
+
+import (
+	"encoding/json"
+	"os"
+	"regexp"
+	"sort"
+	"strings"
+	"testing"
+
+	"github.com/invia-flights/jscript-bench/internal/benchmark"
+	"github.com/invia-flights/jscript-bench/internal/resultset"
+	"github.com/invia-flights/jscript-bench/internal/resultset/resultsettest"
+)
+
+var pointers = regexp.MustCompile(`0x[0-9a-f]+`)
+
+func problemsOf(s *resultset.Set) []string {
+	out := []string{}
+	for _, p := range s.Validate() {
+		out = append(out, pointers.ReplaceAllString(p, "<pointer>"))
+	}
+	return out
+}
+
+func goldenScored(name string) *resultset.Set {
+	advisory := func(severity, scope string) []func(*resultset.Finding) {
+		return []func(*resultset.Finding){
+			resultsettest.Evidence("advisory_severity", severity), resultsettest.Evidence("dependency_scope", scope)}
+	}
+	p := resultsettest.ScoredProject()
+	switch name {
+	case "benchmark-pass":
+		p.Add("security.dependencies", "GHSA-high", false, advisory("high", "prod")...)
+		p.Add("security.dependencies", "GHSA-mod-1", false, advisory("moderate", "prod")...)
+		p.Add("security.dependencies", "GHSA-mod-2", false, advisory("moderate", "prod")...)
+		for i := 0; i < 4; i++ {
+			p.Add("lint.correctness", "no-undef", false)
+		}
+		p.TestFiles(
+			resultset.TestFileCount{File: "test/a.test.js", Found: 4, Passed: 4},
+			resultset.TestFileCount{File: "test/b.test.js", Found: 4, Passed: 3},
+		)
+		p.Metric("quality.size", "lines.source_code:javascript_typescript", 1200, "lines")
+		p.Set.Inventory.Size = []resultset.SizeCount{{Group: "file_class", Name: "source", Lines: 1200, NonBlankLines: 1000}}
+	case "benchmark-fail":
+		p.Add("package.install", "lockfile-out-of-sync", true)
+		p.Status("tests.existing", resultset.StatusBlocked, "prerequisite_failed_project")
+		p.Status("deps.tree", resultset.StatusBlocked, "prerequisite_failed_project")
+		p.TestFiles()
+	}
+	s := p.Done()
+	benchmark.Apply(s)
+	return s
+}
+
+func TestZZOracle(t *testing.T) {
+	out := map[string]any{
+		"recordedFrom": "Go build of js-prueffactory at the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8",
+	}
+
+	// Fingerprints.
+	type fpCase struct {
+		Check, Rule, Path, Text, Value string
+		WithSuite                      map[string]string
+	}
+	fpInputs := [][4]string{
+		{"syntax.parse", "SyntaxError", "src/a.js", "Unexpected token ';' at line 3"},
+		{"syntax.parse", "SyntaxError", "src/a.js", "Unexpected token ';' at line 41"},
+		{"lint.correctness", "no-undef", "src/\u00fc/\u00e4.js", "'x' is not defined. (12:5)"},
+		{"tests.existing", "", "test/a.js", "a  b\tc\n d"},
+		{"x", "y", "p", "Line 3, Column 4 and COLUMN 9 and line 7, column 2"},
+		{"x", "y", "p", "file.js:10:20: boom"},
+		{"x", "y", "p", "\u00a0nbsp\u0085nel\ufeffbom\u3000ideo\u2028ls\u200bzw x\u000bvt\u001fus"},
+		{"x", "y", "p", ""},
+		{"x", "y", "p", "emoji \U0001F600 \ufb01 \u01c5"},
+		{"x", "y", "p", "inline:12abc"},
+		{"x", "y", "p", "outline 5 newline 6 deadline 7 line 8"},
+		{"x", "y", "p", "line 3, column"},
+		{"x", "y", "p", "l\u0131ne 5 L\u0130NE 6 line \u0663"},
+		{"x", "y", "p", "caf\u00e9 cafe\u0301"},
+		{"x", "y", "p", "a\x00b"},
+		{"x", "y", "p", "LINE 10, COLUMN 3"},
+		{"x", "y", "p", "at line 12, column 7:3"},
+	}
+	var fps []fpCase
+	for _, in := range fpInputs {
+		f := resultset.NewFingerprint(in[0], in[1], in[2], in[3])
+		fps = append(fps, fpCase{in[0], in[1], in[2], in[3], f.Value, map[string]string{
+			"test:unit": f.WithSuite("test:unit").Value,
+			"":          f.WithSuite("").Value,
+			"\U0001F600": f.WithSuite("\U0001F600").Value,
+		}})
+	}
+	out["fingerprints"] = fps
+
+	// Quote, WithoutControls, LongestBacktickRun.
+	type textCase struct{ In, Quote, WithoutControls string; Backticks int }
+	var texts []textCase
+	for _, in := range []string{
+		"a && b", "`tick`", "``x`` y", "ctrl\x07bell\x1b[31m", "line1\r\nline2", "\u0085nel\u0085", "\u00a0nbsp",
+		"\ufeffbom", "  spaced  ", "", "\x7f del \u009b csi", "\U0001F600", "a\u2028b", "x ```` y ` z", "\t\v\f",
+	} {
+		texts = append(texts, textCase{in, resultset.Quote(in), resultset.WithoutControls(in), resultset.LongestBacktickRun(in)})
+	}
+	out["texts"] = texts
+
+	// Evidence cap.
+	type capCase struct {
+		Name, Kind   string
+		TextBytes    int
+		OriginalSize *int
+		ArtifactPath string
+		Text         string
+	}
+	frames := func(prefix string, n int) string {
+		var b strings.Builder
+		b.WriteString("Error: boom\n")
+		for i := 0; i < n; i++ {
+			b.WriteString(prefix + "at fn (/app/x.js:1:1)\n")
+		}
+		return b.String()
+	}
+	capInputs := []struct{ name, kind, text string }{
+		{"two-byte character across the cap", "tool_output", strings.Repeat("a", 4095) + "\u00e9" + strings.Repeat("b", 100)},
+		{"three-byte character across the cap", "tool_output", strings.Repeat("a", 4094) + "\u20ac" + "b"},
+		{"three-byte character ending at the cap", "tool_output", strings.Repeat("a", 4093) + "\u20ac" + "b"},
+		{"four-byte characters", "tool_output", strings.Repeat("\U0001F600", 1025)},
+		{"four-byte character across the cap", "tool_output", strings.Repeat("a", 4093) + strings.Repeat("\U0001F600", 2)},
+		{"exactly the cap", "tool_output", strings.Repeat("y", 4096)},
+		{"mixed", "tool_output", strings.Repeat("a\u00e9\u20ac\U0001F600", 500)},
+		{"35 frames", "stack_trace", frames("    ", 35)},
+		{"frames after NEL", "stack_trace", frames("\u0085", 31)},
+		{"frames after NBSP", "stack_trace", frames("\u00a0", 31)},
+		{"frames after BOM", "stack_trace", frames("\ufeff", 31)},
+		{"frames with CRLF", "stack_trace", strings.ReplaceAll(frames("  ", 31), "\n", "\r\n")},
+	}
+	var caps []capCase
+	for _, in := range capInputs {
+		s := handMade()
+		s.Findings[0].Evidence = []resultset.Evidence{evidence(in.kind, in.text)}
+		s.Finalize()
+		var ev resultset.Evidence
+		for _, f := range s.Findings {
+			if len(f.Evidence) > 0 {
+				ev = f.Evidence[0]
+			}
+		}
+		c := capCase{Name: in.name, Kind: in.kind, TextBytes: len(ev.Text), OriginalSize: ev.OriginalSize}
+		if ev.ArtifactID != nil {
+			for _, a := range s.Artifacts {
+				if a.ID == *ev.ArtifactID {
+					c.ArtifactPath = a.Path
+				}
+			}
+		}
+		if in.kind == "stack_trace" {
+			c.Text = ev.Text
+		}
+		caps = append(caps, c)
+	}
+	out["evidenceCap"] = caps
+
+	// Byte-wise order of Finalize: Finding paths, and sort.Strings.
+	{
+		s := handMade()
+		paths := []string{"\ue000.js", "\U0001F600.js", "\uff5e.js", "z.js", "\u00e9.js", "Z.js"}
+		var fs []resultset.Finding
+		for i, p := range paths {
+			f := s.Findings[0]
+			f.ID = "k" + string(rune('a'+i))
+			f.Locations = []resultset.Location{{Role: "primary", PathBase: "project_root", Path: p, Start: &resultset.Position{Line: 1}, FileSHA256: strings.Repeat("a", 64)}}
+			fs = append(fs, f)
+		}
+		s.Findings = fs
+		s.Finalize()
+		var order []string
+		for _, f := range s.Findings {
+			order = append(order, f.ID+" "+f.Locations[0].Path)
+		}
+		out["findingOrderByPath"] = order
+		strs := append([]string{}, paths...)
+		strs = append(strs, "\uffff", "\U00010000", "\ud7ff", "", "a", "ab", "\u0080")
+		sort.Strings(strs)
+		out["sortedStrings"] = strs
+	}
+
+	// Canonical tie-break: Findings that agree on every key but their evidence.
+	{
+		s := handMade()
+		base := s.Findings[0]
+		var fs []resultset.Finding
+		for i, text := range []string{"Zx", "&x", "<x", "ax", "\u2028x", "\U0001F600x", "\ue000x"} {
+			f := base
+			f.ID = "k" + string(rune('a'+i))
+			f.Evidence = []resultset.Evidence{evidence("tool_output", text)}
+			fs = append(fs, f)
+		}
+		s.Findings = fs
+		s.Finalize()
+		var order []string
+		for _, f := range s.Findings {
+			order = append(order, f.ID+" "+f.Evidence[0].Text)
+		}
+		out["findingOrderByCanonical"] = order
+	}
+
+	// Passed-tests artifact with text that Go's encoder escapes.
+	{
+		s := handMade()
+		s.TestCases = []resultset.TestCase{
+			testCase("test/<a>.js", "a & b <c>", resultset.TestPassed),
+			testCase("test/a.js", "line\u2028sep \x07 \"q\" \\ \U0001F600", resultset.TestPassed),
+		}
+		s.TestCases[1].Flaky = true
+		s.TestCases[1].Attempts = []resultset.TestAttempt{{Outcome: resultset.TestFailed, DurationMS: 2, Error: ptrStr("boom\n\tat x")}, {Outcome: resultset.TestPassed, DurationMS: 3}}
+		s.Finalize()
+		out["passedTestsArtifact"] = map[string]string{"path": s.Artifacts[0].Path, "content": string(s.Artifacts[0].Content)}
+	}
+
+	// Validation messages.
+	validation := map[string][]string{}
+	longText := strings.Repeat("y", resultset.MaxEvidenceBytes+1)
+	full := map[string]func(s *resultset.Set){
+		"evidence text over the cap": func(s *resultset.Set) {
+			s.Findings[0].Evidence = []resultset.Evidence{evidence("tool_output", longText)}
+		},
+		"cut evidence names no artifact": func(s *resultset.Set) {
+			for i := range s.Findings {
+				for k := range s.Findings[i].Evidence {
+					s.Findings[i].Evidence[k].ArtifactID = nil
+				}
+			}
+		},
+		"cut evidence claims a smaller original": func(s *resultset.Set) {
+			for i := range s.Findings {
+				for k := range s.Findings[i].Evidence {
+					n := 10
+					s.Findings[i].Evidence[k].OriginalSize = &n
+				}
+			}
+		},
+		"stack trace with more than 30 frames": func(s *resultset.Set) {
+			s.Findings[0].Evidence = []resultset.Evidence{evidence("stack_trace", stackTrace(31))}
+		},
+		"truncated evidence count is wrong":         func(s *resultset.Set) { s.ReportCompleteness.TruncatedEvidence = 5 },
+		"artifact content does not match its hash":  func(s *resultset.Set) { s.Artifacts[0].Content = []byte("changed") },
+		"artifact path leaves the report folder":    func(s *resultset.Set) { s.Artifacts[0].Path = "../escape.txt" },
+		"artifact path is absolute":                 func(s *resultset.Set) { s.Artifacts[0].Path = "/etc/passwd" },
+		"artifact path is not clean":                func(s *resultset.Set) { s.Artifacts[0].Path = "artifacts//x/../y.txt" },
+		"artifact path has a backslash":             func(s *resultset.Set) { s.Artifacts[0].Path = `artifacts\x.txt` },
+		"artifact path is empty":                    func(s *resultset.Set) { s.Artifacts[0].Path = "" },
+		"artifact path is dot":                      func(s *resultset.Set) { s.Artifacts[0].Path = "." },
+		"artifact path ends with a slash":           func(s *resultset.Set) { s.Artifacts[0].Path = "artifacts/" },
+		"artifact would overwrite report.md":        func(s *resultset.Set) { s.Artifacts[0].Path = "report.md" },
+		"two artifacts share a path":                func(s *resultset.Set) { s.Artifacts[1].Path = s.Artifacts[0].Path },
+		"passed test case in the list":              func(s *resultset.Set) { s.TestCases[0].Outcome = resultset.TestPassed },
+		"test case with an unknown outcome":         func(s *resultset.Set) { s.TestCases[0].Outcome = "weird\x07" },
+		"failed test case with a never-run reason":  func(s *resultset.Set) { s.TestCases[0].NeverRunReason = ptrStr("x") },
+		"never-run test case without a reason": func(s *resultset.Set) {
+			for i := range s.TestCases {
+				if s.TestCases[i].Outcome == resultset.TestNeverRun {
+					s.TestCases[i].NeverRunReason = nil
+				}
+			}
+		},
+		"finding in a different context than its execution": func(s *resultset.Set) { s.Findings[0].ContextID = "C-0001" },
+		"finding of a different Check than its execution":   func(s *resultset.Set) { s.Findings[0].CheckID = "tests.existing" },
+		"scope completeness does not match the executions": func(s *resultset.Set) {
+			s.Summary.ScopeCompleteness.Completed = 0
+		},
+		"standard completeness without a ratio": func(s *resultset.Set) {
+			s.Summary.StandardCompleteness.Ratio = nil
+		},
+		"run completed although a selected Check did not complete": func(s *resultset.Set) {
+			s.Checks[0].Status = resultset.StatusBudgetExhausted
+			s.Checks[0].Outcome = resultset.OutcomeUnknown
+		},
+		"finding ID is not in sequence": func(s *resultset.Set) {
+			old := s.Findings[0].ID
+			s.Findings[0].ID = "F-0042"
+			for i := range s.Checks {
+				for k := range s.Checks[i].FindingIDs {
+					if s.Checks[i].FindingIDs[k] == old {
+						s.Checks[i].FindingIDs[k] = "F-0042"
+					}
+				}
+			}
+		},
+		"ID with the wrong prefix":   func(s *resultset.Set) { s.TestCases[0].ID = "X-0001" },
+		"context ID of the wrong form": func(s *resultset.Set) { s.Contexts[2].ID = "C-12\u00e9" },
+		"deselected by --fast although the Run was not fast": func(s *resultset.Set) {
+			code := resultset.ReasonDeselectedByFast
+			s.Checks[0].Selected, s.Checks[0].ReasonCode = false, &code
+		},
+		"Check both selected and deselected": func(s *resultset.Set) {
+			s.Selection.DeselectedChecks = append(s.Selection.DeselectedChecks, s.Selection.EffectiveChecks...)
+		},
+		"Finding refers to a Limitation the Report lacks": func(s *resultset.Set) {
+			s.Findings[0].Limitations = append(s.Findings[0].Limitations, "service_not_started")
+		},
+		"summary severity counts are wrong": func(s *resultset.Set) { s.Summary.FindingsBySeverity.Warning = 4 },
+		"summary test counts are wrong":     func(s *resultset.Set) { s.Summary.TestCases.Todo = 2 },
+		"exit code is wrong":                func(s *resultset.Set) { s.Run.ExitCode = 0 },
+		"execution with an unknown outcome": func(s *resultset.Set) { s.Checks[0].Outcome = "odd \"one\"" },
+		"not applicable execution that ran": func(s *resultset.Set) { s.Checks[0].Applicability = resultset.NotApplicable },
+		"observations_only with a Gate":     func(s *resultset.Set) { s.Checks[1].Outcome = resultset.OutcomeObservationsOnly },
+		"failed without a Gate":             func(s *resultset.Set) { s.Checks[0].Outcome = resultset.OutcomeFailed },
+		"unselected execution with Findings": func(s *resultset.Set) {
+			s.Checks[1].Selected = false
+		},
+		"metric and service in unknown contexts": func(s *resultset.Set) {
+			s.Metrics = append(s.Metrics, resultset.Metric{ID: "M-0001", CheckID: "x", ContextID: "C-0404", Name: "n", Unit: "u"})
+			s.Services = append(s.Services, resultset.Service{Family: "valkey", ComposeService: "cache", ContextIDs: []string{"C-0405"}})
+		},
+		"duplicate context IDs and an unknown test case reference": func(s *resultset.Set) {
+			s.Contexts = append(s.Contexts, s.Contexts[0])
+			s.TestCases[0].ExecutionID = "E-0404"
+			s.TestCases[0].FindingIDs = []string{"F-0404"}
+		},
+		"unknown evidence artifact and execution artifact": func(s *resultset.Set) {
+			id := "A-0404"
+			for i := range s.Findings {
+				for k := range s.Findings[i].Evidence {
+					s.Findings[i].Evidence[k].ArtifactID = &id
+				}
+			}
+			s.Checks[0].ArtifactIDs = append(s.Checks[0].ArtifactIDs, "A-0405")
+		},
+	}
+	for name, mutate := range full {
+		s := fullSet()
+		s.Selection.EffectiveChecks = []string{"syntax.parse"}
+		if p := s.Validate(); len(p) != 0 {
+			t.Fatalf("baseline invalid: %v", p)
+		}
+		mutate(s)
+		validation["fullSet: "+name] = problemsOf(s)
+	}
+	hm := map[string]func(s *resultset.Set){
+		"finding points at an unknown execution": func(s *resultset.Set) { s.Findings[0].ExecutionID = "E-9999" },
+		"finding points at an unknown context":   func(s *resultset.Set) { s.Findings[0].ContextID = "C-9999" },
+		"duplicate finding ID":                   func(s *resultset.Set) { s.Findings[1].ID = s.Findings[0].ID },
+		"passed outcome with Findings":           func(s *resultset.Set) { s.Checks[1].Outcome = resultset.OutcomePassed },
+		"gate count does not match Findings":     func(s *resultset.Set) { s.Checks[1].Gate = 7 },
+		"summary gate count is wrong":            func(s *resultset.Set) { s.Summary.Gates = 9 },
+		"execution lists an unknown finding":     func(s *resultset.Set) { s.Checks[1].FindingIDs = append(s.Checks[1].FindingIDs, "F-4242") },
+		"selected applicable Check never started": func(s *resultset.Set) {
+			s.Checks[0].Status = resultset.StatusNotStarted
+		},
+		"benchmark not requested but scored": func(s *resultset.Set) {
+			s.Benchmark = resultset.Benchmark{Status: resultset.BenchmarkNotRequested, Score: ptrF(50.0)}
+		},
+		"benchmark with an unknown status": func(s *resultset.Set) {
+			s.Benchmark = resultset.Benchmark{Status: "maybe"}
+		},
+		"benchmark not requested but a profile": func(s *resultset.Set) {
+			s.Profiles.BenchmarkProfile = ptrStr("benchmark-v1-uncalibrated")
+		},
+	}
+	for name, mutate := range hm {
+		s := handMade()
+		s.Finalize()
+		s.Benchmark = resultset.Benchmark{Status: resultset.BenchmarkNotRequested}
+		mutate(s)
+		validation["handMade: "+name] = problemsOf(s)
+	}
+	str := func(s string) *string { return &s }
+	num := func(v float64) *float64 { return &v }
+	bm := map[string]struct {
+		baseline string
+		mutate   func(s *resultset.Set)
+	}{
+		"pass although a Gate fired": {"benchmark-fail", func(s *resultset.Set) { s.Benchmark.Verdict = str("pass") }},
+		"fail without a Gate":        {"benchmark-pass", func(s *resultset.Set) { s.Benchmark.Verdict = str("fail") }},
+		"incomplete with a score":    {"benchmark-pass", func(s *resultset.Set) { s.Benchmark.Verdict = str("incomplete") }},
+		"pass without a score": {"benchmark-pass", func(s *resultset.Set) {
+			s.Benchmark.Score, s.Benchmark.Status = nil, resultset.BenchmarkIncomplete
+		}},
+		"computed without a score": {"benchmark-pass", func(s *resultset.Set) {
+			s.Benchmark.Score, s.Benchmark.Verdict = nil, str("incomplete")
+		}},
+		"incomplete status with a score": {"benchmark-pass", func(s *resultset.Set) { s.Benchmark.Status = resultset.BenchmarkIncomplete }},
+		"score over 100":                 {"benchmark-pass", func(s *resultset.Set) { s.Benchmark.Score = num(101) }},
+		"score with a fraction below 0":  {"benchmark-pass", func(s *resultset.Set) { s.Benchmark.Score = num(-0.25) }},
+		"range upside down": {"benchmark-pass", func(s *resultset.Set) {
+			s.Benchmark.Range = &resultset.Range{Low: 80.25, High: 20}
+		}},
+		"range in exponent form": {"benchmark-pass", func(s *resultset.Set) {
+			s.Benchmark.Range = &resultset.Range{Low: 1e-7, High: 1234567}
+		}},
+		"no range": {"benchmark-pass", func(s *resultset.Set) { s.Benchmark.Range = nil }},
+		"no verdict": {"benchmark-pass", func(s *resultset.Set) { s.Benchmark.Verdict = nil }},
+		"no profile ID": {"benchmark-pass", func(s *resultset.Set) { s.Benchmark.ProfileID = nil }},
+		"profile differs from profiles.benchmark_profile": {"benchmark-pass", func(s *resultset.Set) {
+			s.Profiles.BenchmarkProfile = str("other")
+		}},
+		"gate list misses a Gate": {"benchmark-fail", func(s *resultset.Set) { s.Benchmark.GateFindingIDs = nil }},
+		"gate list holds a Finding that is no Gate": {"benchmark-fail", func(s *resultset.Set) {
+			s.Benchmark.GateFindingIDs = append(s.Benchmark.GateFindingIDs, "F-0099")
+		}},
+		"no areas":       {"benchmark-pass", func(s *resultset.Set) { s.Benchmark.Areas = nil }},
+		"no fingerprint": {"benchmark-pass", func(s *resultset.Set) { s.Benchmark.Fingerprint = nil }},
+		"contributions do not add up to the score": {"benchmark-pass", func(s *resultset.Set) {
+			s.Benchmark.Areas[0].Contribution = num(1)
+		}},
+		"contribution without a score": {"benchmark-pass", func(s *resultset.Set) {
+			s.Benchmark.Score, s.Benchmark.Status, s.Benchmark.Verdict = nil, resultset.BenchmarkIncomplete, str("incomplete")
+		}},
+		"summary gates differ": {"benchmark-fail", func(s *resultset.Set) { s.Summary.Gates = 3 }},
+		"benchmark section in a test mode Report": {"benchmark-pass", func(s *resultset.Set) { s.Run.Command = "test" }},
+	}
+	for name, m := range bm {
+		s := goldenScored(m.baseline)
+		if p := s.Validate(); len(p) != 0 {
+			t.Fatalf("baseline %s invalid: %v", m.baseline, p)
+		}
+		m.mutate(s)
+		validation["scored: "+name] = problemsOf(s)
+	}
+	{
+		s := resultsettest.ScoredProject().Done()
+		s.Run.Command = "benchmark"
+		validation["benchmark command without a benchmark section"] = problemsOf(s)
+		s2 := resultsettest.Minimal()
+		s2.Benchmark.Areas = goldenScored("benchmark-pass").Benchmark.Areas
+		validation["test mode Report with benchmark areas"] = problemsOf(s2)
+	}
+	out["validation"] = validation
+
+	b, err := json.MarshalIndent(out, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/go-oracle.json", append(b, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func ptrStr(s string) *string    { return &s }
+func ptrF(v float64) *float64    { return &v }
