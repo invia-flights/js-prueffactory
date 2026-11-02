@@ -18,7 +18,7 @@ export function clean(s: string): string {
     if (ch === "\t" || ch === "\n") {
       out += ch;
     } else if (c >= 0xd800 && c <= 0xdfff) {
-      out += "�";
+      out += "\ufffd";
     } else if (!isControl(c)) {
       out += ch;
     }

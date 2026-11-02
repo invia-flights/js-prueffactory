@@ -36,7 +36,7 @@ describe("report.json follows Go's encoder", () => {
   });
 
   test("U+2028 and U+2029 are escaped", () => {
-    const out = withTitle("a b c");
+    const out = withTitle("a\u2028b\u2029c");
     assert.ok(out.includes('"title": "a\\u2028b\\u2029c"'));
   });
 
