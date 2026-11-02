@@ -105,11 +105,9 @@ export class Snapshot {
   // writeTar writes the copy as a tar archive to out and ends out. Entries
   // are owned by root, files have mode 0644 or 0755 and no timestamps, so
   // the archive depends only on what the Snapshot hash covers. This is the
-  // only way the Snapshot reaches Docker (driver.putTar).
-  //
-  // Names that are not valid UTF-8 reach the archive with U+FFFD in place of
-  // each invalid byte: the shared tar writer takes text names. Go writes the
-  // bytes.
+  // only way the Snapshot reaches Docker (driver.putTar). Names and link
+  // targets are written as their bytes, also where they are not valid UTF-8,
+  // so the volume holds exactly the paths the hash covers.
   async writeTar(out: Writable): Promise<void> {
     const tw = new TarWriter(out);
     try {
@@ -118,26 +116,24 @@ export class Snapshot {
       walkCopy(top, "", entries);
       for (const [relB, d] of entries) {
         const path = top + "/" + relB;
-        const name = fromByteString(relB);
+        const name = fsPath(relB);
         if (d.isDirectory()) {
           await tw.writeHeader({
             type: "directory",
-            name: name + "/",
+            name: fsPath(relB + "/"),
             mode: 0o755,
           });
         } else if (d.isSymbolicLink()) {
-          let target: string;
+          let target: Buffer;
           try {
-            target = readlinkSync(fsPath(path), {
-              encoding: "buffer",
-            }).toString("latin1");
+            target = readlinkSync(fsPath(path), { encoding: "buffer" });
           } catch (err) {
             throw pathError("readlink", fromByteString(path), err);
           }
           await tw.writeHeader({
             type: "symlink",
             name,
-            linkname: fromByteString(target),
+            linkname: target,
             mode: 0o777,
           });
         } else if (d.isFile()) {
@@ -360,7 +356,7 @@ function walkCopy(
 async function writeFileEntry(
   tw: TarWriter,
   path: string,
-  name: string,
+  name: Buffer,
 ): Promise<void> {
   let st: Stats;
   try {

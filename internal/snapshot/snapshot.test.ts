@@ -20,9 +20,8 @@ import type { TestContext } from "node:test";
 
 import { compareBytes } from "../gocompat/strings.ts";
 import { Algorithm, take } from "./snapshot.ts";
-import type { Snapshot } from "./snapshot.ts";
-import { exists, takeIn, tempDir, write } from "./snapshot.testutil.ts";
-import { readTar } from "./tar.testutil.ts";
+import { exists, takeIn, tarOf, tempDir, write } from "./snapshot.testutil.ts";
+import { readTar } from "../tarwriter/tar.testutil.ts";
 
 // Ports of internal/snapshot/snapshot_test.go.
 
@@ -366,16 +365,3 @@ describe("the Snapshot matches the Go build", () => {
     });
   }
 });
-
-async function tarOf(s: Snapshot): Promise<Buffer> {
-  const chunks: Buffer[] = [];
-  await s.writeTar(
-    new Writable({
-      write(chunk: Buffer, _enc, done) {
-        chunks.push(chunk);
-        done();
-      },
-    }),
-  );
-  return Buffer.concat(chunks);
-}

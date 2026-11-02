@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { PassThrough } from "node:stream";
+import { readFileSync } from "node:fs";
+import { PassThrough, Writable } from "node:stream";
 import { buffer } from "node:stream/consumers";
 import { test } from "node:test";
 
-import { unpackTar } from "modern-tar";
-
-import { TarWriter } from "./tarwriter.ts";
+import { readTar } from "./tar.testutil.ts";
+import { TarWriter, type TarHeader } from "./tarwriter.ts";
 
 async function archive(
   fill: (tw: TarWriter) => Promise<void>,
@@ -39,57 +39,36 @@ test("entries are owned by root, carry no time and keep type, mode and target", 
   });
   assert.equal(data.length % 512, 0);
 
-  const got = (await unpackTar(data)).map((e) => ({
-    name: e.header.name,
-    type: e.header.type,
-    mode: e.header.mode,
-    uid: e.header.uid,
-    gid: e.header.gid,
-    mtime: e.header.mtime?.getTime(),
-    linkname: e.header.linkname ?? "",
-    data: e.data === undefined ? undefined : Buffer.from(e.data).toString(),
+  const got = readTar(data).map((e) => ({
+    name: e.name,
+    type: e.type,
+    mode: e.mode,
+    uid: e.uid,
+    gid: e.gid,
+    mtime: e.mtime,
+    linkname: e.linkname,
+    data: e.content.toString(),
   }));
+  const root = { uid: 0, gid: 0, mtime: 0 };
   assert.deepEqual(got, [
-    {
-      name: "d/",
-      type: "directory",
-      mode: 0o755,
-      uid: 0,
-      gid: 0,
-      mtime: 0,
-      linkname: "",
-      data: undefined,
-    },
+    { name: "d/", type: "5", mode: 0o755, ...root, linkname: "", data: "" },
     {
       name: "d/run.sh",
-      type: "file",
+      type: "0",
       mode: 0o755,
-      uid: 0,
-      gid: 0,
-      mtime: 0,
+      ...root,
       linkname: "",
       data: "abc",
     },
     {
       name: "d/link",
-      type: "symlink",
+      type: "2",
       mode: 0o777,
-      uid: 0,
-      gid: 0,
-      mtime: 0,
+      ...root,
       linkname: "run.sh",
-      data: undefined,
-    },
-    {
-      name: long,
-      type: "file",
-      mode: 0o644,
-      uid: 0,
-      gid: 0,
-      mtime: 0,
-      linkname: "",
       data: "",
     },
+    { name: long, type: "0", mode: 0o644, ...root, linkname: "", data: "" },
   ]);
 });
 
@@ -110,3 +89,94 @@ test("an entry must get exactly its size in bytes", async () => {
     /missed writing 1 bytes/,
   );
 });
+
+test("names given as bytes reach the archive unchanged", async () => {
+  const fe = Buffer.from("a\xfe.js", "latin1");
+  const ff = Buffer.from("a\xff.js", "latin1");
+  const data = await archive(async (tw) => {
+    for (const [name, content] of [
+      [fe, "fe"],
+      [ff, "ff"],
+    ] as const) {
+      await tw.writeHeader({ type: "file", name, mode: 0o644, size: 2 });
+      await tw.write(Buffer.from(content));
+    }
+    await tw.writeHeader({
+      type: "symlink",
+      name: Buffer.from("l\xff", "latin1"),
+      linkname: ff,
+      mode: 0o777,
+    });
+  });
+  assert.deepEqual(
+    readTar(data).map((e) => [
+      e.nameBytes.toString("hex"),
+      e.linknameBytes.toString("hex"),
+      e.content.toString(),
+    ]),
+    [
+      [fe.toString("hex"), "", "fe"],
+      [ff.toString("hex"), "", "ff"],
+      ["6cff", ff.toString("hex"), ""],
+    ],
+  );
+});
+
+// What Go's archive/tar.Writer wrote for the same headers (see recordedFrom).
+interface OracleEntry {
+  type: TarHeader["type"];
+  name: string;
+  linkname: string;
+  mode: number;
+  size: number;
+  content: string;
+}
+
+interface OracleArchive {
+  title: string;
+  entries: OracleEntry[];
+  headerOnly: boolean;
+  tar: string;
+  error: string;
+}
+
+const oracle = JSON.parse(
+  readFileSync(new URL("testdata/go-oracle.json", import.meta.url), "utf8"),
+) as { archives: OracleArchive[] };
+
+for (const c of oracle.archives) {
+  test(`archive bytes match Go: ${c.title}`, async () => {
+    const chunks: Buffer[] = [];
+    const out = new Writable({
+      write(chunk: Buffer, _enc, done) {
+        chunks.push(chunk);
+        done();
+      },
+    });
+    const tw = new TarWriter(out);
+    const fill = async (): Promise<void> => {
+      for (const e of c.entries) {
+        await tw.writeHeader({
+          type: e.type,
+          name: Buffer.from(e.name, "hex"),
+          mode: e.mode,
+          size: e.size,
+          ...(e.linkname === ""
+            ? {}
+            : { linkname: Buffer.from(e.linkname, "hex") }),
+        });
+        if (c.headerOnly) {
+          return;
+        }
+        await tw.write(Buffer.from(e.content, "hex"));
+      }
+      await tw.close();
+    };
+    if (c.error !== "") {
+      await assert.rejects(fill(), { message: c.error });
+      return;
+    }
+    await fill();
+    assert.equal(Buffer.concat(chunks).toString("hex"), c.tar);
+  });
+}
