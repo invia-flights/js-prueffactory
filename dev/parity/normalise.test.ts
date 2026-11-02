@@ -151,6 +151,11 @@ test("report texts: the fetch time that a registry Finding quotes is the package
     '"message": "`glob` 8.1.0 is deprecated. Registry data of <time>.",\n' +
       '"evidence": [{\n  "kind": "registry_data_date",\n  "text": "<time>",\n  "origin": "npm registry"\n}]',
   );
+  // The dependency table artifact records it as a field.
+  assert.equal(
+    substitute('  "registry_data_date": "2026-11-02T19:17:09Z",', none),
+    '  "registry_data_date": "<time>",',
+  );
   // Another text with a time stays.
   const other = '"kind": "other",\n  "text": "2026-11-02T19:13:59Z"';
   assert.equal(substitute(other, none), other);

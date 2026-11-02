@@ -17,7 +17,7 @@ export const normalisations: readonly string[] = [
   "Docker details: report.json run.docker.server_version, api_version, cpus and memory_bytes; the Docker server line of report.md",
   "producer: report.json producer.name, producer.version and producer.vcs_revision; the Producer line of report.md",
   'tool log times: the RFC 3339 time of a logrus line (time="..." level=...) that a tool such as docker compose printed and a Check quotes, in report.json, report.md and the artifacts; it is the time of the Run',
-  'registry data dates in Findings: the time of the fetch that a deps.deprecated or deps.outdated Finding quotes ("Registry data of 2026-11-02T19:13:59Z." and the registry_data_date Evidence); every package fetches on its own, so the times of one Run are not the run.registry_data_date',
+  'registry data dates in Findings: the time of the fetch that a deps.deprecated or deps.outdated Finding quotes ("Registry data of 2026-11-02T19:13:59Z.", the registry_data_date Evidence and the registry_data_date of the dependency table artifacts); every package fetches on its own, so the times of one Run are not the run.registry_data_date',
   "npm debug log names: the time in the name of npm's own debug log (/root/.npm/_logs/2026-11-02T19_09_34_148Z-debug-0.log) that a Check quotes in a reason or in Evidence, in report.json, report.md and the artifacts; it is the time of the Run",
   "artifact hashes that follow from the above: when an artifact's content changes through the normalisation or the allowlist, its SHA-256 and size in report.json and report.md become those of the changed content",
 ];
@@ -115,6 +115,9 @@ const registryDataDate =
   /Registry data of \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z\./g;
 const registryDataEvidence =
   /("kind": "registry_data_date",\s*"text": ")\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"/g;
+// The dependency table of deps.outdated and deps.deprecated records it too.
+const registryDataField =
+  /("registry_data_date": ")\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"/g;
 
 // substitute replaces every occurrence of the run ID and the times.
 export function substitute(text: string, values: Values): string {
@@ -125,7 +128,8 @@ export function substitute(text: string, values: Values): string {
     )
     .replace(npmDebugLog, `_logs/${placeholders.time}-debug-`)
     .replace(registryDataDate, `Registry data of ${placeholders.time}.`)
-    .replace(registryDataEvidence, `$1${placeholders.time}"`);
+    .replace(registryDataEvidence, `$1${placeholders.time}"`)
+    .replace(registryDataField, `$1${placeholders.time}"`);
   if (values.runID !== undefined && values.runID !== "") {
     out = out.split(values.runID).join(placeholders.runID);
   }

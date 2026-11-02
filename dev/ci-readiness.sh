@@ -21,10 +21,9 @@
 #   DIND_IMAGE  the dind service image   (default docker:29.4.0-dind)
 #   CLI_IMAGE   the image the docker CLI binary is copied from
 #               (default docker:29.4.0-cli)
-#   ONLY        Checks to run, passed as --only (default: a full Run). While
-#               the TypeScript port is incomplete, a full Run reports the
-#               unported Checks as tool_error, so the check is run with
-#               ONLY=package.manifest,security.secrets.
+#   ONLY        Checks to run, passed as --only (default: a full Run with the
+#               default Selection, which passes on clean-mocha and
+#               valkey-service, ticket 26).
 #   KEEP=1      leave the containers and the network behind for inspection
 #
 # It needs node (24 or later) and `npm ci` in the repository: the tarball is
