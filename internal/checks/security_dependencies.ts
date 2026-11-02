@@ -35,8 +35,12 @@ import { type Check, register } from "./check.ts";
 import { cutList, tail } from "./cut_text.ts";
 import { failedToRun } from "./helper_result.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
-import { shownPackage, shownPair, shownVersion } from "./shown_lockfile.ts";
-import { shownWord } from "./shown_text.ts";
+import {
+  shownPackage,
+  shownPair,
+  shownVersion,
+  shownWord,
+} from "./shown_text.ts";
 import {
   loadPackageLockfile,
   type PackageLockfile,

@@ -8,8 +8,7 @@ import {
   StatusCompleted,
 } from "../resultset/types.ts";
 import { type Check, register } from "./check.ts";
-import { shownIntegrity } from "./shown_lockfile.ts";
-import { shownURL, shownWord } from "./shown_text.ts";
+import { shownIntegrity, shownURL, shownWord } from "./shown_text.ts";
 import type { Input, Result } from "./input.ts";
 import {
   lockfileApplicability,

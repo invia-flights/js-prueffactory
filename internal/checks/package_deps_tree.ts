@@ -28,6 +28,7 @@ import {
   workMount,
   workPath,
 } from "./package_install.ts";
+import { shownProblem } from "./shown_text.ts";
 
 export const depsTreeID = "deps.tree";
 
@@ -189,24 +190,6 @@ const treeTitles = new Map([
   ["deps-peer-conflict", "A peer dependency is missing or in conflict"],
   ["deps-problem", "npm ls reports a problem in the installed tree"],
 ]);
-
-// shownProblemPattern is what a problem line of `npm ls` looks like: a kind,
-// package names, versions, ranges and paths, separated by spaces and commas.
-// No backtick, quote, bracket, hash, control character or line break.
-const shownProblemPattern = /^[A-Za-z0-9 @^~<>=|.,:/_+*()-]{1,300}$/;
-
-/**
- * shownProblem is a problem line of `npm ls` when it looks like one, and
- * otherwise a placeholder; the line itself is always in the Finding's
- * untrusted Evidence and its fingerprint. Go writes the line raw into the
- * message: a plain line stays byte for byte the same here (hardening beyond
- * Go; traps.md, Go bug for a later spec, untrusted text in trusted field).
- */
-export function shownProblem(text: string): string {
-  return shownProblemPattern.test(text)
-    ? text
-    : "(a problem line with unusual characters, see the evidence)";
-}
 
 function depsTreeFinding(input: Input, p: TreeProblem): Finding {
   const pkg = input.context.package;

@@ -31,7 +31,7 @@ import {
   noteServicesNotStarted,
   serviceNotStarted,
 } from "./service_not_started.ts";
-import { shownPath } from "./shown_text.ts";
+import { shownPackage, shownPath } from "./shown_text.ts";
 import type { SuiteEvents } from "./test_events.ts";
 import {
   type Frame,
@@ -584,20 +584,6 @@ export function topFrameFile(stack: readonly string[]): string {
     }
   }
   return "";
-}
-
-/**
- * shownPackage is the name of a dependency as trusted text allows it: it
- * comes from a path in the test output, so a name that is no npm package
- * name is replaced (hardening beyond Go, which wrote it raw; real names read
- * the same).
- */
-export function shownPackage(name: string): string {
-  return /^(?:@[A-Za-z0-9~][A-Za-z0-9._~-]{0,213}\/)?[A-Za-z0-9~][A-Za-z0-9._~-]{0,213}$/.test(
-    name,
-  )
-    ? name
-    : "(package name with unusual characters)";
 }
 
 /** dependencyOf names the package a path inside node_modules belongs to, or "". */

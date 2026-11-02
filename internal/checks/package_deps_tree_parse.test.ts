@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { parseNPMLs, shownProblem } from "./package_deps_tree.ts";
+import { parseNPMLs } from "./package_deps_tree.ts";
+import { shownProblem } from "./shown_text.ts";
 
 // Recorded from npm 11.19.1 (`npm ls --all --json`) on the pinned Node 24
 // image, in a folder with one missing, one invalid and one extraneous package.

@@ -43,7 +43,7 @@ import { type Check, register } from "./check.ts";
 import { cutList, tail } from "./cut_text.ts";
 import { failedToRun, toolsetUnavailable } from "./helper_result.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
-import { shownIdentifier, shownSpecifier } from "./module_names.ts";
+import { shownIdentifier, shownPath, shownSpecifier } from "./shown_text.ts";
 import {
   packageInstallID,
   unsupportedInstallReason,
@@ -56,7 +56,6 @@ import {
 } from "./quality_unused_knip_config.ts";
 import { correctKnip } from "./quality_unused_mocha.ts";
 import type { KnipIssue, KnipItem } from "./quality_unused_report.ts";
-import { shownPath } from "./shown_text.ts";
 
 export const unusedID = "quality.unused";
 
