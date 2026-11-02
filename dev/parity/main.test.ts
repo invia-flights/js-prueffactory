@@ -400,6 +400,9 @@ describe("allowlist", () => {
           "runs/*only=types,quality.suppressions,quality.size,quality.metrics",
           "artifacts/package.install/*/npm-install.log",
         ],
+        // Ticket 26: the Runs of the full default Selection.
+        ["runs/*", "artifacts/package.install/*/npm-install.log"],
+        ["runs/*", "artifacts/sbom.generate/*-sbom.cdx.json"],
       ],
     );
     for (const e of committed) {

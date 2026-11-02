@@ -1,9 +1,13 @@
 // Go's net/url Parse, as the Go build (go 1.27.1 in go.mod, so the strict
 // colon rule for http and https hosts) parses the `resolved` values of a
 // lockfile and the registries of an .npmrc. Only what the port reads is
-// modelled: the fields of URL, Hostname and String. Errors carry no Go text:
-// every caller only asks whether there was one.
+// modelled: the fields of URL, Hostname and String. A failed parse throws a
+// URLError whose message is Go's error text (`parse "<url>": <reason>`), which
+// the JSON Schema formats of the GitLab CI schema show. netip.ParseAddr
+// (parseAddr) lives here too: url.Parse judges IPv6 literals with it.
 //
+import { quoteBytes } from "./fmt.ts";
+
 // A URL is held as a byte string (one character per byte, as Go's strings
 // are bytes): percent-decoding can produce bytes that are no UTF-8. Use
 // fromByteString on a field before showing it.
@@ -115,12 +119,17 @@ function shouldEscape(c: number, mode: number): boolean {
   return ((table[c] ?? 0) & mode) === 0;
 }
 
-/** URLError is a failed parse; Go's text is not modelled. */
+/** URLError is a failed parse; its message is Go's error text. */
 export class URLError extends Error {
   constructor(what: string) {
-    super(`net/url: ${what}`);
+    super(what);
     this.name = "URLError";
   }
+}
+
+// q is %q of a byte string.
+function q(b: string): string {
+  return quoteBytes(Buffer.from(b, "latin1"));
 }
 
 function unescape(s: string, mode: number): string {
@@ -135,14 +144,14 @@ function unescape(s: string, mode: number): string {
         !ishex(s.charCodeAt(i + 1)) ||
         !ishex(s.charCodeAt(i + 2))
       ) {
-        throw new URLError("invalid URL escape");
+        throw new URLError("invalid URL escape " + q(s.slice(i, i + 3)));
       }
       if (
         mode === encodeHost &&
         unhex(s.charCodeAt(i + 1)) < 8 &&
         s.slice(i, i + 3) !== "%25"
       ) {
-        throw new URLError("invalid URL escape");
+        throw new URLError("invalid URL escape " + q(s.slice(i, i + 3)));
       }
       if (mode === encodeZone) {
         const v =
@@ -152,7 +161,7 @@ function unescape(s: string, mode: number): string {
           v !== 0x20 &&
           shouldEscape(v, encodeHost)
         ) {
-          throw new URLError("invalid URL escape");
+          throw new URLError("invalid URL escape " + q(s.slice(i, i + 3)));
         }
       }
       i += 3;
@@ -165,7 +174,9 @@ function unescape(s: string, mode: number): string {
         c < 0x80 &&
         shouldEscape(c, mode)
       ) {
-        throw new URLError("invalid character in host name");
+        throw new URLError(
+          "invalid character " + q(s.charAt(i)) + " in host name",
+        );
       }
       i++;
     }
@@ -379,19 +390,35 @@ export function fromByteString(s: string): string {
 
 /**
  * parse is url.Parse over a byte string. It throws a URLError where Go
- * returns an error.
+ * returns an error, with Go's text: parse "<url>": <reason>.
  */
 export function parse(rawURL: string): URL {
   const hash = rawURL.indexOf("#");
   const u = hash < 0 ? rawURL : rawURL.slice(0, hash);
   const frag = hash < 0 ? "" : rawURL.slice(hash + 1);
-  const url = parseNoFragment(u);
+  let url: URL;
+  try {
+    url = parseNoFragment(u);
+  } catch (err) {
+    throw parseError(u, err);
+  }
   if (frag === "") {
     return url;
   }
-  url.fragment = unescape(frag, encodeFragment);
+  try {
+    url.fragment = unescape(frag, encodeFragment);
+  } catch (err) {
+    throw parseError(rawURL, err);
+  }
   url.rawFragment = escape(url.fragment, encodeFragment) === frag ? "" : frag;
   return url;
+}
+
+// parseError is Go's &url.Error{"parse", raw, err}.
+function parseError(raw: string, err: unknown): unknown {
+  return err instanceof URLError
+    ? new URLError(`parse ${q(raw)}: ${err.message}`)
+    : err;
 }
 
 /** parseText is parse over text, for values read from a JSON document. */
@@ -403,7 +430,7 @@ function parseNoFragment(rawURL: string): URL {
   for (let i = 0; i < rawURL.length; i++) {
     const b = rawURL.charCodeAt(i);
     if (b < 0x20 || b === 0x7f) {
-      throw new URLError("invalid control character in URL");
+      throw new URLError("net/url: invalid control character in URL");
     }
   }
   const url = new URL();
@@ -499,7 +526,7 @@ function parseAuthority(
   }
   const userinfo = authority.slice(0, i);
   if (!validUserinfo(userinfo)) {
-    throw new URLError("invalid userinfo");
+    throw new URLError("net/url: invalid userinfo");
   }
   const colon = userinfo.indexOf(":");
   if (colon < 0) {
@@ -534,7 +561,7 @@ function parseHost(scheme: string, host: string): string {
     }
     const colonPort = host.slice(close + 1);
     if (!validOptionalPort(colonPort)) {
-      throw new URLError("invalid port after host");
+      throw new URLError(`invalid port ${q(colonPort)} after host`);
     }
     const unescapedColonPort = unescape(colonPort, encodeHost);
     const hostname = host.slice(1, close);
@@ -547,8 +574,12 @@ function parseHost(scheme: string, host: string): string {
     } else {
       unescapedHostname = unescape(hostname, encodeHost);
     }
-    if (!isIPv6Literal(unescapedHostname)) {
-      throw new URLError("invalid host");
+    const addr = parseAddr(unescapedHostname);
+    if (addr.error !== undefined) {
+      throw new URLError("invalid host: " + addr.error);
+    }
+    if (addr.is4) {
+      throw new URLError("invalid IP-literal");
     }
     return "[" + unescapedHostname + "]" + unescapedColonPort;
   }
@@ -561,7 +592,7 @@ function parseHost(scheme: string, host: string): string {
       i = lastColon;
     }
     if (!validOptionalPort(host.slice(i))) {
-      throw new URLError("invalid port after host");
+      throw new URLError(`invalid port ${q(host.slice(i))} after host`);
     }
   }
   return unescape(host, encodeHost);
@@ -580,96 +611,171 @@ function validUserinfo(s: string): boolean {
 }
 
 /**
- * isIPv6Literal says whether netip.ParseAddr accepts s as an address that is
- * not IPv4, which is what url accepts between brackets.
+ * parseAddr is netip.ParseAddr: whether s (a byte string) is an IP address,
+ * Go's error text if not, and whether it is IPv4 and has a zone.
  */
-function isIPv6Literal(s: string): boolean {
-  for (const c of s) {
-    if (c === ".") return false; // parseIPv4, or an error: refused either way
-    if (c === "%") return false; // "missing IPv6 address"
-    if (c === ":") return parseIPv6(s);
+export function parseAddr(s: string): {
+  error?: string;
+  is4: boolean;
+  zone: string;
+} {
+  try {
+    for (let i = 0; i < s.length; i++) {
+      switch (s.charAt(i)) {
+        case ".":
+          parseIPv4Fields(s, 0, s.length);
+          return { is4: true, zone: "" };
+        case ":":
+          return { is4: false, zone: parseIPv6(s) };
+        case "%":
+          throw addrError(s, "missing IPv6 address");
+      }
+    }
+    throw addrError(s, "unable to parse IP");
+  } catch (err) {
+    if (err instanceof URLError) {
+      return { error: err.message, is4: false, zone: "" };
+    }
+    throw err;
   }
-  return false;
 }
 
-// parseIPv6 is netip's parseIPv6: sixteen bytes in groups of one to four hex
-// digits, one "::", an IPv4 address in place of the last four bytes and a
-// non-empty zone after "%".
-function parseIPv6(input: string): boolean {
+function addrError(input: string, msg: string, at = ""): URLError {
+  return new URLError(
+    at !== ""
+      ? `ParseAddr(${q(input)}): ${msg} (at ${q(at)})`
+      : `ParseAddr(${q(input)}): ${msg}`,
+  );
+}
+
+function parseIPv4Fields(input: string, off: number, end: number): void {
+  let val = 0;
+  let pos = 0;
+  let digLen = 0;
+  const s = input.slice(off, end);
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charAt(i);
+    if (c >= "0" && c <= "9") {
+      if (digLen === 1 && val === 0) {
+        throw addrError(input, "IPv4 field has octet with leading zero");
+      }
+      val = val * 10 + (c.charCodeAt(0) - 48);
+      digLen++;
+      if (val > 255) {
+        throw addrError(input, "IPv4 field has value >255");
+      }
+    } else if (c === ".") {
+      if (i === 0 || i === s.length - 1 || s.charAt(i - 1) === ".") {
+        throw addrError(
+          input,
+          "IPv4 field must have at least one digit",
+          s.slice(i),
+        );
+      }
+      if (pos === 3) {
+        throw addrError(input, "IPv4 address too long");
+      }
+      pos++;
+      val = 0;
+      digLen = 0;
+    } else {
+      throw addrError(input, "unexpected character", s.slice(i));
+    }
+  }
+  if (pos < 3) {
+    throw addrError(input, "IPv4 address too short");
+  }
+}
+
+// parseIPv6 checks an IPv6 address and returns its zone.
+function parseIPv6(input: string): string {
   let s = input;
+  let zone = "";
   const pct = s.indexOf("%");
   if (pct !== -1) {
-    if (pct === s.length - 1) return false;
+    zone = s.slice(pct + 1);
     s = s.slice(0, pct);
+    if (zone === "") {
+      throw addrError(input, "zone must be a non-empty string");
+    }
   }
   let ellipsis = -1;
-  if (s.startsWith("::")) {
+  if (s.length >= 2 && s.startsWith(":") && s.charAt(1) === ":") {
     ellipsis = 0;
     s = s.slice(2);
-    if (s === "") return true;
+    if (s.length === 0) return zone;
   }
   let i = 0;
   while (i < 16) {
     let off = 0;
     let acc = 0;
     for (; off < s.length; off++) {
-      const c = s.charCodeAt(off);
-      if (c >= 0x30 && c <= 0x39) acc = acc * 16 + (c - 0x30);
-      else if (c >= 0x61 && c <= 0x66) acc = acc * 16 + (c - 0x61 + 10);
-      else if (c >= 0x41 && c <= 0x46) acc = acc * 16 + (c - 0x41 + 10);
-      else break;
-      if (off > 3) return false;
-      if (acc > 0xffff) return false;
+      const c = s.charAt(off);
+      if (!ishex(c.charCodeAt(0))) break;
+      acc = acc * 16 + parseInt(c, 16);
+      if (off > 3) {
+        throw addrError(input, "each group must have 4 or less digits", s);
+      }
+      if (acc > 0xffff) {
+        throw addrError(input, "IPv6 field has value >=2^16", s);
+      }
     }
-    if (off === 0) return false;
-    if (off < s.length && s[off] === ".") {
-      if (ellipsis < 0 && i !== 12) return false;
-      if (i + 4 > 16) return false;
-      if (!ipv4Fields(s)) return false;
+    if (off === 0) {
+      throw addrError(
+        input,
+        "each colon-separated field must have at least one digit",
+        s,
+      );
+    }
+    if (off < s.length && s.charAt(off) === ".") {
+      if (ellipsis < 0 && i !== 12) {
+        throw addrError(
+          input,
+          "embedded IPv4 address must replace the final 2 fields of the address",
+          s,
+        );
+      }
+      if (i + 4 > 16) {
+        throw addrError(
+          input,
+          "too many hex fields to fit an embedded IPv4 at the end of the address",
+          s,
+        );
+      }
+      let end = input.length;
+      if (zone.length > 0) end -= zone.length + 1;
+      parseIPv4Fields(input, end - s.length, end);
       s = "";
       i += 4;
       break;
     }
     i += 2;
     s = s.slice(off);
-    if (s === "") break;
-    if (!s.startsWith(":")) return false;
-    if (s.length === 1) return false;
+    if (s.length === 0) break;
+    if (!s.startsWith(":")) {
+      throw addrError(input, "unexpected character, want colon", s);
+    } else if (s.length === 1) {
+      throw addrError(input, "colon must be followed by more characters", s);
+    }
     s = s.slice(1);
     if (s.startsWith(":")) {
-      if (ellipsis >= 0) return false;
+      if (ellipsis >= 0) {
+        throw addrError(input, "multiple :: in address", s);
+      }
       ellipsis = i;
       s = s.slice(1);
-      if (s === "") break;
+      if (s.length === 0) break;
     }
   }
-  if (s !== "") return false;
-  if (i < 16) return ellipsis >= 0;
-  return ellipsis < 0;
-}
-
-// ipv4Fields is netip's parseIPv4Fields: four decimal fields of at most 255
-// without leading zeros.
-function ipv4Fields(s: string): boolean {
-  let val = 0;
-  let pos = 0;
-  let digLen = 0;
-  for (let i = 0; i < s.length; i++) {
-    const c = s.charCodeAt(i);
-    if (c >= 0x30 && c <= 0x39) {
-      if (digLen === 1 && val === 0) return false;
-      val = val * 10 + (c - 0x30);
-      digLen++;
-      if (val > 255) return false;
-    } else if (c === 0x2e) {
-      if (i === 0 || i === s.length - 1 || s[i - 1] === ".") return false;
-      if (pos === 3) return false;
-      pos++;
-      val = 0;
-      digLen = 0;
-    } else {
-      return false;
-    }
+  if (s.length !== 0) {
+    throw addrError(input, "trailing garbage after address", s);
   }
-  return pos >= 3;
+  if (i < 16) {
+    if (ellipsis < 0) {
+      throw addrError(input, "address string too short");
+    }
+  } else if (ellipsis >= 0) {
+    throw addrError(input, "the :: must expand to at least one field of zeros");
+  }
+  return zone;
 }

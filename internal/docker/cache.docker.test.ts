@@ -40,6 +40,11 @@ test("a cache volume the Go build created is found and reused, not replaced", as
     const r = docker(...args);
     assert.equal(r.status, 0, r.stderr);
   }
+  // A Run that starts while this test runs removes the toolset volumes of
+  // other versions, unless they are in use (the Go build does the same at
+  // the start of a Run). Hold the volume until the end of the test, so that
+  // the tests of internal/cli, which run at the same time, leave it alone.
+  await d.hold(never, "toolset-hold", image, toolsetName, "/toolset");
   for (const v of [name, toolsetName]) {
     const r = docker(
       "run",
@@ -92,9 +97,8 @@ test("a cache volume the Go build created is found and reused, not replaced", as
     assert.equal(res.stdout.toString(), "from-go\n", v);
   }
 
-  // A held volume is in use, so another Run cannot remove it; after the
-  // Run's cleanup it can.
-  await d.hold(never, "toolset-hold", image, toolsetName, "/toolset");
+  // The volume was held since its creation, so it is in use: another Run
+  // cannot remove it; after the Run's cleanup it can.
   assert.equal(await d.removeVolumeIfUnused(never, toolsetName), false);
   await d.removeRunResources();
   assert.equal(await d.removeVolumeIfUnused(never, toolsetName), true);

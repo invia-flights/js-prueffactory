@@ -106,8 +106,9 @@ const hex = "0123456789abcdef";
 /**
  * quoteJSONString writes a string as Go's encoder does. escapeHTML is true
  * for json.Marshal and MarshalIndent, false for an Encoder with
- * SetEscapeHTML(false). A lone surrogate becomes \uFFFD, as invalid UTF-8
- * does in Go.
+ * SetEscapeHTML(false). A lone surrogate becomes the character U+FFFD, as
+ * invalid UTF-8 does in Go 1.27 (the frozen build's encoder writes U+FFFD
+ * itself there, not the escape \ufffd that Go versions before it wrote).
  */
 export function quoteJSONString(s: string, escapeHTML: boolean): string {
   let out = '"';
@@ -153,7 +154,7 @@ export function quoteJSONString(s: string, escapeHTML: boolean): string {
         i++;
         continue;
       }
-      esc = "\\ufffd";
+      esc = "\ufffd";
     }
     if (esc !== undefined) {
       out += s.slice(start, i) + esc;
