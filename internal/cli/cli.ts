@@ -15,6 +15,7 @@ import { resolveBudget } from "./budget.ts";
 import { ErrHelp, type Formats, type Options, parse } from "./options.ts";
 import { type OutputPlan, resolveOriginal, resolveOutput } from "./paths.ts";
 import { type DockerSetup, preflightDocker } from "./preflight.ts";
+import { runListChecks } from "./selection.ts";
 
 const usage = `usage:
   js-prueffactory test <path> [--format json|markdown|json,markdown] [--output-dir <dir>]
@@ -211,15 +212,5 @@ function runListChecksCommand(
   if (typeof opts === "number") {
     return opts;
   }
-  try {
-    resolveOriginal(opts.path);
-  } catch (err) {
-    stderr.write(`js-prueffactory: ${message(err)}\n`);
-    return ExitInternalError;
-  }
-  // Discovery and the listing are ported in tickets 09 and 10.
-  stderr.write(
-    "js-prueffactory: the TypeScript build does not run list-checks yet\n",
-  );
-  return ExitInternalError;
+  return runListChecks(opts, stdout, stderr);
 }

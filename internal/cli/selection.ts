@@ -1,10 +1,18 @@
-// --only, --exclude and --fast on the command line, and the options of
-// list-checks.
+// --only, --exclude and --fast on the command line, and the options and the
+// output of list-checks.
+import type { Writable } from "node:stream";
 
+import "../checks/all.ts";
 import { catalog, type Entry } from "../checks/catalog.ts";
+import { implementation } from "../checks/check.ts";
+import { list } from "../checks/listing.ts";
 import { resolveFast } from "../checks/selection.ts";
+import { discover } from "../discovery/discovery.ts";
 import { quote } from "../gocompat/fmt.ts";
+import { listChecksJSON, listChecksMarkdown } from "../render/listchecks.ts";
+import { ExitInternalError, ExitOK } from "../resultset/exitcode.ts";
 import type { Options } from "./options.ts";
+import { resolveOriginal } from "./paths.ts";
 import { usageError } from "./usage.ts";
 
 // catalogEntries is the Catalog the command line resolves against. Tests
@@ -62,4 +70,40 @@ export function validateListChecks(o: Options): void {
     );
   }
   validateSelection(o);
+}
+
+/**
+ * runListChecks prints the Catalog and what applies to the project. It uses
+ * Discovery only: no Docker, no files written.
+ */
+export function runListChecks(
+  opts: Options,
+  stdout: Writable,
+  stderr: Writable,
+): number {
+  let out: Uint8Array;
+  try {
+    if (opts.selection === null) {
+      throw new Error("the Selection was not resolved");
+    }
+    const original = resolveOriginal(opts.path);
+    const proj = discover(original);
+    const listing = list(
+      proj,
+      catalogEntries(),
+      opts.selection,
+      implementation,
+    );
+    out =
+      opts.formatRaw === "json"
+        ? listChecksJSON(listing)
+        : listChecksMarkdown(listing);
+  } catch (err) {
+    stderr.write(
+      `js-prueffactory: ${err instanceof Error ? err.message : String(err)}\n`,
+    );
+    return ExitInternalError;
+  }
+  stdout.write(out);
+  return ExitOK;
 }
