@@ -214,7 +214,7 @@ function packageOf(input: Input): Package {
 
 /** packageFolder is the absolute path of a package in the host-side Snapshot. */
 export function packageFolder(input: Input): string {
-  return osJoin(input.snapshotDir, packageOf(input).path);
+  return osJoin(input.snapshotDir, input.context.package?.path ?? ".");
 }
 
 /**

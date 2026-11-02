@@ -370,6 +370,10 @@ describe("allowlist", () => {
           "runs/*tests.existing*",
           "artifacts/package.install/*/npm-install.log",
         ],
+        [
+          "runs/*only=lint,tests.smells,deps.engines",
+          "artifacts/package.install/*/npm-install.log",
+        ],
       ],
     );
     for (const e of committed) {

@@ -13,5 +13,10 @@
     "case": "runs/*tests.existing*",
     "file": "artifacts/package.install/*/npm-install.log",
     "reason": "npm's own log of the install that runs as a prerequisite of tests.existing differs between two Runs of the same build, as in the entry above: cache hits in completion order, with timings, and a debug log named after the current time. The install's command, exit code and Findings are compared in report.json."
+  },
+  {
+    "case": "runs/*only=lint,tests.smells,deps.engines",
+    "file": "artifacts/package.install/*/npm-install.log",
+    "reason": "lint.existing and lint.typed run package.install as their prerequisite, so the Run writes npm's own log, which differs between two Runs of the same build (cache hits in completion order, timings such as 'up to date in 99ms', a debug log named after the current time; see the first entry). Ticket 21: on the 13 projects of that ticket every difference of the 26 cases was this log and the SHA-256 and size that report.json and report.md quote for it."
   }
 ]

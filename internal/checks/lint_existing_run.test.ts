@@ -8,9 +8,11 @@ import { test, type TestContext } from "node:test";
 import { discover } from "../discovery/discovery.ts";
 import type { ContainerResult } from "../docker/driver.ts";
 import {
+  Applicable,
   ConfidenceConfirmed,
   type Finding,
   KindHint,
+  NotApplicable,
   SeverityError,
   SeverityNote,
   SeverityWarning,
@@ -46,6 +48,28 @@ test("lint.existing is implemented per package and can fire Gates", (t) => {
     "it needs the installed dependencies",
   );
   assert.equal(check.usesWorkingCopy?.(), true);
+});
+
+test("lint.existing checks each package on its own", (t) => {
+  const proj = tree(t, {
+    "package.json": '{"name":"root"}',
+    "packages/a/package.json": '{"devDependencies":{"eslint":"^9"}}',
+    "packages/a/eslint.config.js": "export default [];\n",
+    "packages/b/package.json": '{"name":"b"}',
+    "packages/b/src/b.js": "1;\n",
+  });
+  const check = impl("lint.existing");
+
+  assert.equal(
+    check.applicability(proj, packageContext(proj, "packages/a"))[0],
+    Applicable,
+    "package a has ESLint",
+  );
+  assert.equal(
+    check.applicability(proj, packageContext(proj, "packages/b"))[0],
+    NotApplicable,
+    "package b has neither linter",
+  );
 });
 
 // A trimmed copy of what Biome 2.1.2 printed for a project with a debugger
