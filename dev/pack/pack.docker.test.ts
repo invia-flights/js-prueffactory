@@ -49,7 +49,7 @@ test("the installed tarball lists Checks and runs a Check from another folder", 
   const stderr = new PassThrough();
   const chunks: Buffer[] = [];
   stderr.on("data", (c: Buffer) => chunks.push(c));
-  const code = await pack(["-o", tarball], {
+  const code = await pack(["-o", tarball, "--allow-dirty"], {
     root: repoRoot,
     env: process.env,
     stdout: new PassThrough(),

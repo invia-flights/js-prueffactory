@@ -19,6 +19,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc",
     "pack:tarball": "node dev/pack/main.ts -o js-prueffactory.tgz",
+    "prepack": "echo 'npm pack of the repository root would ship sources and test data: run npm run pack:tarball instead' >&2; exit 1",
     "test:golden-update": "UPDATE_GOLDEN=1 node --test internal/writer/golden.test.ts"
   },
   "overrides": {

@@ -14,7 +14,7 @@ npm run typecheck                          # tsc, no emit
 npm run test:golden-update                 # after a renderer change; then review git diff internal/writer/testdata/golden
 node dev/reportcheck/main.ts <report-folder>   # validate a report folder (-json-only for --format json)
 node dev/toolsetupdate/main.ts -dry-run    # after bumping a tag in internal/toolset/; drop -dry-run to rewrite
-npm run pack:tarball                       # js-prueffactory.tgz, stamped with the current commit
+npm run pack:tarball                       # js-prueffactory.tgz, stamped with the current commit; refuses uncommitted changes unless `-- --allow-dirty`; plain `npm pack` at the root refuses too
 node bin/js-prueffactory.js <command>      # run the sources without packing
 pre-commit install                         # once per clone: file hygiene, actionlint, zizmor, ESLint, Prettier, tsc, lockfile check
 pre-commit run --all-files                 # every hook on every file, as CI runs it
