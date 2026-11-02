@@ -80,7 +80,7 @@ export const eventsMount = "/jspf-out";
 export const eventsFile = eventsMount + "/events.jsonl";
 
 /** runnable says whether the Check will start a container in the Context. */
-function runnable(c: Context): boolean {
+export function runnable(c: Context): boolean {
   return (
     c.package !== null &&
     c.node !== null &&
@@ -543,7 +543,7 @@ function runnerMissingFinding(input: Input, why: string): Finding {
  * capitalize upper-cases the first byte of s as Go's
  * strings.ToUpper(s[:1]) + s[1:] does for the ASCII texts it gets.
  */
-function capitalize(s: string): string {
+export function capitalize(s: string): string {
   if (s === "") {
     return s;
   }

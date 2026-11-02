@@ -282,7 +282,7 @@ export function mergeSuiteResults(
  * run differs from the project's command (or that holds for some suites
  * only) names the suites it applies to.
  */
-class SuiteLimitations {
+export class SuiteLimitations {
   readonly #out: Limitation[] = [];
   /** naming maps the key of a Limitation that names its suites to its index in out. */
   readonly #naming = new Map<string, number>();
