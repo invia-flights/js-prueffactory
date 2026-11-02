@@ -1,0 +1,375 @@
+// Generator of go-oracle.json: what discovery.Discover of the freeze commit
+// (238e07f66d8cafab24ef363cb79e207bd48babd8) finds for every project under
+// testdata/projects/ and for the inline projects below, and what
+// ResolveTestScript says for the script tables of the Go tests. Kept as
+// text; regenerate from the repository root with:
+//
+//	mkdir -p dev/zzdiscoveryoracle && cp internal/discovery/testdata/go-oracle.go.txt dev/zzdiscoveryoracle/main.go
+//	go run ./dev/zzdiscoveryoracle > internal/discovery/testdata/go-oracle.json && rm -r dev/zzdiscoveryoracle
+package main
+
+import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+
+	"github.com/invia-flights/jscript-bench/internal/discovery"
+)
+
+// Inline projects: path -> content, written to a temp folder.
+var inline = []struct {
+	name  string
+	files map[string]string
+}{
+	{"compose environment values that are not strings", map[string]string{
+		"package.json": `{}`,
+		"compose.yml": "services:\n  db:\n    image: postgres:16\n    environment:\n" +
+			"      INT: 0x1F\n      FLOAT: 1e3\n      BIG: 18446744073709551616\n      SMALL: 1e-7\n" +
+			"      BOOL: true\n      DATE: 2001-12-14\n      OCTAL: 017\n      LIST: [a, 1]\n" +
+			"      MAP: {b: 2, a: 1}\n      INF: .inf\n      STAMP: 2001-12-14T21:59:43.10Z\n" +
+			"      NEG: -0.0\n      HUGE: 1e21\n      NUL: ~\n      Q: \"quoted\"\n      'bad key': x\n",
+	}},
+	{"compose problems", map[string]string{
+		"compose.yml":          "services: [this is: not valid",
+		"docker-compose.yml":   "services:\n  a:\n    image: redis\n  a:\n    image: valkey\n",
+		"compose.dev.yml":      "services:\n  web: nginx\n",
+		"compose.tab.yml":      "services:\n\tweb:\n",
+		"compose.ctl.yml":      "services:\n  x:\n    image: \"a\x01\"\n",
+		"compose.override.yml": "services:\n  redis:\n    image: redis:7\n    environment: [A=1, 5, B]\n",
+	}},
+	{"compose merge keys and anchors", map[string]string{
+		"compose.yml": "x-env: &env\n  A: 1\n  B: two\nservices:\n  db:\n    image: postgres:16\n    environment:\n      <<: *env\n      B: three\n",
+	}},
+	{"dotenv forms", map[string]string{
+		".env": "A=1\nexport B = \"x\\ty\\\"z\"\nC='lit $A'\nD=${A}-${MISSING:-def} # comment\nE=a#b\n9X=bad\nX.Y-z=ok\n=noval\nF=\"unterminated\nG=$$A\n",
+		"compose.yml": "services:\n  db:\n    image: postgres:16\n    environment:\n      A: $A\n      B: ${B}\n      C: ${C}\n      D: ${D}\n      E: ${E}\n      XY: ${X.Y-z}\n      F: ${F}\n      G: ${G}\n      U: ${UNSET}\n      V: ${UNSET?}\n",
+	}},
+	{"node versions", map[string]string{
+		"package.json":            `{"engines":{"node":">=20 <23 || ^26.1"}}`,
+		"Dockerfile":              "FROM --platform=linux/amd64 node:20.11-alpine3.19 AS a\nFROM node:latest\n",
+		"Dockerfile.prod":         "FROM docker.io/node:26-slim@sha256:abc\n",
+		".nvmrc":                  "lts/iron\n",
+		".node-version":           "\xef\xbb\xbfv24.x\n",
+		"packages/a/package.json": `{"engines":{"node":null}}`,
+		"packages/b/package.json": `{"engines":{"node":"banana || 22"}}`,
+		"packages/b/.nvmrc":       "  # c\n\n18\n",
+		"packages/c/package.json": `{"engines":{"node":"^18 || <20"}}`,
+		"packages/d/package.json": `{"engines":{"node":"` + strings.Repeat("é", 60) + `"}}`,
+	}},
+	{"test scripts and mocha configs", map[string]string{
+		"package.json":            `{"scripts":{"test":"  echo \"Error: no test specified\" && exit 1  "},"devDependencies":{"mocha":"*"}}`,
+		".mocharc.yml":            "spec: [ 'test/**/*.spec.js', 5 ]\nrequire: [./setup]\nrecursive: yes\nfile: lib/boot.js\n",
+		"setup.js":                "",
+		"test/a/b.spec.js":        "",
+		"lib/boot.js":             "",
+		"packages/j/package.json": `{"scripts":{"test":"mocha --recursive spec","pretest":"x"}}`,
+		"packages/k/package.json": `{"scripts":{"test":"cross-env A=1 B=\"two words\" c8 --all mocha -r ./h 'spec/**/*.{js,mjs}' --exit","gen:api":"FOO=1 node ./gen/api.mjs --out x","schema":"node gen.ts"}}`,
+		"packages/k/spec/x/a.mjs": "",
+		"packages/k/spec/b.js":    "",
+		"packages/k/h.js":         "",
+		"packages/l/package.json": `{"scripts":{"test":"node --import ./setup.mjs --test"}}`,
+		"packages/l/.mocharc.json": `{"spec": "a.js" // comment
+}`,
+		"packages/m/package.json":  `{"scripts":{"test":5}}`,
+		"packages/m/.mocharc.jsonc": `{"spec":["a.js"]}`,
+		"packages/m/a.js":           "",
+		"packages/n/package.json":   "\xef\xbb\xbf{\"scripts\":{\"test\":\"mocha\"}}",
+	}},
+	{"workspaces and managers", map[string]string{
+		"package.json":            `{"workspaces":["packages/*"]}`,
+		"packages/a/package.json": `{}`,
+		"packages/b/package.json": `{"packageManager":"pnpm@9.0.0"}`,
+		"tools/c/package.json":    `{}`,
+		"tools/c/yarn.lock":       "",
+		"tools/d/package.json":    `{"workspaces":{"packages":["e"]}}`,
+		"tools/d/e/package.json":  `{}`,
+		"tools/d/e/.nvmrc":        "20",
+	}},
+	{"service references", map[string]string{
+		"package.json":         `{}`,
+		"docker-compose.yml":   "services:\n  minio:\n    image: quay.io/minio/minio\n  app:\n    build: .\n  redis:\n    image: redis:7\n  \"bad name\":\n    image: x/y\n  s3.local:\n    image: ghcr.io/x/s3\n",
+		".env":                 "A=minio\nB=http://s3.local:9000\n",
+		"test/a.test.js":       "fetch('https://app/x')\nconst r = 'redis://redis:6379'\n",
+		"test/bad.test.js":     "\xff http://minio:1\n",
+		"sub/package.json":     `{}`,
+		"sub/config/dev.env":   "export X=\"app\" # app\n",
+		"sub/test/x.spec.js":   "url: \"http://minio\"\r\n",
+		"sub/node_modules/x.js": "http://minio:1",
+	}},
+	{"build steps", map[string]string{
+		"package.json":            `{"scripts":{"b":"\"tsc\" -p .","a":"tsc --NOEMIT"}}`,
+		"tsconfig.json":           `{"extends":["./base", 5, "../outside"]}`,
+		"base.json":               `{"compilerOptions":{"declaration":true}}`,
+		"src/a.tsx":               "",
+		"packages/x/package.json": `{"babel":null}`,
+		"packages/y/package.json": `{}`,
+		"packages/y/.swcrc":       `{}`,
+		"packages/z/package.json": `{"scripts":{"build":"vite build"}}`,
+		"packages/z/tsconfig.json": `{"compilerOptions":{"outDir":null,"rootDir":""}}`,
+		"packages/z/a.cts":        "",
+	}},
+}
+
+// Script tables: the cases of testchain_test.go and testcommand_test.go,
+// with the full results.
+var scripts = []map[string]string{
+	{"test": "npm run test:unit && npm run test:api", "test:unit": "mocha --config test/config/mocha-unit.js", "test:api": "mocha --config test/config/mocha-api.js"},
+	{"test": "npm run-script a && npm --silent run b && npm run --silent c", "a": "mocha a", "b": "mocha b", "c": "node --test c"},
+	{"test": "npm --loglevel silent run a", "a": "mocha a"},
+	{"test": "npm run test:all", "test:all": "npm run a && npm run b", "a": "mocha a", "b": "mocha b"},
+	{"test": "NODE_ENV=test mocha unit && cross-env LOG=off c8 mocha api"},
+	{"test": "cross-env NODE_ENV=test npm run a", "a": "LOG=off mocha a"},
+	{"test": "npm run a && node --test b", "a": "mocha a"},
+	{"test": "npm run a -- --grep slow", "a": "mocha a"},
+	{"test": "npm run a --silent -- --exit", "a": "mocha a"},
+	{"test": "npm run a && npm run a", "a": "mocha a"},
+	{"test": "mocha", "ci": "npm test"},
+	{"test": "npm run s1", "s1": "npm run s2", "s2": "npm run s3", "s3": "npm run s4", "s4": "npm run s5", "s5": "mocha"},
+	{"test": "npm run s1 && npm run s1 && npm run s1", "s1": "npm run s2 && npm run s2 && npm run s2", "s2": "npm run s3 && npm run s3 && npm run s3", "s3": "npm run s4 && npm run s4 && npm run s4", "s4": "npm run s5 && npm run s5 && npm run s5", "s5": "mocha"},
+	{"test": "npm run a && npm run b", "a": "c8 mocha a", "b": "mocha b"},
+	{"test": "npm run lint && eslint . && biome check && mocha", "lint": "eslint src"},
+	{"test": "npm run a || npm run b", "a": "mocha", "b": "mocha"},
+	{"test": "mocha a; mocha b"},
+	{"test": "npm run a | tee x", "a": "mocha"},
+	{"test": "mocha a & mocha b"},
+	{"test": "npm run a", "a": "mocha || true"},
+	{"test": "npm run a && ./scripts/it.sh", "a": "mocha"},
+	{"test": "npm run all", "all": "mocha a && sh run.sh"},
+	{"test": "tsc && mocha"},
+	{"test": "npm run a && jest", "a": "mocha"},
+	{"test": "npm run a", "a": "jest --ci"},
+	{"test": "npm run nope && mocha"},
+	{"test": "npm run a", "a": "npm run b && mocha", "b": "npm run a"},
+	{"test": "npm test && mocha"},
+	{"test": "npm run s1", "s1": "npm run s2", "s2": "npm run s3", "s3": "npm run s4", "s4": "npm run s5", "s5": "npm run s6", "s6": "mocha"},
+	{"test": "npm run a && npm run b", "a": "mocha", "b": "mocha", "pretest": "npm run build"},
+	{"test": "mocha", "posttest": "echo done"},
+	{"test": "npm run test:unit && npm run test:api", "test:unit": "mocha u", "test:api": "mocha a", "pretest:unit": "x"},
+	{"test": "npm run unit && npm run api", "unit": "mocha u", "api": "mocha a", "postunit": "x"},
+	{"test": "npm run a -w pkg && mocha", "a": "mocha"},
+	{"test": "npm run a --workspaces", "a": "mocha"},
+	{"test": "npm --prefix sub run a", "a": "mocha"},
+	{"test": "npm run all -- --exit", "all": "mocha a && mocha b"},
+	{"test": "eslint . && biome check"},
+	{"test": "mocha && "},
+	{"test": "c8 npm run a", "a": "mocha"},
+	{"test": `npm run a && mocha "x`, "a": "mocha"},
+	{"test": "npm run"},
+	{"test": "npm ci && mocha"},
+	{"test": "mocha"},
+	{"test": `mocha 'test/api' "test/unit" --config test/mocha-opts.js`},
+	{"test": `mocha "test/**/*.test.js" --exit`},
+	{"test": "NODE_ENV=test TZ=UTC mocha --exit"},
+	{"test": `NODE_OPTIONS="--max-old-space-size=4096 --no-warnings" mocha`},
+	{"test": "cross-env NODE_ENV=test LOG_LEVEL=silent mocha test/"},
+	{"test": "CI=1 cross-env NODE_ENV=test mocha"},
+	{"test": "c8 --reporter=lcov --check-coverage mocha test/"},
+	{"test": "nyc --reporter lcov --exclude test mocha --recursive"},
+	{"test": "cross-env NODE_ENV=test c8 mocha"},
+	{"test": "./node_modules/.bin/mocha --exit"},
+	{"test": "node --test"},
+	{"test": `node --test 'test/**/*.test.js'`},
+	{"test": "NODE_ENV=test node --import ./setup.mjs --test test/"},
+	{"test": "jest --ci"},
+	{"test": "vitest run"},
+	{"test": "cross-env NODE_ENV=test jest"},
+	{"test": "npx jest"},
+	{"test": "ava"},
+	{"test": "tap"},
+	{"test": "jasmine"},
+	{"test": "karma start"},
+	{"test": "playwright test"},
+	{"test": "npm run lint && mocha"},
+	{"test": "mocha | tee out.log"},
+	{"test": "mocha; echo done"},
+	{"test": "mocha > out.txt"},
+	{"test": "mocha $(ls test)"},
+	{"test": "mocha $TEST_DIR"},
+	{"test": `mocha "$TEST_DIR"`},
+	{"test": "mocha `ls test`"},
+	{"test": "node scripts/run-tests.js"},
+	{"test": "npm run test:unit"},
+	{"test": `mocha "test`},
+	{"test": "cross-env-shell NODE_ENV=test mocha"},
+	{"test": "c8 npm test"},
+	{"test": "NODE_ENV=test"},
+	{"test": "mocha 'it''s' \"a\\\"b\" c\\ d && mocha 日本 \"x\\y\""},
+	{"test": "mocha\nmocha"},
+	{"test": "  "},
+	{"test": "&& mocha"},
+	{"test": "npm"},
+	{"test": "npm run a b", "a": "mocha"},
+	{"test": "npm t", "t": "x"},
+	{"test": "npm run --registry x a", "a": "mocha"},
+	{"test": "npm run a -- x && npm run b -- y", "a": "mocha", "b": "node --test"},
+}
+
+func main() {
+	type projectOut struct {
+		Name   string            `json:"name"`
+		Files  map[string][]byte `json:"files,omitempty"` // base64 in JSON
+		Result any               `json:"result"`
+	}
+	var projects []projectOut
+	entries, err := os.ReadDir("testdata/projects")
+	if err != nil {
+		panic(err)
+	}
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		p, err := discovery.Discover(filepath.Join("testdata/projects", e.Name()))
+		if err != nil {
+			panic(err)
+		}
+		projects = append(projects, projectOut{Name: "testdata/projects/" + e.Name(), Result: dumpProject(p)})
+	}
+	for _, c := range inline {
+		root, err := os.MkdirTemp("", "oracle")
+		if err != nil {
+			panic(err)
+		}
+		for rel, content := range c.files {
+			p := filepath.Join(root, filepath.FromSlash(rel))
+			if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+				panic(err)
+			}
+			if err := os.WriteFile(p, []byte(content), 0o644); err != nil {
+				panic(err)
+			}
+		}
+		p, err := discovery.Discover(root)
+		if err != nil {
+			panic(err)
+		}
+		raw := map[string][]byte{}
+		for rel, content := range c.files {
+			raw[rel] = []byte(content)
+		}
+		projects = append(projects, projectOut{Name: c.name, Files: raw, Result: dumpProject(p)})
+		os.RemoveAll(root)
+	}
+	type scriptOut struct {
+		Scripts map[string]string `json:"scripts"`
+		Result  any               `json:"result"`
+	}
+	var chains []scriptOut
+	for _, s := range scripts {
+		chains = append(chains, scriptOut{s, dumpTests(discovery.ResolveTestScript(s))})
+	}
+	out := map[string]any{
+		"recordedFrom": "discovery of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8 (Go 1.27.3)",
+		"projects":     projects,
+		"scripts":      chains,
+	}
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", " ")
+	if err := enc.Encode(out); err != nil {
+		panic(err)
+	}
+}
+
+// pairs renders a map as [key, value] pairs sorted by key; nil stays null.
+func pairs(m map[string]string) any {
+	if m == nil {
+		return nil
+	}
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	out := [][]string{}
+	for _, k := range keys {
+		out = append(out, []string{k, m[k]})
+	}
+	return out
+}
+
+func list[T any](s []T) []T {
+	if s == nil {
+		return []T{}
+	}
+	return s
+}
+
+func unsupported(u *discovery.Unsupported) any {
+	if u == nil {
+		return nil
+	}
+	return map[string]string{"code": u.Code, "reason": u.Reason}
+}
+
+func dumpTests(t *discovery.TestSetup) any {
+	if t == nil {
+		return nil
+	}
+	var suites []any
+	for _, s := range t.Suites {
+		suites = append(suites, map[string]any{
+			"runner": s.Runner, "args": list(s.Args), "env": pairs(s.Env), "dropped": s.Dropped, "origin": s.Origin,
+		})
+	}
+	var left []any
+	for _, l := range t.LeftOut {
+		left = append(left, []string{l.Step, l.Script})
+	}
+	return map[string]any{"script": t.Script, "suites": list(suites), "unsupported": unsupported(t.Unsupported), "leftOut": list(left)}
+}
+
+func dumpFiles(files []discovery.File) any {
+	out := []any{}
+	for _, f := range files {
+		out = append(out, []string{f.Path, f.PackageRel, string(f.Class), f.ContextID})
+	}
+	return out
+}
+
+func dumpProject(p *discovery.Project) any {
+	var pkgs []any
+	for _, pkg := range p.Packages {
+		var gens []any
+		for _, g := range pkg.GeneratorScripts {
+			gens = append(gens, map[string]any{"name": g.Name, "env": pairs(g.Env), "file": g.File, "args": list(g.Args)})
+		}
+		var refs []any
+		for _, r := range pkg.ServiceRefs {
+			refs = append(refs, map[string]any{"service": r.Service, "file": r.File, "line": r.Line})
+		}
+		pkgs = append(pkgs, map[string]any{
+			"path": pkg.Path, "contextID": pkg.ContextID, "buildStepReason": pkg.BuildStepReason,
+			"npmLockfile": pkg.NPMLockfile, "manager": string(pkg.Manager),
+			"installUnsupported": unsupported(pkg.InstallUnsupported),
+			"nodeChoice": map[string]any{
+				"version": pkg.NodeChoice.Version, "source": pkg.NodeChoice.Source, "variant": pkg.NodeChoice.Variant,
+				"notChecked": list(pkg.NodeChoice.NotChecked), "unsupported": unsupported(pkg.NodeChoice.Unsupported),
+			},
+			"tests": dumpTests(pkg.Tests), "mochaDependency": pkg.MochaDependency, "usesMocha": pkg.UsesMocha(),
+			"generatorScripts": list(gens), "serviceRefs": list(refs), "files": dumpFiles(pkg.Files),
+		})
+	}
+	var contexts []any
+	for _, c := range p.Contexts {
+		contexts = append(contexts, c.Context)
+	}
+	var services []any
+	for _, s := range p.Services {
+		services = append(services, map[string]any{
+			"name": s.Name, "file": s.File, "declared": s.Declared, "family": s.Family,
+			"notStarted": unsupported(s.NotStarted), "env": pairs(s.Env), "unresolved": list(s.Unresolved),
+			"versionDiffers": s.VersionDiffers,
+		})
+	}
+	var problems []any
+	for _, pr := range p.ComposeProblems {
+		problems = append(problems, []string{pr.Path, pr.Reason})
+	}
+	return map[string]any{
+		"packages": list(pkgs), "contexts": list(contexts), "files": dumpFiles(p.Files),
+		"services": list(services), "dotEnv": pairs(p.DotEnv), "composeProblems": list(problems),
+	}
+}

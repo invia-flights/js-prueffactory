@@ -59,6 +59,21 @@ export function base(path: string): string {
   return p === "" ? "/" : p;
 }
 
+// ext is path.Ext: the suffix from the last dot of the last element, so
+// ".env" is its own extension (Node's extname gives "").
+export function ext(path: string): string {
+  for (let i = path.length - 1; i >= 0 && path[i] !== "/"; i--) {
+    if (path[i] === ".") return path.slice(i);
+  }
+  return "";
+}
+
+// split is path.Split: the directory with its trailing slash, and the file.
+export function split(path: string): [string, string] {
+  const i = path.lastIndexOf("/");
+  return [path.slice(0, i + 1), path.slice(i + 1)];
+}
+
 // isAbs is path.IsAbs.
 export function isAbs(path: string): boolean {
   return path.startsWith("/");

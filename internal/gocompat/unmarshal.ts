@@ -5,7 +5,8 @@
 // that implementation, not the historical v1 decoder.
 //
 // Only the Go types the port decodes are modelled: string, bool, int,
-// json.RawMessage, pointers, map[string]T, []T and structs with json names.
+// json.RawMessage, interface{}, pointers, map[string]T, []T and structs with
+// json names.
 import { quoteBytes, quoteRune } from "./fmt.ts";
 import { isPrint, isSpace } from "./strings.ts";
 import { decodeRune, fullRune, RuneError, text } from "./utf8.ts";
@@ -52,6 +53,7 @@ export type Schema =
   | { readonly kind: "bool" }
   | { readonly kind: "int" }
   | { readonly kind: "raw" }
+  | { readonly kind: "any" }
   | { readonly kind: "pointer"; readonly elem: Schema }
   | { readonly kind: "map"; readonly type: string; readonly elem: Schema }
   | { readonly kind: "slice"; readonly type: string; readonly elem: Schema }
@@ -75,9 +77,14 @@ export class GoSlice {
 }
 
 // Decoded values: string -> string, bool -> boolean, int -> bigint,
-// raw -> Uint8Array | null, pointer -> value | null, map -> Map | null,
+// raw -> Uint8Array | null, any -> AnyValue, pointer -> value | null, map -> Map | null,
 // slice -> GoSlice | null, struct -> a record keyed by json name.
 export type Value = unknown;
+
+// AnyValue is what JSON decodes to in an interface{}: nil, bool, float64,
+// string, []interface{} or map[string]interface{}.
+export type AnyValue =
+  null | boolean | number | string | AnyValue[] | Map<string, AnyValue>;
 
 export function zeroValue(schema: Schema): Value {
   switch (schema.kind) {
@@ -88,6 +95,7 @@ export function zeroValue(schema: Schema): Value {
     case "int":
       return 0n;
     case "raw":
+    case "any":
     case "pointer":
     case "map":
     case "slice":
@@ -110,6 +118,21 @@ export function unmarshal(data: Uint8Array, schema: Schema): Value {
   const [value] = d.decode(schema, zeroValue(schema), ws(data, 0), []);
   if (d.firstError) throw d.firstError;
   return value;
+}
+
+// unmarshalPartial is unmarshal for a caller that ignores the error, as
+// `_ = json.Unmarshal(data, &v)` does: it returns what Go leaves in v (the
+// zero value after a syntax error, everything that fitted after a type
+// error) and the error.
+export function unmarshalPartial(
+  data: Uint8Array,
+  schema: Schema,
+): [Value, SyntaxError | UnmarshalTypeError | undefined] {
+  const err = checkValid(data);
+  if (err) return [zeroValue(schema), err];
+  const d = new Decoder(data);
+  const [value] = d.decode(schema, zeroValue(schema), ws(data, 0), []);
+  return [value, d.firstError];
 }
 
 // checkValid validates data as one JSON value and returns the syntax error
@@ -517,6 +540,7 @@ class Decoder {
     if (c === 0x6e && schema.kind !== "raw") {
       // null: pointers, maps and slices become nil; other values stay.
       switch (schema.kind) {
+        case "any":
         case "pointer":
         case "map":
         case "slice":
@@ -541,6 +565,8 @@ class Decoder {
         return [this.decodeInt(current, pos, end, path), end];
       case "raw":
         return [b.slice(pos, end), end];
+      case "any":
+        return [this.decodeAny(pos, path), end];
       case "pointer":
         return this.decode(
           schema.elem,
@@ -558,6 +584,87 @@ class Decoder {
         if (c !== 0x7b) return this.fail(schema.type, current, pos, end, path);
         return [this.decodeStruct(schema, current, pos, path), end];
     }
+  }
+
+  // decodeAny decodes the value at pos into an interface{}. Objects and
+  // arrays may nest 10000 deep, so it keeps them on its own stack.
+  private decodeAny(pos: number, path: readonly string[]): AnyValue {
+    const b = this.b;
+    interface Frame {
+      value: AnyValue[] | Map<string, AnyValue>;
+      key: string;
+    }
+    const stack: Frame[] = [];
+    const where = (): string[] => [
+      ...path,
+      ...stack.map((f) =>
+        Array.isArray(f.value) ? String(f.value.length) : f.key,
+      ),
+    ];
+    // name reads a member name and its colon; it returns the value start.
+    const name = (n: number, f: Frame): number => {
+      const end = stringEnd(b, n);
+      f.key = unquote(b, n, end);
+      return ws(b, ws(b, end) + 1);
+    };
+    let n = pos;
+    for (;;) {
+      const c = b[n] ?? 0;
+      let v: AnyValue;
+      if (c === 0x7b || c === 0x5b) {
+        const f: Frame = {
+          value: c === 0x7b ? new Map<string, AnyValue>() : [],
+          key: "",
+        };
+        const first = ws(b, n + 1);
+        if (b[first] !== c + 2) {
+          stack.push(f);
+          n = c === 0x7b ? name(first, f) : first;
+          continue;
+        }
+        v = f.value;
+        n = first + 1;
+      } else {
+        const end = skipValue(b, n);
+        v = this.anyScalar(n, end, where());
+        n = end;
+      }
+      // Add the finished value to its container; close what ends here.
+      for (;;) {
+        const top = stack.at(-1);
+        if (!top) return v;
+        if (Array.isArray(top.value)) top.value.push(v);
+        else top.value.set(top.key, v);
+        n = ws(b, n);
+        if (b[n] === 0x2c) {
+          n = ws(b, n + 1);
+          if (!Array.isArray(top.value)) n = name(n, top);
+          break;
+        }
+        stack.pop();
+        v = top.value;
+        n++;
+      }
+    }
+  }
+
+  private anyScalar(pos: number, end: number, path: string[]): AnyValue {
+    const b = this.b;
+    switch (b[pos]) {
+      case 0x22:
+        return unquote(b, pos, end);
+      case 0x74:
+        return true;
+      case 0x66:
+        return false;
+      case 0x6e:
+        return null;
+    }
+    const literal = text(b.subarray(pos, end));
+    const f = Number(literal);
+    if (!Number.isFinite(f))
+      this.record("number " + literal, "float64", end, path);
+    return f;
   }
 
   // decodeInt parses a number literal into an int64; any other literal,
