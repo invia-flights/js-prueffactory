@@ -177,3 +177,63 @@ export function trimSpace(s: string): string {
   }
   return s.slice(start, end);
 }
+
+// Go maps the case of each rune on its own, with the simple mappings of
+// UnicodeData.txt. JavaScript applies the full mappings of SpecialCasing.txt,
+// which can turn one character into several (U+0130 to "i" plus a combining
+// dot, U+00DF to "SS", U+FB01 to "FI"). Where JavaScript's result has more than
+// one code point, these give Go's simple mapping instead.
+
+function simpleUpper(c: number): number {
+  // Greek letters with ypogegrammeni: the simple upper case is the matching
+  // letter with prosgegrammeni (U+1F80 to U+1F88 and so on).
+  if (c >= 0x1f80 && c <= 0x1faf) {
+    return c | 0x08;
+  }
+  switch (c) {
+    case 0x1fb3:
+      return 0x1fbc;
+    case 0x1fc3:
+      return 0x1fcc;
+    case 0x1ff3:
+      return 0x1ffc;
+    default:
+      return c; // no simple upper case: U+00DF, the ligatures, U+0149 ...
+  }
+}
+
+function mapRunes(
+  s: string,
+  full: (ch: string) => string,
+  simple: (c: number) => number,
+): string {
+  let out = "";
+  for (const ch of s) {
+    const c = codePointAt(ch, 0);
+    if (c === replacement) {
+      out += "\uFFFD"; // a lone surrogate, as Go's invalid UTF-8
+      continue;
+    }
+    const mapped = full(ch);
+    const first = mapped.codePointAt(0) ?? c;
+    const single = mapped.length === (first > 0xffff ? 2 : 1);
+    out += String.fromCodePoint(single ? first : simple(c));
+  }
+  return out;
+}
+
+/** toUpper is Go's strings.ToUpper: rune by rune, simple mappings only. */
+export function toUpper(s: string): string {
+  return mapRunes(s, (ch) => ch.toUpperCase(), simpleUpper);
+}
+
+/** toLower is Go's strings.ToLower: rune by rune, simple mappings only. */
+export function toLower(s: string): string {
+  // U+0130 is the only rune whose full lower case has several code points;
+  // its simple lower case is "i".
+  return mapRunes(
+    s,
+    (ch) => ch.toLowerCase(),
+    (c) => (c === 0x130 ? 0x69 : c),
+  );
+}
