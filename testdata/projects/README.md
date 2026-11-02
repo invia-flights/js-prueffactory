@@ -2,7 +2,12 @@
 
 Each project here is tiny and made up, and triggers specific behaviour of the tool. Every value that looks like a secret is invented.
 
-When you add a Check, add or extend a project that triggers it, and assert on it through one of the test seams described in [AGENTS.md](../../AGENTS.md).
+When you add a Check, add or extend a project that triggers it, and assert on it through one of the two test seams:
+
+- Seam A is `main` in `internal/cli/cli.ts`. A test calls it in-process with an argument list, an environment lookup, two streams and an abort signal, points it at a project here, and asserts on the exit code, the streams and the files of the report folder. Tests that need Docker are named `*.docker.test.ts` and run with `npm run test:docker`.
+- Seam B is a hand-built result set fed to the scorer, the exit-code mapping and the renderers. It needs no project and no Docker.
+
+The rules for tests and the commands are in [AGENTS.md](../../AGENTS.md).
 
 | Project | What it proves |
 |---|---|

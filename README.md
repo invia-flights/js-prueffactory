@@ -6,16 +6,16 @@
 
 js-prueffactory checks a JavaScript project and reports, in one place, what is wrong with it and what could not be checked.
 
-You point it at a project folder. It copies the project into Docker containers, installs the dependencies there, runs the project's own tests and its other Checks, and writes `report.json` for coding agents and `report.md` for people. The project folder stays byte-for-byte unchanged, and every Run proves that with a hash at the end. Docker is the only thing it needs on your machine.
+You point it at a project folder. It copies the project into Docker containers, installs the dependencies there, runs the project's own tests and its other Checks, and writes `report.json` for coding agents and `report.md` for people. The project folder stays byte-for-byte unchanged, and every Run proves that with a hash at the end. It needs Node 24 or newer and Docker on your machine.
 
 ```sh
-go build -o js-prueffactory ./cmd/js-prueffactory
-./js-prueffactory test ~/code/my-service
+npm install --global https://github.com/invia-flights/js-prueffactory/releases/download/main-latest/js-prueffactory.tgz
+js-prueffactory test ~/code/my-service
 ```
 
 `benchmark` runs the same Checks and adds a score from 0 to 100 for how well the project is implemented. Use it to compare several attempts at the same task, for example the code different LLMs wrote for the same feature.
 
-The tool never calls an LLM and never repairs code. The repository is called `jscript-bench`.
+The tool never calls an LLM and never repairs code.
 
 ## How a Run works
 
@@ -45,35 +45,33 @@ The code, the Report and this README use a fixed vocabulary. [GLOSSARY.md](GLOSS
 ## Requirements
 
 - macOS on Apple silicon, or Linux. Windows and WSL are not supported.
-- Go 1.27.1 or newer, only if you build the binary yourself instead of downloading it.
+- Node 24 or newer, with `npm`. The tool is a TypeScript program that runs on Node. On an older Node it exits with code 3 and says so.
 - The `docker` CLI and a running Docker daemon with API 1.41 or newer, which is Docker Engine 20.10 or newer. Docker Desktop works. The tool calls only the `docker` command, so Docker contexts and `DOCKER_HOST` work as usual.
 - Internet access for the Preparation phase.
 - Optional: the `git` CLI. With it, the Report records the commit and whether the working tree is dirty. Without it, the dirty state is `unknown`.
 
-Node, npm and every linter run in pinned images, so you need none of them locally.
+The project's own Node, npm and every linter run in pinned images, so the Node on your machine only runs the tool itself.
 
-## Download
+## Installation
 
-Every push to `main` whose tests pass replaces the binaries in the prerelease [`main-latest`](https://github.com/invia-flights/js-prueffactory/releases/tag/main-latest). The URLs stay the same:
-
-```sh
-# js-prueffactory-linux-amd64, js-prueffactory-linux-arm64 or js-prueffactory-darwin-arm64
-curl -fsSL -o js-prueffactory \
-  https://github.com/invia-flights/js-prueffactory/releases/download/main-latest/js-prueffactory-darwin-arm64
-chmod +x js-prueffactory
-```
-
-`SHA256SUMS` in the same release lists the checksums. Because the download is always the newest `main`, two Reports can come from different builds. `producer.vcs_revision` in `report.json` names the commit a binary was built from.
-
-## Build
+Every push to `main` whose tests pass replaces the package tarball in the prerelease [`main-latest`](https://github.com/invia-flights/js-prueffactory/releases/tag/main-latest). The URL stays the same:
 
 ```sh
-go build -o js-prueffactory ./cmd/js-prueffactory   # binary in the current folder
-go install ./cmd/js-prueffactory                    # binary in $GOBIN
-
-# static Linux binary for CI containers
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o js-prueffactory ./cmd/js-prueffactory
+npm install --global https://github.com/invia-flights/js-prueffactory/releases/download/main-latest/js-prueffactory.tgz
+js-prueffactory help
 ```
+
+`SHA256SUMS` in the same release lists the checksum of `js-prueffactory.tgz`. Nothing is published to the npm registry. Because the download is always the newest `main`, two Reports can come from different builds. `producer.vcs_revision` in `report.json` names the commit the tarball was built from.
+
+## Build from source
+
+```sh
+npm ci --ignore-scripts                 # the tool's own dependencies and development tools
+npm run pack:tarball                    # js-prueffactory.tgz, stamped with the current commit
+npm install --global ./js-prueffactory.tgz
+```
+
+The packing step refuses to run outside a work tree with a commit, because a Report must name the commit it came from. During development, `node bin/js-prueffactory.js test <path>` runs the sources directly. The commands for tests and linting are in [AGENTS.md](AGENTS.md).
 
 ## Quick start
 
@@ -82,7 +80,7 @@ The examples use `testdata/projects/failing-test`, a made-up project with one pa
 1. See what would run. `list-checks` needs no Docker and writes no files.
 
    ```sh
-   ./js-prueffactory list-checks testdata/projects/failing-test
+   js-prueffactory list-checks testdata/projects/failing-test
    ```
 
    It prints every Check with its Applicability, the Contexts with the Node version chosen for each, and the Suites of every package. `unknown` means the answer depends on something only the install reveals. A package whose tests the tool cannot run shows the reason here.
@@ -90,7 +88,7 @@ The examples use `testdata/projects/failing-test`, a made-up project with one pa
 2. Run the Checks.
 
    ```sh
-   dir=$(./js-prueffactory test testdata/projects/failing-test) || code=$?
+   dir=$(js-prueffactory test testdata/projects/failing-test) || code=$?
    ```
 
    The only line on stdout is the report folder. Progress goes to stderr. Exit codes 1 and 2 are results, not tool errors, so a script with `set -e` must catch them as shown. Here the exit code is 1 because a test fails.
@@ -102,13 +100,13 @@ The examples use `testdata/projects/failing-test`, a made-up project with one pa
 4. After a fix, run only the Checks that verify it:
 
    ```sh
-   ./js-prueffactory test testdata/projects/failing-test --only tests.existing
+   js-prueffactory test testdata/projects/failing-test --only tests.existing
    ```
 
 5. Get a score:
 
    ```sh
-   ./js-prueffactory benchmark testdata/projects/failing-test
+   js-prueffactory benchmark testdata/projects/failing-test
    ```
 
 ## Commands and flags
@@ -223,7 +221,7 @@ Test data wins when a file matches both. After the install, the tool asks the pr
 
 ## What gets checked
 
-Run `list-checks` for the Catalog and what applies to a project. The Gate column says when a Check can fail the Run. Checks marked "native" are written in Go and need no container. Every other tool runs in its own pinned image.
+Run `list-checks` for the Catalog and what applies to a project. The Gate column says when a Check can fail the Run. Checks marked "native" run in the tool's own process and need no container. Every other tool runs in its own pinned image.
 
 | Check | What it finds | Tool | Gate |
 |---|---|---|---|
@@ -398,7 +396,7 @@ A Check execution has independent fields, so a crashed tool never reads as a fai
 
 How the numbers combine:
 
-1. A count-based part scores `100 · 2^(−x / x50)`, where `x50` is the count that halves the score. The constants are in [`internal/benchmark/profile.go`](internal/benchmark/profile.go) and in every Report.
+1. A count-based part scores `100 · 2^(−x / x50)`, where `x50` is the count that halves the score. The constants are in [`internal/benchmark/profile.ts`](internal/benchmark/profile.ts) and in every Report.
 2. Repeated hits of one rule count as `1 + log2(count)`, so 200 copies of one warning don't outweigh ten different problems.
 3. Vulnerabilities are weighted by severity and by whether the package is a production or a dev dependency.
 4. An area scores its worst part. Excellent linting can't hide a leaked secret.
@@ -453,24 +451,32 @@ Every per-step limit is also bounded by the remaining Budget. Checks that never 
 
 ## Running in GitLab CI
 
-Download the Linux binary in the job, as below, or build a static one in an earlier job, as shown under [Build](#build). The tool runs next to a `docker:dind` service, reaches Docker through `DOCKER_HOST`, needs no TTY and logs plain lines to stderr. The `docker:*-cli` images have `wget` but no `curl`.
+The job image needs Node 24 or newer and the Docker CLI. The tool runs next to a `docker:dind` service, reaches Docker through `DOCKER_HOST`, needs no TTY and logs plain lines to stderr. The `node:*-alpine` images take the CLI from Alpine's `docker-cli` package; `git` is optional and lets the Report record the commit.
 
 ```yaml
-script:
-  - wget -qO /usr/local/bin/js-prueffactory https://github.com/invia-flights/js-prueffactory/releases/download/main-latest/js-prueffactory-linux-amd64
-  - chmod +x /usr/local/bin/js-prueffactory
-  - js-prueffactory test "$CI_PROJECT_DIR" --output-dir "$CI_PROJECT_DIR/.output/js-prueffactory"
-artifacts:
-  when: always
-  paths:
-    - .output/js-prueffactory/
-allow_failure:
-  exit_codes: 2   # optional: let incomplete Runs pass, keep failing Runs red
+js-prueffactory:
+  image: node:24-alpine
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  before_script:
+    - apk add --no-cache docker-cli git
+    - npm install --global https://github.com/invia-flights/js-prueffactory/releases/download/main-latest/js-prueffactory.tgz
+  script:
+    - js-prueffactory test "$CI_PROJECT_DIR" --output-dir "$CI_PROJECT_DIR/.output/js-prueffactory"
+  artifacts:
+    when: always
+    paths:
+      - .output/js-prueffactory/
+  allow_failure:
+    exit_codes: 2   # optional: let incomplete Runs pass, keep failing Runs red
 ```
 
 ## Pinned tools
 
-Every image is an official upstream image pinned by the digest of its multi-arch index, so the same digest works on arm64 and amd64. The tool's own npm packages are pinned by the integrity hashes of an embedded lockfile. The versions live in [`internal/toolset/`](internal/toolset). Every Report carries a toolset version that hashes all of them.
+Every image is an official upstream image pinned by the digest of its multi-arch index, so the same digest works on arm64 and amd64. The tool's own npm packages are pinned by the integrity hashes of a lockfile that ships in the package. The versions live in [`internal/toolset/`](internal/toolset). Every Report carries a toolset version that hashes all of them.
 
 ## Working on js-prueffactory
 
@@ -478,10 +484,13 @@ Build and test commands and the project rules are in [AGENTS.md](AGENTS.md). Wha
 
 ```
 .github/workflows/
-  ci.yml            pre-commit hooks, go test -race, Docker tests and govulncheck for every PR and push to main
-  main-build.yml    tests main, builds the binaries, replaces the main-latest prerelease
-.pre-commit-config.yaml, .golangci.yml   the hooks and linters that ci.yml runs too
+  ci.yml            pre-commit hooks, npm test on Node 24 and 26, Docker tests and an osv-scanner scan of package-lock.json for every PR and push to main
+  main-build.yml    tests main, packs the tarball, replaces the main-latest prerelease
+.pre-commit-config.yaml   the hooks that ci.yml runs too
+eslint.config.js, tsconfig.json, .prettierignore   lint, type check and format settings
+package.json, package-lock.json   the tool's own dependencies, exactly pinned, and the scripts
 assets/images/icon.png  the icon at the top of this README
+bin/js-prueffactory.js  the installed command: checks the Node version, then starts cmd/
 cmd/js-prueffactory/    main: wires the process into internal/cli
 internal/
   cli/          command front end: flags, output folder, exit code (test seam A)
@@ -489,7 +498,8 @@ internal/
   snapshot/     copying and hashing the Original, the unchanged-check
   discovery/    packages, Node versions, test commands, compose Services, file classes
   checks/       the Catalog and one implementation per Check
-  checks/js/    small JavaScript helpers embedded in the binary: test reporters, ESLint runner …
+  checks/js/    small JavaScript helpers that run inside the containers: test reporters, ESLint runner …
+  checks/config/, checks/data/   pinned tool configurations and data files, read from the package folder
   docker/       thin wrapper over the docker CLI, labels, leftover sweep
   toolset/      the pinned table of images and npm tools
   toolvolume/   cache volumes for the tools and the advisory database
@@ -499,15 +509,19 @@ internal/
   resultset/    the in-memory Report, its consistency rules, exit-code mapping
   benchmark/    the scorer: a pure function from results to the score section
   render/       JSON and Markdown rendering, escaping
-  schema/       the embedded report.schema.json
+  schema/       report.schema.json and its validator
   writer/       validating and writing the report folder
   runid/, progress/
+  gocompat/, yamlv3/, jsonschema/, tarwriter/   exact ports of the Go behaviour the Report depends on: encoding, durations, YAML errors and positions, tar bytes (see docs/adr/0005-typescript-on-node.md)
 dev/
   ci-readiness.sh   the local GitLab CI check
+  pack/             builds js-prueffactory.tgz, stamped with the commit
   reportcheck/      validates a report folder against schema and rules
   toolsetupdate/    refreshes pinned digests and checksums
 testdata/projects/  made-up projects with deliberate defects
 ```
+
+The tool was ported from Go to TypeScript without a change of behaviour. The Go answers the tests compare with are kept as JSON next to the tests (`go-*.json`, `*-oracle.json`), and the Go programs that recorded them as plain text (`*.go.txt`). Source comments of the form "Go: `name.go`" name a file of the last Go build, commit `238e07f66d8cafab24ef363cb79e207bd48babd8`. Recording an oracle again needs that commit's Go sources; see [ADR-0005](docs/adr/0005-typescript-on-node.md).
 
 `dev/ci-readiness.sh` tests the CI setup locally without GitLab. It packs the npm tarball, starts `docker:dind` and a Node container with the Docker CLI, installs the tarball there with `npm install --global`, runs the tool against a testdata project with `DOCKER_HOST=tcp://docker:2375` and no TTY, and checks the exit code, the Report and that nothing was left behind. It needs `npm ci` first.
 

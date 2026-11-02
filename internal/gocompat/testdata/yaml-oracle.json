@@ -23646,18 +23646,6 @@
  ],
  "json": [
   {
-   "path": "dev/parity/testdata/reports/syntax-error-a/report.json"
-  },
-  {
-   "path": "dev/parity/testdata/reports/syntax-error-a/report.schema.json"
-  },
-  {
-   "path": "dev/parity/testdata/reports/syntax-error-b/report.json"
-  },
-  {
-   "path": "dev/parity/testdata/reports/syntax-error-b/report.schema.json"
-  },
-  {
    "path": "dev/toolsetupdate/testdata/index-alpine-without-arm64.json"
   },
   {

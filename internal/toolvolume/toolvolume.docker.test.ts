@@ -1,24 +1,16 @@
-// These tests fill real toolset volumes (Go: toolvolume_docker_test.go).
+// These tests fill real toolset volumes.
 // Every test uses its own toolset version string, so it never touches the
 // volume of a real Run, and removes what it created. The driver's docker CLI
 // is a wrapper that lists only this file's volumes, so the removal of other
 // toolset versions never reaches a volume of another test, agent or Run on
 // the shared daemon.
 import assert from "node:assert/strict";
-import { execFileSync, spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import {
-  cpSync,
-  mkdtempSync,
-  realpathSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, type TestContext, test } from "node:test";
 
-import { cacheDir } from "../cli/cachedir.ts";
 import { Driver, env, locate } from "../docker/driver.ts";
 import {
   assertGone,
@@ -29,7 +21,6 @@ import {
 } from "../docker/realdocker.testutil.ts";
 import { Alpine, Helm, type HelmDownload } from "../toolset/helm.ts";
 import { imageRef } from "../toolset/toolset.ts";
-import { version as toolsetVersion } from "../toolset/all.ts";
 import { HelmBin, MountPath } from "./helm.ts";
 import { ensure, volumeName } from "./toolvolume.ts";
 
@@ -377,67 +368,3 @@ test("a Helm checksum mismatch stops the Preparation and leaves no volume", asyn
     "a volume with an unverified binary must not stay",
   );
 });
-
-// A Run of either build reuses the toolset volume the other filled: same
-// name, labels and completion marker. The volume of the real toolset version
-// is shared with real Runs, so this test never removes it: when it is
-// missing, the Go build fills it with a Run that needs the toolset, and the
-// TypeScript build then reuses it under the same host lock.
-test("a toolset volume the Go build filled for the same toolset version is reused without a new install", async (t) => {
-  await ready;
-  const name = volumeName(toolsetVersion());
-  if (!volumeExists(name)) {
-    if (spawnSync("go", ["version"]).status !== 0) {
-      t.skip("the toolset volume is missing and no Go toolchain can fill it");
-      return;
-    }
-    goRunWithTheToolset(t);
-    assert.equal(
-      volumeExists(name),
-      true,
-      "the Go Run did not fill the volume",
-    );
-  }
-  const created = volumeCreatedAt(name);
-  const logs: string[] = [];
-
-  const v = await ensure(never, {
-    docker: newScope(t),
-    cacheDir: cacheDir(getenv),
-    image,
-    logf: (s) => logs.push(s),
-  });
-
-  assert.deepEqual(v, { name, installed: false });
-  assert.ok(logs.includes(`reusing toolset volume ${name}`), logs.join("\n"));
-  assert.equal(volumeCreatedAt(name), created, "the volume was recreated");
-});
-
-// goRunWithTheToolset builds the Go build from this checkout and runs
-// quality.clones, which installs the toolset, on a copy of clean-mocha.
-function goRunWithTheToolset(t: TestContext): void {
-  const repo = join(import.meta.dirname, "..", "..");
-  const dir = tempDir(t);
-  const exe = join(dir, "js-prueffactory-go");
-  execFileSync("go", ["build", "-o", exe, "./cmd/js-prueffactory"], {
-    cwd: repo,
-    stdio: "inherit",
-  });
-  const project = join(dir, "clean-mocha");
-  cpSync(join(repo, "testdata", "projects", "clean-mocha"), project, {
-    recursive: true,
-  });
-  const r = spawnSync(
-    exe,
-    [
-      "test",
-      project,
-      "--only",
-      "quality.clones",
-      "--output-dir",
-      join(dir, "reports"),
-    ],
-    { encoding: "utf8", env: { ...process.env, TMPDIR: dir } },
-  );
-  assert.ok(r.status === 0 || r.status === 1, r.stderr);
-}

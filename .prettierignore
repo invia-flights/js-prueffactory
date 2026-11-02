@@ -1,7 +1,7 @@
-# Prettier formats the TypeScript port's own files: sources, tests and their
-# configuration. Everything below is either kept byte for byte (test projects,
-# golden files, pinned upstream configs and data, the in-container helpers) or
-# not part of the port (docs and workflows).
+# Prettier formats the TypeScript sources, tests and their configuration.
+# Everything below is either kept byte for byte (test projects, golden files,
+# pinned upstream configs and data, the in-container helpers) or not code
+# (docs and workflows).
 **/testdata/
 internal/checks/config/
 internal/checks/data/

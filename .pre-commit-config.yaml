@@ -1,6 +1,7 @@
-# Install once with `pre-commit install`. CI runs every hook on every file
-# (.github/workflows/ci.yml). testdata/ holds deliberately broken projects and
-# byte-exact golden files, so no hook touches it.
+# Install once with `pre-commit install`, after `npm ci --ignore-scripts`: the
+# TypeScript hooks run the package's own pinned tools. CI runs every hook on
+# every file (.github/workflows/ci.yml). testdata/ holds deliberately broken
+# projects and byte-exact golden files, so no hook touches it.
 exclude: (^|/)testdata/
 
 repos:
@@ -24,14 +25,12 @@ repos:
 
   - repo: local
     hooks:
-      - id: go-mod-tidy
-        name: go mod tidy
-        entry: go mod tidy -diff
+      - id: lockfile
+        name: package-lock.json matches package.json
+        entry: npm ci --dry-run --ignore-scripts --no-audit --no-fund
         language: system
-        files: (\.go|^go\.(mod|sum))$
+        files: ^package(-lock)?\.json$
         pass_filenames: false
-      # The TypeScript port. They run the package's own pinned tools, so run
-      # `npm ci --ignore-scripts` once per clone.
       - id: eslint
         name: eslint
         entry: npm run --silent lint
@@ -50,12 +49,6 @@ repos:
         language: system
         files: \.(ts|js)$|^(package|package-lock|tsconfig)\.json$
         pass_filenames: false
-
-  - repo: https://github.com/golangci/golangci-lint
-    rev: 25c5369a93aacb8cccea0d46e1569ca4a194564d # frozen: v2.15.0
-    hooks:
-      - id: golangci-lint-config-verify
-      - id: golangci-lint-full
 
   - repo: https://github.com/rhysd/actionlint
     rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # frozen: v1.7.12

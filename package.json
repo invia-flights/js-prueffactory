@@ -18,9 +18,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc",
-    "parity": "node dev/parity/main.ts",
     "pack:tarball": "node dev/pack/main.ts -o js-prueffactory.tgz",
     "test:golden-update": "UPDATE_GOLDEN=1 node --test internal/writer/golden.test.ts"
+  },
+  "overrides": {
+    "minimatch": "11.0.1"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
