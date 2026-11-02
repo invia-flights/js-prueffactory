@@ -44,6 +44,7 @@ import { contextErrorIn } from "./helper_result.ts";
 import type { Input, Result } from "./input.ts";
 import { packageInstallID, workMount, workPath } from "./package_install.ts";
 import type { Shared } from "./shared.ts";
+import { shownPath } from "./shown_text.ts";
 import type { SuiteEvents } from "./test_events.ts";
 import { oneLine, projectRel } from "./test_report.ts";
 import { unsupportedTests } from "./tests_existing.ts";
@@ -494,7 +495,7 @@ export function sourceSpecLimitations(
     {
       reason_code: "test_file_classified_as_source",
       message:
-        `The runner of the suite ${suiteLabel(input.suite())} loaded ${String(source.length)} test file(s) that are classified as Source code: ${source.join(", ")}. ` +
+        `The runner of the suite ${suiteLabel(input.suite())} loaded ${String(source.length)} test file(s) that are classified as Source code: ${source.map(shownPath).join(", ")}. ` +
         "The Checks that read File classes lint them without the runner's globals and count them as production code, because neither the folder names nor the test file probe found them.",
       check_id: "tests.existing",
       path: input.manifestPath(),

@@ -39,6 +39,8 @@ import {
 } from "../toolset/services.ts";
 import { imageRef } from "../toolset/toolset.ts";
 import { failedToRun } from "./helper_result.ts";
+import { shownService } from "./service_not_started.ts";
+import { shownEnvName } from "./shown_text.ts";
 import type { Input, Result } from "./input.ts";
 
 /**
@@ -122,9 +124,11 @@ export function unresolvedServices(input: Input): Result | null {
       );
       continue;
     }
-    const why = `the compose entry uses ${s.unresolved.join(", ")}, which neither the project's .env file nor a default answers; the host environment is never used`;
+    const why = `the compose entry uses ${s.unresolved.map(shownEnvName).join(", ")}, which neither the project's .env file nor a default answers; the host environment is never used`;
     res.services?.push(serviceReport(input.context.id, s, ServiceBlocked, why));
-    parts.push(`Service ${s.name} needs ${s.unresolved.join(", ")}`);
+    parts.push(
+      `Service ${shownService(s.name)} needs ${s.unresolved.map(shownEnvName).join(", ")}`,
+    );
   }
   res.reason =
     parts.join("; ") +
@@ -258,7 +262,7 @@ export async function startServices(
       const res: Result = {
         status: StatusInfrastructureError,
         reasonCode: "service_not_ready",
-        reason: `Service ${u.svc.name} (${u.svc.family}) ${reason}`,
+        reason: `Service ${shownService(u.svc.name)} (${u.svc.family}) ${reason}`,
       };
       ss.reports.push(
         withImage(
@@ -277,7 +281,7 @@ export async function startServices(
             input.context.id,
             rest.svc,
             ServiceNotStarted,
-            `not checked, because Service ${u.svc.name} did not come up`,
+            `not checked, because Service ${shownService(u.svc.name)} did not come up`,
           ),
         );
       }

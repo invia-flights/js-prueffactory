@@ -12,7 +12,7 @@ import { jsonLeaves, matches, replaceSpans, type Leaf } from "./jsonleaves.ts";
 export const normalisations: readonly string[] = [
   "run ID: report.json run.id; every occurrence of that run ID in report.json, report.md and the artifacts (this covers Docker resource names such as jspf-<run ID>-...); run IDs in the stdout and stderr of invocations",
   "times: report.json run.started_at, run.finished_at, run.registry_data_date and checks[].started_at, and every occurrence of those values in report.json, report.md and the artifacts; the Started/finished line of report.md; the UTC timestamp that starts a progress line on the stderr of invocations",
-  "durations: report.json run.duration_ms, checks[].duration_ms and test_cases[].attempts[].duration_ms; the duration in the Started/finished line of report.md",
+  "durations: report.json run.duration_ms, checks[].duration_ms and test_cases[].attempts[].duration_ms; passed[].attempts[].duration_ms of the passed-tests artifacts (artifacts/tests/*-passed.json); the duration in the Started/finished line of report.md",
   "host details: report.json run.host.os and run.host.arch; the Host line of report.md",
   "Docker details: report.json run.docker.server_version, api_version, cpus and memory_bytes; the Docker server line of report.md",
   "producer: report.json producer.name, producer.version and producer.vcs_revision; the Producer line of report.md",
@@ -124,6 +124,30 @@ export function normaliseReportJSON(text: string, values: Values): string {
     ];
   });
   return substitute(replaceSpans(text, spans), values);
+}
+
+// passedTestsArtifact is the path pattern of the passed-tests artifacts,
+// which list the duration of every attempt of a passed test.
+const passedTestsArtifact = /^artifacts\/tests\/[^/]+-passed\.json$/;
+
+// normaliseArtifact replaces the test durations of a passed-tests artifact.
+// Every other artifact is returned as it is.
+export function normaliseArtifact(name: string, text: string): string {
+  if (!passedTestsArtifact.test(name)) {
+    return text;
+  }
+  const spans = (jsonLeaves(text) ?? [])
+    .filter(
+      (leaf) =>
+        matches(leaf.path, ["passed", "*", "attempts", "*", "duration_ms"]) &&
+        leaf.raw !== "null",
+    )
+    .map((leaf) => ({
+      start: leaf.start,
+      end: leaf.end,
+      with: `"${placeholders.duration}"`,
+    }));
+  return replaceSpans(text, spans);
 }
 
 // normaliseReportMarkdown replaces the header's Started line and the Producer,

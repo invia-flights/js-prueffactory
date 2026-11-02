@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  normaliseArtifact,
   normaliseInvocationOutput,
   normaliseReportMarkdown,
 } from "./normalise.ts";
@@ -68,5 +69,35 @@ test("report.md: only the versions section's own Host line is normalised", () =>
       "- Host: also quoted",
       "",
     ].join("\n"),
+  );
+});
+
+test("passed-tests artifacts: only the attempt durations are normalised", () => {
+  const artifact = `{
+  "check_id": "tests.existing",
+  "passed": [
+    {
+      "full_title": "duration_ms 7",
+      "attempts": [
+        {
+          "outcome": "passed",
+          "duration_ms": 12,
+          "error": null
+        }
+      ]
+    }
+  ]
+}
+`;
+  assert.equal(
+    normaliseArtifact(
+      "artifacts/tests/tests.existing-C-0002-passed.json",
+      artifact,
+    ),
+    artifact.replace('"duration_ms": 12', '"duration_ms": "<duration>"'),
+  );
+  assert.equal(
+    normaliseArtifact("artifacts/tests.existing/C-0002/passed.json", artifact),
+    artifact,
   );
 });

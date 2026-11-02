@@ -9,6 +9,7 @@ import {
 import { quote } from "../resultset/quote.ts";
 import { type Limitation, StatusCompleted } from "../resultset/types.ts";
 import type { Input, Result } from "./input.ts";
+import { shownPath } from "./shown_text.ts";
 import type { SuiteEvents } from "./test_events.ts";
 import { testFile } from "./test_report.ts";
 import {
@@ -226,7 +227,7 @@ export function nodeTestCountLimitations(
     if (ev.testsOf(f.file) === 0) {
       out.push({
         reason_code: "tests_not_counted",
-        message: `The test file ${testFile(f.file)} reported no test before its process failed, so its tests are not counted.`,
+        message: `The test file ${shownPath(testFile(f.file))} reported no test before its process failed, so its tests are not counted.`,
         check_id: testsExistingID,
         path: manifest,
       });

@@ -41,6 +41,7 @@ import { tail } from "./cut_text.ts";
 import { failedToRun } from "./helper_result.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
 import { packageInstallID, workMount, workPath } from "./package_install.ts";
+import { shownPath, shownWord } from "./shown_text.ts";
 import { unresolvedServices } from "./services.ts";
 import { eventLimitations } from "./test_visibility.ts";
 import {
@@ -257,7 +258,7 @@ export async function runSuite(
   if (!supportedMochaVersion(install.version)) {
     res.status = StatusUnsupported;
     res.reasonCode = "test_runner_version_unsupported";
-    res.reason = `Mocha ${install.version} is installed, and js-prueffactory supports Mocha 9 to 12`;
+    res.reason = `Mocha ${shownWord(install.version, "version")} is installed, and js-prueffactory supports Mocha 9 to 12`;
     return res;
   }
 
@@ -519,7 +520,7 @@ function runnerMissingFinding(input: Input, why: string): Finding {
   const tc = input.suite();
   let where = "the test script";
   if (tc !== null && tc.origin !== "scripts.test") {
-    where = "the " + tc.origin + " file";
+    where = "the " + shownPath(tc.origin) + " file";
   }
   return newFinding({
     check_id: testsExistingID,
@@ -531,7 +532,7 @@ function runnerMissingFinding(input: Input, why: string): Finding {
     confidence: ConfidenceConfirmed,
     gate: true,
     title: "test runner not installed",
-    message: `${capitalize(where)} runs Mocha, but ${why}. Add mocha to the dependencies or devDependencies of ${manifest} and update the lockfile.`,
+    message: `${capitalize(where)} runs Mocha, but ${why}. Add mocha to the dependencies or devDependencies of ${shownPath(manifest)} and update the lockfile.`,
     locations: [input.location("primary", manifest, 0, 0)],
     reproduction: input.reproduction(testsExistingID),
     limitations: [],

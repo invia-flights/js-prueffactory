@@ -25,6 +25,7 @@ import {
 } from "../resultset/types.ts";
 import { newFinding, newTestCase } from "../resultset/zero.ts";
 import { shorten, tail } from "./cut_text.ts";
+import { shownPath } from "./shown_text.ts";
 import { type Input, type SuiteTestCase, untrusted } from "./input.ts";
 import { workMount } from "./package_install.ts";
 import {
@@ -229,7 +230,7 @@ function explainNeverRun(
   }
   for (const f of ev.files) {
     if (f.file === t.file) {
-      t.neverRunReason = `the process of its test file ${testFile(f.file)} stopped before the test finished`;
+      t.neverRunReason = `the process of its test file ${shownPath(testFile(f.file))} stopped before the test finished`;
       return;
     }
   }
@@ -659,8 +660,8 @@ function fileFailureFinding(
     severity: SeverityError,
     confidence: ConfidenceConfirmed,
     gate: true,
-    title: title + ": " + file,
-    message: trimSpace(what(file) + " " + oneLine(first, 300)),
+    title: title + ": " + shownPath(file),
+    message: trimSpace(what(shownPath(file)) + " " + oneLine(first, 300)),
     locations: [input.location("primary", at.path, at.line, at.col)],
     reproduction: input.reproduction(testsExistingID),
     limitations: [],

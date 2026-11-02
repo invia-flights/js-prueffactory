@@ -26,9 +26,19 @@ import {
   StatusPartial,
 } from "../resultset/types.ts";
 import type { Input, Result } from "./input.ts";
+import { shownName } from "./shown_text.ts";
 import { oneLine } from "./test_report.ts";
 
 export const serviceNotStarted = "service_not_started";
+
+/**
+ * shownService is a compose service name as trusted text allows it: the name
+ * is the project's own, so one with unusual characters is replaced (hardening
+ * beyond Go, which wrote it raw; plain names read the same).
+ */
+export function shownService(name: string): string {
+  return shownName(name, "Service name");
+}
 
 const testsExistingID = "tests.existing";
 
@@ -199,7 +209,7 @@ export function serviceMarks(input: Input, res: Result): ServiceMark[] {
           seen:
             code +
             " for " +
-            name +
+            shownService(name) +
             " in the failing test or hook: " +
             quote(oneLine(f.title, 120)),
         });
@@ -292,7 +302,7 @@ export function serviceLimitation(
   }
   return {
     reason_code: serviceNotStarted,
-    message: `The suite ${quote(input.suite()?.origin ?? "")} may need the compose Service ${m.service}, which the Run did not start: ${m.notStarted}. ${how} ${effect}`,
+    message: `The suite ${quote(input.suite()?.origin ?? "")} may need the compose Service ${shownService(m.service)}, which the Run did not start: ${m.notStarted}. ${how} ${effect}`,
     check_id: checkID,
     path,
   };
@@ -341,7 +351,7 @@ export function serviceNote(
   services: readonly string[],
   what: string,
 ): string {
-  return `The suite ${quote(suite)} may need the compose Service ${services.join(", ")}, which the Run did not start, so this ${what} may come from that and not from the project.`;
+  return `The suite ${quote(suite)} may need the compose Service ${services.map(shownService).join(", ")}, which the Run did not start, so this ${what} may come from that and not from the project.`;
 }
 
 /**
@@ -382,7 +392,9 @@ export function serviceNotStartedStatus(
   for (const suite of order) {
     const names = bySuite.get(suite) ?? [];
     if (names.length > 0) {
-      parts.push(`${quote(suite)} (Service ${names.join(", ")})`);
+      parts.push(
+        `${quote(suite)} (Service ${names.map(shownService).join(", ")})`,
+      );
     }
   }
   res.status = StatusPartial;
