@@ -1,7 +1,16 @@
 // Error texts as Go's os package prints them ("open /x: permission denied").
 // They end up in Limitations and Findings, so the port writes Go's words
 // instead of Node's ("EACCES: permission denied, open '/x'").
-import { closeSync, openSync, readFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import {
+  closeSync,
+  lstatSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  statSync,
+} from "node:fs";
+import { join } from "node:path";
 import process from "node:process";
 
 import { goString } from "./utf8.ts";
@@ -42,6 +51,66 @@ export function readFile(path: string): Uint8Array {
   } finally {
     closeSync(fd);
   }
+}
+
+/**
+ * mkdirAll is os.MkdirAll: it creates path and its missing parents. An error
+ * names the folder that could not be made ("mkdir /x/file: not a directory").
+ */
+export function mkdirAll(path: string, perm: number): void {
+  try {
+    if (statSync(path).isDirectory()) {
+      return;
+    }
+    throw pathError("mkdir", path, { code: "ENOTDIR" });
+  } catch (err) {
+    if (err instanceof GoError) {
+      throw err;
+    }
+  }
+  let i = path.length;
+  while (i > 0 && path[i - 1] === "/") {
+    i--;
+  }
+  let j = i;
+  while (j > 0 && path[j - 1] !== "/") {
+    j--;
+  }
+  if (j > 1) {
+    mkdirAll(path.slice(0, j - 1), perm);
+  }
+  try {
+    mkdirSync(path, perm);
+  } catch (err) {
+    try {
+      if (lstatSync(path).isDirectory()) {
+        return;
+      }
+    } catch {
+      // fall through to the error of mkdir
+    }
+    throw pathError("mkdir", path, err);
+  }
+}
+
+/**
+ * createTemp is os.CreateTemp(dir, prefix): it creates a new file named
+ * prefix and random digits in dir, mode 0600, and returns its descriptor and
+ * path.
+ */
+export function createTemp(dir: string, prefix: string): [number, string] {
+  for (let tries = 0; tries < 10000; tries++) {
+    const name = join(dir, prefix + String(randomBytes(4).readUInt32BE(0)));
+    try {
+      return [openSync(name, "wx+", 0o600), name];
+    } catch (err) {
+      if (errnoCode(err) === "EEXIST") {
+        continue;
+      }
+      throw pathError("open", name, err);
+    }
+  }
+  throw pathError("createtemp", join(dir, prefix + "*"), { code: "EEXIST" });
 }
 
 // GoError carries the text a Go error would print, and whether Go's
