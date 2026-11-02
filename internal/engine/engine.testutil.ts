@@ -1,6 +1,12 @@
 // Helpers for the engine's tests: a Run's configuration without Docker, fake
 // Checks, planned executions built by hand, and Runs on small projects.
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { Writable } from "node:stream";
@@ -134,7 +140,10 @@ export function planned(fields: Partial<Planned> & { check: Check }): Planned {
  * runState is the state of a Run whose Snapshot is an empty folder, for
  * calling the engine's steps directly.
  */
-export function runState(t: TestContext, fields: Partial<Config> = {}): RunState {
+export function runState(
+  t: TestContext,
+  fields: Partial<Config> = {},
+): RunState {
   const r = new RunState(config(t, fields));
   r.snap = {
     dir: tempDir(t),
@@ -154,9 +163,18 @@ export function executeOne(
   return execute(r, signal, budget, p, false);
 }
 
+/** ReportExec is an execution of report.json, as far as the tests read it. */
+export interface ReportExec {
+  check_id: string;
+  selected: boolean;
+  status: string;
+  applicability: string;
+  reason_code: string | null;
+}
+
 /** ReportJSON is report.json as parsed JSON. */
 export type ReportJSON = Record<string, unknown> & {
-  checks: Record<string, unknown>[];
+  checks: ReportExec[];
   selection: Record<string, unknown>;
   summary: Record<string, Record<string, unknown>>;
   report_completeness: Record<string, Record<string, unknown>>;
@@ -174,7 +192,12 @@ export async function runProject(
   files: Record<string, string>,
   selection: Selection | null,
   fields: Partial<Config> = {},
-): Promise<{ exitCode: number; report: ReportJSON; reportDir: string; log: string }> {
+): Promise<{
+  exitCode: number;
+  report: ReportJSON;
+  reportDir: string;
+  log: string;
+}> {
   const project = join(tempDir(t), "demo");
   writeTree(project, files);
   const lines = new Lines();

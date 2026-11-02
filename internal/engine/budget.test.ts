@@ -71,7 +71,10 @@ test("why an execution ended", async () => {
   const own = withTimeout(budget.signal, 1n);
   await new Promise((resolve) => setTimeout(resolve, 5));
 
-  assert.equal(endReason(run.signal, budget.signal, own.signal), StatusTimedOut);
+  assert.equal(
+    endReason(run.signal, budget.signal, own.signal),
+    StatusTimedOut,
+  );
   budget.cancel();
   assert.equal(
     endReason(run.signal, budget.signal, own.signal),

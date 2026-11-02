@@ -18,7 +18,10 @@ import {
 import { execResult } from "./execution.ts";
 import { plan, type Planned, runnable } from "./plan.ts";
 import type { Job } from "./pool.ts";
-import { blockedByPrerequisite, resolvePrerequisites } from "./prerequisites.ts";
+import {
+  blockedByPrerequisite,
+  resolvePrerequisites,
+} from "./prerequisites.ts";
 import { linkAfter, orderJobs } from "./schedule.ts";
 
 // The Checks that read File classes wait for the probe of the packages whose
@@ -106,12 +109,15 @@ test("an install that a File class Check waits for runs even when it is not sele
   // Go: TestAnInstallThatAFileClassCheckWaitsForRunsEvenWhenItIsNotSelected
   const all = plannedFor(probeProject(t), "quality.size");
   const ran = executionsOf(all, "package.install").filter(runnable);
-  assert.deepEqual(
-    sortStrings(ran.map((p) => p.context.package?.path ?? "")),
-    [".", "api"],
-  );
+  assert.deepEqual(sortStrings(ran.map((p) => p.context.package?.path ?? "")), [
+    ".",
+    "api",
+  ]);
   for (const p of ran) {
-    assert.ok(p.prerequisite, `the install of ${p.context.path} runs as a prerequisite`);
+    assert.ok(
+      p.prerequisite,
+      `the install of ${p.context.path} runs as a prerequisite`,
+    );
   }
 });
 
@@ -132,7 +138,9 @@ test("a waited install that did not complete does not block the Check", (t) => {
 test("the secret scan is planned as a prerequisite of redaction when it is not selected", (t) => {
   const all = plannedFor(probeProject(t), "package.manifest");
   const [secrets] = executionsOf(all, "security.secrets");
-  assert.ok(secrets?.deselected === true && secrets.prerequisite && runnable(secrets));
+  assert.ok(
+    secrets?.deselected === true && secrets.prerequisite && runnable(secrets),
+  );
   for (const p of executionsOf(all, "syntax.parse")) {
     assert.ok(p.deselected && !p.prerequisite && !runnable(p));
   }
@@ -158,17 +166,23 @@ test("needs and follows make a deselected Check a prerequisite, orderedAfter doe
   const flaky = planned({
     key: "x3",
     entry: entry("tests.flaky"),
-    check: fakeCheck({ status: "completed" }, {
-      prerequisites: () => ["package.install"],
-      runsAfter: () => ["tests.existing"],
-    }),
+    check: fakeCheck(
+      { status: "completed" },
+      {
+        prerequisites: () => ["package.install"],
+        runsAfter: () => ["tests.existing"],
+      },
+    ),
   });
   const strict = planned({
     key: "x4",
     entry: entry("runtime.unhandled-rejections"),
-    check: fakeCheck({ status: "completed" }, {
-      orderedAfter: () => ["tests.coverage"],
-    }),
+    check: fakeCheck(
+      { status: "completed" },
+      {
+        orderedAfter: () => ["tests.coverage"],
+      },
+    ),
   });
   const coverage = planned({
     key: "x5",
@@ -188,7 +202,10 @@ test("the scheduler waits for what a job needs, waits for, follows and is ordere
   const a = planned({ key: "x1", check: fakeCheck({ status: "completed" }) });
   const b = planned({ key: "x2", check: fakeCheck({ status: "completed" }) });
   const c = planned({ key: "x3", check: fakeCheck({ status: "completed" }) });
-  const notAJob = planned({ key: "x4", check: fakeCheck({ status: "completed" }) });
+  const notAJob = planned({
+    key: "x4",
+    check: fakeCheck({ status: "completed" }),
+  });
   c.follows = [a];
   c.orderedAfter = [b, notAJob];
   const jobs: Job[] = [c, a, b].map((p, i) => ({
