@@ -1,0 +1,38 @@
+{
+  // Type check only: Node runs the sources directly. The packaging step
+  // (ticket 24 of the port) adds the emit settings.
+  "compilerOptions": {
+    "target": "es2024",
+    "lib": ["es2024"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "noEmit": true,
+
+    // Only syntax Node can strip: no enums, namespaces or parameter
+    // properties. Relative imports name the .ts file.
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "rewriteRelativeImportExtensions": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "allowJs": true,
+    "checkJs": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["bin", "cmd", "dev", "internal", "*.js", "*.ts"],
+  // Test projects and the in-container helpers are not the tool's own code.
+  "exclude": [
+    "node_modules",
+    "**/testdata",
+    "internal/checks/js",
+    "internal/toolset/npm"
+  ]
+}

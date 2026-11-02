@@ -11,6 +11,8 @@ repos:
         args: [--enforce-all]
       - id: check-merge-conflict
       - id: check-json
+        # JSON with comments, read by tsc.
+        exclude: ^tsconfig\.json$
       - id: check-yaml
       # internal/checks/data/ keeps upstream files byte for byte.
       - id: end-of-file-fixer
@@ -27,6 +29,26 @@ repos:
         entry: go mod tidy -diff
         language: system
         files: (\.go|^go\.(mod|sum))$
+        pass_filenames: false
+      # The TypeScript port. They run the package's own pinned tools, so run
+      # `npm ci --ignore-scripts` once per clone.
+      - id: eslint
+        name: eslint
+        entry: npm run --silent lint
+        language: system
+        files: \.(ts|js)$|^(package|package-lock|tsconfig)\.json$
+        pass_filenames: false
+      - id: prettier-check
+        name: prettier --check
+        entry: npm run --silent format:check
+        language: system
+        files: \.(ts|js|json)$|^\.prettierignore$
+        pass_filenames: false
+      - id: tsc
+        name: tsc
+        entry: npm run --silent typecheck
+        language: system
+        files: \.(ts|js)$|^(package|package-lock|tsconfig)\.json$
         pass_filenames: false
 
   - repo: https://github.com/golangci/golangci-lint
