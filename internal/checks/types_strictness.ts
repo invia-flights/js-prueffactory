@@ -1,6 +1,13 @@
+import { TestCode } from "../discovery/discovery.ts";
 import { NotApplicable } from "../resultset/types.ts";
 import { type Check, register } from "./check.ts";
-import { typesApplicability } from "./types_javascript.ts";
+import { cutList } from "./cut_text.ts";
+import type { Input } from "./input.ts";
+import {
+  type TscDiagnostic,
+  targetsOfClass,
+  typesApplicability,
+} from "./types_javascript.ts";
 
 export const typesStrictnessID = "types.strictness";
 
@@ -20,3 +27,48 @@ export const typesStrictness: Check = {
 };
 
 register(typesStrictnessID, typesStrictness);
+
+/**
+ * typesTestTargets lists the files of the package's Test code that TypeScript
+ * can read, relative to the package folder and sorted, as typesTargets does
+ * for Source code.
+ */
+export function typesTestTargets(input: Input): string[] {
+  return targetsOfClass(input, TestCode);
+}
+
+/**
+ * TscRun is what one run of tsc left: the diagnostics of its text output, the
+ * ones without a file, and its exit code.
+ */
+export interface TscRun {
+  diagnostics: TscDiagnostic[];
+  global: string[];
+  exit: number;
+}
+
+/**
+ * tscProblem says whether a run of tsc says nothing about the project: it
+ * crashed, or complained about the generated configuration, or exited with an
+ * error and no diagnostic. It returns the reason code and the reason, or two
+ * empty strings.
+ */
+export function tscProblem(r: TscRun): [code: string, reason: string] {
+  if (r.exit < 0 || r.exit > 2) {
+    return ["tsc_failed", `tsc exited with ${String(r.exit)}`];
+  }
+  if (r.global.length > 0) {
+    return [
+      "tsc_config_error",
+      "tsc reported a problem with the generated configuration: " +
+        cutList(r.global, 3).join("; "),
+    ];
+  }
+  if (r.exit !== 0 && r.diagnostics.length === 0) {
+    return [
+      "tsc_failed",
+      `tsc exited with ${String(r.exit)} and reported no error`,
+    ];
+  }
+  return ["", ""];
+}
