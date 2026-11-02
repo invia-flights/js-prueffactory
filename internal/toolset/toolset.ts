@@ -50,12 +50,17 @@ record(
   `${String(ContainerCPUs)} cpus, ${String(ContainerMemoryMB)} MB`,
 );
 
-// version is a short hash of the whole table: the first six bytes of the
-// SHA-256 over the sorted "key=value" lines, as hex.
-export function version(): string {
+// tableLines returns the "key=value" lines of the table recorded so far,
+// sorted byte-wise as whole lines, as version hashes them.
+export function tableLines(): string[] {
   // Go sorts strings byte-wise; UTF-16 order differs outside the BMP.
-  const lines = [...entries].map(([k, v]) => k + "=" + v);
-  sortStrings(lines);
-  const sum = createHash("sha256").update(lines.join("\n")).digest();
+  return sortStrings([...entries].map(([k, v]) => k + "=" + v));
+}
+
+// version is a short hash of the whole table: the first six bytes of the
+// SHA-256 over the sorted "key=value" lines, as hex. It hashes only the files
+// that have been imported: import it from all.ts.
+export function version(): string {
+  const sum = createHash("sha256").update(tableLines().join("\n")).digest();
   return sum.subarray(0, 6).toString("hex");
 }
