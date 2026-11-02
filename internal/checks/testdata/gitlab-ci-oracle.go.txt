@@ -1,0 +1,240 @@
+// Generator of gitlab-ci-oracle.json: what the Go build's repository.gitlab-ci
+// reports for every case of gitlab-ci-cases.json and for the alias bombs below.
+// It must see the package's unexported names, so it runs as a test of
+// package checks. Kept as text; regenerate from the repository root with:
+//
+//	cp internal/checks/testdata/gitlab-ci-oracle.go.txt internal/checks/zz_oracle_test.go
+//	go test ./internal/checks -run TestZZGitlabOracle -count=1 && rm internal/checks/zz_oracle_test.go
+package checks
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
+	"sort"
+	"strings"
+	"testing"
+
+	"github.com/invia-flights/jscript-bench/internal/discovery"
+)
+
+type zzCase struct {
+	Name  string            `json:"name"`
+	Files map[string]string `json:"files"`
+}
+
+type zzResult struct {
+	Name         string            `json:"name"`
+	Files        map[string]string `json:"files"`
+	Status       string            `json:"status"`
+	ReasonCode   string            `json:"reason_code"`
+	Reason       string            `json:"reason"`
+	Findings     json.RawMessage   `json:"findings"`
+	Limitations  json.RawMessage   `json:"limitations"`
+	ContextTools json.RawMessage   `json:"context_tools"`
+}
+
+// storedFiles are the files a case keeps in the oracle: the generated ones
+// (bombs and deep documents) are rebuilt by the TypeScript test, which has
+// the same builders, so they are left out.
+func storedFiles(c zzCase) map[string]string {
+	if strings.HasPrefix(c.Name, "bomb-") || strings.HasPrefix(c.Name, "deep-") || c.Name == "aliases-under-limit" {
+		return nil
+	}
+	return c.Files
+}
+
+func zzBombs() []zzCase {
+	var merge strings.Builder
+	merge.WriteString(".l0: &l0 {}\n")
+	for i := 1; i <= 12; i++ {
+		refs := strings.Repeat(fmt.Sprintf("*l%d, ", i-1), 9)
+		fmt.Fprintf(&merge, ".l%d: &l%d\n  <<: [%s]\n", i, i, strings.TrimSuffix(refs, ", "))
+	}
+	merge.WriteString("test:\n  script: make\n")
+	var plain strings.Builder
+	plain.WriteString("a0: &a0 [x, x, x, x, x, x, x, x, x]\n")
+	for i := 1; i <= 12; i++ {
+		refs := strings.Repeat(fmt.Sprintf("*a%d, ", i-1), 9)
+		fmt.Fprintf(&plain, "a%d: &a%d [%s]\n", i, i, strings.TrimSuffix(refs, ", "))
+	}
+	// Just under the limit: 2^20 nodes is not reached.
+	var small strings.Builder
+	small.WriteString("a0: &a0 [x, x, x, x, x, x, x, x, x]\n")
+	for i := 1; i <= 4; i++ {
+		refs := strings.Repeat(fmt.Sprintf("*a%d, ", i-1), 9)
+		fmt.Fprintf(&small, "a%d: &a%d [%s]\n", i, i, strings.TrimSuffix(refs, ", "))
+	}
+	// Deep documents: steps nest through the schema's recursive step, and
+	// yaml.v3 refuses more than 10000 levels.
+	steps := func(n int, leaf string) string {
+		return "test:\n  run: [" + strings.Repeat("{run: [", n) + leaf + strings.Repeat("]}", n) + "]\n"
+	}
+	return []zzCase{
+		{"deep-steps-valid", map[string]string{".gitlab-ci.yml": steps(4900, "{name: a, script: x}")}},
+		{"deep-steps-invalid", map[string]string{".gitlab-ci.yml": steps(4900, "{name: a, script: 5}")}},
+		{"deep-sequence", map[string]string{".gitlab-ci.yml": "test:\n  script: " + strings.Repeat("[", 9990) + "x" + strings.Repeat("]", 9990) + "\n"}},
+		{"deep-mapping", map[string]string{".gitlab-ci.yml": ".h: " + strings.Repeat("{a: ", 9990) + "1" + strings.Repeat("}", 9990) + "\n"}},
+		{"deep-too-deep", map[string]string{".gitlab-ci.yml": "test:\n  script: " + strings.Repeat("[", 20000) + "x" + strings.Repeat("]", 20000) + "\n"}},
+		{"deep-long-keys", map[string]string{".gitlab-ci.yml": "test:\n  script: make\n  variables: " + strings.Repeat("{"+strings.Repeat("k", 200)+": ", 5000) + "1" + strings.Repeat("}", 5000) + "\n"}},
+		{"bomb-merge", map[string]string{".gitlab-ci.yml": merge.String()}},
+		{"bomb-plain", map[string]string{".gitlab-ci.yml": plain.String()}},
+		{"aliases-under-limit", map[string]string{".gitlab-ci.yml": small.String()}},
+	}
+}
+
+func TestZZGitlabOracle(t *testing.T) {
+	data, err := os.ReadFile("testdata/gitlab-ci-cases.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases []zzCase
+	if err := json.Unmarshal(data, &cases); err != nil {
+		t.Fatal(err)
+	}
+	cases = append(cases, zzBombs()...)
+	var out []zzResult
+	for _, c := range cases {
+		dir := t.TempDir()
+		names := make([]string, 0, len(c.Files))
+		for rel := range c.Files {
+			names = append(names, rel)
+		}
+		sort.Strings(names)
+		for _, rel := range names {
+			p := filepath.Join(dir, filepath.FromSlash(rel))
+			if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(p, []byte(c.Files[rel]), 0o644); err != nil {
+				t.Fatal(err)
+			}
+		}
+		proj, err := discovery.Discover(dir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		res := gitlabCI{}.Run(context.Background(), &Input{
+			Project: proj, Context: &proj.Contexts[0], OriginalPath: "/work/project", SnapshotDir: dir,
+		})
+		findings, _ := json.Marshal(res.Findings)
+		limitations, _ := json.Marshal(res.Limitations)
+		tools, _ := json.Marshal(res.ContextTools)
+		out = append(out, zzResult{
+			Name: c.Name, Files: storedFiles(c), Status: string(res.Status), ReasonCode: res.ReasonCode, Reason: res.Reason,
+			Findings: findings, Limitations: limitations, ContextTools: tools,
+		})
+	}
+	// Include globs: what globRegexp matches. A long input is written as
+	// prefix + unit repeated count times + suffix.
+	type longText struct {
+		Prefix string `json:"prefix"`
+		Unit   string `json:"unit"`
+		Count  int    `json:"count"`
+		Suffix string `json:"suffix"`
+	}
+	expand := func(l longText) string { return l.Prefix + strings.Repeat(l.Unit, l.Count) + l.Suffix }
+	type globCase struct {
+		Pattern longText `json:"pattern"`
+		Path    longText `json:"path"`
+		Match   bool     `json:"match"`
+	}
+	short := func(s string) longText { return longText{Prefix: s} }
+	var globs []globCase
+	addGlob := func(pattern, path longText) {
+		globs = append(globs, globCase{pattern, path, globRegexp(expand(pattern)).MatchString(expand(path))})
+	}
+	for _, g := range [][2]string{
+		{"ci/*.yml", "ci/a.yml"}, {"ci/*.yml", "ci/sub/a.yml"}, {"ci/**/*.yml", "ci/a.yml"}, {"ci/**/*.yml", "ci/x/y/a.yml"},
+		{"ci/**", "ci/x/y"}, {"ci/**", "ci"}, {"**/*.yml", "a.yml"}, {"**/*.yml", "x/a.yml"}, {"**.yml", "x/a.yml"},
+		{"ci/?.yml", "ci/a.yml"}, {"ci/?.yml", "ci/ab.yml"}, {"ci/?.yml", "ci//.yml"}, {"ci/?.yml", "ci/ä.yml"},
+		{"ci/ä*.yml", "ci/äb.yml"}, {"ci/ä*.yml", "ci/Ã¤b.yml"}, {"a.b", "aXb"}, {"a+b", "a+b"}, {"(a)", "(a)"}, {"[a]", "[a]"},
+		{"a**/b", "a/b"}, {"a**/b", "ax/y/b"}, {"a**/b", "ab"}, {"**/", "/"}, {"**/", ""}, {"*", ""}, {"?", ""},
+		{"ci/*.yml", "ci/a\nb.yml"}, {"ci/**.yml", "ci/a\nb.yml"}, {"ci/**/a", "ci/x\n/a"}, {"ci/?", "ci/\n"},
+		{"a*b*c", "aXbYc"}, {"a*b*c", "abcabc"}, {"$x", "$x"}, {"^a$", "^a$"},
+	} {
+		addGlob(short(g[0]), short(g[1]))
+	}
+	addGlob(longText{Unit: "*a", Count: 30, Suffix: "*b"}, longText{Unit: "a", Count: 50000})
+	addGlob(longText{Unit: "**/a", Count: 30, Suffix: "b"}, longText{Unit: "a/", Count: 30000})
+	addGlob(longText{Unit: "?", Count: 300}, longText{Unit: "x", Count: 300})
+	addGlob(longText{Prefix: "ci/", Unit: "*", Count: 2000, Suffix: ".yml"}, longText{Prefix: "ci/", Unit: "a", Count: 50000, Suffix: ".ym"})
+
+	// The pinned schema's patterns on short and long hostile strings: what
+	// Go's MatchString says.
+	type patternCase struct {
+		Pattern string   `json:"pattern"`
+		Text    longText `json:"text"`
+		Match   bool     `json:"match"`
+	}
+	var patterns []patternCase
+	var schemaDoc any
+	if err := json.Unmarshal(gitlabCISchema, &schemaDoc); err != nil {
+		t.Fatal(err)
+	}
+	seen := map[string]bool{}
+	var walk func(v any)
+	walk = func(v any) {
+		switch x := v.(type) {
+		case map[string]any:
+			for k, e := range x {
+				if k == "pattern" {
+					if s, ok := e.(string); ok {
+						seen[s] = true
+					}
+				}
+				if k == "patternProperties" {
+					if m, ok := e.(map[string]any); ok {
+						for p := range m {
+							seen[p] = true
+						}
+					}
+				}
+				walk(e)
+			}
+		case []any:
+			for _, e := range x {
+				walk(e)
+			}
+		}
+	}
+	walk(schemaDoc)
+	var pats []string
+	for p := range seen {
+		pats = append(pats, p)
+	}
+	sort.Strings(pats)
+	texts := []longText{
+		short(""), short("a"), short("."), short("a/b"), short("x.yml"), short("ci/a.yaml"), short("$VAR"), short("pull"), short("$"),
+		short("https://a.example/x.yml"), short("http://"), short("/x/"), short("a\nb"), short("a\n/b"), short("sha256-" + strings.Repeat("A", 43) + "="),
+		short("2024-02-29T10:00:00+01:00"), short("x\v/y"), short("x /y"), short("ab_9"), short("1a"), short("a-b"),
+		{Unit: "a", Count: 200000, Suffix: "/"}, {Unit: ".", Count: 200000}, {Unit: "a", Count: 200000}, {Unit: "/", Count: 200000},
+		{Unit: "$", Count: 200000}, {Unit: "$a", Count: 100000}, {Prefix: "https://", Unit: "a", Count: 200000, Suffix: ".ym"},
+		{Prefix: "https://", Unit: ".y", Count: 100000}, {Prefix: "/", Unit: "a", Count: 200000}, {Unit: "a/", Count: 100000},
+		{Unit: "\n", Count: 200000}, {Unit: "x", Count: 200000, Suffix: ".yml"}, {Unit: "a ", Count: 100000}, {Unit: "pul", Count: 100000},
+		{Prefix: "$", Unit: "w", Count: 300}, {Unit: "_", Count: 200000, Suffix: "!"}, {Unit: "2024-", Count: 50000},
+	}
+	for _, p := range pats {
+		re := regexp.MustCompile(p)
+		for _, tx := range texts {
+			patterns = append(patterns, patternCase{p, tx, re.MatchString(expand(tx))})
+		}
+	}
+
+	doc := map[string]any{
+		"recordedFrom": "the Go build at the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8 (Go 1.27.3)",
+		"cases":        out,
+		"globs":        globs,
+		"patterns":     patterns,
+	}
+	b, err := json.MarshalIndent(doc, "", " ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/gitlab-ci-oracle.json", append(b, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
