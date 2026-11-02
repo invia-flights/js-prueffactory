@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { closeSync, lstatSync, openSync, readSync } from "node:fs";
 
 import { pathError } from "../gocompat/os.ts";
+import { join } from "../gocompat/path.ts";
 import type { Limitation } from "../resultset/types.ts";
 import { cutList } from "./cut_text.ts";
 
@@ -126,6 +127,18 @@ export function readCapped(abs: string, limit: number): Uint8Array {
     throw errTooLarge;
   }
   return data;
+}
+
+/**
+ * readProjectFile reads a regular project file of at most
+ * maxProjectFileBytes from the host-side Snapshot copy (Go: quality_size.go).
+ * It throws errNotRegular, errTooLarge or Go's *PathError.
+ */
+export function readProjectFile(
+  input: { readonly snapshotDir: string },
+  rel: string,
+): Uint8Array {
+  return readCapped(join(input.snapshotDir, rel), maxProjectFileBytes);
 }
 
 // fileHashes caches sha256File: a Check that reports many Findings in one
