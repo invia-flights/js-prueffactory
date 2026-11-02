@@ -30,8 +30,8 @@ test("only the groups of selected Checks are switched on", () => {
 
   assert.deepEqual(
     ids(all),
-    ["deps.engines", "lint.correctness", "tests.smells"],
-    "without a Selection every registered group is on, in Check ID order (quality.metrics registers its group with ticket 22)",
+    ["deps.engines", "lint.correctness", "quality.metrics", "tests.smells"],
+    "without a Selection every registered group is on, in Check ID order",
   );
 
   const some = packageInput(proj, dir, ".", {

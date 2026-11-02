@@ -2,7 +2,7 @@
 // ESLint run (their rule groups) and what they make of its output (Go:
 // eslint_groups_test.go). The run itself needs Docker and is covered by
 // cli/eslint_groups.docker.test.ts. The quality.metrics tests of the Go file
-// belong to ticket 22.
+// are in quality_metrics.test.ts.
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 

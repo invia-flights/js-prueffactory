@@ -1,0 +1,326 @@
+// Generator of types-quality-oracle.json: what the Go build of the freeze
+// commit (238e07f66d8cafab24ef363cb79e207bd48babd8) answers for the functions
+// of types.javascript, types.strictness, quality.suppressions, quality.size and
+// quality.metrics on the inputs of types-quality-oracle-cases.json: how
+// Suppression comments are counted, the Inventory role of a path, the line
+// counts, the percentile, the reading of type-coverage's document, what the
+// type Checks make of tsc's output, what quality.metrics makes of a combined
+// ESLint run, and the two native Checks run on a tree of files. Kept as text,
+// because the functions are unexported; regenerate from the repository root
+// with:
+//
+//	cp internal/checks/testdata/types-quality-oracle.go.txt internal/checks/zz_types_quality_oracle_test.go
+//	go test ./internal/checks -run TestZZTypesQualityOracle -count=1 && rm internal/checks/zz_types_quality_oracle_test.go
+package checks
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"sort"
+	"strings"
+	"testing"
+
+	"github.com/invia-flights/jscript-bench/internal/resultset"
+)
+
+type ztCoverage struct {
+	Correct int `json:"correct"`
+	Total   int `json:"total"`
+}
+
+type ztRun struct {
+	Out  string `json:"out"`
+	Exit int    `json:"exit"`
+	// Many generates Count diagnostics of Code in Path (a strict-mode error).
+	Many *struct {
+		Count int    `json:"count"`
+		Path  string `json:"path"`
+		Code  string `json:"code"`
+	} `json:"many"`
+	// Resolution adds that many unresolved modules (TS2307) in src/a.ts.
+	Resolution int `json:"resolution"`
+}
+
+type ztCases struct {
+	Suppressions []string `json:"suppressions"`
+	Roles        []string `json:"roles"`
+	Lines        []string `json:"lines"`
+	Percentiles  []struct {
+		Values []int `json:"values"`
+		P      int   `json:"p"`
+	} `json:"percentiles"`
+	TypeCoverage []string `json:"typeCoverage"`
+	Types        []struct {
+		Name  string            `json:"name"`
+		Files map[string]string `json:"files"`
+		Pkg   string            `json:"pkg"`
+		Run   ztRun             `json:"run"`
+	} `json:"types"`
+	Strictness []struct {
+		Name   string            `json:"name"`
+		Files  map[string]string `json:"files"`
+		Basic  ztRun             `json:"basic"`
+		Strict ztRun             `json:"strict"`
+		Source ztCoverage        `json:"source"`
+		Tests  *ztCoverage       `json:"tests"`
+	} `json:"strictness"`
+	Metrics []struct {
+		Name     string `json:"name"`
+		Measures []struct {
+			Path   string `json:"path"`
+			Kind   string `json:"kind"`
+			Line   int    `json:"line"`
+			Column int    `json:"column"`
+			Value  int    `json:"value"`
+			Name   string `json:"name"`
+		} `json:"measures"`
+		Unparsed   []string `json:"unparsed"`
+		Dropped    int      `json:"dropped"`
+		Unreadable int      `json:"unreadable"`
+		Many       int      `json:"many"`
+	} `json:"metrics"`
+	Native []struct {
+		Name  string            `json:"name"`
+		Files map[string]string `json:"files"`
+	} `json:"native"`
+}
+
+func ztFindings(fs []resultset.Finding) any {
+	if len(fs) > 20 {
+		return map[string]any{"count": len(fs), "first": ztFindings(fs[:2]), "last": ztFindings(fs[len(fs)-2:])}
+	}
+	out := []map[string]any{}
+	for _, f := range fs {
+		m := map[string]any{
+			"rule": *f.RuleID, "title": f.Title, "message": f.Message, "gate": f.Gate, "severity": f.Severity,
+			"confidence": f.Confidence, "kind": f.Kind, "in_test_code": f.InTestCode,
+			"fingerprint": f.Fingerprint.Value, "limitations": f.Limitations,
+		}
+		if len(f.Locations) > 0 {
+			l := f.Locations[0]
+			m["path"], m["sha"] = l.Path, l.FileSHA256
+			if l.Start != nil {
+				m["line"] = l.Start.Line
+				if l.Start.Column != nil {
+					m["column"] = *l.Start.Column
+				}
+			}
+		}
+		if len(f.Evidence) > 0 {
+			m["evidence"], m["origin"], m["trust"] = f.Evidence[0].Text, f.Evidence[0].Origin, f.Evidence[0].Trust
+		}
+		out = append(out, m)
+	}
+	return out
+}
+
+func ztResult(res *Result) map[string]any {
+	m := map[string]any{
+		"status": res.Status, "reasonCode": res.ReasonCode, "reason": res.Reason, "command": res.Command,
+		"findings": ztFindings(res.Findings),
+	}
+	if res.Tool != nil {
+		t := map[string]any{"name": res.Tool.Name}
+		if res.Tool.Version != nil {
+			t["version"] = *res.Tool.Version
+		}
+		if res.Tool.ExitCode != nil {
+			t["exit"] = *res.Tool.ExitCode
+		}
+		m["tool"] = t
+	}
+	var lims []map[string]any
+	for _, l := range res.Limitations {
+		c := ""
+		if l.CheckID != nil {
+			c = *l.CheckID
+		}
+		lims = append(lims, map[string]any{"code": l.ReasonCode, "message": l.Message, "check": c})
+	}
+	m["limitations"] = lims
+	var arts []map[string]any
+	for _, a := range res.Artifacts {
+		arts = append(arts, map[string]any{"id": a.ID, "path": a.Path, "mediaType": a.MediaType, "content": string(a.Content)})
+	}
+	m["artifacts"] = arts
+	var tools []map[string]any
+	for _, c := range res.ContextTools {
+		d := ""
+		if c.Digest != nil {
+			d = *c.Digest
+		}
+		tools = append(tools, map[string]any{"name": c.Name, "version": c.Version, "digest": d})
+	}
+	m["contextTools"] = tools
+	var metrics []map[string]any
+	for _, x := range res.Metrics {
+		e := map[string]any{"name": x.Name, "unit": x.Unit, "value": nil, "reason": nil}
+		if x.Value != nil {
+			e["value"] = *x.Value
+		}
+		if x.Reason != nil {
+			e["reason"] = *x.Reason
+		}
+		metrics = append(metrics, e)
+	}
+	m["metrics"] = metrics
+	if res.Inventory != nil {
+		m["inventory"] = map[string]any{
+			"suppressions": res.Inventory.Suppressions, "file_hashes": res.Inventory.FileHashes, "size": res.Inventory.Size,
+		}
+	}
+	return m
+}
+
+func ztTSC(r ztRun) string {
+	out := r.Out
+	if r.Many != nil {
+		for i := 1; i <= r.Many.Count; i++ {
+			out += fmt.Sprintf("%s(%d,1): error %s: Parameter 'p%d' implicitly has an 'any' type.\n", r.Many.Path, i, r.Many.Code, i)
+		}
+	}
+	for i := 1; i <= r.Resolution; i++ {
+		out += fmt.Sprintf("src/a.ts(%d,1): error TS2307: Cannot find module '@app/m%d' or its corresponding type declarations.\n", i, i-1)
+	}
+	return out
+}
+
+func ztTscRun(r ztRun) tscRun {
+	diags, global := parseTSC(ztTSC(r))
+	return tscRun{Diagnostics: diags, Global: global, Exit: r.Exit}
+}
+
+func ztInput(t *testing.T, files map[string]string, pkg string) *Input {
+	t.Helper()
+	if pkg == "" {
+		pkg = "."
+	}
+	proj, dir := writeTree(t, files)
+	return &Input{Project: proj, Context: packageContext(t, proj, pkg), OriginalPath: "/original", SnapshotDir: dir}
+}
+
+func TestZZTypesQualityOracle(t *testing.T) {
+	raw, err := os.ReadFile("testdata/types-quality-oracle-cases.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases ztCases
+	if err := json.Unmarshal(raw, &cases); err != nil {
+		t.Fatal(err)
+	}
+	out := map[string]any{}
+
+	var supp []map[string]int
+	for _, c := range cases.Suppressions {
+		supp = append(supp, countSuppressions([]byte(c)))
+	}
+	out["suppressions"] = supp
+
+	var roles []string
+	for _, c := range cases.Roles {
+		roles = append(roles, configRole(c))
+	}
+	out["roles"] = roles
+
+	var lines [][]int
+	for _, c := range cases.Lines {
+		n := countLines([]byte(c))
+		lines = append(lines, []int{n.lines, n.nonBlank})
+	}
+	out["lines"] = lines
+
+	var pcts []int
+	for _, c := range cases.Percentiles {
+		sorted := append([]int{}, c.Values...)
+		sort.Ints(sorted)
+		pcts = append(pcts, percentile(sorted, c.P))
+	}
+	out["percentiles"] = pcts
+
+	var covs []map[string]any
+	for _, c := range cases.TypeCoverage {
+		got, err := parseTypeCoverage([]byte(c))
+		m := map[string]any{"error": err != nil}
+		if err != nil {
+			m["errorText"] = err.Error()
+		} else {
+			m["correct"], m["total"], m["percent"] = got.Correct, got.Total, got.Percent()
+		}
+		covs = append(covs, m)
+	}
+	out["typeCoverage"] = covs
+
+	var types []map[string]any
+	for _, c := range cases.Types {
+		in := ztInput(t, c.Files, c.Pkg)
+		diags, global := parseTSC(ztTSC(c.Run))
+		types = append(types, ztResult(interpretTypes(in, diags, global, c.Run.Exit)))
+	}
+	out["types"] = types
+
+	var strict []map[string]any
+	for _, c := range cases.Strictness {
+		in := ztInput(t, c.Files, ".")
+		var tests *typeCoverage
+		if c.Tests != nil {
+			tests = &typeCoverage{Correct: c.Tests.Correct, Total: c.Tests.Total}
+		}
+		strict = append(strict, ztResult(interpretStrictness(in, ztTscRun(c.Basic), ztTscRun(c.Strict),
+			typeCoverage{Correct: c.Source.Correct, Total: c.Source.Total}, tests)))
+	}
+	out["strictness"] = strict
+
+	var metrics []map[string]any
+	for _, c := range cases.Metrics {
+		in := ztInput(t, map[string]string{"package.json": `{"name":"x"}`, "src/a.js": "1;\n"}, ".")
+		var ms []eslintMeasure
+		for _, m := range c.Measures {
+			ms = append(ms, eslintMeasure{Path: m.Path, Kind: m.Kind, Line: m.Line, Column: m.Column, Value: m.Value, Name: m.Name})
+		}
+		for i := 1; i <= c.Many; i++ {
+			ms = append(ms, eslintMeasure{Path: "src/a.js", Kind: "cyclomatic", Line: i, Column: 1, Value: i % 30, Name: "f"},
+				eslintMeasure{Path: "src/a.js", Kind: "length", Line: i, Column: 1, Value: i % 70, Name: "f"})
+		}
+		run := &eslintRun{
+			Output: eslintOutput{
+				Version: "10.13.0", Groups: map[string][]string{"quality.metrics": {"complexity", "max-lines-per-function", "sonarjs/cognitive-complexity"}},
+				Config: map[string]any{"eslint": "10.13.0"}, Measures: ms, MeasuresDropped: c.Dropped, MeasuresUnreadable: c.Unreadable,
+			},
+			ConfigSHA256: "abc123",
+		}
+		for _, p := range c.Unparsed {
+			run.Output.Results = append(run.Output.Results, eslintFileResult{Path: p, Messages: []eslintMessage{{Fatal: true, Message: "Parsing error"}}})
+		}
+		metrics = append(metrics, ztResult(interpretQualityMetrics(in, run)))
+	}
+	out["metrics"] = metrics
+
+	var native []map[string]any
+	for _, c := range cases.Native {
+		proj, dir := writeTree(t, c.Files)
+		ctx := &proj.Contexts[0]
+		m := map[string]any{}
+		for _, id := range []string{"quality.size", "quality.suppressions"} {
+			res := Implementation(id).Run(context.Background(), &Input{Project: proj, Context: ctx, SnapshotDir: dir, OriginalPath: dir})
+			m[id] = ztResult(res)
+		}
+		var classes []string
+		for _, f := range proj.Files {
+			classes = append(classes, f.Path+"="+string(f.Class))
+		}
+		sort.Strings(classes)
+		m["classes"] = strings.Join(classes, ",")
+		native = append(native, m)
+	}
+	out["native"] = native
+
+	data, err := json.Marshal(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/types-quality-oracle.json", append(data, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}

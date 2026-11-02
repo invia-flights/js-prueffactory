@@ -2,38 +2,99 @@ import { join as osJoin } from "node:path";
 
 import type { Context, FileClass, Package } from "../discovery/discovery.ts";
 import { isTypeScript, Source } from "../discovery/discovery.ts";
+import type { ContainerResult } from "../docker/driver.ts";
 import { marshalAny } from "../gocompat/marshal_any.ts";
-import { dir as pathDir, join } from "../gocompat/path.ts";
-import { sortStrings, trimSpace } from "../gocompat/strings.ts";
+import { clean, dir as pathDir, join } from "../gocompat/path.ts";
+import {
+  compareBytes,
+  sortStrings,
+  toLower,
+  trimSpace,
+} from "../gocompat/strings.ts";
+import { goString } from "../gocompat/utf8.ts";
 import {
   type Applicability,
   Applicable,
+  ConfidenceSuspected,
+  type Finding,
   type Limitation,
   NotApplicable,
+  StatusCompleted,
+  StatusPartial,
+  StatusToolError,
+  StatusUnsupported,
+  type ToolRef,
 } from "../resultset/types.ts";
-import { newLimitation } from "../resultset/zero.ts";
+import { newArtifact, newLimitation, newMetric } from "../resultset/zero.ts";
 import { DefaultNodeMajor, nodeImage, VariantDebian } from "../toolset/node.ts";
+import { npmTool } from "../toolset/npmtools.ts";
 import { imageRef } from "../toolset/toolset.ts";
-import { ToolBin } from "../toolvolume/toolvolume.ts";
+import { MountPath, ToolBin } from "../toolvolume/toolvolume.ts";
 import { type Check, register } from "./check.ts";
-import { cutList } from "./cut_text.ts";
+import { cutList, tail } from "./cut_text.ts";
 import { eslintCandidate, packageFolder } from "./eslint_run.ts";
-import type { Input } from "./input.ts";
+import { failedToRun, toolsetUnavailable } from "./helper_result.ts";
+import type { Input, Result } from "./input.ts";
 import {
   packageInstallID,
   unsupportedInstallReason,
   workMount,
+  workPath,
 } from "./package_install.ts";
 import { lstatRegular } from "./readcap.ts";
+import { rawJSON, repoFinding } from "./repo_findings.ts";
 
 export const typesJavascriptID = "types.javascript";
 
-// typesJavascript runs TypeScript over the package's JavaScript with a
-// generated tsconfig. The run arrives with ticket 22 of the port.
+// typesJavascript lets TypeScript 7 check the JavaScript of a package, in the
+// basic profile: JSDoc and inference, with `strict` and `noImplicitAny` off. It
+// shows contract errors that the project never promised to be free of, so
+// every error is a warning and never a Gate.
+//
+// TypeScript runs from the toolset volume on the toolset's own Node image, like
+// ESLint, and reads the package's installed dependencies in the Working copy,
+// which it mounts read-only. The tsconfig is ours: it is written next to the
+// helper files outside the Working copy, so that nothing in the project, not
+// even a tsconfig.json or jsconfig.json for its editor, changes what is
+// measured and nothing is written to the project's folder.
+//
+// TypeScript files in the package's Source code (.ts, .tsx, .mts, .cts) are
+// checked together with the JavaScript, with the same profile, so a mostly
+// JavaScript package with a few TypeScript files is measured like any other.
+// The exception is a package whose Discovery says it needs a build step and
+// that has TypeScript sources: the JavaScript that runs is a build product
+// there, and the Check is unsupported with the reason, like syntax.parse.
+// Because the project's own tsconfig is not read, errors that only exist for
+// that reason (path aliases, project references, custom lib settings) are
+// counted, and a Limitation names the likely cause when they are a flood.
 export const typesJavascript: Check = {
   applicability(_p, c) {
     return typesApplicability(c);
   },
+
+  /**
+   * Prerequisites is the install, except for a package that is unsupported
+   * whatever the install does.
+   */
+  prerequisites(c) {
+    return typesPrerequisites(c);
+  },
+
+  usesWorkingCopy() {
+    return true;
+  },
+
+  /** Images tells the engine which image the run will use. */
+  images(c) {
+    return typesImages(c);
+  },
+
+  /** UsesToolset says that TypeScript comes from the toolset volume. */
+  usesToolset(c) {
+    return typesRunnable(c);
+  },
+
+  run: runTypesJavascript,
 };
 
 register(typesJavascriptID, typesJavascript);
@@ -468,4 +529,319 @@ export function projectTsconfigNotUsed(
         consequence,
     }),
   ];
+}
+
+// --- the Check's own run (Go: types_javascript.go) ---
+
+function packageOf(input: Input): Package {
+  const pkg = input.context.package;
+  if (pkg === null) {
+    throw new Error("the type Checks examine packages");
+  }
+  return pkg;
+}
+
+async function runTypesJavascript(
+  signal: AbortSignal,
+  input: Input,
+): Promise<Result> {
+  const pkg = packageOf(input);
+  const u = pkg.installUnsupported;
+  if (u !== null) {
+    return { status: StatusUnsupported, reasonCode: u.code, reason: u.reason };
+  }
+  const [code, reason] = typesUnsupported(pkg);
+  if (reason !== "") {
+    return { status: StatusUnsupported, reasonCode: code, reason };
+  }
+  if (input.toolsetVolume === "") {
+    return toolsetUnavailable(input, "TypeScript");
+  }
+  const files = typesTargets(input);
+  if (files.length === 0) {
+    return { status: StatusCompleted };
+  }
+  const node = input.context.node?.version ?? "";
+  const config = typesTsconfig(files, pkg.path, node, pkg.usesMocha());
+
+  const res: Result = { status: StatusCompleted };
+  res.command = [
+    "node",
+    ToolBin + "/typescript7/bin/tsc",
+    "-p",
+    typesConfigPath,
+    "--pretty",
+    "false",
+  ];
+  const docker = input.docker;
+  if (docker === null) {
+    // Go dereferenced the nil driver here and panicked.
+    throw new Error("no Docker driver is configured");
+  }
+  let container: ContainerResult;
+  try {
+    container = await docker.runContainer(signal, {
+      name: "types-" + toLower(input.context.id),
+      image: typesImage(),
+      cmd: res.command,
+      workDir: workPath(pkg),
+      network: input.network,
+      mounts: [
+        { volume: input.workVolume, path: workMount, readOnly: true },
+        { volume: input.toolsetVolume, path: MountPath, readOnly: true },
+      ],
+      files: [
+        { path: typesConfigPath, mode: 0o644, content: Buffer.from(config) },
+      ],
+    });
+  } catch (err) {
+    return failedToRun(res, err);
+  }
+  if (container.oomKilled) {
+    res.status = StatusToolError;
+    res.reasonCode = "tsc_failed";
+    res.reason =
+      "tsc ran out of memory: " + tail(goString(container.stderr), 400);
+    return res;
+  }
+  const { diags, global } = parseTSC(goString(container.stdout));
+  const out = interpretTypes(input, diags, global, container.exitCode);
+  out.command = res.command;
+  if (out.status === StatusToolError && out.reasonCode === "tsc_failed") {
+    out.reason =
+      (out.reason ?? "") +
+      ": " +
+      tail(goString(container.stderr) + "\n" + goString(container.stdout), 800);
+  }
+  out.artifacts = [
+    ...(out.artifacts ?? []),
+    newArtifact({
+      id: "tsconfig-" + input.context.id,
+      path: `artifacts/${typesJavascriptID}/${input.context.id}-tsconfig.json`,
+      media_type: "application/json",
+      content: Buffer.from(config + "\n"),
+    }),
+  ];
+  return out;
+}
+
+/**
+ * typesJSONListMax caps the dropped errors that the list names; the rest is
+ * counted.
+ */
+const typesJSONListMax = 50;
+
+/**
+ * DroppedJSONError is one TS2307 that the Check dropped because Node loads
+ * the JSON file. Paths are project paths. The properties are in Go's field
+ * order, which is the order of the artifact.
+ */
+interface DroppedJSONError {
+  specifier: string;
+  path: string;
+  line: number;
+  column: number;
+  resolves_to: string;
+}
+
+/**
+ * typesDroppedJSON reports what the JSON filter dropped, so that a reader
+ * sees what was left out of the Findings: the count as a measurement, and the
+ * list, cut at typesJSONListMax with the remainder counted, as an artifact. It
+ * adds the list only when something was dropped.
+ */
+function typesDroppedJSON(
+  input: Input,
+  res: Result,
+  dropped: DroppedJSONError[],
+): void {
+  res.metrics = [
+    ...(res.metrics ?? []),
+    newMetric({
+      name: "json_modules_dropped",
+      unit: "errors",
+      value: dropped.length,
+    }),
+  ];
+  if (dropped.length === 0) {
+    return;
+  }
+  dropped.sort(
+    (a, b) =>
+      compareBytes(a.path, b.path) || a.line - b.line || a.column - b.column,
+  );
+  const listed =
+    dropped.length > typesJSONListMax
+      ? dropped.slice(0, typesJSONListMax)
+      : dropped;
+  const doc = marshalAny(
+    {
+      check: typesJavascriptID,
+      context_id: input.context.id,
+      note: 'TypeScript reported "Cannot find module" (TS2307) for these requires, but Node loads the JSON file named in resolves_to. The Check does not report them as Findings and does not count them in resolution_errors.',
+      dropped: dropped.length,
+      omitted: dropped.length - listed.length,
+      errors: listed,
+    },
+    { indent: "  " },
+  );
+  res.artifacts = [
+    ...(res.artifacts ?? []),
+    newArtifact({
+      id: "json-modules-dropped-" + input.context.id,
+      path: `artifacts/${typesJavascriptID}/${input.context.id}-json-modules-dropped.json`,
+      media_type: "application/json",
+      content: Buffer.from(doc + "\n"),
+    }),
+  ];
+}
+
+/**
+ * int64Of is the int that strconv.Atoi left for a number held in a double:
+ * the clamped largest int64 is 2^63 as a double, and only it gets there.
+ */
+function int64Of(n: number): bigint {
+  return n >= 2 ** 63 ? (1n << 63n) - 1n : BigInt(n);
+}
+
+/** tscDiagnosticJSON is Go's json.Marshal of a tscDiagnostic (no json tags). */
+export function tscDiagnosticJSON(d: TscDiagnostic): string {
+  return rawJSON([
+    ["Path", d.path],
+    ["Line", int64Of(d.line)],
+    ["Column", int64Of(d.column)],
+    ["Category", d.category],
+    ["Code", d.code],
+    ["Message", d.message],
+  ]);
+}
+
+/**
+ * interpretTypes turns tsc's diagnostics and exit code into the Result. tsc
+ * exits with 0 for a clean run and 1 or 2 when it reported errors; anything
+ * else, or a failure without a diagnostic, is a problem of the tool and not a
+ * statement about the project. Only diagnostics in the files of the package's
+ * Source code are reported: what an import pulls in from Test code, Test data
+ * or outside the package is not what the Check examines.
+ */
+export function interpretTypes(
+  input: Input,
+  diags: readonly TscDiagnostic[],
+  global: readonly string[],
+  exit: number,
+): Result {
+  const res: Result = { status: StatusCompleted };
+  const tsc = npmTool("typescript");
+  if (tsc !== undefined) {
+    res.tool = { name: "tsc", version: tsc.version, exit_code: exit };
+  }
+  const refs: ToolRef[] = [];
+  for (const name of ["typescript", "@types/node", "@types/mocha"]) {
+    const tool = npmTool(name);
+    if (tool !== undefined) {
+      refs.push({
+        name: tool.name,
+        version: tool.version,
+        digest: tool.integrity,
+      });
+    }
+  }
+  res.contextTools = refs;
+  if (exit < 0 || exit > 2) {
+    res.status = StatusToolError;
+    res.reasonCode = "tsc_failed";
+    res.reason = `tsc exited with ${String(exit)}`;
+    return res;
+  }
+  if (global.length > 0) {
+    res.status = StatusToolError;
+    res.reasonCode = "tsc_config_error";
+    res.reason =
+      "tsc reported a problem with the generated configuration: " +
+      cutList(global, 3).join("; ");
+    return res;
+  }
+  if (exit !== 0 && diags.length === 0) {
+    res.status = StatusToolError;
+    res.reasonCode = "tsc_failed";
+    res.reason = `tsc exited with ${String(exit)} and reported no error`;
+    return res;
+  }
+
+  const pkg = packageOf(input);
+  const source = new Set(typesTargets(input));
+  let findings: Finding[] = [];
+  const dropped: DroppedJSONError[] = [];
+  for (const d of diags) {
+    const rel = clean(d.path);
+    if (d.category === "message" || !source.has(rel)) {
+      continue;
+    }
+    const json = typesNodeLoadsJSON(input, rel, d);
+    if (json !== null) {
+      dropped.push({
+        specifier: json.specifier,
+        path: join(pkg.path, rel),
+        line: d.line,
+        column: d.column,
+        resolves_to: join(pkg.path, json.resolvesTo),
+      });
+      continue;
+    }
+    const f = repoFinding(input, typesJavascriptID, {
+      tool: "tsc",
+      rule: d.code,
+      level: "warning",
+      path: join(pkg.path, rel),
+      line: d.line,
+      column: d.column,
+      message: d.message,
+      raw: tscDiagnosticJSON(d),
+    });
+    // The basic profile still has false positives: dynamic patterns and
+    // dependencies without types.
+    f.confidence = ConfidenceSuspected;
+    findings.push(f);
+  }
+  // Errors that only exist because the generated config cannot see the
+  // project's own: counted before the cut, and a Limitation when they are a
+  // flood. The Findings stay in the Report.
+  let resolution = 0;
+  for (const f of findings) {
+    if (f.rule_id !== null && typesResolutionCodes.has(f.rule_id)) {
+      resolution++;
+    }
+  }
+  res.metrics = [
+    newMetric({
+      name: "resolution_errors",
+      unit: "errors",
+      value: resolution,
+    }),
+  ];
+  typesDroppedJSON(input, res, dropped);
+  res.limitations = [
+    ...projectTsconfigNotUsed(
+      typesJavascriptID,
+      resolution,
+      findings.length,
+      "Treat these Findings with care.",
+    ),
+  ];
+  if (findings.length > typesMaxFindings) {
+    res.limitations.push(
+      newLimitation({
+        reason_code: "findings_cut",
+        check_id: typesJavascriptID,
+        message: `The Report keeps the first ${String(typesMaxFindings)} type errors; ${String(findings.length - typesMaxFindings)} more were found and are left out.`,
+      }),
+    );
+    findings = findings.slice(0, typesMaxFindings);
+    res.status = StatusPartial;
+    res.reasonCode = "check_could_not_run_on_some_files";
+    res.reason =
+      "some type errors are missing from this Check; see the Limitations";
+  }
+  res.findings = findings;
+  return res;
 }

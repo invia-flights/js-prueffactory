@@ -1,9 +1,9 @@
 // Seam A with a real Docker daemon: Test code is what the project's test
 // runner loads, wherever it lives, and lint.correctness reads those classes
 // (Go: colocated_tests_docker_test.go). colocated_tests.docker.test.ts has the
-// probe's own part; the quality.suppressions part (the Inventory's Test code
-// file hashes of the moved files) belongs to ticket 22 and the coverage part to
-// ticket 15.
+// probe's own part, colocated_tests_inventory.docker.test.ts the Inventory's
+// Test code file hashes of the moved files and colocated_tests_coverage.docker.test.ts
+// the coverage part.
 import assert from "node:assert/strict";
 import { test } from "node:test";
 

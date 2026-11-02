@@ -37,8 +37,13 @@ import { eslintCandidate, packageFolder } from "./eslint_run.ts";
 import { failedToRun } from "./helper_result.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
 import { plural } from "./lint_correctness.ts";
-import { isBinary, readProjectFile } from "./quality_size.ts";
-import { errNotRegular, errTooLarge, readCapped } from "./readcap.ts";
+import { isBinary } from "./quality_size.ts";
+import {
+  errNotRegular,
+  errTooLarge,
+  readCapped,
+  readProjectFile,
+} from "./readcap.ts";
 import { cutTitle } from "./repo_findings.ts";
 import { shownPath } from "./shown_text.ts";
 import { unmarshalText } from "./security_dependencies_osv.ts";
