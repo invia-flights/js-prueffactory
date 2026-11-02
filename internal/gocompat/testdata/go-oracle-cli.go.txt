@@ -1,0 +1,136 @@
+// Generator of go-oracle-cli.json: what the Go standard library of the freeze
+// commit's toolchain computes for the inputs of the duration, integer and flag
+// tests in gocompat (the parts of Go the command line relies on). Kept as
+// text; regenerate with:
+// mkdir /tmp/x && cp go-oracle-cli.go.txt /tmp/x/main.go && (cd /tmp/x && go run main.go) > go-oracle-cli.json
+package main
+
+import (
+	"encoding/json"
+	"errors"
+	"flag"
+	"fmt"
+	"io"
+	"math"
+	"os"
+	"strconv"
+	"time"
+)
+
+type listValue []string
+
+func (l *listValue) String() string     { return fmt.Sprint([]string(*l)) }
+func (l *listValue) Set(v string) error { *l = append(*l, v); return nil }
+
+func main() {
+	out := map[string]any{"recordedFrom": "Go 1.27.3 standard library, the toolchain of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8"}
+
+	type parsed struct {
+		In    string
+		Nanos string // decimal int64, "" on error
+		Err   string
+	}
+	var ps []parsed
+	for _, s := range []string{"", "0", "+0", "-0", "0s", "45m", "1h30m", "1.5h", "90s", "-5m", "+5m", "1h30", "30", "soon", "1d",
+		"abc", ".5h", "5.m", ".s", "-.s", "1.s", "300ms", "1us", "1µs", "1μs", "2ns", "1h1m1s1ms1us1ns", "0.000000001s", "0.0000000001s",
+		"1.0000000005s", "2562047h47m16.854775807s", "2562047h47m16.854775808s", "-2562047h47m16.854775808s", "9223372036854775807ns",
+		"9223372036854775808ns", "-9223372036854775808ns", "99999999999999999999ns", "1.123456789123456789h", "1x", "1 m", " 1m", "1m ",
+		"1M", "1H", "1e3s", "1..5s", "1.5.5s", "--5m", "+-5m", "1hé", "1\x00s", "1\x7fs", "h", "1h-1m", "600h", "0.1h", "1.00000000000000000000001h",
+		"3.000000000000000000000000000000000000001s", "123456789012345678901234567890.5ns", "1éés", "1\U0001F600"} {
+		d, err := time.ParseDuration(s)
+		p := parsed{In: s}
+		if err != nil {
+			p.Err = err.Error()
+		} else {
+			p.Nanos = strconv.FormatInt(int64(d), 10)
+		}
+		ps = append(ps, p)
+	}
+	out["parseDuration"] = ps
+
+	type formatted struct{ Nanos, String string }
+	var fs []formatted
+	for _, n := range []int64{0, 1, 999, 1000, 1001, 1500, 999999, 1000000, 1234567, 999999999, 1000000000, 1500000000, 59999999999,
+		60000000000, 61000000000, 3600000000000, 5400000000000, 7200000000000, 3300000000000, 1800000000000, 86400000000000,
+		-1, -1500, -60000000000, -5400000000000, math.MaxInt64, math.MinInt64, 300000000000, 1200000000000, 3723004005006} {
+		fs = append(fs, formatted{strconv.FormatInt(n, 10), time.Duration(n).String()})
+	}
+	out["durationString"] = fs
+
+	// Seconds times time.Second as int64 arithmetic, wrapping on overflow.
+	type mul struct{ Secs, Nanos string }
+	var ms []mul
+	for _, s := range []int64{1, 3600, 9223372036, 9223372037, 10000000000000, math.MaxInt64} {
+		ms = append(ms, mul{strconv.FormatInt(s, 10), strconv.FormatInt(int64(time.Duration(s)*time.Second), 10)})
+	}
+	out["secondsWrap"] = ms
+
+	type intCase struct{ In, Value, Err string }
+	var ics []intCase
+	for _, s := range []string{"3600", "+3600", "-5", "0", "", "abc", "1_000", "0x10", "9223372036854775807", "9223372036854775808",
+		"-9223372036854775808", "-9223372036854775809", "36 00", "٣", "+", "-", "007"} {
+		v, err := strconv.ParseInt(s, 10, 64)
+		c := intCase{In: s}
+		if err != nil {
+			c.Err = err.Error()
+		} else {
+			c.Value = strconv.FormatInt(v, 10)
+		}
+		ics = append(ics, c)
+	}
+	out["parseInt"] = ics
+
+	// A FlagSet with a string, a bool and a list flag, as the command line has.
+	type flagCase struct {
+		Args    []string
+		Err     string
+		Help    bool
+		Format  string
+		Fast    bool
+		Only    []string
+		Visited []string
+		Rest    []string
+	}
+	var fcs []flagCase
+	for _, args := range [][]string{
+		{}, {"path"}, {"--format", "json", "path"}, {"-format=json", "path"}, {"--format=", "path"}, {"--format"}, {"-format"},
+		{"--fast", "path"}, {"--fast=false", "path"}, {"--fast", "false"}, {"-fast=0"}, {"--fast=maybe"}, {"--fast=TRUE"}, {"--fast=t"},
+		{"--fast=True"}, {"--fast=tRUE"}, {"--fast="}, {"--nope"}, {"-nope=1"}, {"---x"}, {"-=x"}, {"--=x"}, {"-"}, {"--", "--fast"}, {"--"},
+		{"-h"}, {"-help"}, {"--help=x"}, {"--h"}, {"--nope", "-h"}, {"-h", "--nope"}, {"--only", "a", "--only=b,c", "-only", ""},
+		{"--format", "a", "--format", "b"}, {"--format", "--fast"}, {"path", "--fast"}, {"--fast", "--", "x", "--format", "y"},
+		{"--only"}, {"-fast=1", "-fast=F"}, {"--Fast"}, {"--fast=\x01"}, {"--format=a=b"}, {"--népe"}, {"--fast=é"},
+		{"-format==x"}, {"--format", "-", "x"}, {"---"},
+	} {
+		var format string
+		var fast bool
+		var only listValue
+		f := flag.NewFlagSet("t", flag.ContinueOnError)
+		f.SetOutput(io.Discard)
+		f.StringVar(&format, "format", "def", "")
+		f.BoolVar(&fast, "fast", false, "")
+		f.Var(&only, "only", "")
+		err := f.Parse(args)
+		c := flagCase{Args: args, Format: format, Fast: fast, Only: only, Rest: f.Args(), Visited: []string{}}
+		if errors.Is(err, flag.ErrHelp) {
+			c.Help = true
+		} else if err != nil {
+			c.Err = err.Error()
+		}
+		f.Visit(func(fl *flag.Flag) { c.Visited = append(c.Visited, fl.Name) })
+		if c.Args == nil {
+			c.Args = []string{}
+		}
+		if c.Only == nil {
+			c.Only = []string{}
+		}
+		if c.Rest == nil {
+			c.Rest = []string{}
+		}
+		fcs = append(fcs, c)
+	}
+	out["flag"] = fcs
+
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	_ = enc.Encode(out)
+}

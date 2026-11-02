@@ -145,6 +145,108 @@ function forCommand(command: "test" | "benchmark"): Invocation[] {
       args: [c, project],
       env: { XDG_STATE_HOME: "", HOME: "" },
     },
+
+    // Ticket 07: the corners of Go's flag rules, the Selection errors, the
+    // Budget and CI_JOB_TIMEOUT forms and the path errors.
+    { name: `${c}/bad-flag-syntax`, args: [c, missing, "---x"] },
+    { name: `${c}/bad-flag-syntax-equals`, args: [c, "-=x", missing] },
+    { name: `${c}/unknown-single-dash-equals`, args: [c, missing, "-x=1"] },
+    { name: `${c}/help-equals`, args: [c, "--help=x"] },
+    { name: `${c}/unknown-flag-before-help`, args: [c, "--nope", "-h"] },
+    { name: `${c}/help-after-end-of-flags`, args: [c, "--", "-h"] },
+    {
+      name: `${c}/flags-after-end-of-flags`,
+      args: [c, "--", missing, "--budget", "soon"],
+    },
+    { name: `${c}/dash-as-path`, args: [c, "-"] },
+    { name: `${c}/fast-space-false`, args: [c, missing, "--fast", "false"] },
+    { name: `${c}/fast-capital-true`, args: [c, missing, "--fast=TRUE"] },
+    { name: `${c}/fast-empty`, args: [c, missing, "--fast="] },
+    { name: `${c}/fast-non-ascii`, args: [c, missing, "--fast=é"] },
+    { name: `${c}/two-paths-around-flags`, args: [c, missing, "--fast", missing] }, // prettier-ignore
+    {
+      name: `${c}/format-repeated-last-wins`,
+      args: [c, missing, "--format", "xml", "--format", "json"],
+    },
+    { name: `${c}/format-equals-in-value`, args: [c, missing, "--format=json=x"] }, // prettier-ignore
+    { name: `${c}/format-duplicate`, args: [c, missing, "--format", "json,json"] }, // prettier-ignore
+    { name: `${c}/budget-empty`, args: [c, missing, "--budget="] },
+    { name: `${c}/budget-plus`, args: [c, missing, "--budget", "+90m"] },
+    { name: `${c}/budget-zero-seconds`, args: [c, missing, "--budget", "0s"] },
+    { name: `${c}/budget-hour-no-unit`, args: [c, missing, "--budget", "1h30"] }, // prettier-ignore
+    { name: `${c}/budget-units`, args: [c, missing, "--budget", "1h1m1.5s20ms3us4µs5ns"] }, // prettier-ignore
+    { name: `${c}/budget-large`, args: [c, missing, "--budget", "600h"] },
+    { name: `${c}/budget-overflow`, args: [c, missing, "--budget", "2562048h"] }, // prettier-ignore
+    { name: `${c}/budget-control-character`, args: [c, missing, "--budget", "1\tm"] }, // prettier-ignore
+    { name: `${c}/budget-non-ascii`, args: [c, missing, "--budget", "1é"] }, // prettier-ignore
+    {
+      name: `${c}/budget-repeated-last-wins`,
+      args: [c, missing, "--budget", "soon", "--budget", "1h"],
+    },
+    { name: `${c}/only-planned`, args: [c, missing, "--only", "tests.mutation"] }, // prettier-ignore
+    { name: `${c}/only-planned-family`, args: [c, missing, "--only", "app"] },
+    { name: `${c}/exclude-planned`, args: [c, missing, "--exclude", "api.dast"] }, // prettier-ignore
+    { name: `${c}/only-empty-element`, args: [c, missing, "--only", "syntax,,tests"] }, // prettier-ignore
+    { name: `${c}/only-white-space`, args: [c, missing, "--only", " syntax.parse ,\ttests"] }, // prettier-ignore
+    { name: `${c}/only-quoted-name`, args: [c, missing, "--only", 'a"bé\u0007'] }, // prettier-ignore
+    {
+      name: `${c}/empty-selection`,
+      args: [c, missing, "--only", "syntax", "--exclude", "syntax.parse"],
+    },
+    {
+      name: `${c}/empty-selection-fast`,
+      args: [c, missing, "--fast", "--only", "lint", "--exclude", "lint.existing,lint.correctness,lint.typed"], // prettier-ignore
+    },
+    {
+      name: `${c}/ci-job-timeout-plus-sign`,
+      args: [c, missing],
+      env: { CI_JOB_TIMEOUT: "+3600" },
+    },
+    {
+      name: `${c}/ci-job-timeout-negative`,
+      args: [c, missing],
+      env: { CI_JOB_TIMEOUT: "-5" },
+    },
+    {
+      name: `${c}/ci-job-timeout-zero`,
+      args: [c, missing],
+      env: { CI_JOB_TIMEOUT: "0" },
+    },
+    {
+      name: `${c}/ci-job-timeout-wraps`,
+      args: [c, missing],
+      env: { CI_JOB_TIMEOUT: "9223372037" },
+    },
+    {
+      name: `${c}/ci-job-timeout-out-of-range`,
+      args: [c, missing],
+      env: { CI_JOB_TIMEOUT: "9223372036854775808" },
+    },
+    {
+      name: `${c}/ci-job-timeout-quoted`,
+      args: [c, missing],
+      env: { CI_JOB_TIMEOUT: "1é\u0001" },
+    },
+    {
+      name: `${c}/ci-job-timeout-shorter-than-flag`,
+      args: [c, missing, "--budget", "3h"],
+      env: { CI_JOB_TIMEOUT: "3600" },
+    },
+    {
+      name: `${c}/ci-job-timeout-shorter-than-fast`,
+      args: [c, missing, "--fast"],
+      env: { CI_JOB_TIMEOUT: "1500" },
+    },
+    { name: `${c}/path-under-a-file`, args: [c, `${file}/x`] },
+    {
+      name: `${c}/output-dir-under-a-file`,
+      args: [c, project, "--output-dir", `${file}/sub`],
+    },
+    {
+      name: `${c}/default-report-folder-through-home`,
+      args: [c, project],
+      env: { XDG_STATE_HOME: "", HOME: project },
+    },
   ];
 }
 
@@ -225,4 +327,19 @@ export const invocations: readonly Invocation[] = [
     args: ["list-checks", project],
     env: { CI_JOB_TIMEOUT: "60" },
   },
+
+  // Ticket 07: more usage errors of list-checks.
+  { name: "list-checks/format-empty", args: ["list-checks", project, "--format="] }, // prettier-ignore
+  { name: "list-checks/budget-equals", args: ["list-checks", project, "--budget=soon"] }, // prettier-ignore
+  { name: "list-checks/output-dir-empty", args: ["list-checks", project, "--output-dir="] }, // prettier-ignore
+  {
+    name: "list-checks/output-dir-before-budget",
+    args: ["list-checks", project, "--budget", "1h", "--output-dir", "x"],
+  },
+  { name: "list-checks/fast-invalid", args: ["list-checks", project, "--fast=2"] }, // prettier-ignore
+  { name: "list-checks/help-after-path", args: ["list-checks", project, "--help"] }, // prettier-ignore
+  { name: "list-checks/two-paths-after-flags", args: ["list-checks", "--fast", project, project] }, // prettier-ignore
+  { name: "list-checks/exclude-planned", args: ["list-checks", project, "--exclude", "security.containers"] }, // prettier-ignore
+  { name: "list-checks/empty-selection-fast", args: ["list-checks", project, "--fast", "--only", "syntax", "--exclude", "syntax"] }, // prettier-ignore
+  { name: "list-checks/path-under-a-file", args: ["list-checks", `${file}/x`] }, // prettier-ignore
 ];

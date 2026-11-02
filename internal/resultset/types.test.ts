@@ -61,6 +61,10 @@ function walk(
         problems.push(`${where} is not a Date`);
       }
       return;
+    case "map":
+      // The Report has no Go map.
+      problems.push(`${where} is a map`);
+      return;
     default:
       if (
         typeof v !==

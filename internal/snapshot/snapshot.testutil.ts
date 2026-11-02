@@ -10,6 +10,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { Writable } from "node:stream";
 import type { TestContext } from "node:test";
 
 import { take } from "./snapshot.ts";
@@ -59,4 +60,18 @@ export function takeIn(
 // limitedPaths maps each Limitation's path to its code.
 export function limitedPaths(s: Snapshot): Map<string, string> {
   return new Map(s.limitations.map((l) => [l.path, l.code]));
+}
+
+// tarOf is the archive Snapshot.writeTar writes.
+export async function tarOf(s: Snapshot): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  await s.writeTar(
+    new Writable({
+      write(chunk: Buffer, _enc, done) {
+        chunks.push(chunk);
+        done();
+      },
+    }),
+  );
+  return Buffer.concat(chunks);
 }

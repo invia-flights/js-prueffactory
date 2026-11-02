@@ -1,0 +1,1202 @@
+{
+  "durationString": [
+    {
+      "Nanos": "0",
+      "String": "0s"
+    },
+    {
+      "Nanos": "1",
+      "String": "1ns"
+    },
+    {
+      "Nanos": "999",
+      "String": "999ns"
+    },
+    {
+      "Nanos": "1000",
+      "String": "1µs"
+    },
+    {
+      "Nanos": "1001",
+      "String": "1.001µs"
+    },
+    {
+      "Nanos": "1500",
+      "String": "1.5µs"
+    },
+    {
+      "Nanos": "999999",
+      "String": "999.999µs"
+    },
+    {
+      "Nanos": "1000000",
+      "String": "1ms"
+    },
+    {
+      "Nanos": "1234567",
+      "String": "1.234567ms"
+    },
+    {
+      "Nanos": "999999999",
+      "String": "999.999999ms"
+    },
+    {
+      "Nanos": "1000000000",
+      "String": "1s"
+    },
+    {
+      "Nanos": "1500000000",
+      "String": "1.5s"
+    },
+    {
+      "Nanos": "59999999999",
+      "String": "59.999999999s"
+    },
+    {
+      "Nanos": "60000000000",
+      "String": "1m0s"
+    },
+    {
+      "Nanos": "61000000000",
+      "String": "1m1s"
+    },
+    {
+      "Nanos": "3600000000000",
+      "String": "1h0m0s"
+    },
+    {
+      "Nanos": "5400000000000",
+      "String": "1h30m0s"
+    },
+    {
+      "Nanos": "7200000000000",
+      "String": "2h0m0s"
+    },
+    {
+      "Nanos": "3300000000000",
+      "String": "55m0s"
+    },
+    {
+      "Nanos": "1800000000000",
+      "String": "30m0s"
+    },
+    {
+      "Nanos": "86400000000000",
+      "String": "24h0m0s"
+    },
+    {
+      "Nanos": "-1",
+      "String": "-1ns"
+    },
+    {
+      "Nanos": "-1500",
+      "String": "-1.5µs"
+    },
+    {
+      "Nanos": "-60000000000",
+      "String": "-1m0s"
+    },
+    {
+      "Nanos": "-5400000000000",
+      "String": "-1h30m0s"
+    },
+    {
+      "Nanos": "9223372036854775807",
+      "String": "2562047h47m16.854775807s"
+    },
+    {
+      "Nanos": "-9223372036854775808",
+      "String": "-2562047h47m16.854775808s"
+    },
+    {
+      "Nanos": "300000000000",
+      "String": "5m0s"
+    },
+    {
+      "Nanos": "1200000000000",
+      "String": "20m0s"
+    },
+    {
+      "Nanos": "3723004005006",
+      "String": "1h2m3.004005006s"
+    }
+  ],
+  "flag": [
+    {
+      "Args": [],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "path"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": [
+        "path"
+      ]
+    },
+    {
+      "Args": [
+        "--format",
+        "json",
+        "path"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "json",
+      "Fast": false,
+      "Only": [],
+      "Visited": [
+        "format"
+      ],
+      "Rest": [
+        "path"
+      ]
+    },
+    {
+      "Args": [
+        "-format=json",
+        "path"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "json",
+      "Fast": false,
+      "Only": [],
+      "Visited": [
+        "format"
+      ],
+      "Rest": [
+        "path"
+      ]
+    },
+    {
+      "Args": [
+        "--format=",
+        "path"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "",
+      "Fast": false,
+      "Only": [],
+      "Visited": [
+        "format"
+      ],
+      "Rest": [
+        "path"
+      ]
+    },
+    {
+      "Args": [
+        "--format"
+      ],
+      "Err": "flag needs an argument: -format",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "-format"
+      ],
+      "Err": "flag needs an argument: -format",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--fast",
+        "path"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": true,
+      "Only": [],
+      "Visited": [
+        "fast"
+      ],
+      "Rest": [
+        "path"
+      ]
+    },
+    {
+      "Args": [
+        "--fast=false",
+        "path"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [
+        "fast"
+      ],
+      "Rest": [
+        "path"
+      ]
+    },
+    {
+      "Args": [
+        "--fast",
+        "false"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": true,
+      "Only": [],
+      "Visited": [
+        "fast"
+      ],
+      "Rest": [
+        "false"
+      ]
+    },
+    {
+      "Args": [
+        "-fast=0"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [
+        "fast"
+      ],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--fast=maybe"
+      ],
+      "Err": "invalid boolean value \"maybe\" for -fast: parse error",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--fast=TRUE"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": true,
+      "Only": [],
+      "Visited": [
+        "fast"
+      ],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--fast=t"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": true,
+      "Only": [],
+      "Visited": [
+        "fast"
+      ],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--fast=True"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": true,
+      "Only": [],
+      "Visited": [
+        "fast"
+      ],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--fast=tRUE"
+      ],
+      "Err": "invalid boolean value \"tRUE\" for -fast: parse error",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--fast="
+      ],
+      "Err": "invalid boolean value \"\" for -fast: parse error",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--nope"
+      ],
+      "Err": "flag provided but not defined: -nope",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "-nope=1"
+      ],
+      "Err": "flag provided but not defined: -nope",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "---x"
+      ],
+      "Err": "bad flag syntax: ---x",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": [
+        "---x"
+      ]
+    },
+    {
+      "Args": [
+        "-=x"
+      ],
+      "Err": "bad flag syntax: -=x",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": [
+        "-=x"
+      ]
+    },
+    {
+      "Args": [
+        "--=x"
+      ],
+      "Err": "bad flag syntax: --=x",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": [
+        "--=x"
+      ]
+    },
+    {
+      "Args": [
+        "-"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": [
+        "-"
+      ]
+    },
+    {
+      "Args": [
+        "--",
+        "--fast"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": [
+        "--fast"
+      ]
+    },
+    {
+      "Args": [
+        "--"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "-h"
+      ],
+      "Err": "",
+      "Help": true,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "-help"
+      ],
+      "Err": "",
+      "Help": true,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--help=x"
+      ],
+      "Err": "",
+      "Help": true,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--h"
+      ],
+      "Err": "",
+      "Help": true,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--nope",
+        "-h"
+      ],
+      "Err": "flag provided but not defined: -nope",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": [
+        "-h"
+      ]
+    },
+    {
+      "Args": [
+        "-h",
+        "--nope"
+      ],
+      "Err": "",
+      "Help": true,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": [
+        "--nope"
+      ]
+    },
+    {
+      "Args": [
+        "--only",
+        "a",
+        "--only=b,c",
+        "-only",
+        ""
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [
+        "a",
+        "b,c",
+        ""
+      ],
+      "Visited": [
+        "only"
+      ],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--format",
+        "a",
+        "--format",
+        "b"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "b",
+      "Fast": false,
+      "Only": [],
+      "Visited": [
+        "format"
+      ],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--format",
+        "--fast"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "--fast",
+      "Fast": false,
+      "Only": [],
+      "Visited": [
+        "format"
+      ],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "path",
+        "--fast"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": [
+        "path",
+        "--fast"
+      ]
+    },
+    {
+      "Args": [
+        "--fast",
+        "--",
+        "x",
+        "--format",
+        "y"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": true,
+      "Only": [],
+      "Visited": [
+        "fast"
+      ],
+      "Rest": [
+        "x",
+        "--format",
+        "y"
+      ]
+    },
+    {
+      "Args": [
+        "--only"
+      ],
+      "Err": "flag needs an argument: -only",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "-fast=1",
+        "-fast=F"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [
+        "fast"
+      ],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--Fast"
+      ],
+      "Err": "flag provided but not defined: -Fast",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--fast=\u0001"
+      ],
+      "Err": "invalid boolean value \"\\x01\" for -fast: parse error",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--format=a=b"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "a=b",
+      "Fast": false,
+      "Only": [],
+      "Visited": [
+        "format"
+      ],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--népe"
+      ],
+      "Err": "flag provided but not defined: -népe",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--fast=é"
+      ],
+      "Err": "invalid boolean value \"é\" for -fast: parse error",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "-format==x"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "=x",
+      "Fast": false,
+      "Only": [],
+      "Visited": [
+        "format"
+      ],
+      "Rest": []
+    },
+    {
+      "Args": [
+        "--format",
+        "-",
+        "x"
+      ],
+      "Err": "",
+      "Help": false,
+      "Format": "-",
+      "Fast": false,
+      "Only": [],
+      "Visited": [
+        "format"
+      ],
+      "Rest": [
+        "x"
+      ]
+    },
+    {
+      "Args": [
+        "---"
+      ],
+      "Err": "bad flag syntax: ---",
+      "Help": false,
+      "Format": "def",
+      "Fast": false,
+      "Only": [],
+      "Visited": [],
+      "Rest": [
+        "---"
+      ]
+    }
+  ],
+  "parseDuration": [
+    {
+      "In": "",
+      "Nanos": "",
+      "Err": "time: invalid duration \"\""
+    },
+    {
+      "In": "0",
+      "Nanos": "0",
+      "Err": ""
+    },
+    {
+      "In": "+0",
+      "Nanos": "0",
+      "Err": ""
+    },
+    {
+      "In": "-0",
+      "Nanos": "0",
+      "Err": ""
+    },
+    {
+      "In": "0s",
+      "Nanos": "0",
+      "Err": ""
+    },
+    {
+      "In": "45m",
+      "Nanos": "2700000000000",
+      "Err": ""
+    },
+    {
+      "In": "1h30m",
+      "Nanos": "5400000000000",
+      "Err": ""
+    },
+    {
+      "In": "1.5h",
+      "Nanos": "5400000000000",
+      "Err": ""
+    },
+    {
+      "In": "90s",
+      "Nanos": "90000000000",
+      "Err": ""
+    },
+    {
+      "In": "-5m",
+      "Nanos": "-300000000000",
+      "Err": ""
+    },
+    {
+      "In": "+5m",
+      "Nanos": "300000000000",
+      "Err": ""
+    },
+    {
+      "In": "1h30",
+      "Nanos": "",
+      "Err": "time: missing unit in duration \"1h30\""
+    },
+    {
+      "In": "30",
+      "Nanos": "",
+      "Err": "time: missing unit in duration \"30\""
+    },
+    {
+      "In": "soon",
+      "Nanos": "",
+      "Err": "time: invalid duration \"soon\""
+    },
+    {
+      "In": "1d",
+      "Nanos": "",
+      "Err": "time: unknown unit \"d\" in duration \"1d\""
+    },
+    {
+      "In": "abc",
+      "Nanos": "",
+      "Err": "time: invalid duration \"abc\""
+    },
+    {
+      "In": ".5h",
+      "Nanos": "1800000000000",
+      "Err": ""
+    },
+    {
+      "In": "5.m",
+      "Nanos": "300000000000",
+      "Err": ""
+    },
+    {
+      "In": ".s",
+      "Nanos": "",
+      "Err": "time: invalid duration \".s\""
+    },
+    {
+      "In": "-.s",
+      "Nanos": "",
+      "Err": "time: invalid duration \"-.s\""
+    },
+    {
+      "In": "1.s",
+      "Nanos": "1000000000",
+      "Err": ""
+    },
+    {
+      "In": "300ms",
+      "Nanos": "300000000",
+      "Err": ""
+    },
+    {
+      "In": "1us",
+      "Nanos": "1000",
+      "Err": ""
+    },
+    {
+      "In": "1µs",
+      "Nanos": "1000",
+      "Err": ""
+    },
+    {
+      "In": "1μs",
+      "Nanos": "1000",
+      "Err": ""
+    },
+    {
+      "In": "2ns",
+      "Nanos": "2",
+      "Err": ""
+    },
+    {
+      "In": "1h1m1s1ms1us1ns",
+      "Nanos": "3661001001001",
+      "Err": ""
+    },
+    {
+      "In": "0.000000001s",
+      "Nanos": "1",
+      "Err": ""
+    },
+    {
+      "In": "0.0000000001s",
+      "Nanos": "0",
+      "Err": ""
+    },
+    {
+      "In": "1.0000000005s",
+      "Nanos": "1000000000",
+      "Err": ""
+    },
+    {
+      "In": "2562047h47m16.854775807s",
+      "Nanos": "9223372036854775807",
+      "Err": ""
+    },
+    {
+      "In": "2562047h47m16.854775808s",
+      "Nanos": "",
+      "Err": "time: invalid duration \"2562047h47m16.854775808s\""
+    },
+    {
+      "In": "-2562047h47m16.854775808s",
+      "Nanos": "-9223372036854775808",
+      "Err": ""
+    },
+    {
+      "In": "9223372036854775807ns",
+      "Nanos": "9223372036854775807",
+      "Err": ""
+    },
+    {
+      "In": "9223372036854775808ns",
+      "Nanos": "",
+      "Err": "time: invalid duration \"9223372036854775808ns\""
+    },
+    {
+      "In": "-9223372036854775808ns",
+      "Nanos": "-9223372036854775808",
+      "Err": ""
+    },
+    {
+      "In": "99999999999999999999ns",
+      "Nanos": "",
+      "Err": "time: invalid duration \"99999999999999999999ns\""
+    },
+    {
+      "In": "1.123456789123456789h",
+      "Nanos": "4044444440844",
+      "Err": ""
+    },
+    {
+      "In": "1x",
+      "Nanos": "",
+      "Err": "time: unknown unit \"x\" in duration \"1x\""
+    },
+    {
+      "In": "1 m",
+      "Nanos": "",
+      "Err": "time: unknown unit \" m\" in duration \"1 m\""
+    },
+    {
+      "In": " 1m",
+      "Nanos": "",
+      "Err": "time: invalid duration \" 1m\""
+    },
+    {
+      "In": "1m ",
+      "Nanos": "",
+      "Err": "time: unknown unit \"m \" in duration \"1m \""
+    },
+    {
+      "In": "1M",
+      "Nanos": "",
+      "Err": "time: unknown unit \"M\" in duration \"1M\""
+    },
+    {
+      "In": "1H",
+      "Nanos": "",
+      "Err": "time: unknown unit \"H\" in duration \"1H\""
+    },
+    {
+      "In": "1e3s",
+      "Nanos": "",
+      "Err": "time: unknown unit \"e\" in duration \"1e3s\""
+    },
+    {
+      "In": "1..5s",
+      "Nanos": "",
+      "Err": "time: missing unit in duration \"1..5s\""
+    },
+    {
+      "In": "1.5.5s",
+      "Nanos": "",
+      "Err": "time: missing unit in duration \"1.5.5s\""
+    },
+    {
+      "In": "--5m",
+      "Nanos": "",
+      "Err": "time: invalid duration \"--5m\""
+    },
+    {
+      "In": "+-5m",
+      "Nanos": "",
+      "Err": "time: invalid duration \"+-5m\""
+    },
+    {
+      "In": "1hé",
+      "Nanos": "",
+      "Err": "time: unknown unit \"h\\xc3\\xa9\" in duration \"1h\\xc3\\xa9\""
+    },
+    {
+      "In": "1\u0000s",
+      "Nanos": "",
+      "Err": "time: unknown unit \"\\x00s\" in duration \"1\\x00s\""
+    },
+    {
+      "In": "1s",
+      "Nanos": "",
+      "Err": "time: unknown unit \"s\" in duration \"1s\""
+    },
+    {
+      "In": "h",
+      "Nanos": "",
+      "Err": "time: invalid duration \"h\""
+    },
+    {
+      "In": "1h-1m",
+      "Nanos": "",
+      "Err": "time: unknown unit \"h-\" in duration \"1h-1m\""
+    },
+    {
+      "In": "600h",
+      "Nanos": "2160000000000000",
+      "Err": ""
+    },
+    {
+      "In": "0.1h",
+      "Nanos": "360000000000",
+      "Err": ""
+    },
+    {
+      "In": "1.00000000000000000000001h",
+      "Nanos": "3600000000000",
+      "Err": ""
+    },
+    {
+      "In": "3.000000000000000000000000000000000000001s",
+      "Nanos": "3000000000",
+      "Err": ""
+    },
+    {
+      "In": "123456789012345678901234567890.5ns",
+      "Nanos": "",
+      "Err": "time: invalid duration \"123456789012345678901234567890.5ns\""
+    },
+    {
+      "In": "1éés",
+      "Nanos": "",
+      "Err": "time: unknown unit \"\\xc3\\xa9\\xc3\\xa9s\" in duration \"1\\xc3\\xa9\\xc3\\xa9s\""
+    },
+    {
+      "In": "1😀",
+      "Nanos": "",
+      "Err": "time: unknown unit \"\\xf0\\x9f\\x98\\x80\" in duration \"1\\xf0\\x9f\\x98\\x80\""
+    }
+  ],
+  "parseInt": [
+    {
+      "In": "3600",
+      "Value": "3600",
+      "Err": ""
+    },
+    {
+      "In": "+3600",
+      "Value": "3600",
+      "Err": ""
+    },
+    {
+      "In": "-5",
+      "Value": "-5",
+      "Err": ""
+    },
+    {
+      "In": "0",
+      "Value": "0",
+      "Err": ""
+    },
+    {
+      "In": "",
+      "Value": "",
+      "Err": "strconv.ParseInt: parsing \"\": invalid syntax"
+    },
+    {
+      "In": "abc",
+      "Value": "",
+      "Err": "strconv.ParseInt: parsing \"abc\": invalid syntax"
+    },
+    {
+      "In": "1_000",
+      "Value": "",
+      "Err": "strconv.ParseInt: parsing \"1_000\": invalid syntax"
+    },
+    {
+      "In": "0x10",
+      "Value": "",
+      "Err": "strconv.ParseInt: parsing \"0x10\": invalid syntax"
+    },
+    {
+      "In": "9223372036854775807",
+      "Value": "9223372036854775807",
+      "Err": ""
+    },
+    {
+      "In": "9223372036854775808",
+      "Value": "",
+      "Err": "strconv.ParseInt: parsing \"9223372036854775808\": value out of range"
+    },
+    {
+      "In": "-9223372036854775808",
+      "Value": "-9223372036854775808",
+      "Err": ""
+    },
+    {
+      "In": "-9223372036854775809",
+      "Value": "",
+      "Err": "strconv.ParseInt: parsing \"-9223372036854775809\": value out of range"
+    },
+    {
+      "In": "36 00",
+      "Value": "",
+      "Err": "strconv.ParseInt: parsing \"36 00\": invalid syntax"
+    },
+    {
+      "In": "٣",
+      "Value": "",
+      "Err": "strconv.ParseInt: parsing \"٣\": invalid syntax"
+    },
+    {
+      "In": "+",
+      "Value": "",
+      "Err": "strconv.ParseInt: parsing \"+\": invalid syntax"
+    },
+    {
+      "In": "-",
+      "Value": "",
+      "Err": "strconv.ParseInt: parsing \"-\": invalid syntax"
+    },
+    {
+      "In": "007",
+      "Value": "7",
+      "Err": ""
+    }
+  ],
+  "recordedFrom": "Go 1.27.3 standard library, the toolchain of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8",
+  "secondsWrap": [
+    {
+      "Secs": "1",
+      "Nanos": "1000000000"
+    },
+    {
+      "Secs": "3600",
+      "Nanos": "3600000000000"
+    },
+    {
+      "Secs": "9223372036",
+      "Nanos": "9223372036000000000"
+    },
+    {
+      "Secs": "9223372037",
+      "Nanos": "-9223372036709551616"
+    },
+    {
+      "Secs": "10000000000000",
+      "Nanos": "1864712049423024128"
+    },
+    {
+      "Secs": "9223372036854775807",
+      "Nanos": "-1000000000"
+    }
+  ]
+}

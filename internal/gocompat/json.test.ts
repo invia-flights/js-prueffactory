@@ -7,6 +7,7 @@ import {
   bool,
   formatRFC3339,
   formatTime,
+  map,
   marshal,
   nullable,
   number,
@@ -130,5 +131,37 @@ describe("marshal", () => {
   test("writes a missing list as null, as Go writes a nil slice", () => {
     const withoutList = { ...value, list: null as unknown as Inner[] };
     assert.match(marshal(withoutList, outerShape), /"list":null/);
+  });
+});
+
+describe("maps", () => {
+  // Go writes a map[string]T with its keys sorted byte-wise, whatever order
+  // they were set in; a nil map is null.
+  const counts = map(number);
+
+  test("keys are sorted byte-wise, not by UTF-16 units", () => {
+    const m = new Map<string, number>([
+      ["b", 2],
+      ["\u{1F600}", 4],
+      ["Ａ", 3],
+      ["a", 1],
+      ["B", 0],
+    ]);
+    assert.equal(
+      marshal(m, counts),
+      '{"B":0,"a":1,"b":2,"Ａ":3,"\u{1F600}":4}',
+    );
+  });
+
+  test("a plain object works as a map too, indented like a struct", () => {
+    assert.equal(
+      marshal({ z: 1, "<y>": 2 }, counts, { indent: "  " }),
+      '{\n  "\\u003cy\\u003e": 2,\n  "z": 1\n}',
+    );
+  });
+
+  test("an empty map is {}, a missing one null", () => {
+    assert.equal(marshal(new Map(), counts), "{}");
+    assert.equal(marshal(null, counts), "null");
   });
 });

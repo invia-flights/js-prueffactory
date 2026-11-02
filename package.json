@@ -18,7 +18,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc",
-    "parity": "node dev/parity/main.ts"
+    "parity": "node dev/parity/main.ts",
+    "test:golden-update": "UPDATE_GOLDEN=1 node --test internal/writer/golden.test.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -29,6 +30,7 @@
     "typescript-eslint": "8.72.1"
   },
   "dependencies": {
-    "modern-tar": "0.8.6"
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
   }
 }

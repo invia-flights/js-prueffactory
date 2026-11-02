@@ -1,0 +1,300 @@
+{
+  "evalSymlinks": [
+    {
+      "In": "",
+      "Out": "\u003croot\u003e",
+      "Err": ""
+    },
+    {
+      "In": "dir",
+      "Out": "\u003croot\u003e/dir",
+      "Err": ""
+    },
+    {
+      "In": "dir/",
+      "Out": "\u003croot\u003e/dir",
+      "Err": ""
+    },
+    {
+      "In": "dir/./sub/",
+      "Out": "\u003croot\u003e/dir/sub",
+      "Err": ""
+    },
+    {
+      "In": "dir/../file",
+      "Out": "\u003croot\u003e/file",
+      "Err": ""
+    },
+    {
+      "In": "file",
+      "Out": "\u003croot\u003e/file",
+      "Err": ""
+    },
+    {
+      "In": "file/x",
+      "Out": "",
+      "Err": "not a directory"
+    },
+    {
+      "In": "nope",
+      "Out": "",
+      "Err": "lstat \u003croot\u003e/nope: no such file or directory"
+    },
+    {
+      "In": "nope/x",
+      "Out": "",
+      "Err": "lstat \u003croot\u003e/nope: no such file or directory"
+    },
+    {
+      "In": "link-dir/sub",
+      "Out": "\u003croot\u003e/dir/sub",
+      "Err": ""
+    },
+    {
+      "In": "link-file",
+      "Out": "\u003croot\u003e/file",
+      "Err": ""
+    },
+    {
+      "In": "link-file/x",
+      "Out": "",
+      "Err": "not a directory"
+    },
+    {
+      "In": "dangling",
+      "Out": "",
+      "Err": "lstat \u003croot\u003e/nope: no such file or directory"
+    },
+    {
+      "In": "dangling/x",
+      "Out": "",
+      "Err": "lstat \u003croot\u003e/nope: no such file or directory"
+    },
+    {
+      "In": "loop-a",
+      "Out": "",
+      "Err": "EvalSymlinks: too many links"
+    },
+    {
+      "In": "dir/link-up/sub",
+      "Out": "\u003croot\u003e/dir/sub",
+      "Err": ""
+    },
+    {
+      "In": "dir/link-up/link-up/..",
+      "Out": "\u003croot\u003e",
+      "Err": ""
+    },
+    {
+      "In": "noperm",
+      "Out": "\u003croot\u003e/noperm",
+      "Err": ""
+    },
+    {
+      "In": "noperm/inner",
+      "Out": "",
+      "Err": "lstat \u003croot\u003e/noperm/inner: permission denied"
+    },
+    {
+      "In": "dir/sub/../../file",
+      "Out": "\u003croot\u003e/file",
+      "Err": ""
+    },
+    {
+      "In": "link-root/",
+      "Out": "/",
+      "Err": ""
+    },
+    {
+      "In": "dir//sub",
+      "Out": "\u003croot\u003e/dir/sub",
+      "Err": ""
+    },
+    {
+      "In": "dir/..",
+      "Out": "\u003croot\u003e",
+      "Err": ""
+    }
+  ],
+  "joins": [
+    {
+      "In": [],
+      "Out": ""
+    },
+    {
+      "In": [
+        ""
+      ],
+      "Out": ""
+    },
+    {
+      "In": [
+        "",
+        ""
+      ],
+      "Out": ""
+    },
+    {
+      "In": [
+        "a",
+        "b"
+      ],
+      "Out": "a/b"
+    },
+    {
+      "In": [
+        "/a",
+        "../b"
+      ],
+      "Out": "/b"
+    },
+    {
+      "In": [
+        "a",
+        "",
+        "b"
+      ],
+      "Out": "a/b"
+    },
+    {
+      "In": [
+        "",
+        "a"
+      ],
+      "Out": "a"
+    },
+    {
+      "In": [
+        "/",
+        "a"
+      ],
+      "Out": "/a"
+    },
+    {
+      "In": [
+        "a/",
+        "/b/"
+      ],
+      "Out": "a/b"
+    }
+  ],
+  "paths": [
+    {
+      "In": "",
+      "Dir": ".",
+      "Base": "."
+    },
+    {
+      "In": "/",
+      "Dir": "/",
+      "Base": "/"
+    },
+    {
+      "In": "a",
+      "Dir": ".",
+      "Base": "a"
+    },
+    {
+      "In": "/a",
+      "Dir": "/",
+      "Base": "a"
+    },
+    {
+      "In": "/a/",
+      "Dir": "/a",
+      "Base": "a"
+    },
+    {
+      "In": "/a/b",
+      "Dir": "/a",
+      "Base": "b"
+    },
+    {
+      "In": "a/b/",
+      "Dir": "a/b",
+      "Base": "b"
+    },
+    {
+      "In": "//a//b//",
+      "Dir": "/a/b",
+      "Base": "b"
+    },
+    {
+      "In": ".",
+      "Dir": ".",
+      "Base": "."
+    },
+    {
+      "In": "..",
+      "Dir": ".",
+      "Base": ".."
+    },
+    {
+      "In": "/a/..",
+      "Dir": "/a",
+      "Base": ".."
+    },
+    {
+      "In": "a/../..",
+      "Dir": ".",
+      "Base": ".."
+    }
+  ],
+  "recordedFrom": "Go 1.27.3 standard library on darwin/arm64, the toolchain of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8",
+  "stat": [
+    {
+      "In": "dir",
+      "IsDir": "yes",
+      "StatErr": "",
+      "ReadDirErr": ""
+    },
+    {
+      "In": "file",
+      "IsDir": "",
+      "StatErr": "",
+      "ReadDirErr": "open \u003croot\u003e/file: not a directory"
+    },
+    {
+      "In": "file/x",
+      "IsDir": "",
+      "StatErr": "stat \u003croot\u003e/file/x: not a directory",
+      "ReadDirErr": "open \u003croot\u003e/file/x: not a directory"
+    },
+    {
+      "In": "nope",
+      "IsDir": "",
+      "StatErr": "stat \u003croot\u003e/nope: no such file or directory",
+      "ReadDirErr": "open \u003croot\u003e/nope: no such file or directory"
+    },
+    {
+      "In": "noperm",
+      "IsDir": "yes",
+      "StatErr": "",
+      "ReadDirErr": "open \u003croot\u003e/noperm: permission denied"
+    },
+    {
+      "In": "noperm/inner",
+      "IsDir": "",
+      "StatErr": "stat \u003croot\u003e/noperm/inner: permission denied",
+      "ReadDirErr": "open \u003croot\u003e/noperm/inner: permission denied"
+    },
+    {
+      "In": "dangling",
+      "IsDir": "",
+      "StatErr": "stat \u003croot\u003e/dangling: no such file or directory",
+      "ReadDirErr": "open \u003croot\u003e/dangling: no such file or directory"
+    },
+    {
+      "In": "loop-a",
+      "IsDir": "",
+      "StatErr": "stat \u003croot\u003e/loop-a: too many levels of symbolic links",
+      "ReadDirErr": "open \u003croot\u003e/loop-a: too many levels of symbolic links"
+    },
+    {
+      "In": "link-dir",
+      "IsDir": "yes",
+      "StatErr": "",
+      "ReadDirErr": ""
+    }
+  ]
+}

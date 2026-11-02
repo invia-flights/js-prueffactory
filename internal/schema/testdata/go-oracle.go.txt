@@ -1,0 +1,263 @@
+package schema_test
+
+// Generator of go-oracle.json: what the frozen Go build's schema.Validate says
+// about broken Reports. The Go code is frozen, so this is kept as text. To
+// regenerate at the freeze commit: copy it to internal/schema/zz_oracle_test.go,
+// run go test -count=1 -run TestZZOracle ./internal/schema, delete the copy.
+//
+// Every case starts from a base document (the populated test mode Report, or
+// the benchmark-pass golden report.json) and applies operations given as JSON
+// Pointers, so the TypeScript test can build the same document.
+
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+	"testing"
+
+	"github.com/santhosh-tekuri/jsonschema/v6"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
+
+	"github.com/invia-flights/jscript-bench/internal/resultset/resultsettest"
+	"github.com/invia-flights/jscript-bench/internal/schema"
+)
+
+type oracleOp struct {
+	Op    string `json:"op"` // "set" or "delete"
+	Path  string `json:"path"`
+	Value any    `json:"value,omitempty"`
+}
+
+type oracleLeaf struct {
+	Instance string `json:"instance"`
+	Keyword  string `json:"keyword"`
+	Kind     string `json:"kind"`
+	Message  string `json:"message"`
+}
+
+type oracleCase struct {
+	Name     string       `json:"name"`
+	Base     string       `json:"base"`
+	Ops      []oracleOp   `json:"ops"`
+	Problems []string     `json:"problems"`
+	Leaves   []oracleLeaf `json:"leaves"`
+}
+
+type rawCase struct {
+	Name string
+	Doc  string
+}
+
+func set(path string, v any) oracleOp { return oracleOp{Op: "set", Path: path, Value: v} }
+func del(path string) oracleOp      { return oracleOp{Op: "delete", Path: path} }
+
+func apply(t *testing.T, doc any, op oracleOp) any {
+	toks := strings.Split(op.Path, "/")[1:]
+	for i, tok := range toks {
+		toks[i] = strings.ReplaceAll(strings.ReplaceAll(tok, "~1", "/"), "~0", "~")
+	}
+	if len(toks) == 0 {
+		return op.Value
+	}
+	parent := doc
+	for _, tok := range toks[:len(toks)-1] {
+		switch p := parent.(type) {
+		case map[string]any:
+			parent = p[tok]
+		case []any:
+			i, _ := strconv.Atoi(tok)
+			parent = p[i]
+		default:
+			t.Fatalf("%s: no container at %s", op.Path, tok)
+		}
+	}
+	last := toks[len(toks)-1]
+	switch p := parent.(type) {
+	case map[string]any:
+		if op.Op == "delete" {
+			delete(p, last)
+		} else {
+			p[last] = op.Value
+		}
+	case []any:
+		i, _ := strconv.Atoi(last)
+		p[i] = op.Value
+	default:
+		t.Fatalf("%s: no container", op.Path)
+	}
+	return doc
+}
+
+func leaves(e *jsonschema.ValidationError, out *[]oracleLeaf) {
+	if len(e.Causes) == 0 {
+		kw := strings.Join(e.ErrorKind.KeywordPath(), "/")
+		*out = append(*out, oracleLeaf{
+			Instance: "/" + strings.Join(e.InstanceLocation, "/"),
+			Keyword:  kw,
+			Kind:     fmt.Sprintf("%T", e.ErrorKind),
+			Message:  e.ErrorKind.LocalizedString(message.NewPrinter(language.English)),
+		})
+		return
+	}
+	for _, c := range e.Causes {
+		leaves(c, out)
+	}
+}
+
+func TestZZOracle(t *testing.T) {
+	populated, err := json.Marshal(resultsettest.Populated())
+	if err != nil {
+		t.Fatal(err)
+	}
+	bench, err := os.ReadFile("../writer/testdata/golden/benchmark-pass/report.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bases := map[string][]byte{"populated": populated, "benchmark-pass": bench}
+
+	long := strings.Repeat("x", 5000)
+	cases := []struct {
+		name, base string
+		ops        []oracleOp
+	}{
+		{"valid populated", "populated", nil},
+		{"valid benchmark", "benchmark-pass", nil},
+		{"unknown status", "populated", []oracleOp{set("/checks/0/status", "weird")}},
+		{"trust marker is wrong", "populated", []oracleOp{set("/findings/0/evidence/0/trust", "trusted")}},
+		{"bad fingerprint", "populated", []oracleOp{set("/findings/0/fingerprint/value", "nope")}},
+		{"test case without a suite", "populated", []oracleOp{set("/test_cases/0/suite", "")}},
+		{"suite row without a suite", "populated", []oracleOp{set("/inventory/test_suites/0/suite", "")}},
+		{"test file without a suite", "populated", []oracleOp{set("/inventory/test_files/0/suite", "")}},
+		{"relative path base", "populated", []oracleOp{set("/findings/0/locations/0/path_base", "cwd")}},
+		{"zero-based line", "populated", []oracleOp{set("/findings/0/locations/0/start/line", 0)}},
+		{"empty re-run command", "populated", []oracleOp{set("/findings/0/reproduction/rerun_command", []any{})}},
+		{"fraction over the maximum", "benchmark-pass", []oracleOp{set("/benchmark/areas/0/parts/0/score", 100.5)}},
+		{"large number over the maximum", "benchmark-pass", []oracleOp{set("/benchmark/areas/0/parts/0/score", 123456)}},
+		{"tiny negative number", "benchmark-pass", []oracleOp{set("/benchmark/areas/0/parts/0/score", -0.00001)}},
+		{"huge number", "benchmark-pass", []oracleOp{set("/benchmark/areas/0/parts/0/score", 1e21)}},
+		{"long text over the limit", "populated", []oracleOp{set("/findings/0/evidence/0/text", strings.Repeat("y", 12345))}},
+		{"enum with null", "benchmark-pass", []oracleOp{set("/benchmark/status", "nope")}},
+		{"wrong format id", "populated", []oracleOp{set("/format", "other")}},
+		{"evidence over 4 KiB", "populated", []oracleOp{set("/findings/0/evidence/0/text", long)}},
+		{"unknown top-level field", "populated", []oracleOp{set("/surprise", 1)}},
+		{"unknown field in a finding", "populated", []oracleOp{set("/findings/0/surprise", true)}},
+		{"two unknown fields", "populated", []oracleOp{set("/zz", 1), set("/aa", 2)}},
+		{"one missing field", "populated", []oracleOp{del("/run/id")}},
+		{"two missing fields", "populated", []oracleOp{del("/run/id"), del("/run/command")}},
+		{"string for an integer", "populated", []oracleOp{set("/run/duration_ms", "90000")}},
+		{"fraction for an integer", "populated", []oracleOp{set("/run/duration_ms", 1.5)}},
+		{"negative integer", "populated", []oracleOp{set("/run/duration_ms", -1000000)}},
+		{"large negative count", "populated", []oracleOp{set("/source/file_count", -1234567)}},
+		{"null for a string", "populated", []oracleOp{set("/run/id", nil)}},
+		{"array for an object", "populated", []oracleOp{set("/run", []any{})}},
+		{"bool for an array", "populated", []oracleOp{set("/findings", true)}},
+		{"enum with a wrong type", "populated", []oracleOp{set("/findings/0/severity", 3)}},
+		{"date without T", "populated", []oracleOp{set("/run/started_at", "2026-10-25 10:15:00Z")}},
+		{"date too short", "populated", []oracleOp{set("/run/started_at", "yesterday")}},
+		{"month out of range", "populated", []oracleOp{set("/run/started_at", "2026-13-01T00:00:00Z")}},
+		{"leap second at noon", "populated", []oracleOp{set("/run/started_at", "2026-10-25T12:00:60Z")}},
+		{"leap second at midnight", "populated", []oracleOp{set("/run/started_at", "2026-12-31T23:59:60Z")}},
+		{"bad offset", "populated", []oracleOp{set("/run/started_at", "2026-10-25T10:15:00+0100")}},
+		{"lower case t and z", "populated", []oracleOp{set("/run/started_at", "2026-10-25t10:15:00.5z")}},
+		{"day out of range", "populated", []oracleOp{set("/run/started_at", "2027-02-29T00:00:00Z")}},
+		{"day 32", "populated", []oracleOp{set("/run/started_at", "2026-01-32T00:00:00Z")}},
+		{"month not digits", "populated", []oracleOp{set("/run/started_at", "2026-1x-01T00:00:00Z")}},
+		{"year not digits", "populated", []oracleOp{set("/run/started_at", "20x6-01-01T00:00:00Z")}},
+		{"slashes in the date", "populated", []oracleOp{set("/run/started_at", "2026/01/01T00:00:00Z")}},
+		{"hour out of range", "populated", []oracleOp{set("/run/started_at", "2026-01-01T25:00:00Z")}},
+		{"fraction without digits", "populated", []oracleOp{set("/run/started_at", "2026-01-01T10:15:00.Z")}},
+		{"minute not digits", "populated", []oracleOp{set("/run/started_at", "2026-01-01T10:1x:00Z")}},
+		{"valid offset", "populated", []oracleOp{set("/run/started_at", "2026-01-01T10:15:00+01:00")}},
+		{"leap second shifted by the offset", "populated", []oracleOp{set("/run/started_at", "2026-01-01T00:29:60+00:30")}},
+		{"leap second wrong after the offset", "populated", []oracleOp{set("/run/started_at", "2026-01-01T00:30:60+00:30")}},
+		{"offset out of range", "populated", []oracleOp{set("/run/started_at", "2026-01-01T00:30:00+24:00")}},
+		{"wide digits", "populated", []oracleOp{set("/run/started_at", "２０２６-01-01T00:00:00Z")}},
+		{"quote in a date", "populated", []oracleOp{set("/run/started_at", "2026-0\"-01T00:00:00Z")}},
+		{"node variant unknown", "populated", []oracleOp{set("/contexts/1/node/variant", "windows")}},
+		{"node is a string", "populated", []oracleOp{set("/contexts/1/node", "24")}},
+		{"html in a field name", "populated", []oracleOp{set("/findings/0/<b>", 1)}},
+		{"slash in a field name", "populated", []oracleOp{set("/run/a~1b", 1)}},
+		{"test mode with areas", "populated", []oracleOp{set("/benchmark/areas", []any{})}},
+		{"test mode with a verdict", "populated", []oracleOp{set("/benchmark/verdict", "pass")}},
+		{"computed without fingerprint", "benchmark-pass", []oracleOp{del("/benchmark/fingerprint")}},
+		{"computed without areas", "benchmark-pass", []oracleOp{del("/benchmark/areas")}},
+		{"unknown field in a part", "benchmark-pass", []oracleOp{set("/benchmark/areas/0/parts/0/surprise", 1)}},
+		{"unknown part state", "benchmark-pass", []oracleOp{set("/benchmark/areas/0/parts/0/state", "weird")}},
+		{"part score over 100", "benchmark-pass", []oracleOp{set("/benchmark/areas/0/parts/0/score", 101)}},
+		{"short hash not hex", "benchmark-pass", []oracleOp{set("/benchmark/fingerprint/hash", "zz")}},
+		{"computed verdict null", "benchmark-pass", []oracleOp{set("/benchmark/verdict", nil)}},
+		{"weight zero", "benchmark-pass", []oracleOp{set("/benchmark/areas/0/weight", 0)}},
+		{"several problems", "populated", []oracleOp{
+			set("/checks/0/status", "weird"), del("/run/id"), set("/findings/0/locations/0/start/line", 0), set("/surprise", 1)}},
+	}
+
+	var out []oracleCase
+	for _, c := range cases {
+		var doc any
+		if err := json.Unmarshal(bases[c.base], &doc); err != nil {
+			t.Fatal(err)
+		}
+		for _, op := range c.ops {
+			// Round-trip the value so numbers are float64 as in the base.
+			b, _ := json.Marshal(op.Value)
+			var v any
+			_ = json.Unmarshal(b, &v)
+			op.Value = v
+			doc = apply(t, doc, op)
+		}
+		data, err := json.Marshal(doc)
+		if err != nil {
+			t.Fatal(err)
+		}
+		oc := oracleCase{Name: c.name, Base: c.base, Ops: c.ops, Problems: schema.Validate(data), Leaves: []oracleLeaf{}}
+		if oc.Problems == nil {
+			oc.Problems = []string{}
+		}
+		inst, _ := jsonschema.UnmarshalJSON(strings.NewReader(string(data)))
+		if verr, ok := compiled().Validate(inst).(*jsonschema.ValidationError); ok {
+			leaves(verr, &oc.Leaves)
+		}
+		out = append(out, oc)
+	}
+
+	var raws []map[string]any
+	for _, r := range []rawCase{
+		{"empty", ""},
+		{"blank", "  \n"},
+		{"truncated", `{"a": [1, 2`},
+		{"bad token", `{"a": tru}`},
+		{"trailing value", `{} {}`},
+		{"trailing garbage", `{} x`},
+		{"not an object", `[]`},
+	} {
+		p := schema.Validate([]byte(r.Doc))
+		raws = append(raws, map[string]any{"name": r.Name, "doc": r.Doc, "problems": p})
+	}
+
+	report, err := json.MarshalIndent(map[string]any{
+		"recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8",
+		"bases":        map[string]string{"populated": string(populated)},
+		"cases":        out,
+		"raw":          raws,
+	}, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/go-oracle.json", append(report, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// compiled compiles the schema again: the package keeps its compiled schema
+// private.
+func compiled() *jsonschema.Schema {
+	doc, _ := jsonschema.UnmarshalJSON(strings.NewReader(string(schema.Report())))
+	c := jsonschema.NewCompiler()
+	c.DefaultDraft(jsonschema.Draft2020)
+	c.AssertFormat()
+	_ = c.AddResource("report.schema.json", doc)
+	return c.MustCompile("report.schema.json")
+}

@@ -7,6 +7,8 @@
 // nil slice as null, keeps the sign of negative zero and formats times as RFC
 // 3339 with trimmed fractional seconds.
 
+import { compareBytes } from "./strings.ts";
+
 /** RedactTag is the `redact` struct tag of a report field (see redaction). */
 export type RedactTag = "vocabulary" | "identifier";
 
@@ -33,7 +35,12 @@ export interface ObjectShape {
   readonly kind: "object";
   readonly fields: readonly Field[];
 }
-export type Shape = ScalarShape | NullableShape | ArrayShape | ObjectShape;
+export interface MapShape {
+  readonly kind: "map";
+  readonly of: Shape;
+}
+export type Shape =
+  ScalarShape | NullableShape | ArrayShape | ObjectShape | MapShape;
 
 export const string: ScalarShape = { kind: "string" };
 export const number: ScalarShape = { kind: "number" };
@@ -49,6 +56,14 @@ export function nullable(of: Shape): NullableShape {
 /** array is a Go slice. */
 export function array(of: Shape): ArrayShape {
   return { kind: "array", of };
+}
+
+/**
+ * map is a Go map with string keys: a Map or a plain object, written with
+ * its keys sorted byte-wise; null or undefined is a nil map.
+ */
+export function map(of: Shape): MapShape {
+  return { kind: "map", of };
 }
 
 export interface FieldOptions<T> {
@@ -256,6 +271,24 @@ export function marshal(
             `${name}:${indent === "" ? "" : " "}${write(owner[f.key], f.shape, depth + 1)}`,
           );
         }
+        return parts.length === 0 ? "{}" : wrap("{", "}", parts, depth);
+      }
+      case "map": {
+        if (v === null || v === undefined) {
+          return "null";
+        }
+        if (typeof v !== "object") {
+          return fail(s, v);
+        }
+        const entries: [string, unknown][] =
+          v instanceof Map
+            ? [...(v as Map<string, unknown>)]
+            : Object.entries(v as Record<string, unknown>);
+        entries.sort(([a], [b]) => compareBytes(a, b));
+        const parts = entries.map(
+          ([key, item]) =>
+            `${quoteJSONString(key, escapeHTML)}:${indent === "" ? "" : " "}${write(item, s.of, depth + 1)}`,
+        );
         return parts.length === 0 ? "{}" : wrap("{", "}", parts, depth);
       }
     }
