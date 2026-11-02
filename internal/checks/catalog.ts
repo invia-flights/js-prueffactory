@@ -1,4 +1,11 @@
 // The Catalog: every Check with its static metadata, in Catalog order.
+//
+// A Check is implemented exactly when an implementation registered itself
+// (check.ts register). The Check modules register when they load, so code
+// that reads the status imports all.ts first, as Go's init functions ran
+// before main.
+
+import { registry } from "./registry.ts";
 
 /**
  * CatalogVersion identifies the Catalog a release ships. Change it when Checks
@@ -58,20 +65,6 @@ type Meta = readonly [string, string, Scope, boolean, string];
 
 // skippedByFast holds the slow Checks that --fast leaves out.
 const skippedByFast = new Set(["tests.mutation", "api.fuzz", "api.dast"]);
-
-// In Go a Check is implemented exactly when an implementation registered
-// itself. During the port the Checks are not all ported yet, but the command
-// line and list-checks must answer as the Go build at the freeze commit does,
-// so the status follows that build: these Checks were planned there, every
-// other one was implemented. The registry of implementations arrives with the
-// engine (ticket 12 of the port).
-const plannedInGoBuild = new Set([
-  "tests.mutation",
-  "security.containers",
-  "app.lifecycle",
-  "api.fuzz",
-  "api.dast",
-]);
 
 // The 29 milestone-1 Checks first, in the order milestone 1 shipped them,
 // followed by the Checks of later milestones.
@@ -138,7 +131,7 @@ function entryOf([id, description, scope, gates, area]: Meta): Entry {
     scope,
     canFireGates: gates,
     area,
-    status: plannedInGoBuild.has(id) ? Planned : Implemented,
+    status: registry.has(id) ? Implemented : Planned,
     skippedByFast: skippedByFast.has(id),
   };
 }

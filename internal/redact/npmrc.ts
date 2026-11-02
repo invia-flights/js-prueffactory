@@ -3,8 +3,8 @@
 import { lstatSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 
-import { compareBytes, trimSpace } from "../gocompat/strings.ts";
-import { goString } from "../gocompat/utf8.ts";
+import { compareBytes } from "../gocompat/strings.ts";
+import { trimSpaceBytes } from "../gocompat/utf8.ts";
 
 const base64Alphabet =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -39,35 +39,55 @@ export function decodeStdBase64(s: string): Buffer | null {
   return Buffer.from(t, "base64");
 }
 
-const strictUTF8 = new TextDecoder("utf-8", { fatal: true });
+const strictUTF8 = new TextDecoder("utf-8", {
+  fatal: true,
+  ignoreBOM: true,
+});
 
 /**
- * decodedText is Go's string(dec) for the decoded bytes of a base64 value, or
- * null when they are not UTF-8. Go registers such bytes as they are; a
- * JavaScript string cannot hold them, and turning them into U+FFFD would
- * register a value that matches every run of replacement characters, so the
- * port leaves them out (see the redaction traps).
+ * NpmrcValue is a secret value of an .npmrc: its text, or, where it is not
+ * UTF-8, its bytes. Go keeps such bytes in a string; a JavaScript string
+ * cannot hold them, so they stay bytes and are redacted where bytes are,
+ * in the artifacts (Redactor.addFrom takes both).
  */
-function decodedText(dec: Buffer): string | null {
+export type NpmrcValue = string | Buffer;
+
+/** valueOf is Go's string(b): the text of valid UTF-8, otherwise the bytes. */
+function valueOf(b: Buffer): NpmrcValue {
   try {
-    return strictUTF8.decode(dec);
+    return strictUTF8.decode(b);
   } catch {
-    return null;
+    return Buffer.from(b);
   }
 }
 
-/** trimChars is Go's strings.Trim with a set of ASCII characters. */
-function trimChars(s: string, chars: string): string {
+/** trimBytes is Go's strings.Trim with a set of ASCII characters, on bytes. */
+function trimBytes(b: Buffer, chars: string): Buffer {
+  const set = Buffer.from(chars, "latin1");
   let start = 0;
-  let end = s.length;
-  while (start < end && chars.includes(s.charAt(start))) {
+  let end = b.length;
+  while (start < end && set.includes(b[start] ?? -1)) {
     start++;
   }
-  while (end > start && chars.includes(s.charAt(end - 1))) {
+  while (end > start && set.includes(b[end - 1] ?? -1)) {
     end--;
   }
-  return s.slice(start, end);
+  return b.subarray(start, end);
 }
+
+function trimSpace(b: Buffer): Buffer {
+  const t = trimSpaceBytes(b);
+  return Buffer.from(t.buffer, t.byteOffset, t.byteLength);
+}
+
+function hasSuffix(b: Buffer, suffix: string): boolean {
+  const s = Buffer.from(suffix, "latin1");
+  return b.length >= s.length && b.subarray(b.length - s.length).equals(s);
+}
+
+const newline = 0x0a;
+const equals = 0x3d;
+const colon = 0x3a;
 
 /**
  * npmrcValues returns the secret values in the text of an .npmrc: the values
@@ -75,53 +95,67 @@ function trimChars(s: string, chars: string): string {
  * so their decoded text counts as well, and for `_auth` its password half,
  * which is what shows up if a tool prints the credentials it decoded. A value
  * that is only a reference to an environment variable, such as ${NPM_TOKEN},
- * is no secret and is left out. A byte that is not UTF-8 is read as U+FFFD,
- * one per byte as Go's decoders do (goString).
+ * is no secret and is left out. The file is read as bytes, as Go reads it, so
+ * a value that is not UTF-8 comes back as its bytes.
  */
-export function npmrcValues(data: Uint8Array | string): string[] {
-  const text = typeof data === "string" ? data : goString(data);
-  const out: string[] = [];
-  const add = (v: string | null): void => {
-    if (v !== null && v !== "") {
-      out.push(v);
+export function npmrcValues(data: Uint8Array | string): NpmrcValue[] {
+  const buf =
+    typeof data === "string"
+      ? Buffer.from(data, "utf8")
+      : Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+  const out: NpmrcValue[] = [];
+  const add = (v: Buffer): void => {
+    if (v.length > 0) {
+      out.push(valueOf(v));
     }
   };
-  for (let line of text.split("\n")) {
-    line = trimSpace(line);
-    if (line === "" || line.startsWith("#") || line.startsWith(";")) {
-      continue;
-    }
-    const eq = line.indexOf("=");
-    if (eq < 0) {
-      continue;
-    }
-    const key = trimSpace(line.slice(0, eq));
-    const value = trimChars(trimSpace(line.slice(eq + 1)), `"'`);
-    if (value === "" || value.includes("${")) {
-      continue;
-    }
-    if (key.endsWith("_authToken")) {
-      add(value);
-    } else if (key.endsWith("_password")) {
-      add(value);
-      const dec = decodeStdBase64(value);
-      if (dec !== null) {
-        add(decodedText(dec));
-      }
-    } else if (key.endsWith("_auth")) {
-      add(value);
-      const dec = decodeStdBase64(value);
-      const plain = dec === null ? null : decodedText(dec);
-      if (plain !== null) {
-        add(plain);
-        const colon = plain.indexOf(":");
-        if (colon >= 0) {
-          add(plain.slice(colon + 1));
-        }
-      }
+  let from = 0;
+  for (;;) {
+    const nl = buf.indexOf(newline, from);
+    const line = trimSpace(buf.subarray(from, nl < 0 ? buf.length : nl));
+    from = nl + 1;
+    entry(line, add);
+    if (nl < 0) {
+      break;
     }
   }
   return out;
+}
+
+// entry adds the secret values of one trimmed line.
+function entry(line: Buffer, add: (v: Buffer) => void): void {
+  const first = line[0];
+  if (first === undefined || first === 0x23 || first === 0x3b) {
+    return; // empty, "#" or ";"
+  }
+  const eq = line.indexOf(equals);
+  if (eq < 0) {
+    return;
+  }
+  const key = trimSpace(line.subarray(0, eq));
+  const value = trimBytes(trimSpace(line.subarray(eq + 1)), `"'`);
+  if (value.length === 0 || value.includes("${")) {
+    return;
+  }
+  if (hasSuffix(key, "_authToken")) {
+    add(value);
+  } else if (hasSuffix(key, "_password")) {
+    add(value);
+    const dec = decodeStdBase64(value.toString("latin1"));
+    if (dec !== null) {
+      add(dec);
+    }
+  } else if (hasSuffix(key, "_auth")) {
+    add(value);
+    const dec = decodeStdBase64(value.toString("latin1"));
+    if (dec !== null) {
+      add(dec);
+      const c = dec.indexOf(colon);
+      if (c >= 0) {
+        add(dec.subarray(c + 1));
+      }
+    }
+  }
 }
 
 /**
@@ -130,8 +164,8 @@ export function npmrcValues(data: Uint8Array | string): string[] {
  * filepath.WalkDir does: names in byte order, symbolic links not followed, an
  * unreadable corner skipped.
  */
-export function snapshotNpmrcValues(dir: string): string[] {
-  const out: string[] = [];
+export function snapshotNpmrcValues(dir: string): NpmrcValue[] {
+  const out: NpmrcValue[] = [];
   const visit = (
     p: string,
     name: string,

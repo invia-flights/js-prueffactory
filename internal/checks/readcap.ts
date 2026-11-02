@@ -4,6 +4,7 @@
 // into memory reads only a regular file (never a symbolic link or named pipe)
 // and only up to maxProjectFileBytes. A larger file is not read: the Check
 // names it in a Limitation and goes on.
+import { createHash } from "node:crypto";
 import { closeSync, lstatSync, openSync, readSync } from "node:fs";
 
 import { pathError } from "../gocompat/os.ts";
@@ -102,4 +103,54 @@ export function readCapped(abs: string, limit: number): Uint8Array {
     throw errTooLarge;
   }
   return data;
+}
+
+// fileHashes caches sha256File: a Check that reports many Findings in one
+// file would otherwise read that file once per Location. The key is the
+// path with the size and modification time of the state that was hashed.
+const fileHashes = new Map<string, string>();
+
+/**
+ * sha256File streams the regular file at abs through SHA-256. It returns the
+ * empty string for anything but a regular file, and for a read error.
+ */
+export function sha256File(abs: string): string {
+  let info;
+  try {
+    info = lstatSync(abs, { bigint: true });
+  } catch {
+    return "";
+  }
+  if (!info.isFile()) {
+    return "";
+  }
+  const key = `${abs}\x00${String(info.size)}\x00${String(info.mtimeNs)}`;
+  const known = fileHashes.get(key);
+  if (known !== undefined) {
+    return known;
+  }
+  let fd: number;
+  try {
+    fd = openSync(abs, "r");
+  } catch {
+    return "";
+  }
+  const h = createHash("sha256");
+  try {
+    const buf = Buffer.alloc(1 << 20);
+    for (;;) {
+      const got = readSync(fd, buf, 0, buf.length, null);
+      if (got === 0) {
+        break;
+      }
+      h.update(buf.subarray(0, got));
+    }
+  } catch {
+    return "";
+  } finally {
+    closeSync(fd);
+  }
+  const sum = h.digest("hex");
+  fileHashes.set(key, sum);
+  return sum;
 }

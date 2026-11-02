@@ -10,7 +10,8 @@
 
 import type { Field, Shape } from "../gocompat/json.ts";
 import { quoteJSONString } from "../gocompat/json.ts";
-import { compareBytes, utf8Bytes, utf8Length } from "../gocompat/strings.ts";
+import { utf8Bytes, utf8Length } from "../gocompat/strings.ts";
+import { decodeRune, goString, text } from "../gocompat/utf8.ts";
 import { ReportShape, type Set as ResultSet } from "../resultset/types.ts";
 import { closedPaths } from "../schema/closed.ts";
 import { MinLength } from "./envvalues.ts";
@@ -24,7 +25,51 @@ export {
   MinLength,
   selectEnv,
 } from "./envvalues.ts";
-export { npmrcValues, snapshotNpmrcValues } from "./npmrc.ts";
+export { type NpmrcValue, npmrcValues, snapshotNpmrcValues } from "./npmrc.ts";
+
+const strictUTF8 = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
+
+/** utf8Text is the text of valid UTF-8 bytes, or null. */
+function utf8Text(b: Uint8Array): string | null {
+  try {
+    return strictUTF8.decode(b);
+  } catch {
+    return null;
+  }
+}
+
+const lenientUTF8 = new TextDecoder("utf-8", { ignoreBOM: true });
+
+/**
+ * specificEnough says whether the decoded text of a value that is not UTF-8
+ * may be replaced in texts: what remains without the replacement characters
+ * must be at least MinLength bytes, so that a value of mostly invalid bytes
+ * never matches every run of U+FFFD in the Report.
+ */
+function specificEnough(decoded: string): boolean {
+  return utf8Length(decoded.replaceAll("\uFFFD", "")) >= MinLength;
+}
+
+/**
+ * jsonSpelling is how Go's json.Marshal spells bytes inside a string, without
+ * the quotes: each byte that is not UTF-8 becomes the escape \ufffd, the rest
+ * as quoteJSONString writes it.
+ */
+function jsonSpelling(b: Uint8Array): string {
+  let out = "";
+  let start = 0;
+  let i = 0;
+  while (i < b.length) {
+    const [r, size] = decodeRune(b, i);
+    if (r === 0xfffd && size === 1) {
+      out += quoteJSONString(text(b.subarray(start, i)), true).slice(1, -1);
+      out += "\\ufffd";
+      start = i + 1;
+    }
+    i += size;
+  }
+  return out + quoteJSONString(text(b.subarray(start)), true).slice(1, -1);
+}
 
 /** Placeholder replaces every redacted value. */
 export const Placeholder = "[REDACTED]";
@@ -62,11 +107,16 @@ const maxSourcesPerValue = 3;
  */
 const maxHits = 50000;
 
-/** Form is one spelling of a registered value and the sources of the value. */
+/**
+ * Form is one spelling of a registered value and the sources of the value.
+ * A raw form is a value that is not UTF-8: it has no text and is only
+ * replaced in bytes.
+ */
 interface Form {
   text: string;
   bytes: Buffer;
   sources: string[];
+  raw: boolean;
 }
 
 type Note = (sources: readonly string[], n: number) => void;
@@ -83,6 +133,9 @@ function replaceForms(
 ): [string, number] {
   let n = 0;
   for (const f of forms) {
+    if (f.raw) {
+      continue;
+    }
     const parts = s.split(f.text);
     const c = parts.length - 1;
     if (c > 0) {
@@ -144,6 +197,11 @@ export class Redactor {
   readonly #values = new Set<string>(); // replaced everywhere
   readonly #textOnly = new Set<string>(); // replaced outside identifier fields
   readonly #sources = new Map<string, string[]>();
+  // #raw holds the values that are not UTF-8, by their bytes as Latin-1 text,
+  // and #rawSources their sources. Go keeps them in strings; here they are
+  // replaced everywhere bytes are, in artifacts, and in their JSON spelling.
+  readonly #raw = new Map<string, Buffer>();
+  readonly #rawSources = new Map<string, string[]>();
   // #everywhere and #text are the spellings of the values, longest first, so
   // a value that contains another is replaced as a whole: #everywhere is for
   // the identifier fields and has the values of add only, #text has both.
@@ -157,8 +215,12 @@ export class Redactor {
   readonly #hits = new Map<string, Set<string>>();
   readonly #sourceCount = new Map<string, number>(); // occurrences replaced per source
 
-  /** add registers secrets to redact everywhere. Values shorter than MinLength bytes are ignored. */
-  add(...values: string[]): void {
+  /**
+   * add registers secrets to redact everywhere. Values shorter than MinLength
+   * bytes are ignored. A value may be bytes; bytes that are not UTF-8 are
+   * replaced in artifacts and in their JSON spelling, as Go replaced them.
+   */
+  add(...values: (string | Uint8Array)[]): void {
     this.addFrom(UnnamedSource, ...values);
   }
 
@@ -167,8 +229,19 @@ export class Redactor {
    * such as "gitleaks" or ".npmrc". The name is shown in diagnostics, so it
    * must not contain a secret.
    */
-  addFrom(source: string, ...values: string[]): void {
-    for (const v of values) {
+  addFrom(source: string, ...values: (string | Uint8Array)[]): void {
+    for (const value of values) {
+      let v: string;
+      if (typeof value === "string") {
+        v = value;
+      } else {
+        const t = utf8Text(value);
+        if (t === null) {
+          this.#addRaw(source, value);
+          continue;
+        }
+        v = t;
+      }
       if (utf8Length(v) < MinLength) {
         continue;
       }
@@ -209,20 +282,33 @@ export class Redactor {
     }
   }
 
-  #noteSource(v: string, source: string): void {
-    const known = this.#sources.get(v) ?? [];
+  #noteSource(v: string, source: string, sources = this.#sources): void {
+    const known = sources.get(v) ?? [];
     if (known.includes(source)) {
       return;
     }
     if (known.length < maxSourcesPerValue) {
-      this.#sources.set(v, [...known, source]);
+      sources.set(v, [...known, source]);
+      this.#built = false;
+    }
+  }
+
+  // addRaw registers a value that is not UTF-8.
+  #addRaw(source: string, value: Uint8Array): void {
+    if (value.length < MinLength) {
+      return;
+    }
+    const key = Buffer.from(value).toString("latin1");
+    this.#noteSource(key, source, this.#rawSources);
+    if (!this.#raw.has(key)) {
+      this.#raw.set(key, Buffer.from(value));
       this.#built = false;
     }
   }
 
   /** len returns the number of values the Redactor knows. */
   len(): number {
-    return this.#values.size + this.#textOnly.size;
+    return this.#values.size + this.#textOnly.size + this.#raw.size;
   }
 
   /**
@@ -232,29 +318,61 @@ export class Redactor {
    */
   #spellings(...sets: ReadonlySet<string>[]): Form[] {
     const seen = new Map<string, Form>();
-    const add = (text: string, value: string): void => {
-      const sources = this.#sources.get(value) ?? [];
-      const f = seen.get(text);
+    const add = (
+      text: string,
+      sources: readonly string[],
+      raw?: Buffer,
+    ): void => {
+      const key = raw === undefined ? text : "\u0000raw\u0000" + text;
+      const f = seen.get(key);
       if (f !== undefined) {
         mergeSources(f.sources, sources);
         return;
       }
-      seen.set(text, { text, bytes: utf8Bytes(text), sources: [...sources] });
+      seen.set(key, {
+        text: raw === undefined ? text : "",
+        bytes: raw ?? utf8Bytes(text),
+        sources: [...sources],
+        raw: raw !== undefined,
+      });
     };
+    // The values that are not UTF-8 are replaced everywhere, like those of
+    // add: as bytes, and in the JSON spelling, which is text.
+    for (const [key, raw] of this.#raw) {
+      const sources = this.#rawSources.get(key) ?? [];
+      add(key, sources, raw);
+      const esc = jsonSpelling(raw);
+      if (!esc.includes("\\u00")) {
+        add(esc, sources);
+      }
+      // Go keeps the raw bytes in a string field and replaces them there.
+      // Here such a value reaches a text only after decoding: as Go's
+      // decoders do it (one U+FFFD per invalid byte) or as TextDecoder and
+      // Buffer.toString do it (one per maximal subpart). Both spellings are
+      // replaced, in texts and in artifacts built from texts, unless they are
+      // mostly replacement characters and would match unrelated text.
+      for (const decoded of [goString(raw), lenientUTF8.decode(raw)]) {
+        if (specificEnough(decoded)) {
+          add(decoded, sources);
+        }
+      }
+    }
     for (const values of sets) {
       for (const v of values) {
-        add(v, v);
+        const sources = this.#sources.get(v) ?? [];
+        add(v, sources);
         // Go's json.Marshal also escapes <, > and & as < and so on;
         // producers of artifacts rarely do, so only the plain escapes count as
         // an extra spelling here.
         const esc = quoteJSONString(v, true).slice(1, -1);
         if (esc !== v && !esc.includes("\\u00")) {
-          add(esc, v);
+          add(esc, sources);
         }
       }
     }
     return [...seen.values()].sort(
-      (a, b) => b.bytes.length - a.bytes.length || compareBytes(a.text, b.text),
+      (a, b) =>
+        b.bytes.length - a.bytes.length || Buffer.compare(a.bytes, b.bytes),
     );
   }
 
@@ -277,7 +395,9 @@ export class Redactor {
    * with the Go build's order.
    */
   forms(identifier: boolean): string[] {
-    return this.#forms(identifier).map((f) => f.text);
+    return this.#forms(identifier).map((f) =>
+      f.raw ? f.bytes.toString("latin1") : f.text,
+    );
   }
 
   /**

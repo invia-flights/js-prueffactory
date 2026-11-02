@@ -8,6 +8,7 @@ import "./artifacts_structured.ts";
 import "./clones.ts";
 import "./deps_deprecated.ts";
 import "./deps_engines.ts";
+import "./file_class_readers.ts";
 import "./deps_outdated.ts";
 import "./lint_correctness.ts";
 import "./lint_existing.ts";

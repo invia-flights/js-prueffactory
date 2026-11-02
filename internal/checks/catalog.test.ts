@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import "./all.ts";
 import {
   AreaSecurity,
   catalog,
@@ -62,7 +63,8 @@ test("security.patterns feeds the security area", () => {
 });
 
 test("the status of every Check is the Go build's at the freeze commit", () => {
-  // Recorded with `list-checks --format json` of the frozen Go build.
+  // Recorded with `list-checks --format json` of the frozen Go build. The
+  // status comes from the registry, which all.ts fills (Go: init functions).
   const planned = ["tests.mutation", "security.containers", "app.lifecycle", "api.fuzz", "api.dast"]; // prettier-ignore
   for (const e of catalog()) {
     assert.equal(
