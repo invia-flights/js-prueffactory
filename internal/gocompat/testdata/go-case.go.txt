@@ -1,0 +1,34 @@
+// Generator of go-case.json: the runes that Go's strings.ToUpper and
+// strings.ToLower change, with the toolchain of the freeze commit. Kept as
+// text; regenerate with: cp go-case.go.txt /tmp/x/main.go && go run /tmp/x/main.go > go-case.json
+package main
+
+import (
+	"encoding/json"
+	"os"
+	"strings"
+	"unicode/utf8"
+)
+
+func main() {
+	changed := [][3]int{}
+	for r := rune(0); r <= 0x10FFFF; r++ {
+		if r >= 0xD800 && r <= 0xDFFF {
+			continue
+		}
+		s := string(r)
+		up, low := strings.ToUpper(s), strings.ToLower(s)
+		if up == s && low == s {
+			continue
+		}
+		u, _ := utf8.DecodeRuneInString(up)
+		l, _ := utf8.DecodeRuneInString(low)
+		changed = append(changed, [3]int{int(r), int(u), int(l)})
+	}
+	out := map[string]any{
+		"recordedFrom": "Go 1.27.3 standard library, the toolchain of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8",
+		"changed":      changed,
+	}
+	data, _ := json.Marshal(out)
+	os.Stdout.Write(append(data, '\n'))
+}
