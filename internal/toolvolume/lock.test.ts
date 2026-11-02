@@ -8,7 +8,7 @@ import {
   utimesSync,
   writeFileSync,
 } from "node:fs";
-import { tmpdir } from "node:os";
+import { hostname, tmpdir } from "node:os";
 import { join } from "node:path";
 import { type TestContext, test } from "node:test";
 
@@ -200,4 +200,20 @@ test("owner-file: releasing never removes a lock another holder took over", asyn
     readFileSync(ownerFile(path), "utf8"),
     "1 some-other-host abc\n",
   );
+});
+
+// From ticket 17's lock: a lock left by a process that is gone is taken over
+// at once (with flock, the kernel drops the lock of a dead process itself).
+test("owner-file: a lock left by a process that is gone is taken over", async (t) => {
+  const path = join(tempDir(t), "kubernetes-schemas.lock");
+  // No process has this ID: it is above any PID limit.
+  writeFileSync(ownerFile(path), `2147483646 ${hostname()} abc\n`);
+  const ctx = withTimeout(new AbortController().signal, 2000n * millisecond);
+  t.after(() => {
+    ctx.cancel();
+  });
+
+  const l = await acquireWith("owner-file", ctx.signal, path);
+
+  l.release();
 });

@@ -356,7 +356,11 @@ async function removeOtherVersions(
   }
 }
 
-function lastLines(s: string, n: number): string {
+/**
+ * lastLines is the last n lines of s, trimmed and joined with " | ", for an
+ * error message.
+ */
+export function lastLines(s: string, n: number): string {
   let lines = trimSpace(s).split("\n");
   if (lines.length > n) {
     lines = lines.slice(lines.length - n);

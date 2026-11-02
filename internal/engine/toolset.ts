@@ -1,6 +1,6 @@
 // The cache volumes of the Preparation phase: the toolset volume with the
-// pinned npm tools (Go: toolset.go), the offline advisory database (Go:
-// advisorydb.go) and the Kubernetes schemas (Go: kubernetesschemas.go).
+// pinned npm tools (Go: toolset.go) and the offline advisory database (Go:
+// advisorydb.go).
 //
 // A failure of any of them does not stop the Run: the Checks that need the
 // volume end as infrastructure_error with the reason, every other Check goes
@@ -8,9 +8,9 @@
 //
 // The volumes themselves (internal/toolvolume) are ported with the Checks
 // that use them: the npm tools with package.install (ticket 13), the
-// Kubernetes schemas with repository.kubernetes (17), the advisory database
-// with security.dependencies (19). Until then no ported Check asks for them,
-// and a Check that does gets the reason below.
+// advisory database with security.dependencies (19). Until then a Check that
+// asks for them gets the reason below. The Kubernetes schemas are in
+// kubernetesschemas.ts.
 import { contextError } from "../docker/common.ts";
 import { DefaultNodeMajor, nodeImage, VariantDebian } from "../toolset/node.ts";
 import { imageRef } from "../toolset/toolset.ts";
@@ -83,27 +83,6 @@ export function prepareAdvisoryDB(r: RunState): Promise<void> {
       err: notPorted("the advisory database"),
     };
     r.log.print(`advisory database preparation failed: ${r.advisory.err}`);
-  }
-  return Promise.resolve();
-}
-
-/** needsKubernetesSchemas says whether any execution that will run validates with the Kubernetes schemas. */
-export function needsKubernetesSchemas(r: RunState): boolean {
-  return r.planned.some(
-    (p) => runnable(p) && p.check.usesKubernetesSchemas?.(p.context) === true,
-  );
-}
-
-/** prepareKubernetesSchemas makes the Kubernetes schemas available to the Execution phase. */
-export function prepareKubernetesSchemas(r: RunState): Promise<void> {
-  if (needsKubernetesSchemas(r)) {
-    r.kubernetesSchemas = {
-      volume: "",
-      err: notPorted("the Kubernetes schemas"),
-    };
-    r.log.print(
-      `Kubernetes schema preparation failed: ${r.kubernetesSchemas.err}`,
-    );
   }
   return Promise.resolve();
 }

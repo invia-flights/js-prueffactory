@@ -38,6 +38,7 @@ import {
   newService,
   newTestCase,
 } from "../resultset/zero.ts";
+import { producer } from "./assemble.ts";
 import {
   entry,
   executeOne,
@@ -569,4 +570,14 @@ test("the isolation probe only confirms what it saw fail", () => {
       out,
     );
   }
+});
+
+test("producer names the package version and no revision when run from the sources", () => {
+  // Version is the Go constant at the freeze commit. Sources run directly
+  // have no stamped commit, as a Go build without VCS information had none.
+  assert.deepEqual(producer(), {
+    name: "js-prueffactory",
+    version: "0.1.0-dev",
+    vcs_revision: null,
+  });
 });
