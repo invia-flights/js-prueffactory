@@ -10,6 +10,8 @@ import {
   isPrint,
   isSpace,
   sortStrings,
+  toLower,
+  toUpper,
   trimSpace,
   utf8Length,
 } from "./strings.ts";
@@ -80,4 +82,54 @@ describe("Go's character classes", () => {
       assert.equal(trimSpace(c.In), c.TrimSpace);
     });
   }
+});
+
+// Every rune Go's strings.ToUpper or strings.ToLower changes, as
+// [rune, upper, lower] (testdata/go-case.go.txt).
+const goCase = JSON.parse(
+  readFileSync(new URL("testdata/go-case.json", import.meta.url), "utf8"),
+) as { changed: [number, number, number][] };
+
+describe("Go's case mapping", () => {
+  test("maps every rune as strings.ToUpper and strings.ToLower do", () => {
+    const changed = new Map(goCase.changed.map((c) => [c[0], c]));
+    const wrong: string[] = [];
+    for (let c = 0; c <= 0x10ffff; c++) {
+      if (c >= 0xd800 && c <= 0xdfff) {
+        continue;
+      }
+      const s = String.fromCodePoint(c);
+      const [, upper, lower] = changed.get(c) ?? [c, c, c];
+      const want = String.fromCodePoint(upper) + String.fromCodePoint(lower);
+      const got = toUpper(s) + toLower(s);
+      if (got !== want && wrong.length < 20) {
+        wrong.push(
+          `U+${c.toString(16)}: ${JSON.stringify(got)}, Go ${JSON.stringify(want)}`,
+        );
+      }
+    }
+    assert.deepEqual(wrong, []);
+  });
+
+  test("keeps one rune for one rune where JavaScript's full mapping makes several", () => {
+    const dottedI = String.fromCodePoint(0x130);
+    assert.equal(toLower(dottedI + "stanbul"), "istanbul");
+    assert.equal(dottedI.toLowerCase().length, 2, "JavaScript's own");
+    const sharpS = String.fromCodePoint(0xdf);
+    assert.equal(toUpper("stra" + sharpS + "e"), "STRA" + sharpS + "E");
+    assert.equal(sharpS.toUpperCase(), "SS", "JavaScript's own");
+    const ligature = String.fromCodePoint(0xfb01);
+    assert.equal(toUpper(ligature), ligature);
+    assert.equal(
+      toUpper(String.fromCodePoint(0x1f80)),
+      String.fromCodePoint(0x1f88),
+    );
+    const sigma = String.fromCodePoint(0x3a3, 0x39f, 0x3a3);
+    assert.equal(toLower(sigma), String.fromCodePoint(0x3c3, 0x3bf, 0x3c3));
+    assert.equal(
+      toUpper("a" + String.fromCharCode(0xd800) + "b"),
+      "A" + String.fromCodePoint(0xfffd) + "B",
+      "a lone surrogate is U+FFFD",
+    );
+  });
 });
