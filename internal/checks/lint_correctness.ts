@@ -12,3 +12,8 @@ export const lintCorrectness: Check = {
 };
 
 register(lintCorrectnessID, lintCorrectness);
+
+/** plural is "" for one and "s" otherwise (Go: lint_correctness.go). */
+export function plural(n: number): string {
+  return n === 1 ? "" : "s";
+}

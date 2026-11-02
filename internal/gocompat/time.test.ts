@@ -6,8 +6,11 @@ import { parseInt64 } from "./strconv.ts";
 import {
   durationString,
   formatCompactUTC,
+  hours,
   parseDuration,
+  parseRFC3339Nano,
   second,
+  sub,
   wrapInt64,
 } from "./time.ts";
 
@@ -64,4 +67,36 @@ describe("strconv.ParseInt(s, 10, 64)", () => {
 test("the layout 20060102T150405Z is in UTC and leaves out the fraction", () => {
   const t = new Date(Date.UTC(2026, 9, 25, 10, 15, 0, 999));
   assert.equal(formatCompactUTC(t), "20261025T101500Z");
+});
+
+test("parseRFC3339Nano and hours of the time between give Go's values", () => {
+  const oracle = JSON.parse(
+    readFileSync(
+      new URL("testdata/go-oracle-rfc3339.json", import.meta.url),
+      "utf8",
+    ),
+  ) as {
+    parse: {
+      in: string;
+      ok: boolean;
+      unix_nano: string;
+      hours_since_previous: string;
+    }[];
+  };
+  let prev: bigint | undefined;
+  for (const want of oracle.parse) {
+    const got = parseRFC3339Nano(want.in);
+    assert.equal(got !== undefined, want.ok, want.in);
+    if (got === undefined) continue;
+    const [secs = "", nanos = ""] = want.unix_nano.split(".");
+    assert.equal(got, BigInt(secs) * second + BigInt(nanos), want.in);
+    if (prev !== undefined) {
+      assert.equal(
+        hours(sub(got, prev)),
+        Number(want.hours_since_previous),
+        want.in,
+      );
+    }
+    prev = got;
+  }
 });

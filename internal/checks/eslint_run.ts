@@ -6,12 +6,13 @@
 // Checks. The run itself arrives with ticket 21 of the port.
 import type { Context } from "../discovery/discovery.ts";
 import { Source, TestCode } from "../discovery/discovery.ts";
-import { ext } from "../gocompat/path.ts";
+import { ext, join } from "../gocompat/path.ts";
 import {
   type Applicability,
   Applicable,
   NotApplicable,
 } from "../resultset/types.ts";
+import type { Input } from "./input.ts";
 
 /**
  * eslintApplicability is the Applicability of every Check that reads the
@@ -88,4 +89,9 @@ export function eslintCandidate(rel: string): boolean {
       return true;
   }
   return false;
+}
+
+/** packageFolder is the absolute path of a package in the host-side Snapshot. */
+export function packageFolder(input: Input): string {
+  return join(input.snapshotDir, input.context.package?.path ?? ".");
 }

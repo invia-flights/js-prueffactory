@@ -1,0 +1,56 @@
+// Generator of go-oracle-rfc3339.json: Go's time.Parse(time.RFC3339Nano, s)
+// (Unix nanoseconds, or the error) and Duration.Hours of the time between
+// consecutive inputs, for internal/gocompat/time.test.ts. Kept as text;
+// regenerate in a folder with a go.mod of `go 1.27.1`:
+// cp go-oracle-rfc3339.go.txt /tmp/x/main.go && (cd /tmp/x && go run .) > go-oracle-rfc3339.json
+package main
+
+import (
+	"encoding/json"
+	"math"
+	"os"
+	"strconv"
+	"time"
+)
+
+func main() {
+	inputs := []string{
+		"2020-01-01T00:00:00.000Z", "2024-01-01T00:00:00.000Z", "2020-01-01T00:00:00Z",
+		"2025-01-01T00:00:00Z", "2018-04-09T00:00:00.000Z", "2026-01-01T00:00:00.000Z",
+		"2021-05-05T12:34:56.123456789Z", "2021-05-05T12:34:56.1234567891234Z", "2000-02-29T00:00:00Z",
+		"2001-02-29T00:00:00Z", "2020-01-01T00:00:00+01:30", "2020-01-01T00:00:00-23:59",
+		"2020-01-01 00:00:00Z", "2020-01-01t00:00:00Z", "2020-01-01T00:00:00z", "2020-01-01T00:00:00",
+		"2020-01-01T24:00:00Z", "2020-01-01T23:59:60Z", "0001-01-01T00:00:00Z", "9999-12-31T23:59:59.999999999Z",
+		"1969-12-31T23:59:59.5Z", "2020-13-01T00:00:00Z", "2020-01-01T00:00:00.Z", "", "garbage",
+		"2011-10-05T14:48:00.000Z", "2015-06-30T23:59:59.999Z",
+	}
+	type row struct {
+		In    string `json:"in"`
+		OK    bool   `json:"ok"`
+		Unix  string `json:"unix_nano"`
+		Hours string `json:"hours_since_previous"`
+	}
+	var rows []row
+	var prev time.Time
+	var prevOK bool
+	for _, in := range inputs {
+		t, err := time.Parse(time.RFC3339Nano, in)
+		r := row{In: in, OK: err == nil}
+		if err == nil {
+			// UnixNano overflows outside 1678..2262; seconds and nanoseconds then.
+			r.Unix = strconv.FormatInt(t.Unix(), 10) + "." + strconv.Itoa(t.Nanosecond())
+			if prevOK {
+				r.Hours = strconv.FormatFloat(t.Sub(prev).Hours(), 'g', -1, 64)
+				_ = math.Round
+			}
+			prev, prevOK = t, true
+		}
+		rows = append(rows, r)
+	}
+	enc := json.NewEncoder(os.Stdout)
+	enc.SetIndent("", "  ")
+	_ = enc.Encode(map[string]any{
+		"recordedFrom": "Go 1.27.3 standard library (time), the toolchain of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8",
+		"parse":        rows,
+	})
+}
