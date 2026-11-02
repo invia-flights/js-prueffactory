@@ -3,6 +3,7 @@
 // rounds it to even).
 
 import { isPrint } from "./strings.ts";
+import { decodeRune, RuneError } from "./utf8.ts";
 
 const hex = "0123456789abcdef";
 
@@ -139,4 +140,52 @@ export function formatFloatFixed(x: number, prec: number): string {
     digits = `${digits.slice(0, -prec)}.${digits.slice(-prec)}`;
   }
   return (negative ? "-" : "") + digits;
+}
+
+// quoteRune is strconv.QuoteRune.
+export function quoteRune(r: number): string {
+  if (r > 0x10ffff || (r >= 0xd800 && r <= 0xdfff)) r = RuneError;
+  return "'" + escapedRune(r, "'") + "'";
+}
+
+// quoteBytes is strconv.Quote applied to a byte string: invalid UTF-8 bytes come
+// out as \x escapes.
+export function quoteBytes(b: Uint8Array): string {
+  let out = '"';
+  for (let i = 0; i < b.length;) {
+    const [r, size] = decodeRune(b, i);
+    if (r === RuneError && size === 1) {
+      out += "\\x" + hexDigits(b[i] ?? 0, 2);
+      i++;
+      continue;
+    }
+    out += escapedRune(r, '"');
+    i += size;
+  }
+  return out + '"';
+}
+
+function escapedRune(r: number, q: string): string {
+  const ch = String.fromCodePoint(r);
+  if (ch === q || ch === "\\") return "\\" + ch;
+  if (isPrint(r)) return ch;
+  switch (r) {
+    case 0x07:
+      return "\\a";
+    case 0x08:
+      return "\\b";
+    case 0x0c:
+      return "\\f";
+    case 0x0a:
+      return "\\n";
+    case 0x0d:
+      return "\\r";
+    case 0x09:
+      return "\\t";
+    case 0x0b:
+      return "\\v";
+  }
+  if (r < 0x20 || r === 0x7f) return "\\x" + hexDigits(r, 2);
+  if (r < 0x10000) return "\\u" + hexDigits(r, 4);
+  return "\\U" + hexDigits(r, 8);
 }
