@@ -1,0 +1,244 @@
+package benchmark
+
+// Generator of go-oracle.json: what the frozen Go build's Benchmark scorer
+// computes for the inputs of the TypeScript port's tests. The Go code is
+// frozen, so this is kept as text. To regenerate at the freeze commit: copy it
+// to internal/benchmark/zz_oracle_test.go, run
+// go test -count=1 -run TestZZOracle ./internal/benchmark, delete the copy.
+// Run it on arm64 and on amd64 (GOARCH=amd64, under Rosetta on a Mac): the
+// file must come out the same on both.
+
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"os"
+	"strings"
+	"testing"
+
+	"github.com/invia-flights/jscript-bench/internal/resultset"
+	"github.com/invia-flights/jscript-bench/internal/resultset/resultsettest"
+)
+
+type oracleGrid struct {
+	Count  int    `json:"count"`
+	SHA256 string `json:"sha256"`
+}
+
+func gridOf(values []float64) oracleGrid {
+	lines := make([]string, len(values))
+	for i, v := range values {
+		lines[i] = fmt.Sprintf("%v", v)
+	}
+	sum := sha256.Sum256([]byte(strings.Join(lines, "\n")))
+	return oracleGrid{Count: len(values), SHA256: hex.EncodeToString(sum[:])}
+}
+
+func oracleGrids() map[string]oracleGrid {
+	x50s := []float64{1, 2, 3, 5, 10, 20}
+	var exp, log, damped []float64
+	for _, x50 := range x50s {
+		for i := 0; i <= 4000; i++ {
+			exp = append(exp, round1(partScore(float64(i)/8, x50)))
+		}
+	}
+	for c := 1; c <= 20000; c++ {
+		log = append(log, round2(nEff(map[string]int{"a": c})))
+	}
+	for a := 1; a <= 200; a++ {
+		for b := 0; b <= 200; b++ {
+			m := map[string]int{"a": a}
+			if b > 0 {
+				m["b"] = b
+			}
+			n := nEff(m)
+			for _, x50 := range x50s {
+				damped = append(damped, round1(partScore(n, x50)))
+			}
+		}
+	}
+	return map[string]oracleGrid{"partScore": gridOf(exp), "nEff": gridOf(log), "dampedPartScore": gridOf(damped)}
+}
+
+func oracleAdvisory(severity, scope string) []func(*resultset.Finding) {
+	return []func(*resultset.Finding){
+		resultsettest.Evidence("advisory_severity", severity), resultsettest.Evidence("dependency_scope", scope),
+	}
+}
+
+func oracleSecondPackage(p *resultsettest.Project, node, npm string) {
+	c := p.Set.Contexts[1]
+	c.ID, c.Path = "C-0003", "packages/b"
+	nodeCopy := *c.Node
+	nodeCopy.Version = node
+	nodeCopy.ImageDigest = "sha256:" + strings.Repeat("cd", 32)
+	c.Node = &nodeCopy
+	c.NPM = &npm
+	c.Tools = nil
+	p.Set.Contexts = append(p.Set.Contexts, c)
+}
+
+// oracleScenarios must match scenarios in ../scenarios.test.ts.
+var oracleScenarios = map[string]func(p *resultsettest.Project){
+	"clean": func(p *resultsettest.Project) {},
+	"an advisory and four lint hits": func(p *resultsettest.Project) {
+		p.Add("security.dependencies", "GHSA-mod", false, oracleAdvisory("moderate", "prod")...)
+		for i := 0; i < 4; i++ {
+			p.Add("lint.correctness", "no-undef", false)
+		}
+	},
+	"eighty percent of the weight measured": func(p *resultsettest.Project) {
+		p.Deselect("lint.correctness")
+		p.Add("security.dependencies", "GHSA-high", false, oracleAdvisory("high", "prod")...)
+		p.Add("security.dependencies", "GHSA-mod-1", false, oracleAdvisory("moderate", "prod")...)
+		p.Add("security.dependencies", "GHSA-mod-2", false, oracleAdvisory("moderate", "prod")...)
+	},
+	"a pass rate of two thirds": func(p *resultsettest.Project) {
+		p.TestFiles(
+			resultset.TestFileCount{Suite: "test:unit", File: "test/a.test.js", Found: 2, Passed: 2},
+			resultset.TestFileCount{Suite: "test:unit", File: "test/shared.test.js", Found: 2, Passed: 2},
+			resultset.TestFileCount{Suite: "test:api", File: "test/shared.test.js", Found: 3, Passed: 0},
+			resultset.TestFileCount{File: "test/b.test.js", Found: 7, Passed: 6, PassedFocused: 1},
+		)
+		p.Add("tests.existing", "test-file-load-failed", true, resultsettest.AtPath("test/c.test.js"))
+	},
+	"advisories of every severity and scope": func(p *resultsettest.Project) {
+		p.Add("security.dependencies", "GHSA-1", false, oracleAdvisory("low", "dev")...)
+		p.Add("security.dependencies", "GHSA-2", false, oracleAdvisory("high", "dev")...)
+		p.Add("security.dependencies", "GHSA-3", false, oracleAdvisory("critical", "prod")...)
+		p.Add("security.dependencies", "GHSA-4", false, oracleAdvisory("unheard-of", "test")...)
+	},
+	"validity dropped and a secret": func(p *resultsettest.Project) {
+		for _, id := range []string{"package.manifest", "package.install", "syntax.parse", "artifacts.structured", "api.lint",
+			"schema.compile", "repository.helm", "deps.tree", "repository.dockerfile", "repository.shell"} {
+			p.NotApplicable(id)
+		}
+		p.Add("security.secrets", "generic-api-key", false)
+	},
+	"damped hits of three rules": func(p *resultsettest.Project) {
+		for _, r := range []struct {
+			rule string
+			n    int
+		}{{"mocha/c", 7}, {"mocha/a", 3}, {"mocha/b", 5}} {
+			for i := 0; i < r.n; i++ {
+				p.Add("tests.smells", r.rule, false)
+			}
+		}
+		for i := 0; i < 11; i++ {
+			p.Add("deps.engines", "n/no-deprecated-api", false)
+		}
+		p.Add("security.patterns", "njsscan/eval_nodejs", false)
+		p.Add("security.integrity", "missing-integrity", false)
+		p.Set.Inventory.Suppressions = []resultset.SuppressionCount{
+			{Kind: "eslint-disable", FileClass: "source", Count: 7},
+			{Kind: "eslint-disable", FileClass: "test_data", Count: 70},
+		}
+	},
+	"type coverage of two packages": func(p *resultsettest.Project) {
+		p.AddExecution("types.strictness", "C-0002")
+		p.Metric("types.strictness", "type_coverage_percent", 87.3, "percent")
+		p.Metric("types.strictness", "type_coverage_identifiers", 1234, "identifiers")
+		p.Metric("types.strictness", "strict_gap_errors", 17, "errors")
+		p.Set.Contexts = append(p.Set.Contexts, resultset.Context{ID: "C-0003", Kind: "package", Path: "packages/b"})
+		e := p.Set.Checks[len(p.Set.Checks)-1]
+		e.ID, e.ContextID = "added-second", "C-0003"
+		p.Set.Checks = append(p.Set.Checks, e)
+		for _, m := range []struct {
+			name, unit string
+			v          float64
+		}{{"type_coverage_percent", "percent", 41.7}, {"type_coverage_identifiers", "identifiers", 333}, {"strict_gap_errors", "errors", 4}} {
+			v := m.v
+			p.Set.Metrics = append(p.Set.Metrics, resultset.Metric{
+				ID: "tmp-" + m.name + "-b", CheckID: "types.strictness", ContextID: "C-0003", Name: m.name, Value: &v, Unit: m.unit,
+			})
+		}
+	},
+	"helm, gitlab and openapi": func(p *resultsettest.Project) {
+		p.Applicable("repository.helm")
+		msg := func(chart string) func(*resultset.Finding) {
+			return func(f *resultset.Finding) {
+				f.Message = "helm reports error helm.template: chart in " + chart + " does not render with its default values: boom"
+			}
+		}
+		p.Add("repository.helm", "helm.template", true, msg("deploy/a"))
+		p.Add("repository.helm", "helm.template", true, msg("deploy/a"))
+		p.Add("repository.helm", "helm.template", true, msg("deploy/b"))
+		p.Add("repository.helm", "helm.template", true, resultsettest.AtPath("deploy/c/values.yaml"))
+		p.Applicable("repository.gitlab-ci")
+		p.Add("repository.gitlab-ci", "gitlab-ci.schema", true, resultsettest.AtPath("ci/a.yml"))
+		p.Add("repository.gitlab-ci", "gitlab-ci.yaml", true, resultsettest.AtPath("ci/a.yml"))
+		p.Add("repository.gitlab-ci", "gitlab-ci.unknown-job", true)
+		p.Applicable("api.lint")
+		p.Add("api.lint", "spec-no-empty-servers", true)
+		p.Add("api.lint", "operation-summary", true)
+		p.Add("api.lint", "operation-summary", true, resultsettest.InTestData)
+	},
+	"side indicators": func(p *resultsettest.Project) {
+		p.AddExecution("tests.coverage", "C-0002")
+		p.Metric("tests.coverage", "lines_percent", 81.25, "percent")
+		p.Metric("tests.coverage", "branches_percent", 60.333, "percent")
+		p.Metric("security.licenses", "license:MIT", 120, "packages")
+		p.Metric("security.licenses", "license:none_in_lockfile", 3, "packages")
+		p.Metric("security.licenses", "license:(MIT OR lgpl-2.1)", 2, "packages")
+		p.Metric("security.licenses", "license:CC-BY-NC-SA-4.0", 1, "packages")
+		p.Metric("quality.metrics", "functions_above_cyclomatic_10", 7, "functions")
+		reason := "tool_failed"
+		p.Set.Metrics = append(p.Set.Metrics, resultset.Metric{
+			ID: "tmp-null", CheckID: "quality.metrics", ContextID: "C-0002", Name: "functions_above_cognitive_15", Reason: &reason, Unit: "functions",
+		})
+		p.Metric("quality.clones", "duplication_percent_source", 3.456, "percent")
+		p.Add("quality.unused", "unused-file", false)
+		p.Add("quality.unused", "unused-type", false)
+		p.Add("quality.unused", "unused-dev-dependency", false)
+		p.Status("modules.cycles", resultset.StatusTimedOut, "timed_out")
+		p.NotApplicable("types.javascript")
+	},
+	"a fingerprint of two runtimes, services and every tool": func(p *resultsettest.Project) {
+		oracleSecondPackage(p, "22.5.0", "10.8.2")
+		oracleSecondPackage(p, "22.5.0", "10.8.2")
+		p.Set.Contexts[3].ID, p.Set.Contexts[3].Path = "C-0004", "packages/c"
+		svc := "sha256:" + strings.Repeat("ef", 32)
+		p.Set.Services = []resultset.Service{{Family: "valkey", ComposeService: "cache", ImageDigest: &svc, DeclaredImage: "valkey/valkey:8", Status: resultset.ServiceStarted}}
+		d := func(s string) *string { return &s }
+		p.Set.Contexts[0].Tools = []resultset.ToolRef{
+			{Name: "hadolint", Version: "2.12.0", Digest: d("sha256:" + strings.Repeat("12", 32))},
+			{Name: "gitlab-ci-schema", Version: "18.5.0-aaaa", Digest: d("aaaa")},
+			{Name: "kubernetes-schemas", Version: "1.34.1"},
+			{Name: "local-tool", Version: "1", Digest: d("not-an-image")},
+		}
+		p.Set.Contexts[1].Tools = append(p.Set.Contexts[1].Tools,
+			resultset.ToolRef{Name: "typescript6", Version: "6.0.2"},
+			resultset.ToolRef{Name: "typed-lint-rules", Version: "abababababab", Digest: d("<&>")},
+		)
+		p.Set.Profiles.CatalogVersion = "milestone-2"
+		p.Set.Profiles.ToolsetVersion = "toolset-<abc>"
+	},
+}
+
+func TestZZOracle(t *testing.T) {
+	// Each section is json.Marshal's bytes of Compute, kept as a string.
+	sections := map[string]string{}
+	for name, build := range oracleScenarios {
+		p := resultsettest.ScoredProject()
+		build(p)
+		s := p.Done()
+		data, err := json.Marshal(Compute(s))
+		if err != nil {
+			t.Fatal(err)
+		}
+		sections[name] = string(data)
+	}
+	out := map[string]any{
+		"recordedFrom": "238e07f66d8cafab24ef363cb79e207bd48babd8",
+		"grids":        oracleGrids(),
+		"sections":     sections,
+	}
+	data, err := json.MarshalIndent(out, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile("testdata/go-oracle.json", append(data, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}

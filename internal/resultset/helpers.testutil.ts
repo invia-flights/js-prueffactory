@@ -3,6 +3,7 @@
 
 import { readFileSync } from "node:fs";
 
+import { apply } from "../benchmark/score.ts";
 import {
   evidence as scoredEvidence,
   scoredProject,
@@ -10,7 +11,6 @@ import {
 import {
   Applicable,
   type Artifact,
-  type Benchmark,
   BenchmarkNotRequested,
   ConfidenceConfirmed,
   type Evidence,
@@ -213,11 +213,8 @@ export function at<T>(list: readonly T[], i: number): T {
 
 /**
  * goldenScored builds the benchmark mode fixture behind a golden report folder
- * ("benchmark-pass", "benchmark-fail" or "benchmark-incomplete"), as the
- * writer's Go golden test does,
- * and takes its Benchmark section from that folder's report.json, which the Go
- * scorer wrote. Until the scorer is ported (ticket 06) this stands in for
- * benchmark.Apply.
+ * ("benchmark-pass", "benchmark-fail" or "benchmark-incomplete") and scores
+ * it, as the writer's Go golden test does.
  */
 export function goldenScored(
   name: "benchmark-pass" | "benchmark-fail" | "benchmark-incomplete",
@@ -282,14 +279,7 @@ export function goldenScored(
     p.add("tests.smells", "mocha/no-pending-tests", false);
   }
   const s = p.done();
-  const report = JSON.parse(
-    readFileSync(
-      new URL(`../writer/testdata/golden/${name}/report.json`, import.meta.url),
-      "utf8",
-    ),
-  ) as { benchmark: Benchmark };
-  s.benchmark = report.benchmark;
-  s.profiles.benchmark_profile = report.benchmark.profile_id;
+  apply(s);
   return s;
 }
 
