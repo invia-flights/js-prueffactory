@@ -1,7 +1,7 @@
 # Checks every pull request and every push to main: the pre-commit hooks, the
 # fast tests with the race detector, the Docker tests and govulncheck for the Go
-# build; lint, format check, type check and the fast tests on every supported
-# Node major for the TypeScript port next to it.
+# build; lint, format check, type check, the fast tests on every supported
+# Node major and the Docker tests for the TypeScript port next to it.
 name: ci
 
 on:
@@ -117,3 +117,19 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm ci --ignore-scripts
       - run: npm test
+
+  ts-docker-test:
+    name: TypeScript npm run test:docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    permissions:
+      contents: read # check out the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - run: npm ci --ignore-scripts
+      - run: npm run test:docker
