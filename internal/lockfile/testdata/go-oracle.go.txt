@@ -1,0 +1,251 @@
+package lockfile_test
+
+// Generator of testdata/go-oracle.json for the TypeScript port. The Go code
+// is frozen, so this is no .go file. To re-record (inputs are the cases
+// already in the file; add a case there to record it too):
+//
+//   cp internal/lockfile/testdata/go-oracle.go.txt internal/lockfile/zz_oracle_test.go
+//   RECORD_CORPUS=$PWD/internal/lockfile/testdata/go-oracle.json \
+//   RECORD_OUT=$PWD/internal/lockfile/testdata/go-oracle.json \
+//     go test ./internal/lockfile -run TestRecordForTypeScriptPort -count=1
+//   rm internal/lockfile/zz_oracle_test.go
+
+import (
+	"encoding/base64"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+	"testing"
+
+	"github.com/invia-flights/jscript-bench/internal/lockfile"
+)
+
+type repeat struct {
+	Prefix string `json:"prefix"`
+	Open   string `json:"open"`
+	Middle string `json:"middle"`
+	Close  string `json:"close"`
+	Suffix string `json:"suffix"`
+	Count  int    `json:"count"`
+}
+
+type corpusCase struct {
+	Name   string  `json:"name"`
+	Doc    string  `json:"doc,omitempty"`
+	B64    string  `json:"b64,omitempty"`
+	Repeat *repeat `json:"repeat,omitempty"`
+}
+
+func pairs(m map[string]string) [][2]string {
+	out := [][2]string{}
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		out = append(out, [2]string{k, m[k]})
+	}
+	return out
+}
+
+func errorRecord(err error) map[string]any {
+	var se *lockfile.SyntaxError
+	var ue *lockfile.UnsupportedVersionError
+	switch {
+	case errors.As(err, &se):
+		return map[string]any{"kind": "syntax", "line": se.Line, "column": se.Column, "message": se.Message, "error": err.Error()}
+	case errors.As(err, &ue):
+		return map[string]any{"kind": "unsupported", "version": fmt.Sprintf("%d", ue.Version), "error": err.Error()}
+	}
+	return map[string]any{"kind": "other", "error": err.Error()}
+}
+
+func entryRecord(e lockfile.Entry) map[string]any {
+	return map[string]any{
+		"name": e.Name, "version": e.Version, "resolved": e.Resolved, "integrity": e.Integrity,
+		"link": e.Link, "inBundle": e.InBundle, "dev": e.Dev, "optional": e.Optional, "peer": e.Peer,
+		"hasInstallScript": e.HasInstallScript,
+		"dependencies": pairs(e.Dependencies), "devDependencies": pairs(e.DevDependencies),
+		"optionalDependencies": pairs(e.OptionalDependencies), "peerDependencies": pairs(e.PeerDependencies),
+		"license": e.License(),
+	}
+}
+
+func TestRecordForTypeScriptPort(t *testing.T) {
+	in := os.Getenv("RECORD_CORPUS")
+	out := os.Getenv("RECORD_OUT")
+	if in == "" || out == "" {
+		t.Skip("recorder")
+	}
+	raw, err := os.ReadFile(in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var corpus struct {
+		Cases []corpusCase `json:"cases"`
+	}
+	if err := json.Unmarshal(raw, &corpus); err != nil {
+		t.Fatal(err)
+	}
+	var cases []map[string]any
+	for _, c := range corpus.Cases {
+		data := []byte(c.Doc)
+		if c.B64 != "" {
+			data, _ = base64.StdEncoding.DecodeString(c.B64)
+		}
+		rec := map[string]any{"name": c.Name}
+		switch {
+		case c.Repeat != nil:
+			x := c.Repeat
+			data = []byte(x.Prefix + strings.Repeat(x.Open, x.Count) + x.Middle + strings.Repeat(x.Close, x.Count) + x.Suffix)
+			rec["repeat"] = x
+		case c.B64 != "":
+			rec["b64"] = c.B64
+		default:
+			rec["doc"] = c.Doc
+		}
+		if m, err := lockfile.ParseManifest(data); err != nil {
+			rec["manifest"] = map[string]any{"error": errorRecord(err)}
+		} else {
+			ws := m.Workspaces
+			if ws == nil {
+				ws = []string{}
+			}
+			rec["manifest"] = map[string]any{"value": map[string]any{
+				"dependencies": pairs(m.Dependencies), "devDependencies": pairs(m.DevDependencies),
+				"optionalDependencies": pairs(m.OptionalDependencies), "packageManager": m.PackageManager,
+				"hasWorkspaces": m.HasWorkspaces, "workspaces": ws,
+			}}
+		}
+		if l, err := lockfile.ParseLock(data); err != nil {
+			rec["lock"] = map[string]any{"error": errorRecord(err)}
+		} else {
+			keys := make([]string, 0, len(l.Packages))
+			for k := range l.Packages {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+			pk := []any{}
+			for _, k := range keys {
+				pk = append(pk, []any{k, entryRecord(l.Packages[k])})
+			}
+			rec["lock"] = map[string]any{"value": map[string]any{"version": l.Version, "packages": pk}}
+		}
+		cases = append(cases, rec)
+	}
+
+	// Workspace patterns.
+	type wsCase struct {
+		Patterns []string `json:"patterns"`
+		Rel      string   `json:"rel"`
+		Member   bool     `json:"member"`
+	}
+	var ws []wsCase
+	patternSets := [][]string{
+		{"packages/*"}, {"apps/**"}, {"tools/cli"}, {"./packages/*"}, {"packages/*", "!packages/legacy"},
+		{"!packages/legacy", "packages/*"}, {"packages/lib-*"}, {"packages/[a-c]*"}, {"packages/[^a]*"},
+		{"packages/[!a]*"}, {"packages/\\*"}, {"packages/?"}, {"packages/["}, {"packages/a\\"}, {"[]"},
+		{"**"}, {"**/x"}, {"a/**/b"}, {"packages/"}, {"packages//a"}, {"../a"}, {"./"}, {"."}, {""},
+		{"/abs"}, {"packages/./a"}, {"packages/x/../a"}, {"*"}, {"a/**/**/b"}, {"[a-]"}, {"[\\]]"}, {"p\\[a]"},
+		{"packages/é*"}, {"packages/[é]"}, {"packages/[a-é]"}, {"!"}, {"!!a"}, {"**/"},
+	}
+	rels := []string{"packages/a", "packages/a/b", "packages/legacy", "packages/lib-core", "apps/x/y", "apps",
+		"tools/cli", "a/b", "a/x/b", "a/x/y/b", "x", "a", "b", "packages", "packages/*", "packages/é", "packages/éa",
+		"packages/[", ".", "", "-", "]", "p[a]", "pa", "abs", "/abs", "../a", "packages/ab", "packages/d"}
+	for _, ps := range patternSets {
+		raw, _ := json.Marshal(map[string]any{"workspaces": ps})
+		m, err := lockfile.ParseManifest(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, r := range rels {
+			ws = append(ws, wsCase{ps, r, m.IsWorkspaceMember(r)})
+		}
+	}
+
+	// Load over folders.
+	type loadCase struct {
+		Name  string            `json:"name"`
+		Files map[string]string `json:"files"`
+		Got   map[string]any    `json:"got"`
+	}
+	v3 := `{"lockfileVersion": 3, "packages": {"": {"dependencies": {"a": "^1.0.0"}}, "node_modules/a": {"version": "1.0.0"}}}`
+	loads := []loadCase{
+		{Name: "npm v3", Files: map[string]string{"package.json": `{"dependencies": {"a": "^1.0.0"}}`, "package-lock.json": v3}},
+		{Name: "shrinkwrap preferred", Files: map[string]string{"package.json": `{}`, "package-lock.json": `{`, "npm-shrinkwrap.json": v3}},
+		{Name: "v1", Files: map[string]string{"package.json": `{}`, "package-lock.json": `{"lockfileVersion": 1}`}},
+		{Name: "v7", Files: map[string]string{"package.json": `{}`, "package-lock.json": `{"lockfileVersion": 7}`}},
+		{Name: "broken lock", Files: map[string]string{"package.json": `{}`, "package-lock.json": `{"lockfileVersion": 3,`}},
+		{Name: "lock type error", Files: map[string]string{"package.json": `{}`, "package-lock.json": `{"lockfileVersion": 3, "packages": []}`}},
+		{Name: "no lockfile", Files: map[string]string{"package.json": `{}`}},
+		{Name: "no package.json", Files: map[string]string{"package-lock.json": v3}},
+		{Name: "nothing", Files: map[string]string{}},
+		{Name: "pnpm", Files: map[string]string{"package.json": `{}`, "pnpm-lock.yaml": "x"}},
+		{Name: "yarn and npm", Files: map[string]string{"package.json": `{}`, "yarn.lock": "x", "package-lock.json": v3}},
+		{Name: "yarn and npm with field", Files: map[string]string{"package.json": `{"packageManager": "yarn@4"}`, "yarn.lock": "x", "package-lock.json": v3}},
+		{Name: "packageManager pnpm", Files: map[string]string{"package.json": `{"packageManager": "pnpm@9"}`}},
+		{Name: "packageManager pnpm with npm lock", Files: map[string]string{"package.json": `{"packageManager": "pnpm@9"}`, "package-lock.json": v3}},
+		{Name: "deno", Files: map[string]string{"package.json": `{}`, "deno.jsonc": "{}"}},
+		{Name: "deno lock", Files: map[string]string{"deno.lock": "{}"}},
+		{Name: "bun and deno", Files: map[string]string{"bun.lockb": "x", "deno.lock": "{}"}},
+		{Name: "workspaces", Files: map[string]string{"package.json": `{"workspaces": ["a"]}`, "package-lock.json": v3}},
+		{Name: "workspaces null", Files: map[string]string{"package.json": `{"workspaces": null}`, "package-lock.json": v3}},
+		{Name: "workspaces with pnpm", Files: map[string]string{"package.json": `{"workspaces": ["a"]}`, "pnpm-lock.yaml": "x"}},
+		{Name: "broken manifest", Files: map[string]string{"package.json": `{`, "package-lock.json": v3}},
+		{Name: "broken manifest and v1", Files: map[string]string{"package.json": `[]`, "package-lock.json": `{"lockfileVersion": 1}`}},
+		{Name: "lock is a folder", Files: map[string]string{"package.json": `{}`, "package-lock.json/x": ""}},
+		{Name: "package.json is a folder", Files: map[string]string{"package.json/x": "", "package-lock.json": v3}},
+	}
+	for i := range loads {
+		dir := t.TempDir()
+		for name, content := range loads[i].Files {
+			p := filepath.Join(dir, filepath.FromSlash(name))
+			_ = os.MkdirAll(filepath.Dir(p), 0o755)
+			if err := os.WriteFile(p, []byte(content), 0o644); err != nil {
+				t.Fatal(err)
+			}
+		}
+		l := lockfile.Load(dir)
+		strip := func(s string) string { return strings.ReplaceAll(s, dir, "<dir>") }
+		got := map[string]any{
+			"manager": string(l.Manager), "source": l.Source, "npmLockfile": l.NPMLockfile,
+			"lockfileName": l.LockfileName, "hasManifest": l.Manifest != nil, "hasLock": l.Lock != nil,
+		}
+		var lfs []string
+		for _, lf := range l.Lockfiles {
+			lfs = append(lfs, lf.Name+":"+string(lf.Manager))
+		}
+		got["lockfiles"] = lfs
+		var ms []string
+		for _, m := range l.Managers() {
+			ms = append(ms, string(m))
+		}
+		got["managers"] = ms
+		if l.ManifestErr != nil {
+			got["manifestErr"] = strip(l.ManifestErr.Error())
+		}
+		if l.LockErr != nil {
+			got["lockErr"] = strip(l.LockErr.Error())
+		}
+		if l.Unsupported != nil {
+			got["unsupported"] = map[string]string{"code": l.Unsupported.Code, "reason": strip(l.Unsupported.Reason)}
+		}
+		loads[i].Got = got
+	}
+
+	b, err := json.MarshalIndent(map[string]any{
+		"recordedFrom": "Go build at freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8 (internal/lockfile)",
+		"cases":        cases, "workspaces": ws, "loads": loads,
+	}, "", " ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(out, append(b, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
