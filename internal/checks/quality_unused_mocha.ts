@@ -232,18 +232,9 @@ const maxConfigModules = 30;
 const localRequire =
   /(?:(?:require\(|import\()[\t\n\f\r ]*|\b(?:from|import)[\t\n\f\r ]+)['"](\.{1,2}\/[^'"\n]*|\.{1,2})['"]/g;
 
-/** packageOf is the package of the Context the Check runs in. */
-function packageOf(input: Input): Package {
-  const pkg = input.context.package;
-  if (pkg === null) {
-    throw new Error("quality.unused runs in a package Context");
-  }
-  return pkg;
-}
-
 /** newMochaFacts reads what the package says about Mocha from the Snapshot. */
 export function newMochaFacts(input: Input): MochaFacts {
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   const folder = osJoin(input.snapshotDir, pkg.path);
   const have = new Set<string>();
   const names: string[] = [];
@@ -697,7 +688,7 @@ export function correctKnip(input: Input, stdout: Uint8Array): CorrectedKnip {
       reportedUnused.add(clean(issue.file));
     }
   }
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   for (const f of probedTestFiles(input.shared, input.context.id)) {
     const rel = relToPackage(pkg, f.path);
     if (

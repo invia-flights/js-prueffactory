@@ -84,7 +84,7 @@ export function projectESLintFindings(
       cause: err,
     });
   }
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   const prefix = workPath(pkg) + "/";
   const out: Finding[] = [];
   for (const f of files) {
@@ -266,20 +266,12 @@ export function biomeLineAndColumn(
   return [line, column];
 }
 
-function packageOf(input: Input): NonNullable<Input["context"]["package"]> {
-  const pkg = input.context.package;
-  if (pkg === null) {
-    throw new Error("lint.existing examines packages");
-  }
-  return pkg;
-}
-
 /**
  * projectFile is a path relative to the folder of the package as a path
  * relative to the project root. The paths come from a linter that ran project
  * code, so the result is confined to the project root, whatever they hold.
  */
 export function projectFile(input: Input, rel: string): string {
-  const p = join("/", packageOf(input).path, rel);
+  const p = join("/", input.pkg().path, rel);
   return p.startsWith("/") ? p.slice(1) : p;
 }

@@ -7,7 +7,7 @@
 // container step is in eslint_exec.ts.
 import { join as osJoin } from "node:path";
 
-import type { Context, Package } from "../discovery/discovery.ts";
+import type { Context } from "../discovery/discovery.ts";
 import { Source, TestCode } from "../discovery/discovery.ts";
 import { compareBytes, sortStrings } from "../gocompat/strings.ts";
 import { ext, join } from "../gocompat/path.ts";
@@ -204,14 +204,6 @@ export function groupSpec(g: ESLintGroup, input: Input): ESLintGroupSpec {
   };
 }
 
-function packageOf(input: Input): Package {
-  const pkg = input.context.package;
-  if (pkg === null) {
-    throw new Error("the combined ESLint run examines packages");
-  }
-  return pkg;
-}
-
 /** packageFolder is the absolute path of a package in the host-side Snapshot. */
 export function packageFolder(input: Input): string {
   return osJoin(input.snapshotDir, input.context.package?.path ?? ".");
@@ -224,7 +216,7 @@ export function packageFolder(input: Input): string {
  * for .js the package's type field.
  */
 export function eslintTargets(input: Input): ESLintFile[] {
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   const jsType = readPackageFacts(input).moduleType ? "module" : "commonjs";
   const out: ESLintFile[] = [];
   for (const f of pkg.files) {
@@ -288,7 +280,7 @@ export function eslintHelperInput(
   groups: readonly ESLintGroup[],
   toolBin: string,
 ): ESLintHelperInput {
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   let root = snapshotMount;
   if (pkg.path !== ".") {
     root += "/" + pkg.path;

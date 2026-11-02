@@ -533,19 +533,11 @@ export function projectTsconfigNotUsed(
 
 // --- the Check's own run (Go: types_javascript.go) ---
 
-function packageOf(input: Input): Package {
-  const pkg = input.context.package;
-  if (pkg === null) {
-    throw new Error("the type Checks examine packages");
-  }
-  return pkg;
-}
-
 async function runTypesJavascript(
   signal: AbortSignal,
   input: Input,
 ): Promise<Result> {
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   const u = pkg.installUnsupported;
   if (u !== null) {
     return { status: StatusUnsupported, reasonCode: u.code, reason: u.reason };
@@ -768,7 +760,7 @@ export function interpretTypes(
     return res;
   }
 
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   const source = new Set(typesTargets(input));
   let findings: Finding[] = [];
   const dropped: DroppedJSONError[] = [];
