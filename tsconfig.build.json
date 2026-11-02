@@ -1,0 +1,20 @@
+{
+  // The package build: dev/pack emits the tool's own code with
+  // `--noEmit false --outDir <folder>`, so that the emitted JavaScript keeps
+  // the source layout and finds its data files beside it. Without those flags
+  // this config only type-checks, so it never writes JavaScript next to the
+  // sources.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "."
+  },
+  "include": ["bin", "cmd", "internal"],
+  "exclude": [
+    "node_modules",
+    "**/testdata",
+    "internal/checks/js",
+    "internal/toolset/npm",
+    "**/*.test.ts",
+    "**/*.testutil.ts"
+  ]
+}
