@@ -1,0 +1,821 @@
+{
+  "parse": [
+    {
+      "in": "",
+      "ok": true,
+      "err": "",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "*",
+      "ok": true,
+      "err": "",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://registry.npmjs.org/a/-/a-1.0.0.tgz",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "registry.npmjs.org",
+      "hostname": "registry.npmjs.org"
+    },
+    {
+      "in": "http://registry.npmjs.org/a",
+      "ok": true,
+      "err": "",
+      "scheme": "http",
+      "host": "registry.npmjs.org",
+      "hostname": "registry.npmjs.org"
+    },
+    {
+      "in": "HTTPS://Registry.NPMJS.org/a",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "Registry.NPMJS.org",
+      "hostname": "Registry.NPMJS.org"
+    },
+    {
+      "in": "git+ssh://git@example.com/x/from-git.git#abc",
+      "ok": true,
+      "err": "",
+      "scheme": "git+ssh",
+      "host": "example.com",
+      "hostname": "example.com"
+    },
+    {
+      "in": "github:user/repo",
+      "ok": true,
+      "err": "",
+      "scheme": "github",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "file:../local",
+      "ok": true,
+      "err": "",
+      "scheme": "file",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "packages/member",
+      "ok": true,
+      "err": "",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "../x",
+      "ok": true,
+      "err": "",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "./x",
+      "ok": true,
+      "err": "",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "git@github.com:user/repo.git",
+      "ok": false,
+      "err": "parse \"git@github.com:user/repo.git\": first path segment in URL cannot contain colon",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://user:pa%20ss@npm.example.com/a",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "npm.example.com",
+      "hostname": "npm.example.com"
+    },
+    {
+      "in": "https://us%zzer@npm.example.com/a",
+      "ok": false,
+      "err": "parse \"https://us%zzer@npm.example.com/a\": invalid URL escape \"%zz\"",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://user name@host/a",
+      "ok": false,
+      "err": "parse \"https://user name@host/a\": net/url: invalid userinfo",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://a@b@host/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "host",
+      "hostname": "host"
+    },
+    {
+      "in": "https://host:8080/a",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "host:8080",
+      "hostname": "host"
+    },
+    {
+      "in": "https://host:80a/x",
+      "ok": false,
+      "err": "parse \"https://host:80a/x\": invalid port \":80a\" after host",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://host:/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "host:",
+      "hostname": "host"
+    },
+    {
+      "in": "https://host::1/x",
+      "ok": false,
+      "err": "parse \"https://host::1/x\": invalid port \"::1\" after host",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[::1]:4873/a",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[::1]:4873",
+      "hostname": "::1"
+    },
+    {
+      "in": "https://[::1]/a",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[::1]",
+      "hostname": "::1"
+    },
+    {
+      "in": "https://[1.2.3.4]/a",
+      "ok": false,
+      "err": "parse \"https://[1.2.3.4]/a\": invalid IP-literal",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[::ffff:1.2.3.4]/a",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[::ffff:1.2.3.4]",
+      "hostname": "::ffff:1.2.3.4"
+    },
+    {
+      "in": "https://[fe80::1%25en0]/a",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[fe80::1%en0]",
+      "hostname": "fe80::1%en0"
+    },
+    {
+      "in": "https://[fe80::1%en0]/a",
+      "ok": false,
+      "err": "parse \"https://[fe80::1%en0]/a\": invalid URL escape \"%en\"",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[::1/a",
+      "ok": false,
+      "err": "parse \"https://[::1/a\": missing ']' in host",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://x[::1]/a",
+      "ok": false,
+      "err": "parse \"https://x[::1]/a\": invalid IP-literal",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[gggg::1]/a",
+      "ok": false,
+      "err": "parse \"https://[gggg::1]/a\": invalid host: ParseAddr(\"gggg::1\"): each colon-separated field must have at least one digit (at \"gggg::1\")",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[1:2:3:4:5:6:7:8]/a",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[1:2:3:4:5:6:7:8]",
+      "hostname": "1:2:3:4:5:6:7:8"
+    },
+    {
+      "in": "https://[1:2:3:4:5:6:7:8:9]/a",
+      "ok": false,
+      "err": "parse \"https://[1:2:3:4:5:6:7:8:9]/a\": invalid host: ParseAddr(\"1:2:3:4:5:6:7:8:9\"): trailing garbage after address (at \"9\")",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[1::2::3]/a",
+      "ok": false,
+      "err": "parse \"https://[1::2::3]/a\": invalid host: ParseAddr(\"1::2::3\"): multiple :: in address (at \":3\")",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[::1]x/a",
+      "ok": false,
+      "err": "parse \"https://[::1]x/a\": invalid port \"x\" after host",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://h%C3%A9st/a",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "hést",
+      "hostname": "hést"
+    },
+    {
+      "in": "https://h%41st/a",
+      "ok": false,
+      "err": "parse \"https://h%41st/a\": invalid URL escape \"%41\"",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://hé.example/a",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "hé.example",
+      "hostname": "hé.example"
+    },
+    {
+      "in": "https://ho st/a",
+      "ok": false,
+      "err": "parse \"https://ho st/a\": invalid character \" \" in host name",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://ho^st/a",
+      "ok": false,
+      "err": "parse \"https://ho^st/a\": invalid character \"^\" in host name",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://ho_st/a",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "ho_st",
+      "hostname": "ho_st"
+    },
+    {
+      "in": "https://h!$\u0026'()*+,;=st/a",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "h!$\u0026'()*+,;=st",
+      "hostname": "h!$\u0026'()*+,;=st"
+    },
+    {
+      "in": "https://host/a%zz",
+      "ok": false,
+      "err": "parse \"https://host/a%zz\": invalid URL escape \"%zz\"",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://host/a%2",
+      "ok": false,
+      "err": "parse \"https://host/a%2\": invalid URL escape \"%2\"",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://host/a?x=%zz",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "host",
+      "hostname": "host"
+    },
+    {
+      "in": "https://host/a#%zz",
+      "ok": false,
+      "err": "parse \"https://host/a#%zz\": invalid URL escape \"%zz\"",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://host/a#frag",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "host",
+      "hostname": "host"
+    },
+    {
+      "in": "https://host/a",
+      "ok": false,
+      "err": "parse \"https://host/a\\x7f\": net/url: invalid control character in URL",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://host/a\n",
+      "ok": false,
+      "err": "parse \"https://host/a\\n\": net/url: invalid control character in URL",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://host/a b",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "host",
+      "hostname": "host"
+    },
+    {
+      "in": "https:opaque",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https:/path/only",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https:///triple",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "//host/x",
+      "ok": true,
+      "err": "",
+      "scheme": "",
+      "host": "host",
+      "hostname": "host"
+    },
+    {
+      "in": ":nope",
+      "ok": false,
+      "err": "parse \":nope\": missing protocol scheme",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "1http://x",
+      "ok": false,
+      "err": "parse \"1http://x\": first path segment in URL cannot contain colon",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "ht+tp.-x://h/a",
+      "ok": true,
+      "err": "",
+      "scheme": "ht+tp.-x",
+      "host": "h",
+      "hostname": "h"
+    },
+    {
+      "in": "http://h/a?",
+      "ok": true,
+      "err": "",
+      "scheme": "http",
+      "host": "h",
+      "hostname": "h"
+    },
+    {
+      "in": "cache_object:foo/bar",
+      "ok": false,
+      "err": "parse \"cache_object:foo/bar\": first path segment in URL cannot contain colon",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "a:b/c",
+      "ok": true,
+      "err": "",
+      "scheme": "a",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "/a:b",
+      "ok": true,
+      "err": "",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "x/a:b",
+      "ok": true,
+      "err": "",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://h/%",
+      "ok": false,
+      "err": "parse \"https://h/%\": invalid URL escape \"%\"",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://h%25/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "h%",
+      "hostname": "h%"
+    },
+    {
+      "in": "https://h%2/x",
+      "ok": false,
+      "err": "parse \"https://h%2/x\": invalid URL escape \"%2\"",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://host:99999999/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "host:99999999",
+      "hostname": "host"
+    },
+    {
+      "in": "https://h/x#a#b",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "h",
+      "hostname": "h"
+    },
+    {
+      "in": "https://h/x?y#z%",
+      "ok": false,
+      "err": "parse \"https://h/x?y#z%\": invalid URL escape \"%\"",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://h%e2%82%ac/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "h€",
+      "hostname": "h€"
+    },
+    {
+      "in": "https://[::1%25]/x",
+      "ok": false,
+      "err": "parse \"https://[::1%25]/x\": invalid host: ParseAddr(\"::1%\"): zone must be a non-empty string",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[::1%25%0a]/x",
+      "ok": false,
+      "err": "parse \"https://[::1%25%0a]/x\": invalid URL escape \"%0a\"",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[::1%25en%20]/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[::1%en ]",
+      "hostname": "::1%en "
+    },
+    {
+      "in": "https://[]/x",
+      "ok": false,
+      "err": "parse \"https://[]/x\": invalid host: ParseAddr(\"\"): unable to parse IP",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[::]/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[::]",
+      "hostname": "::"
+    },
+    {
+      "in": "https://[0:0:0:0:0:0:1.2.3.4]/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[0:0:0:0:0:0:1.2.3.4]",
+      "hostname": "0:0:0:0:0:0:1.2.3.4"
+    },
+    {
+      "in": "https://[::1.2.3]/x",
+      "ok": false,
+      "err": "parse \"https://[::1.2.3]/x\": invalid host: ParseAddr(\"::1.2.3\"): IPv4 address too short",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[::01.2.3.4]/x",
+      "ok": false,
+      "err": "parse \"https://[::01.2.3.4]/x\": invalid host: ParseAddr(\"::01.2.3.4\"): IPv4 field has octet with leading zero",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[::256.1.1.1]/x",
+      "ok": false,
+      "err": "parse \"https://[::256.1.1.1]/x\": invalid host: ParseAddr(\"::256.1.1.1\"): IPv4 field has value \u003e255",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[12345::]/x",
+      "ok": false,
+      "err": "parse \"https://[12345::]/x\": invalid host: ParseAddr(\"12345::\"): each group must have 4 or less digits (at \"12345::\")",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[:1]/x",
+      "ok": false,
+      "err": "parse \"https://[:1]/x\": invalid host: ParseAddr(\":1\"): each colon-separated field must have at least one digit (at \":1\")",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[1:]/x",
+      "ok": false,
+      "err": "parse \"https://[1:]/x\": invalid host: ParseAddr(\"1:\"): colon must be followed by more characters (at \":\")",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[1::]/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[1::]",
+      "hostname": "1::"
+    },
+    {
+      "in": "https://[::1]:/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[::1]:",
+      "hostname": "::1"
+    },
+    {
+      "in": "https://[::1]:a/x",
+      "ok": false,
+      "err": "parse \"https://[::1]:a/x\": invalid port \":a\" after host",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "mongodb://h1:1,h2:2/x",
+      "ok": true,
+      "err": "",
+      "scheme": "mongodb",
+      "host": "h1:1,h2:2",
+      "hostname": "h1:1,h2"
+    },
+    {
+      "in": "https://h1:1,h2:2/x",
+      "ok": false,
+      "err": "parse \"https://h1:1,h2:2/x\": invalid port \":1,h2:2\" after host",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://@host/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "host",
+      "hostname": "host"
+    },
+    {
+      "in": "https://user:@host/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "host",
+      "hostname": "host"
+    },
+    {
+      "in": "https://:pw@host/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "host",
+      "hostname": "host"
+    },
+    {
+      "in": "https://us/er@host",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "us",
+      "hostname": "us"
+    },
+    {
+      "in": "https://us]er@host/x",
+      "ok": false,
+      "err": "parse \"https://us]er@host/x\": net/url: invalid userinfo",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://us%40er@host/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "host",
+      "hostname": "host"
+    },
+    {
+      "in": "https://[1.2.3.4%25eth0]/x",
+      "ok": false,
+      "err": "parse \"https://[1.2.3.4%25eth0]/x\": invalid host: ParseAddr(\"1.2.3.4%eth0\"): unexpected character (at \"%eth0\")",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[::1%25eth0%25x]/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[::1%eth0%x]",
+      "hostname": "::1%eth0%x"
+    },
+    {
+      "in": "https://[1:2:3:4:5:6:7::]/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[1:2:3:4:5:6:7::]",
+      "hostname": "1:2:3:4:5:6:7::"
+    },
+    {
+      "in": "https://[::1:2:3:4:5:6:7]/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[::1:2:3:4:5:6:7]",
+      "hostname": "::1:2:3:4:5:6:7"
+    },
+    {
+      "in": "https://[1:2:3:4:5:6:7:8::]/x",
+      "ok": false,
+      "err": "parse \"https://[1:2:3:4:5:6:7:8::]/x\": invalid host: ParseAddr(\"1:2:3:4:5:6:7:8::\"): the :: must expand to at least one field of zeros",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[0001:2:3:4:5:6:7:8]/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[0001:2:3:4:5:6:7:8]",
+      "hostname": "0001:2:3:4:5:6:7:8"
+    },
+    {
+      "in": "https://[1:2:3:4:5:6:1.2.3.4]/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[1:2:3:4:5:6:1.2.3.4]",
+      "hostname": "1:2:3:4:5:6:1.2.3.4"
+    },
+    {
+      "in": "https://[1:2:3:4:5:6:7:1.2.3.4]/x",
+      "ok": false,
+      "err": "parse \"https://[1:2:3:4:5:6:7:1.2.3.4]/x\": invalid host: ParseAddr(\"1:2:3:4:5:6:7:1.2.3.4\"): embedded IPv4 address must replace the final 2 fields of the address (at \"1.2.3.4\")",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[::1.2.3.04]/x",
+      "ok": false,
+      "err": "parse \"https://[::1.2.3.04]/x\": invalid host: ParseAddr(\"::1.2.3.04\"): IPv4 field has octet with leading zero",
+      "scheme": "",
+      "host": "",
+      "hostname": ""
+    },
+    {
+      "in": "https://[::ffff:255.255.255.255]/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[::ffff:255.255.255.255]",
+      "hostname": "::ffff:255.255.255.255"
+    },
+    {
+      "in": "https://[A:B:C:D:E:F:a:b]/x",
+      "ok": true,
+      "err": "",
+      "scheme": "https",
+      "host": "[A:B:C:D:E:F:a:b]",
+      "hostname": "A:B:C:D:E:F:a:b"
+    },
+    {
+      "in": "HtTp://X/y",
+      "ok": true,
+      "err": "",
+      "scheme": "http",
+      "host": "X",
+      "hostname": "X"
+    }
+  ],
+  "recordedFrom": "Go 1.27.3 standard library (net/url), the toolchain of the freeze commit 238e07f66d8cafab24ef363cb79e207bd48babd8"
+}

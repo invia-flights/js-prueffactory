@@ -371,6 +371,22 @@ describe("allowlist", () => {
           "artifacts/package.install/*/npm-install.log",
         ],
         [
+          "runs/*quality.unused*",
+          "artifacts/package.install/*/npm-install.log",
+        ],
+        [
+          "runs/*only=modules.cycles*",
+          "artifacts/package.install/*/npm-install.log",
+        ],
+        [
+          "runs/*only=*deps.tree*",
+          "artifacts/package.install/*/npm-install.log",
+        ],
+        [
+          "runs/*only=*sbom.generate*",
+          "artifacts/sbom.generate/*-sbom.cdx.json",
+        ],
+        [
           "runs/*only=lint,tests.smells,deps.engines",
           "artifacts/package.install/*/npm-install.log",
         ],
