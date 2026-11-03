@@ -271,7 +271,7 @@ async function runSchemaDrift(
         ...(s.env.size > 0 ? { env: Object.fromEntries(s.env) } : {}),
         workDir: workPath(pkg),
         // The Run's internal network, like every container of the Execution
-        // phase (ADR-0004): a generator that needs the internet fails and is
+        // phase: a generator that needs the internet fails and is
         // reported, and never reaches it.
         network: input.network,
         mounts: [{ volume: copyVolume, path: driftCopyMount }],

@@ -218,7 +218,7 @@ async function install(signal: AbortSignal, input: Input): Promise<Result> {
       env: npmEnv({ npm_config_cache: npmCacheMount }),
       workDir: workPath(pkg),
       // The install runs on Docker's default bridge, with outbound access,
-      // as ADR-0004 allows in the Preparation phase.
+      // as the Preparation phase allows.
       preparation: true,
       mounts: [
         { volume: input.workVolume, path: workMount },

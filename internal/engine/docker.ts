@@ -13,7 +13,7 @@ import { errorMessage } from "../gocompat/errors.ts";
 /**
  * prepare is the Preparation phase for the Execution phase's containers: it
  * pulls the pinned images, streams the Snapshot into a run-owned volume as a
- * tar stream (ADR-0001), and creates the Run's internal network (ADR-0004).
+ * tar stream, and creates the Run's internal network.
  * It does nothing when no planned Check needs a container.
  */
 export async function prepare(r: RunState, signal: AbortSignal): Promise<void> {

@@ -220,8 +220,8 @@ async function install(
     const helm = cfg.helm ?? Helm;
     const script = `${npmCI} && ${helmInstallScript(helm)} && printf %s "$JSPF_TOOLSET_VERSION" > ${MountPath}/${completeMarker}`;
 
-    // The default bridge network: the Preparation phase has outbound access
-    // (ADR-0004), and this is the only step that needs it for the tools.
+    // The default bridge network: the Preparation phase has outbound access,
+    // and this is the only step that needs it for the tools.
     let res: ContainerResult;
     try {
       res = await cfg.docker.runContainer(ctx.signal, {

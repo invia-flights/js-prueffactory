@@ -153,8 +153,8 @@ export async function ensureKubernetesSchemas(
     const timed = withTimeout(signal, kubernetesTimeout);
     let res;
     try {
-      // The default bridge network: the Preparation phase has outbound access
-      // (ADR-0004), and this download is the only reason this container exists.
+      // The default bridge network: the Preparation phase has outbound access,
+      // and this download is the only reason this container exists.
       res = await d.runContainer(timed.signal, {
         name: "k8s-schemas-fetch",
         image: cfg.helper,

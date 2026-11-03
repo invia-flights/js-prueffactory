@@ -264,7 +264,7 @@ test("a node:test suite gets its compose Service under its compose name", async 
   assertNothingLeft(r);
 });
 
-// ADR-0004: a test that talks to a host the Run does not provide fails fast and
+// A test that talks to a host the Run does not provide fails fast and
 // visibly. On the Execution network a lookup of an unknown name takes 5 s by
 // default, which is the testdata test's own 5 s timeout; with the resolver
 // options every container gets, the test fails with the lookup error instead.

@@ -1,4 +1,4 @@
-// ADR-0001: the driver offers no way to mount a host folder. Every function
+// The driver offers no way to mount a host folder. Every function
 // that creates a container or a volume is called here, with harmless and with
 // hostile input, and every argument list that reaches the docker CLI is
 // checked.

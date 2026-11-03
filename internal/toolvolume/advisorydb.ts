@@ -318,8 +318,8 @@ async function refreshAdvisoryDB(
       (exit) => exit === 0,
     );
 
-    // The default bridge network: the Preparation phase has outbound access
-    // (ADR-0004), and this download is the only reason this container
+    // The default bridge network: the Preparation phase has outbound access,
+    // and this download is the only reason this container
     // exists. The project's own osv-scanner.toml is never read here: the seed
     // brings an empty one. osv-scanner exits with 1 when it finds
     // vulnerabilities in what it scanned.

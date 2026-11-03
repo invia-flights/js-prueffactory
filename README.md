@@ -27,7 +27,7 @@ The tool never calls an LLM and never repairs code.
 
 ## Terms
 
-The code, the Report and this README use a fixed vocabulary. [GLOSSARY.md](GLOSSARY.md) has the full list.
+The code, the Report and this README use a fixed vocabulary.
 
 | Word | Meaning |
 |---|---|

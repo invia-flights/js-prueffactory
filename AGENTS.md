@@ -25,7 +25,7 @@ pre-commit run --all-files                 # every hook on every file, as CI run
 - Tests drive Seam A (`main` of `internal/cli/cli.ts`, called in-process with arguments, an environment lookup, streams and an abort signal) or Seam B (hand-built result set → scorer, exit-code mapping, renderers) and assert on what a user sees. A new Check gets a project under `testdata/projects/` that triggers it.
 - Tests use Node's built-in runner (`node:test`, `node:assert/strict`) and sit next to their module as `<name>.test.ts`. Docker-only tests are named `<name>.docker.test.ts`: `npm test` skips them and `npm run test:docker` runs only them. A Docker test that creates or reads a shared cache volume (`jspf-toolset-*`, `jspf-cache-*`) is named `<name>.serial.docker.test.ts`: a Run that starts on the same daemon removes the unused toolset volumes of other versions, so these files run in a second pass, one at a time, after the parallel one.
 - Code is TypeScript in strict mode, ES modules, erasable syntax only (Node runs the sources directly), relative imports with the `.ts` extension. A new runtime dependency needs a reason; the ones in `package.json` are exactly pinned.
-- Name things with GLOSSARY.md terms (Run, Check, Gate, Finding, Report …), not the words it lists under _Avoid_.
+- Name things with the terms of the README's Terms table (Run, Check, Gate, Finding, Report …) and use them the same way in code, Report text and docs.
 - This repo is public (MIT, GitHub). Every project, host and secret in it is invented. Fake keys use prefixes like `sk_prod_`; GitHub push protection rejects `sk_live_`.
 - CI is GitHub Actions only. `ci.yml` runs the pre-commit hooks, `npm test` on Node 24 and 26, the Docker tests and an osv-scanner scan of `package-lock.json` on every pull request and push to `main`. `main-build.yml` replaces the tarball in the prerelease `main-latest` on every push to `main`. Nothing else here creates, changes or triggers anything in a CI system.
 - Code, CLI text, report text and docs are in English.
@@ -40,4 +40,4 @@ Local markdown under `.scratch/<feature>/`: spec in `spec.md`, tickets in `issue
 
 ### Domain docs
 
-Single-context: `GLOSSARY.md` at the root. New ADRs go in `docs/adr/`.
+Single-context. The terms are in the README's Terms table. New ADRs go in `docs/adr/`.

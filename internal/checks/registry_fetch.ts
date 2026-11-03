@@ -3,8 +3,8 @@
 // package with an npm lockfile (version 2 or 3, or the lockfile its install
 // produced), however many of the Checks are selected. It runs the bundled
 // Node script js/registry-data.js in a container of the package's Context
-// image on Docker's default bridge network, as ADR-0004 allows in the
-// Preparation phase, with the project's .npmrc and no host environment
+// image on Docker's default bridge network, as the
+// Preparation phase allows, with the project's .npmrc and no host environment
 // variables. The script resolves each package's registry the way npm does,
 // asks at most 8 requests at a time and stops at the step's deadline.
 //
@@ -368,7 +368,7 @@ async function fetchRegistryData(
       cmd: ["node", registryScriptPath, registryInputPath],
       env: npmEnv(),
       // The fetch runs on Docker's default bridge, with outbound access, as
-      // ADR-0004 allows in the Preparation phase.
+      // the Preparation phase allows.
       preparation: true,
       files: [
         { path: registryScriptPath, mode: 0o644, content: registryDataScript },

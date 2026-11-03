@@ -9,8 +9,8 @@ import { errorMessage } from "../gocompat/errors.ts";
  * makeWorkingCopy creates the Working copy: a second run-owned volume
  * holding a writable copy of the Snapshot, where dependencies are installed.
  * The copy is made inside Docker from the Snapshot volume, so the Snapshot
- * reaches Docker only once and no container ever mounts a host path
- * (ADR-0001). The Snapshot volume itself stays as it was, read-only for
+ * reaches Docker only once and no container ever mounts a host path.
+ * The Snapshot volume itself stays as it was, read-only for
  * every Check that examines the project's own files. node_modules lives only
  * in the Working copy, and the volume goes away with the Run.
  */

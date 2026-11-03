@@ -68,8 +68,7 @@ export function hardening(): string[] {
 // internal network. There, a lookup of a host that is not a Run Service takes
 // 5 s and ends in EAI_AGAIN by default, which turns a test that calls out into
 // a Mocha timeout instead of a connection error. One attempt of one second
-// makes it fail after about 1.1 s; Run Service names still resolve at once
-// (ADR-0004).
+// makes it fail after about 1.1 s; Run Service names still resolve at once.
 export function fastLookupFailure(): string[] {
   return ["--dns-opt", "timeout:1", "--dns-opt", "attempts:1"];
 }

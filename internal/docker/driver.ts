@@ -1,9 +1,9 @@
-// Package docker is a thin wrapper over the `docker` command-line tool
-// (ADR-0002). It creates and removes the volumes, networks and containers of
+// Package docker is a thin wrapper over the `docker` command-line tool.
+// It creates and removes the volumes, networks and containers of
 // one Run, streams tar archives into volumes and out of containers, and labels
 // everything so it can be found and removed again.
 //
-// The API deliberately has no way to mount a host folder (ADR-0001): a
+// The API deliberately has no way to mount a host folder: a
 // container mount names a run-owned volume, and data reaches a volume or a
 // container only as a tar stream. The CLI is always started with an argument
 // array, never through a shell.
@@ -171,7 +171,7 @@ export interface ContainerSpec {
   readonly workDir?: string;
   // network is the run-owned network to join, or NetworkNone. It must be set
   // unless preparation is: an empty network would silently mean Docker's
-  // default bridge, with outbound access (ADR-0004).
+  // default bridge, with outbound access.
   readonly network?: string;
   // preparation marks a container of the Preparation phase (npm install, the
   // toolset and advisory-database downloads), the only containers that have
@@ -930,7 +930,7 @@ function networkArgs(spec: ContainerSpec): string[] {
   }
   if (network === "") {
     throw new Error(
-      "the container names no network and is not a Preparation container: the network must be explicit (ADR-0004)",
+      "the container names no network and is not a Preparation container: the network must be explicit",
     );
   }
   throw new Error(

@@ -6,7 +6,7 @@ import { type ContainerSpec, NetworkNone } from "./driver.ts";
 
 const base = { image: "node@sha256:x", cmd: ["true"] };
 
-// ADR-0004: only the Preparation phase has outbound access. A container that
+// Only the Preparation phase has outbound access. A container that
 // names neither a network nor the Preparation phase would silently get the
 // default bridge, so it is refused.
 test("a container must choose its network explicitly", async () => {
@@ -69,7 +69,7 @@ test("the refusal of a foreign network quotes it as Go does", async () => {
   });
 });
 
-// ADR-0004: on the internal network a lookup of a host that is not a Run
+// On the internal network a lookup of a host that is not a Run
 // Service takes 5 s by default, so a project test that calls out hits the
 // Mocha timeout instead of failing fast. Every container on a run-owned
 // network therefore starts with a one-second, one-attempt resolver.

@@ -71,7 +71,7 @@ dns.lookup('unknown-host.invalid', (e) => {
   dns.lookup('redis', (e2) => console.log('service_code=' + (e2 ? e2.code : 'ok')));
 });`;
 
-// ADR-0004: a test that calls a host the Run does not provide must fail
+// A test that calls a host the Run does not provide must fail
 // fast. A lookup of an unknown name on the internal network fails within 2
 // seconds (the Docker default is 5), and a Run Service's name still resolves.
 async function assertFastLookupFailureAndServiceNamesResolve(
