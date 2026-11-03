@@ -23,7 +23,7 @@ import { tail } from "./cut_text.ts";
 import { type Input, untrusted } from "./input.ts";
 import { workPath } from "./package_install.ts";
 import { cutTitle, repoFinding } from "./repo_findings.ts";
-import { UnreadableOutput } from "./tool_output.ts";
+import { requireShape, shape, UnreadableOutput } from "./tool_output.ts";
 
 /** lintExistingID is defined here so that the parts of the Check need no cycle. */
 export const lintExistingID = "lint.existing";
@@ -69,6 +69,31 @@ const eslintSchema: Schema = {
   ]),
 };
 
+/**
+ * eslintOutputShape is the JSON that `eslint --format json` documents: a list
+ * of files, each with its path and its messages. ruleId, line, column and
+ * fatal may be missing (a message of the configuration has no rule).
+ */
+const eslintOutputShape = shape.array(
+  shape.object(
+    {
+      filePath: shape.string,
+      messages: shape.array(
+        shape.object(
+          { message: shape.string, severity: shape.number },
+          {
+            ruleId: shape.nullable(shape.string),
+            line: shape.number,
+            column: shape.number,
+            fatal: shape.boolean,
+          },
+        ),
+      ),
+    },
+    {},
+  ),
+);
+
 interface ESLintJSONMessage {
   ruleId: string | null;
   severity: bigint;
@@ -93,7 +118,14 @@ export function projectESLintFindings(
   try {
     files = ((unmarshal(stdout, eslintSchema) as GoSlice | null)?.items() ??
       []) as typeof files;
+    // The lenient decode above accepts any list of objects, and a list of
+    // another shape reads as files without messages: a clean project that
+    // nobody checked. The documented shape is required as well.
+    requireShape("ESLint", stdout, eslintOutputShape);
   } catch (err) {
+    if (err instanceof UnreadableOutput) {
+      throw err;
+    }
     throw new UnreadableOutput(
       `ESLint printed no JSON report: ${errorMessage(err)}`,
       "it is not the JSON list of files that ESLint documents",

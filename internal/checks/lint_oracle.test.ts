@@ -340,7 +340,7 @@ test("Biome's byte offsets give Go's lines and columns", () => {
 // a tool problem and never a Finding about the project, and Biome's report is
 // read in the shape of every 2.x version. The recorded files are not edited;
 // these cases assert the new answer instead.
-//   parsing "biome null": Go read `null` as a clean project.
+//   parsing "biome null" and "eslint null": Go read `null` as a clean project.
 //   existing "eslint not json": Go ended with the reason code linter_failed.
 //   existing "biome config problem without a marker": Go made the Gate
 //     biome-config-error of any stderr without a report.
@@ -348,6 +348,7 @@ test("Biome's byte offsets give Go's lines and columns", () => {
 //     real Biome 2.4 and later do not write, made the same Gate.
 const unreadableSinceGo = new Set([
   "biome null",
+  "eslint null",
   "eslint not json",
   "biome config problem without a marker",
   "biome 2.5 style output",

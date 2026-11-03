@@ -388,9 +388,11 @@ async function runESLint(
   const t = eslintTool;
   const v = await installedVersion(signal, input, t);
   if (!v.installed) {
-    return v.failed !== null
-      ? outcome({ failed: v.failed })
-      : outcome({ findings: notInstalled(input, t) });
+    if (v.failed !== null) {
+      return outcome({ failed: v.failed });
+    }
+    outputs.answered(); // a linter that is missing is an answer
+    return outcome({ findings: notInstalled(input, t) });
   }
   const version = v.version;
   const cmd = command(t);
@@ -419,7 +421,9 @@ async function runESLint(
   }
   if (!c.oomKilled && c.exitCode === 2) {
     // ESLint's exit code for a configuration or internal error. The project's
-    // own lint would fail in the same way.
+    // own lint would fail in the same way. Both findings below are ESLint's
+    // own answer, so the call counts as answered.
+    outputs.answered();
     if (l.legacyESLint !== "" && stderr.includes("eslint.config")) {
       out.findings = [
         lintProjectError(
@@ -515,9 +519,11 @@ async function runBiome(
   const t = biomeTool;
   const v = await installedVersion(signal, input, t);
   if (!v.installed) {
-    return v.failed !== null
-      ? outcome({ failed: v.failed })
-      : outcome({ findings: notInstalled(input, t) });
+    if (v.failed !== null) {
+      return outcome({ failed: v.failed });
+    }
+    outputs.answered(); // a linter that is missing is an answer
+    return outcome({ findings: notInstalled(input, t) });
   }
   const version = v.version;
 
@@ -583,7 +589,8 @@ async function runBiome(
     biomeConfigDiagnostic(goString(c.stderr))
   ) {
     // Biome says in its own words that it cannot use the configuration; the
-    // project's own lint would fail in the same way.
+    // project's own lint would fail in the same way. That is its answer.
+    outputs.answered();
     out.findings = [
       lintProjectError(
         input,
