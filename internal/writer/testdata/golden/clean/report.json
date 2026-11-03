@@ -1,6 +1,6 @@
 {
   "format": "js-prueffactory.report",
-  "schema_version": "0.4.0",
+  "schema_version": "0.5.0",
   "producer": {
     "name": "js-prueffactory",
     "version": "test",

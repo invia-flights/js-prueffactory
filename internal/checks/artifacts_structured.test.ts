@@ -250,6 +250,44 @@ test("a broken file in Test data is only a note", async (t) => {
   assert.equal(findings(r).filter((f) => f.gate).length, 1);
 });
 
+test("a broken file in Documentation is an error without a Gate", async (t) => {
+  const r = await runStructured(t, {
+    "docs/example.json": "{",
+    "docs/how-to/pipeline.yml": "a:\n\t- b\n",
+    "doc/api.yaml": "x: 1\ny: *nope\n",
+    "test/data.json": "{", // Test code by place, not Documentation
+    "src/broken.json": "{",
+  });
+  for (const p of [
+    "docs/example.json",
+    "docs/how-to/pipeline.yml",
+    "doc/api.yaml",
+  ]) {
+    const f = findingFor(r, p);
+    assert.deepEqual(
+      [f.gate, f.severity, f.confidence, f.in_test_data],
+      [false, "error", "confirmed", false],
+      p,
+    );
+    assert.ok(f.message.includes("Documentation"), f.message);
+  }
+  const outside = ["test/data.json", "src/broken.json"].map((p) => {
+    const f = findingFor(r, p);
+    return [f.gate, f.severity, f.message.includes("Documentation")];
+  });
+  assert.deepEqual(outside, [
+    [true, "error", false],
+    [true, "error", false],
+  ]);
+  assert.equal(findings(r).filter((f) => f.gate).length, 2);
+});
+
+test("a broken file in Test data below docs is still only a note", async (t) => {
+  const r = await runStructured(t, { "fixtures/docs/broken.json": "{" });
+  const f = findingFor(r, "fixtures/docs/broken.json");
+  assert.deepEqual([f.gate, f.severity, f.in_test_data], [false, "note", true]);
+});
+
 test("Build output and Helm templates are skipped and listed", async (t) => {
   const r = await runStructured(t, {
     "dist/bundle.json": "{",

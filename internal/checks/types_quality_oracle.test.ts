@@ -12,6 +12,7 @@ import { join } from "node:path";
 import { describe, test, type TestContext } from "node:test";
 
 import { discover } from "../discovery/discovery.ts";
+import { withGoClasses } from "../discovery/goclasses.testutil.ts";
 import type { Finding } from "../resultset/types.ts";
 import "./all.ts";
 import { projectContext, runCheck, writeTree } from "./checks.testutil.ts";
@@ -388,7 +389,9 @@ describe("quality.size and quality.suppressions on a tree of files", () => {
   cases.native.forEach((c, i) => {
     test(c.name, async (t: TestContext) => {
       const dir = writeTree(t, c.files);
-      const proj = discover(dir);
+      // The Go build knew no Documentation class: its answers are compared
+      // with the files classified as it did.
+      const proj = withGoClasses(discover(dir));
       const context = projectContext(proj);
       const want = oracle.native?.[i] as Record<string, unknown>;
       for (const id of ["quality.size", "quality.suppressions"]) {

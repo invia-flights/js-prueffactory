@@ -41,6 +41,7 @@ export interface ParseReport {
     tool: { name: string; version: string | null } | null;
   }[];
   findings: {
+    id: string;
     check_id: string;
     context_id: string;
     rule_id: string | null;
@@ -48,6 +49,8 @@ export interface ParseReport {
     severity: string;
     confidence: string;
     in_test_data: boolean;
+    in_test_code: boolean;
+    in_documentation: boolean;
     title: string;
     message: string;
     locations: {
@@ -57,6 +60,7 @@ export interface ParseReport {
     evidence: { text: string; trust: string; artifact_id: string | null }[];
   }[];
   artifacts: { id: string; path: string }[];
+  inventory: { size: { group: string; name: string; lines: number }[] };
   summary: {
     gates: number;
     scope_completeness: { required: number; completed: number };

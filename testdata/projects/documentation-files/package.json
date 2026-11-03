@@ -1,0 +1,7 @@
+{
+  "name": "documentation-files",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: Documentation next to Source code, Test code and Test data. Prose files and non-code files below docs/ hold made-up tokens, a broken example and an API description that fail without a Gate. A JavaScript example under docs/ is still code. Every value in this project is invented and opens nothing.",
+  "main": "src/index.js"
+}
