@@ -29,6 +29,7 @@ import { newLocation } from "../resultset/zero.ts";
 import { sha256File } from "./readcap.ts";
 import type { SuiteRun } from "./runtime_warnings.ts";
 import type { Selection } from "./selection.ts";
+import type { ServiceNeed } from "./service_not_started.ts";
 import type { Shared } from "./shared.ts";
 import type { CoverageRun } from "./tests_coverage.ts";
 import type { RepeatRun } from "./tests_repeat.ts";
@@ -331,9 +332,10 @@ export interface Result {
   suite?: SuiteRun | null;
   /**
    * mayNeed are the compose Services the suite of the run may need and the
-   * Run did not start, as markServicesNotStarted found them.
+   * Run did not start, and the Init services whose Service it may use, as
+   * markServicesNotStarted found them.
    */
-  mayNeed?: string[];
+  mayNeed?: ServiceNeed[];
   /**
    * parts are the results of the suites of a package with several, in list
    * order. Only the merged result of such a package has them.

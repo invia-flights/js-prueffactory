@@ -113,3 +113,14 @@ test("a Service with a build section is also recognised", () => {
     ["app"],
   );
 });
+
+test("credentials in front of the host do not hide it", () => {
+  const p = project({
+    "package.json": "{}",
+    "docker-compose.yml": composeWithMinio,
+    ".env": "A=http://key:secret@minio:9000/x\nB=http://key@minio/x\n",
+    "test/other.env":
+      "C=http://key:se@minio-seed:9000\nD=http://key:se@my.minio.example/\n",
+  });
+  assert.deepEqual(refsOf(p), [{ service: "minio", file: ".env", line: 1 }]);
+});

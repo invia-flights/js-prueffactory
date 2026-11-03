@@ -21,6 +21,23 @@ export interface ServiceRef {
   line: number;
 }
 
+// InitServiceRef says that a package's Suites may use a Service that an Init
+// service prepares, so that they fail for a reason of the Run's environment
+// while the Run does not start the Init service.
+export interface InitServiceRef {
+  // initService is the name of the Init service.
+  initService: string;
+  // services are the Services it prepares that the package refers to, or all
+  // of them when no package refers to any.
+  services: string[];
+  // file and line are where the package first refers to one of them (see
+  // ServiceRef). Both are empty when no package of the project refers to the
+  // Services the Init service prepares: then every Suite of every package may
+  // use them, since every Suite gets every Service the Run starts.
+  file: string;
+  line: number;
+}
+
 // maxServiceRefFileBytes is the largest file the search reads.
 const maxServiceRefFileBytes = 512 << 10;
 
@@ -46,6 +63,29 @@ export function readServiceRefs(root: string, proj: Project): void {
   sortStrings(names);
   for (const pkg of proj.packages) {
     pkg.serviceRefs = serviceRefsOf(root, pkg, names);
+  }
+}
+
+// readInitServiceRefs marks the packages whose Suites may use a Service that
+// an Init service prepares: the packages whose env files or Test code refer to
+// the prepared Service, found with the search of readServiceRefs, or, when no
+// package does, every package. It needs Project.initServices.
+export function readInitServiceRefs(root: string, proj: Project): void {
+  for (const init of proj.initServices) {
+    const names = sortStrings([...init.prepares]);
+    const refs = proj.packages.map((pkg) => serviceRefsOf(root, pkg, names));
+    const named = refs.some((r) => r.length > 0);
+    proj.packages.forEach((pkg, i) => {
+      const found = refs[i] ?? [];
+      if (named && found.length === 0) return;
+      const [first] = found;
+      pkg.initServiceRefs.push({
+        initService: init.name,
+        services: named ? found.map((r) => r.service) : names,
+        file: first?.file ?? "",
+        line: first?.line ?? 0,
+      });
+    });
   }
 }
 
@@ -131,10 +171,16 @@ function lineRefersTo(
   return dotEnvValue(trimSpace(value), new Map()) === name;
 }
 
-// urlHost matches `://name` followed by the end of the host: a port, a path,
-// a query, a fragment, a quote, white space or the end of the line. A longer
-// name that starts the same way does not match. Go's \s is [\t\n\f\r ] and
+// urlHost matches `://name` or `://user:password@name` followed by the end of
+// the host: a port, a path, a query, a fragment, a quote, white space or the
+// end of the line. A longer name that starts the same way does not match, nor
+// does a sub-domain of it. Credentials come first in the database URLs of
+// most projects, so they must not hide the host. Go's \s is [\t\n\f\r ] and
 // its `$` without (?m) is the end of the text.
 function urlHost(name: string): RegExp {
-  return new RegExp("://" + quoteMeta(name) + "(?:[:/?#'\"`\\t\\n\\f\\r ]|$)");
+  return new RegExp(
+    "://(?:[^/?#@'\"`\\t\\n\\f\\r ]+@)?" +
+      quoteMeta(name) +
+      "(?:[:/?#'\"`\\t\\n\\f\\r ]|$)",
+  );
 }
