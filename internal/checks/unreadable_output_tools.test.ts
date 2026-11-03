@@ -11,6 +11,7 @@ import { test } from "node:test";
 
 import {
   assertUnreadable,
+  run,
   runInPackage,
 } from "./unreadable_output.testutil.ts";
 import { newShared } from "./shared.ts";
@@ -185,6 +186,211 @@ test("quality.unused: Knip exiting with an error stays a tool failure", async (t
     stderr: "boom",
   }));
   assert.deepEqual([res.status, res.reasonCode], ["tool_error", "knip_failed"]);
+});
+
+// --- dependency-cruiser (modules.cycles) ---
+
+const cruiseGood =
+  '{"version":"17.0.0","total_cruised":1,"violations":[],"unresolved":[],"edges":{}}';
+const cruiseBad: Record<string, string> = {
+  "a changed JSON shape": '{"modules":[{"source":"index.js"}]}',
+  "violations of another type": '{"version":"1","violations":{"rule":"x"}}',
+  "truncated output": cruiseGood.slice(0, 40),
+  "plain text": "node:internal/modules/cjs/loader:1228\n  throw err;",
+};
+
+for (const [what, out] of Object.entries(cruiseBad)) {
+  test(`modules.cycles: ${what} from dependency-cruiser is a tool problem with the raw output kept`, async (t) => {
+    const res = await runInPackage(t, "modules.cycles", pkg, () => ({
+      stdout: out,
+      stderr: "cruise stderr",
+    }));
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "modules.cycles",
+      context: "C-0002",
+      call: "cruise",
+      stdout: out,
+      stderr: "cruise stderr",
+    });
+    assert.deepEqual(res.findings ?? [], []);
+  });
+}
+
+test("modules.cycles: output that is read is still read, and the helper's own error stays its message", async (t) => {
+  const ok = await runInPackage(t, "modules.cycles", pkg, () => ({
+    stdout: cruiseGood,
+  }));
+  assert.equal(ok.status, "completed", ok.reason ?? "");
+  const failed = await runInPackage(t, "modules.cycles", pkg, () => ({
+    stdout:
+      '{"version":"","total_cruised":0,"violations":[],"unresolved":[],"error":"cannot read the dependency-cruiser report: x"}',
+  }));
+  assert.deepEqual(
+    [failed.status, failed.reasonCode],
+    ["tool_error", "dependency_cruiser_failed"],
+  );
+  const crashed = await runInPackage(t, "modules.cycles", pkg, () => ({
+    exitCode: 1,
+    stderr: "boom",
+  }));
+  assert.deepEqual(
+    [crashed.status, crashed.reasonCode],
+    ["tool_error", "helper_failed"],
+  );
+});
+
+// --- jscpd (quality.clones) ---
+
+const clonesGood =
+  '{"version":"4.0.0","groups":[{"name":"source","files":1,"percentage":0,"duplicated_lines":0,"lines":2,"clones":[]},{"name":"test","files":0,"percentage":0,"duplicated_lines":0,"lines":0,"clones":[]}]}';
+const clonesBad: Record<string, string> = {
+  "a changed JSON shape": '{"statistics":{"total":{"percentage":3}}}',
+  "groups with other keys": '{"version":"4","groups":[{"label":"source"}]}',
+  "truncated output": clonesGood.slice(0, 60),
+  "plain text": "jscpd: command not found",
+};
+
+for (const [what, out] of Object.entries(clonesBad)) {
+  test(`quality.clones: ${what} from jscpd is a tool problem with the raw output kept`, async (t) => {
+    const res = await run(t, "quality.clones", pkg, () => ({
+      stdout: out,
+      stderr: "jscpd stderr",
+    }));
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "quality.clones",
+      call: "clones",
+      stdout: out,
+      stderr: "jscpd stderr",
+    });
+    assert.deepEqual(res.findings ?? [], []);
+    assert.deepEqual(res.metrics ?? [], []);
+  });
+}
+
+test("quality.clones: output that is read is still read, and a group's own error stays its message", async (t) => {
+  const ok = await run(t, "quality.clones", pkg, () => ({
+    stdout: clonesGood,
+  }));
+  assert.equal(ok.status, "completed", ok.reason ?? "");
+  assert.equal(ok.reasonCode, undefined);
+});
+
+// --- TypeScript (types.javascript, types.strictness) ---
+
+const tscLine = "index.js(1,1): error TS2304: Cannot find name 'x'.";
+const tscBad: Record<string, string> = {
+  "a changed format": "index.js:1:1 - error TS2304: Cannot find name 'x'.\n",
+  "plain text": "error: unknown compiler option '--pretty'\n",
+  "truncated output": tscLine + "\nindex.js(2,1): error TS23",
+  "an unreadable line among readable ones": `${tscLine}\n\u001b[96mindex.js\u001b[0m:2:1 - \u001b[91merror\u001b[0m TS2304: Cannot find name 'y'.\n`,
+};
+
+for (const [what, out] of Object.entries(tscBad)) {
+  test(`types.javascript: ${what} from tsc is a tool problem with the raw output kept`, async (t) => {
+    const res = await runInPackage(t, "types.javascript", pkg, () => ({
+      exitCode: 2,
+      stdout: out,
+      stderr: "tsc stderr",
+    }));
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "types.javascript",
+      context: "C-0002",
+      call: "tsc",
+      stdout: out,
+      stderr: "tsc stderr",
+    });
+    assert.deepEqual(res.findings ?? [], []);
+  });
+}
+
+test("types.javascript: output that is read is still read, and a silent or crashed tsc stays a tool failure", async (t) => {
+  const read = await runInPackage(t, "types.javascript", pkg, () => ({
+    exitCode: 2,
+    stdout: tscLine + "\n",
+  }));
+  assert.equal(read.status, "completed", read.reason ?? "");
+  assert.equal(read.findings?.length, 1);
+  const silent = await runInPackage(t, "types.javascript", pkg, () => ({
+    exitCode: 2,
+  }));
+  assert.deepEqual(
+    [silent.status, silent.reasonCode],
+    ["tool_error", "tsc_failed"],
+  );
+  const crashed = await runInPackage(t, "types.javascript", pkg, () => ({
+    exitCode: 139,
+    stdout: "Segmentation fault",
+  }));
+  assert.deepEqual(
+    [crashed.status, crashed.reasonCode],
+    ["tool_error", "tsc_failed"],
+  );
+});
+
+for (const [what, out] of Object.entries(tscBad)) {
+  test(`types.strictness: ${what} from the strict run of tsc is a tool problem with the raw output kept`, async (t) => {
+    const res = await runInPackage(t, "types.strictness", pkg, (spec) =>
+      (spec.name ?? "").startsWith("strictness-strict")
+        ? { exitCode: 2, stdout: out, stderr: "tsc stderr" }
+        : { exitCode: 0 },
+    );
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "types.strictness",
+      context: "C-0002",
+      call: "strictness-strict",
+      stdout: out,
+      stderr: "tsc stderr",
+    });
+    assert.deepEqual(res.findings ?? [], []);
+  });
+}
+
+const coverageGood =
+  '{"succeeded":true,"correctCount":17,"percent":89.47,"percentString":"89.47","totalCount":19}';
+const coverageBad: Record<string, string> = {
+  "a changed JSON shape": '{"succeeded":true,"covered":17,"of":19}',
+  "counts of another type": '{"correctCount":"17","totalCount":"19"}',
+  "truncated output": coverageGood.slice(0, 40),
+  "plain text": "type-coverage: the tsconfig could not be read",
+};
+
+for (const [what, out] of Object.entries(coverageBad)) {
+  test(`types.strictness: ${what} from type-coverage is a tool problem with the raw output kept`, async (t) => {
+    const res = await runInPackage(t, "types.strictness", pkg, (spec) =>
+      (spec.name ?? "").startsWith("coverage-source")
+        ? { stdout: out, stderr: "type-coverage stderr" }
+        : { exitCode: 0 },
+    );
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "types.strictness",
+      context: "C-0002",
+      call: "coverage-source",
+      stdout: out,
+      stderr: "type-coverage stderr",
+    });
+    assert.deepEqual(res.findings ?? [], []);
+  });
+}
+
+test("types.strictness: type-coverage output that is read is still read, and a crash stays a tool failure", async (t) => {
+  const read = await runInPackage(t, "types.strictness", pkg, (spec) =>
+    (spec.name ?? "").startsWith("coverage") ? { stdout: coverageGood } : {},
+  );
+  assert.equal(read.status, "completed", read.reason ?? "");
+  const crashed = await runInPackage(t, "types.strictness", pkg, (spec) =>
+    (spec.name ?? "").startsWith("coverage-source")
+      ? { exitCode: 139, stderr: "Segmentation fault" }
+      : {},
+  );
+  assert.deepEqual(
+    [crashed.status, crashed.reasonCode],
+    ["tool_error", "type_coverage_failed"],
+  );
 });
 
 // (more adapters below)
