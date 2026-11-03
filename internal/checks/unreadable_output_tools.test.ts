@@ -689,4 +689,105 @@ test("security.patterns: reports that are read are still read, and a crash stays
   );
 });
 
+// --- npm ls (deps.tree) ---
+
+const npmLsGood =
+  '{"version":"1.0.0","name":"x","problems":["missing: left-pad@1.3.0, required by x@1.0.0"]}';
+const npmLsBad: Record<string, [number, string]> = {
+  "a changed JSON shape": [0, '{"problems":"missing: left-pad@1.3.0"}'],
+  "a list instead of the document": [0, '[{"name":"x"}]'],
+  "an error document without a problem": [
+    1,
+    '{"error":{"code":"ELSPROBLEMS","summary":"x"}}',
+  ],
+  "truncated output": [1, npmLsGood.slice(0, 60)],
+  "plain text": [1, "npm error code ELSPROBLEMS"],
+};
+
+for (const [what, [exitCode, out]] of Object.entries(npmLsBad)) {
+  test(`deps.tree: ${what} from npm ls is a tool problem with the raw output kept`, async (t) => {
+    const res = await runInPackage(t, "deps.tree", pkg, () => ({
+      exitCode,
+      stdout: out,
+      stderr: "npm stderr",
+    }));
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "deps.tree",
+      context: "C-0002",
+      call: "npm-ls",
+      stdout: out,
+      stderr: "npm stderr",
+    });
+    assert.deepEqual(res.findings ?? [], []);
+  });
+}
+
+test("deps.tree: output that is read is still read, and another exit code stays a tool failure", async (t) => {
+  const found = await runInPackage(t, "deps.tree", pkg, () => ({
+    exitCode: 1,
+    stdout: npmLsGood,
+  }));
+  assert.equal(found.status, "completed", found.reason ?? "");
+  assert.equal(found.findings?.length, 1);
+  const clean = await runInPackage(t, "deps.tree", pkg, () => ({
+    stdout: "{}",
+  }));
+  assert.equal(clean.status, "completed", clean.reason ?? "");
+  const failed = await runInPackage(t, "deps.tree", pkg, () => ({
+    exitCode: 127,
+    stderr: "npm: command not found",
+  }));
+  assert.deepEqual(
+    [failed.status, failed.reasonCode],
+    ["tool_error", "npm_ls_failed"],
+  );
+});
+
+// --- npm sbom (sbom.generate) ---
+
+const sbomGood =
+  '{"bomFormat":"CycloneDX","specVersion":"1.5","components":[{"name":"minimist"}]}';
+const sbomBad: Record<string, string> = {
+  "another document format": '{"spdxVersion":"SPDX-2.3","packages":[]}',
+  "components of another type":
+    '{"bomFormat":"CycloneDX","components":{"minimist":{}}}',
+  "truncated output": sbomGood.slice(0, 50),
+  "plain text": "npm warn config production Use `--omit=dev` instead.",
+};
+
+for (const [what, out] of Object.entries(sbomBad)) {
+  test(`sbom.generate: ${what} from npm sbom is a tool problem with the raw output kept`, async (t) => {
+    const res = await runInPackage(t, "sbom.generate", osvPkg, () => ({
+      stdout: out,
+      stderr: "npm stderr",
+    }));
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "sbom.generate",
+      context: "C-0002",
+      call: "sbom",
+      stdout: out,
+      stderr: "npm stderr",
+    });
+    assert.deepEqual(res.metrics ?? [], []);
+  });
+}
+
+test("sbom.generate: a document that is read is still read, and a failing npm stays a tool failure", async (t) => {
+  const ok = await runInPackage(t, "sbom.generate", osvPkg, () => ({
+    stdout: sbomGood,
+  }));
+  assert.equal(ok.status, "completed", ok.reason ?? "");
+  assert.equal(ok.metrics?.[0]?.value, 1);
+  const failed = await runInPackage(t, "sbom.generate", osvPkg, () => ({
+    exitCode: 1,
+    stderr: "npm error",
+  }));
+  assert.deepEqual(
+    [failed.status, failed.reasonCode],
+    ["tool_error", "npm_sbom_failed"],
+  );
+});
+
 // (more adapters below)
