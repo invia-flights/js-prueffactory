@@ -32,7 +32,14 @@ import {
   biomeLineAndColumn,
   projectESLintFindings,
 } from "./lint_existing_parse.ts";
-import { useLintContainer } from "./lint_existing_run.ts";
+import {
+  cr,
+  isVersionQuery,
+  lint,
+  lintTree,
+  ok,
+  withFakeLinters,
+} from "./lint_existing.testutil.ts";
 
 test("lint.existing is implemented per package and can fire Gates", (t) => {
   const entry = lookup("lint.existing");
@@ -237,64 +244,6 @@ test("ESLint output that is not a JSON array is an error", (t) => {
     "an empty list is a clean project",
   );
 });
-
-// fakeLinters replaces the container step of lint.existing. It answers by the
-// command, records every command it was asked to run, and fails the test for a
-// command it has no answer for.
-interface FakeLinters {
-  commands: string[][];
-  count(substring: string): number;
-}
-
-function cr(r: Partial<ContainerResult> = {}): ContainerResult {
-  return {
-    exitCode: 0,
-    oomKilled: false,
-    stdout: Buffer.alloc(0),
-    stderr: Buffer.alloc(0),
-    stoppedAfterGrace: false,
-    ...r,
-  };
-}
-
-const ok = (stdout: string): ContainerResult =>
-  cr({ stdout: Buffer.from(stdout) });
-
-function withFakeLinters(
-  t: TestContext,
-  answers: (cmd: string[]) => ContainerResult | null,
-): FakeLinters {
-  const commands: string[][] = [];
-  t.after(
-    useLintContainer((_signal, _input, _name, cmd) => {
-      commands.push(cmd);
-      const got = answers(cmd);
-      assert.ok(got, `unexpected command ${cmd.join(" ")}`);
-      return Promise.resolve(got);
-    }),
-  );
-  return {
-    commands,
-    count: (substring) =>
-      commands.filter((c) => c.join(" ").includes(substring)).length,
-  };
-}
-
-function lintTree(t: TestContext, files: Record<string, string>): Input {
-  const dir = writeTree(t, files);
-  const proj = discover(dir);
-  return new Input({
-    project: proj,
-    context: packageContext(proj, "."),
-    originalPath: "/original",
-    snapshotDir: dir,
-  });
-}
-
-const isVersionQuery = (cmd: string[]): boolean => cmd[1] === "-p";
-
-const lint = (input: Input) =>
-  impl("lint.existing").run(new AbortController().signal, input);
 
 const eslint9 = '{"devDependencies":{"eslint":"^9"}}';
 
