@@ -1,30 +1,16 @@
 import assert from "node:assert/strict";
-import {
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 import type { TestContext } from "node:test";
 
 import { load } from "./load.ts";
 import type { Loaded } from "./load.ts";
 import { v3Lock } from "./lockfile.testutil.ts";
+import { tempDir, writeFiles } from "../testkit/fs.testutil.ts";
 
-function writeFiles(t: TestContext, files: Record<string, string>): string {
-  const dir = mkdtempSync(join(tmpdir(), "lockfile-"));
-  t.after(() => {
-    rmSync(dir, { recursive: true, force: true });
-  });
-  for (const [name, content] of Object.entries(files)) {
-    const p = join(dir, name);
-    mkdirSync(dirname(p), { recursive: true });
-    writeFileSync(p, content);
-  }
+function writeTree(t: TestContext, files: Record<string, string>): string {
+  const dir = tempDir(t, "lockfile-");
+  writeFiles(dir, files);
   return dir;
 }
 
@@ -32,7 +18,7 @@ function writeFiles(t: TestContext, files: Record<string, string>): string {
 
 test("an npm package with a version 3 lockfile is usable", (t) => {
   const l = load(
-    writeFiles(t, {
+    writeTree(t, {
       "package.json": '{"dependencies": {"a": "^1.0.0"}}',
       "package-lock.json": v3Lock,
     }),
@@ -47,7 +33,7 @@ test("an npm package with a version 3 lockfile is usable", (t) => {
 
 test("a version 1 lockfile is unsupported with the reason", (t) => {
   const l = load(
-    writeFiles(t, {
+    writeTree(t, {
       "package.json": "{}",
       "package-lock.json": '{"lockfileVersion": 1}',
     }),
@@ -60,7 +46,7 @@ test("a version 1 lockfile is unsupported with the reason", (t) => {
 
 test("a broken lockfile is an error, not unsupported", (t) => {
   const l = load(
-    writeFiles(t, {
+    writeTree(t, {
       "package.json": "{}",
       "package-lock.json": '{"lockfileVersion": 3,',
     }),
@@ -70,7 +56,7 @@ test("a broken lockfile is an error, not unsupported", (t) => {
 });
 
 test("without a lockfile there is nothing to read but no error", (t) => {
-  const l = load(writeFiles(t, { "package.json": "{}" }));
+  const l = load(writeTree(t, { "package.json": "{}" }));
   assert.equal(l.lock, null);
   assert.equal(l.lockErr, null);
   assert.equal(l.unsupported?.code, "no_lockfile");
@@ -78,11 +64,11 @@ test("without a lockfile there is nothing to read but no error", (t) => {
 
 test("other managers and workspaces are unsupported", (t) => {
   const pnpm = load(
-    writeFiles(t, { "package.json": "{}", "pnpm-lock.yaml": "x" }),
+    writeTree(t, { "package.json": "{}", "pnpm-lock.yaml": "x" }),
   );
   assert.equal(pnpm.unsupported?.code, "package_manager_unsupported");
   const ws = load(
-    writeFiles(t, {
+    writeTree(t, {
       "package.json": '{"workspaces": ["a"]}',
       "package-lock.json": v3Lock,
     }),
@@ -92,7 +78,7 @@ test("other managers and workspaces are unsupported", (t) => {
 
 test("a broken manifest still reads the lockfile", (t) => {
   const l = load(
-    writeFiles(t, { "package.json": "{", "package-lock.json": v3Lock }),
+    writeTree(t, { "package.json": "{", "package-lock.json": v3Lock }),
   );
   assert.notEqual(l.manifestErr, null);
   assert.equal(l.manifest, null);
@@ -140,7 +126,7 @@ function summary(l: Loaded, dir: string): Record<string, unknown> {
 describe("load matches the Go build", () => {
   for (const c of recorded.loads) {
     test(c.name, (t) => {
-      const dir = writeFiles(t, c.files);
+      const dir = writeTree(t, c.files);
       assert.deepEqual(summary(load(dir), dir), c.got);
     });
   }

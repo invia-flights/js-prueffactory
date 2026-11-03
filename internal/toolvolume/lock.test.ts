@@ -1,14 +1,7 @@
 import assert from "node:assert/strict";
 import { type ChildProcess, spawn, spawnSync } from "node:child_process";
-import {
-  mkdtempSync,
-  readFileSync,
-  realpathSync,
-  rmSync,
-  utimesSync,
-  writeFileSync,
-} from "node:fs";
-import { hostname, tmpdir } from "node:os";
+import { readFileSync, utimesSync, writeFileSync } from "node:fs";
+import { hostname } from "node:os";
 import { join } from "node:path";
 import { type TestContext, test } from "node:test";
 
@@ -21,14 +14,7 @@ import {
   defaultLockKind,
   ownerFile,
 } from "./lock.ts";
-
-function tempDir(t: TestContext): string {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), "jspf-lock-")));
-  t.after(() => {
-    rmSync(dir, { recursive: true, force: true });
-  });
-  return dir;
-}
+import { tempDir } from "../testkit/fs.testutil.ts";
 
 const kinds: LockKind[] =
   process.platform === "darwin" ? ["flock", "owner-file"] : ["owner-file"];

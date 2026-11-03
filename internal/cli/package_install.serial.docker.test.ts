@@ -22,6 +22,11 @@ import {
   realRun,
   treeFingerprint,
 } from "./realrun.testutil.ts";
+import {
+  artifactEndingIn,
+  isApplicable,
+  onlyExecution,
+} from "./reportsel.testutil.ts";
 
 /** Full is the part of report.json these tests read beyond realrun's Report. */
 interface Full {
@@ -62,11 +67,7 @@ function executionsOf(r: DockerRun, check: string): Full["checks"] {
 }
 
 function oneExecution(r: DockerRun, check: string): Full["checks"][number] {
-  const got = executionsOf(r, check);
-  assert.equal(got.length, 1, `${check} executions = ${JSON.stringify(got)}`);
-  const e = got[0];
-  assert.ok(e);
-  return e;
+  return onlyExecution(full(r).checks, check, isApplicable);
 }
 
 function artifactOf(
@@ -74,9 +75,7 @@ function artifactOf(
   e: Full["checks"][number],
   name: string,
 ): { id: string; path: string } | undefined {
-  return full(r).artifacts.find(
-    (a) => e.artifact_ids.includes(a.id) && a.path.endsWith("/" + name),
-  );
+  return artifactEndingIn(full(r).artifacts, e, "/" + name);
 }
 
 const install = "package.install";

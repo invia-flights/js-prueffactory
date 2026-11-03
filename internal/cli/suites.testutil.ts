@@ -3,10 +3,17 @@
 // tests_existing_edges_docker_test.go, tests_existing_visibility_docker_test.go
 // and services_docker_test.go).
 import assert from "node:assert/strict";
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { readFileSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 import type { DockerRun } from "./realrun.testutil.ts";
+import { writeFiles } from "../testkit/fs.testutil.ts";
+import {
+  artifactEndingIn,
+  findingsOfCheck,
+  onlyExecution,
+  isApplicable,
+} from "./reportsel.testutil.ts";
 
 export interface Limitation {
   reason_code: string;
@@ -202,16 +209,12 @@ export function executionsOf(s: Full, check: string): Execution[] {
 
 /** oneExecution is the only execution of a Check. */
 export function oneExecution(s: Full, check: string): Execution {
-  const got = executionsOf(s, check);
-  assert.equal(got.length, 1, `${check} executions = ${JSON.stringify(got)}`);
-  const e = got[0];
-  assert.ok(e);
-  return e;
+  return onlyExecution(s.checks, check, isApplicable);
 }
 
 /** findingsOf are the Findings of a Check. */
 export function findingsOf(s: Full, check: string): Finding[] {
-  return s.findings.filter((f) => f.check_id === check);
+  return findingsOfCheck(s.findings, check);
 }
 
 /** testCasesOf are the test cases of an execution. */
@@ -270,9 +273,7 @@ export function artifactOf(
   e: Execution,
   name: string,
 ): { id: string; path: string } | undefined {
-  return s.artifacts.find(
-    (a) => e.artifact_ids.includes(a.id) && a.path.endsWith("/" + name),
-  );
+  return artifactEndingIn(s.artifacts, e, "/" + name);
 }
 
 interface PassedCase {
@@ -315,14 +316,7 @@ export function withoutSecretScan(ids: readonly string[]): string[] {
   return ids.filter((id) => id !== "security.secrets");
 }
 
-/** writeFiles adds or replaces files of a project copy. */
-export function writeFiles(dir: string, files: Record<string, string>): void {
-  for (const [rel, content] of Object.entries(files)) {
-    const p = join(dir, rel);
-    mkdirSync(dirname(p), { recursive: true });
-    writeFileSync(p, content);
-  }
-}
+export { writeFiles };
 
 /** removeFile removes a file of a project copy. */
 export function removeFile(dir: string, rel: string): void {

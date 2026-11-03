@@ -1,14 +1,14 @@
 // Shared by the gitstate tests: the real git CLI is the source of truth for
 // what a repository contains. Tests skip when the host has no git.
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import process from "node:process";
 import type { TestContext } from "node:test";
 
 import { Reader } from "./gitstate.ts";
 import type { State } from "./gitstate.ts";
+import { tempDir } from "../testkit/fs.testutil.ts";
 
 export const gitExe = findGit();
 
@@ -54,13 +54,7 @@ export function gitIn(dir: string, ...args: string[]): string {
   ).trim();
 }
 
-export function tempDir(t: TestContext): string {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), "gitstate-")));
-  t.after(() => {
-    rmSync(dir, { recursive: true, force: true });
-  });
-  return dir;
-}
+export { tempDir };
 
 export function writeFile(dir: string, name: string, content: string): void {
   writeFileSync(join(dir, name), content);

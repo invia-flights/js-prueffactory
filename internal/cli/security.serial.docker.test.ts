@@ -19,6 +19,7 @@ import {
   realRun,
   treeFingerprint,
 } from "./realrun.testutil.ts";
+import { isApplicable, onlyExecution } from "./reportsel.testutil.ts";
 
 /** Full is the part of report.json these tests read beyond realrun's Report. */
 interface Full {
@@ -69,13 +70,7 @@ interface Full {
 const full = (r: DockerRun): Full => r.report as unknown as Full;
 
 function oneExecution(r: DockerRun, check: string): Full["checks"][number] {
-  const got = full(r).checks.filter(
-    (e) => e.check_id === check && e.applicability !== "not_applicable",
-  );
-  assert.equal(got.length, 1, `${check} executions: ${JSON.stringify(got)}`);
-  const e = got[0];
-  assert.ok(e);
-  return e;
+  return onlyExecution(full(r).checks, check, isApplicable);
 }
 
 const findingsOf = (r: DockerRun, check: string): Full["findings"] =>

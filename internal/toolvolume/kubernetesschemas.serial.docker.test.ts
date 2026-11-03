@@ -5,8 +5,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { cpSync, mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { cpSync } from "node:fs";
 import { join } from "node:path";
 import { test, type TestContext } from "node:test";
 
@@ -24,16 +23,9 @@ import {
   KubernetesSchemaMountPath,
   kubernetesKind,
 } from "./kubernetesschemas.ts";
+import { tempDir } from "../testkit/fs.testutil.ts";
 
 const folder = KubernetesSchemaMountPath + "/" + KubernetesSchemaFolder;
-
-function tempDir(t: TestContext): string {
-  const dir = mkdtempSync(join(tmpdir(), "jspf-k8s-"));
-  t.after(() => {
-    rmSync(dir, { recursive: true, force: true });
-  });
-  return dir;
-}
 
 /** testKind is a cache kind no real Run uses; its volume is removed after the test. */
 function testKind(t: TestContext): string {

@@ -1,30 +1,14 @@
 // Shared by the Snapshot tests.
-import {
-  chmodSync,
-  lstatSync,
-  mkdirSync,
-  mkdtempSync,
-  realpathSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { chmodSync, lstatSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { Writable } from "node:stream";
 import type { TestContext } from "node:test";
 
 import { take } from "./snapshot.ts";
 import type { Options, Snapshot } from "./snapshot.ts";
+import { tempDir } from "../testkit/fs.testutil.ts";
 
-// tempDir returns a new folder with symbolic links in its own path resolved,
-// removed after the test.
-export function tempDir(t: TestContext): string {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), "snapshot-")));
-  t.after(() => {
-    rmSync(dir, { recursive: true, force: true });
-  });
-  return dir;
-}
+export { tempDir };
 
 // write creates a file below root, making parent folders as needed, and
 // sets its mode exactly (the umask does not apply).

@@ -30,20 +30,13 @@ import { Alpine, Helm, type HelmDownload } from "../toolset/helm.ts";
 import { imageRef } from "../toolset/toolset.ts";
 import { HelmBin, MountPath } from "./helm.ts";
 import { ensure, volumeName } from "./toolvolume.ts";
+import { tempDir } from "../testkit/fs.testutil.ts";
 
 const getenv = (k: string): string => process.env[k] ?? "";
 
 // nonce is in every volume name this file creates; the wrapper CLI lists
 // only those.
 const nonce = "t13" + randomBytes(5).toString("hex");
-
-function tempDir(t: TestContext): string {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), "jspf-toolvolume-")));
-  t.after(() => {
-    rmSync(dir, { recursive: true, force: true });
-  });
-  return dir;
-}
 
 const wrapperDir = realpathSync(
   mkdtempSync(join(tmpdir(), "jspf-toolvolume-cli-")),

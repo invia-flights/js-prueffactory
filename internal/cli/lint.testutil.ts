@@ -7,6 +7,11 @@ import { join } from "node:path";
 
 import type { DockerRun } from "./realrun.testutil.ts";
 import type { Execution, Finding, Limitation } from "./suites.testutil.ts";
+import {
+  artifactEndingIn,
+  findingsOfCheck,
+  onlyExecution,
+} from "./reportsel.testutil.ts";
 
 /** LintReport is the part of report.json these tests read. */
 export interface LintReport {
@@ -76,15 +81,7 @@ export function executionsOf(s: LintReport, check: string): Execution[] {
 
 /** oneExecution is the only execution of a Check; it fails the test when there is not exactly one. */
 export function oneExecution(s: LintReport, check: string): Execution {
-  const found = executionsOf(s, check);
-  assert.equal(
-    found.length,
-    1,
-    `executions of ${check}: ${String(found.length)}`,
-  );
-  const [e] = found;
-  assert.ok(e);
-  return e;
+  return onlyExecution(s.checks, check);
 }
 
 /** packageExecution is the execution of a Check in the package Context C-0002. */
@@ -102,7 +99,7 @@ export function packageExecution(
 
 /** findingsOf are the Findings of a Check. */
 export function findingsOf(s: LintReport, check: string): Finding[] {
-  return s.findings.filter((f) => f.check_id === check);
+  return findingsOfCheck(s.findings, check);
 }
 
 /** artifactOf is the artifact of an execution whose path ends in name. */
@@ -111,9 +108,7 @@ export function artifactOf(
   e: Execution,
   name: string,
 ): { id: string; path: string } | undefined {
-  return s.artifacts.find(
-    (a) => e.artifact_ids.includes(a.id) && a.path.endsWith(name),
-  );
+  return artifactEndingIn(s.artifacts, e, name);
 }
 
 /** partOf is a part of the Benchmark section; it fails the test when there is none. */

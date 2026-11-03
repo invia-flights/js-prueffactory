@@ -3,7 +3,6 @@
 // tests). The registry is a fake one in this test process, which the
 // container of the registry-data step reaches through the host: nothing
 // depends on the live npm registry.
-import assert from "node:assert/strict";
 import { writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
@@ -12,6 +11,12 @@ import { join } from "node:path";
 import type { TestContext } from "node:test";
 
 import { copyProject, type DockerRun } from "./realrun.testutil.ts";
+import {
+  artifactEndingIn,
+  findingsOfCheck,
+  onlyExecution,
+  isApplicable,
+} from "./reportsel.testutil.ts";
 
 /**
  * registryHost is how a container on Docker's default bridge reaches this
@@ -211,13 +216,7 @@ export const full = (r: DockerRun): Full => r.report as unknown as Full;
 
 /** oneExecution is the only applicable execution of a Check. */
 export function oneExecution(r: DockerRun, check: string): Execution {
-  const got = full(r).checks.filter(
-    (e) => e.check_id === check && e.applicability !== "not_applicable",
-  );
-  assert.equal(got.length, 1, `${check} executions = ${JSON.stringify(got)}`);
-  const [e] = got;
-  assert.ok(e);
-  return e;
+  return onlyExecution(full(r).checks, check, isApplicable);
 }
 
 /** artifactOf is the artifact of an execution whose path ends in name. */
@@ -226,14 +225,12 @@ export function artifactOf(
   e: Execution,
   name: string,
 ): Full["artifacts"][number] | undefined {
-  return full(r).artifacts.find(
-    (a) => e.artifact_ids.includes(a.id) && a.path.endsWith("/" + name),
-  );
+  return artifactEndingIn(full(r).artifacts, e, "/" + name);
 }
 
 /** findingsOf is the Findings of a Check. */
 export function findingsOf(r: DockerRun, check: string): Finding[] {
-  return full(r).findings.filter((f) => f.check_id === check);
+  return findingsOfCheck(full(r).findings, check);
 }
 
 /** withoutSecretScan is prerequisites_run without the secret scan every Run performs. */

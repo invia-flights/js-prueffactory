@@ -1,6 +1,6 @@
 // Seam A with a real Docker daemon: the Suppressions part of Go's
 // TestSecurityPatternsFindInsecureSourceCodeFromBothRuleSetsAndNoSuppressionHidesAFinding
-// (security_patterns_docker_test.go). security.docker.test.ts has the rest of
+// (security_patterns_docker_test.go). security.serial.docker.test.ts has the rest of
 // that test, without the Inventory, which is quality.suppressions'.
 import assert from "node:assert/strict";
 import { test } from "node:test";

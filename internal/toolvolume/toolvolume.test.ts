@@ -1,12 +1,5 @@
 import assert from "node:assert/strict";
-import {
-  mkdtempSync,
-  readFileSync,
-  realpathSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { type TestContext, test } from "node:test";
 
@@ -16,6 +9,7 @@ import { version } from "../toolset/all.ts";
 import { helmInstallScript } from "./helm.ts";
 import { acquire } from "./lock.ts";
 import { cleanOtherVersions, ensure, volumeName } from "./toolvolume.ts";
+import { tempDir } from "../testkit/fs.testutil.ts";
 
 interface OracleCase {
   name: string;
@@ -27,14 +21,6 @@ interface OracleCase {
 const oracle = JSON.parse(
   readFileSync(new URL("testdata/go-oracle.json", import.meta.url), "utf8"),
 ) as { cases: OracleCase[]; helmScript: string; volumeName: string };
-
-function tempDir(t: TestContext): string {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), "jspf-toolvolume-")));
-  t.after(() => {
-    rmSync(dir, { recursive: true, force: true });
-  });
-  return dir;
-}
 
 const never = new AbortController().signal;
 

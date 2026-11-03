@@ -1,7 +1,5 @@
 // repository.github-actions end to end (Go: github_actions_docker_test.go).
 import assert from "node:assert/strict";
-import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
 import { test } from "node:test";
 
 import {
@@ -16,16 +14,9 @@ import {
   fullReport,
   gatesByPath,
 } from "./repository.testutil.ts";
+import { writeFiles } from "../testkit/fs.testutil.ts";
 
 const id = "repository.github-actions";
-
-function writeFiles(root: string, files: Record<string, string>): void {
-  for (const [rel, content] of Object.entries(files)) {
-    const p = join(root, rel);
-    mkdirSync(dirname(p), { recursive: true });
-    writeFileSync(p, content);
-  }
-}
 
 test("a workflow with an actionlint error fails the Run, and zizmor and ShellCheck give warnings", async (t) => {
   const original = copyProject(t, "ci-files");

@@ -5,9 +5,6 @@
 // build fills, and changes nothing in it.
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { test, type TestContext } from "node:test";
 
 import { type Driver, LabelCache, NetworkNone } from "../docker/driver.ts";
@@ -21,14 +18,7 @@ import {
   AdvisoryMountPath,
   ensureAdvisoryDB,
 } from "./advisorydb.ts";
-
-function tempDir(t: TestContext): string {
-  const dir = mkdtempSync(join(tmpdir(), "jspf-advisory-"));
-  t.after(() => {
-    rmSync(dir, { recursive: true, force: true });
-  });
-  return dir;
-}
+import { tempDir } from "../testkit/fs.testutil.ts";
 
 /** testKind is a cache kind no real Run uses; its volume is removed after the test. */
 function testKind(t: TestContext): string {

@@ -1,12 +1,5 @@
 // Seam A for tests: calls main in-process and captures what a user sees.
-import {
-  mkdirSync,
-  mkdtempSync,
-  realpathSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { Writable } from "node:stream";
 import type { TestContext } from "node:test";
@@ -14,6 +7,7 @@ import type { TestContext } from "node:test";
 import type { Entry } from "../checks/catalog.ts";
 import { main } from "./cli.ts";
 import { useCatalog } from "./selection.ts";
+import { tempDir } from "../testkit/fs.testutil.ts";
 
 export interface MainResult {
   exitCode: number;
@@ -79,14 +73,7 @@ export async function call(
   };
 }
 
-// tempDir is a temporary folder, symlinks resolved, removed when the test ends.
-export function tempDir(t: TestContext): string {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), "jspf-cli-")));
-  t.after(() => {
-    rmSync(dir, { recursive: true, force: true });
-  });
-  return dir;
-}
+export { tempDir };
 
 // project creates a tiny project folder.
 export function project(t: TestContext): string {

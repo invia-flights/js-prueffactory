@@ -1,14 +1,7 @@
 // Helpers for the engine's tests: a Run's configuration without Docker, fake
 // Checks, planned executions built by hand, and Runs on small projects.
-import {
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { Writable } from "node:stream";
 import type { TestContext } from "node:test";
 
@@ -27,24 +20,12 @@ import { type Config, run, RunState } from "./engine.ts";
 import type { ExecResult } from "./execution.ts";
 import type { Planned } from "./plan.ts";
 import { execute } from "./schedule.ts";
+import { tempDir } from "../testkit/fs.testutil.ts";
+import { writeFiles } from "../testkit/fs.testutil.ts";
 
-/** tempDir makes a folder that is removed after the test. */
-export function tempDir(t: TestContext, prefix = "engine-"): string {
-  const dir = mkdtempSync(join(tmpdir(), prefix));
-  t.after(() => {
-    rmSync(dir, { recursive: true, force: true });
-  });
-  return dir;
-}
+export { tempDir };
 
-/** writeTree writes files below dir, creating folders. */
-export function writeTree(dir: string, files: Record<string, string>): void {
-  for (const [name, body] of Object.entries(files)) {
-    const p = join(dir, name);
-    mkdirSync(dirname(p), { recursive: true });
-    writeFileSync(p, body);
-  }
-}
+export { writeFiles as writeTree };
 
 /** Lines collects what a Logger writes. */
 export class Lines extends Writable {
@@ -199,7 +180,7 @@ export async function runProject(
   log: string;
 }> {
   const project = join(tempDir(t), "demo");
-  writeTree(project, files);
+  writeFiles(project, files);
   const lines = new Lines();
   const cfg = config(t, {
     original: project,

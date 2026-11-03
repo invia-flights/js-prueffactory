@@ -1,12 +1,13 @@
 // Test helpers shared by the Discovery tests: temp projects written from a
 // path -> content table, as the Go tests' project helper does.
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { after } from "node:test";
 
 import { discover, type File, type Project } from "./discovery.ts";
+import { writeFiles } from "../testkit/fs.testutil.ts";
 
 const temps: string[] = [];
 after(() => {
@@ -20,17 +21,7 @@ export function tempDir(): string {
   return d;
 }
 
-// writeFiles writes files (path -> content) below root.
-export function writeFiles(
-  root: string,
-  files: Readonly<Record<string, string>>,
-): void {
-  for (const [rel, content] of Object.entries(files)) {
-    const p = join(root, rel);
-    mkdirSync(dirname(p), { recursive: true });
-    writeFileSync(p, content);
-  }
-}
+export { writeFiles };
 
 // project writes files below a new temp folder and discovers it.
 export function project(files: Readonly<Record<string, string>>): Project {

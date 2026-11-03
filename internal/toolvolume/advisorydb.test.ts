@@ -1,16 +1,9 @@
 // Go: advisorydb_test.go, and the Go recording of EnsureAdvisoryDB with a
 // fake docker CLI (testdata/go-oracle-advisorydb.go.txt).
 import assert from "node:assert/strict";
-import {
-  mkdtempSync,
-  readFileSync,
-  realpathSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { type TestContext, test } from "node:test";
+import { test } from "node:test";
 
 import { Driver } from "../docker/driver.ts";
 import { formatTime } from "../gocompat/json.ts";
@@ -21,6 +14,7 @@ import {
   needsRefresh,
   parseDBDate,
 } from "./advisorydb.ts";
+import { tempDir } from "../testkit/fs.testutil.ts";
 
 interface OracleCase {
   name: string;
@@ -48,14 +42,6 @@ const oracle = JSON.parse(
 ) as { cases: OracleCase[]; dates: DateCase[] };
 
 const never = new AbortController().signal;
-
-function tempDir(t: TestContext): string {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), "jspf-advisorydb-")));
-  t.after(() => {
-    rmSync(dir, { recursive: true, force: true });
-  });
-  return dir;
-}
 
 // The fake docker CLI of the Go recording, word for word.
 const oracleScript = `#!/bin/sh
