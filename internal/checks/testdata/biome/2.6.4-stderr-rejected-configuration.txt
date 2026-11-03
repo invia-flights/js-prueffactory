@@ -1,0 +1,14 @@
+/p/biome.json:1:64 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × enabled has an incorrect type, expected a boolean, but received a string.
+  
+  > 1 │ { "files": { "includes": ["**/*.js"] }, "linter": { "enabled": "yes please" } }
+      │                                                                ^^^^^^^^^^^^
+    2 │ 
+  
+
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+

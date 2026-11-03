@@ -2,9 +2,10 @@
 // lint.existing: the project's own ESLint and Biome at their locked versions
 // (Go: lint_existing_docker_test.go, lint_existing_nogate_docker_test.go).
 //
-// project-biome pins Biome 2.1.2. Biome 2.5 prints a different JSON document
-// that the reader of this build, like Go's, does not understand; the fix
-// belongs to the trustworthy-gates spec and is not made here.
+// project-biome pins Biome 2.1.2 and project-biome-current the newest Biome
+// 2.x. Biome 2.4 and later print another JSON document than 2.1 (a location
+// with a plain path and start and end positions instead of a path object and
+// a byte span); the Check reads both, and a test of each keeps it so.
 import assert from "node:assert/strict";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -25,7 +26,7 @@ import {
   realRun,
   treeFingerprint,
 } from "./realrun.testutil.ts";
-import { withoutSecretScan } from "./suites.testutil.ts";
+import { type Finding, withoutSecretScan } from "./suites.testutil.ts";
 
 function lintFindingsByRule(
   s: LintReport,
@@ -130,6 +131,109 @@ test("lint.existing runs Biome and retries without VCS when its ignore file cann
   assert.ok(
     doc.includes("--vcs-enabled=false") && doc.includes('"override"'),
     doc,
+  );
+  assertNothingLeft(r);
+});
+
+test("lint.existing reads the newest Biome 2.x: the Source code error is a Gate at its line and column, the same rule in Test code is not", async (t) => {
+  const original = copyProject(t, "project-biome-current");
+  const before = treeFingerprint(original);
+
+  const r = await realRun(t, ["test", original, "--only", "lint.existing"]);
+
+  assert.equal(r.code, 1, `exit 1 for the Source code error\n${r.stderr}`);
+  const s = lintReport(r);
+  const exec = oneExecution(s, "lint.existing");
+  assert.deepEqual(
+    [exec.status, exec.outcome, exec.gate],
+    ["completed", "failed", 1],
+  );
+  assert.equal(exec.tool?.name, "biome");
+  assert.equal(exec.tool.version, "2.6.4", "the project's Biome 2.6.4");
+  assert.equal(
+    exec.command.join(" "),
+    "node node_modules/@biomejs/biome/bin/biome lint --reporter=json .",
+    "no retry: the configuration does not use the VCS integration",
+  );
+
+  const findings = findingsOf(s, "lint.existing");
+  assert.deepEqual(
+    findings.filter((f) => f.rule_id === "biome-config-error"),
+    [],
+    "Biome exited with 1 only because of its diagnostics",
+  );
+  const where = (f: Finding): string =>
+    `${f.locations[0]?.path ?? ""}:${String(f.locations[0]?.start?.line)}:${String(f.locations[0]?.start?.column)}`;
+  assert.deepEqual(
+    findings.map((f) => [f.rule_id, where(f), f.severity, f.gate]).sort(),
+    [
+      ["lint/suspicious/noConsole", "src/index.js:3:3", "warning", false],
+      ["lint/suspicious/noDebugger", "src/index.js:2:3", "error", true],
+      ["lint/suspicious/noDebugger", "test/index.test.js:4:3", "error", false],
+    ],
+    "the Gate is the one in Source code",
+  );
+  const inTest = findings.find((f) => f.locations[0]?.path.startsWith("test/"));
+  assert.equal(inTest?.in_test_code, true);
+  assert.equal(s.summary.gates, 1);
+  assert.deepEqual(
+    s.limitations.filter((l) => l.reason_code === "biome_vcs_disabled"),
+    [],
+  );
+  assert.equal(treeFingerprint(original), before, "the Original changed");
+  assertNothingLeft(r);
+});
+
+test("with no error in Source code the Test code error of the newest Biome leaves the Run at exit code 0", async (t) => {
+  const original = copyProject(t, "project-biome-current");
+  writeFileSync(
+    join(original, "src", "index.js"),
+    "function main() {\n  return 1;\n}\n\nmodule.exports = { main };\n",
+  );
+
+  const r = await realRun(t, ["test", original, "--only", "lint.existing"]);
+
+  assert.equal(r.code, 0, `the only error is in Test code\n${r.stderr}`);
+  const s = lintReport(r);
+  const exec = oneExecution(s, "lint.existing");
+  assert.deepEqual(
+    [exec.status, exec.outcome, exec.gate],
+    ["completed", "observations_only", 0],
+  );
+  const hits = findingsOf(s, "lint.existing");
+  assert.deepEqual(
+    hits.map((f) => [f.rule_id, f.severity, f.gate]),
+    [["lint/suspicious/noDebugger", "error", false]],
+  );
+  assertNothingLeft(r);
+});
+
+test("a Biome configuration that Biome itself rejects is a Gate with Biome's own diagnostic as Evidence", async (t) => {
+  const original = copyProject(t, "project-biome-current");
+  writeFileSync(
+    join(original, "biome.json"),
+    '{\n  "files": { "includes": ["**/*.js"] },\n  "linter": { "enabled": "yes please" }\n}\n',
+  );
+
+  const r = await realRun(t, ["test", original, "--only", "lint.existing"]);
+
+  assert.equal(r.code, 1, `exit 1 for the rejected configuration\n${r.stderr}`);
+  const s = lintReport(r);
+  const exec = oneExecution(s, "lint.existing");
+  assert.deepEqual([exec.status, exec.gate], ["completed", 1]);
+  const findings = findingsOf(s, "lint.existing");
+  assert.equal(findings.length, 1, JSON.stringify(findings));
+  const f = findings[0];
+  assert.deepEqual(
+    [f?.rule_id, f?.gate, f?.severity, f?.locations[0]?.path],
+    ["biome-config-error", true, "error", "biome.json"],
+  );
+  assert.equal(f?.evidence[0]?.trust, "untrusted_data");
+  assert.ok(
+    f.evidence[0].text.includes(
+      "enabled has an incorrect type, expected a boolean, but received a string",
+    ),
+    f.evidence[0].text,
   );
   assertNothingLeft(r);
 });
