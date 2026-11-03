@@ -1,7 +1,9 @@
 // api.lint runs Redocly CLI with the structural `spec` ruleset on every
 // OpenAPI or Swagger file outside node_modules and Test data (Go:
 // api_lint.go). Errors are never Gates. A file with a remote $ref is partial,
-// because the Execution phase has no network.
+// because the Execution phase has no network. A file that Redocly cannot parse
+// but that artifacts.structured's native parser accepts is a warning, not a
+// tool error.
 import { readFileSync } from "node:fs";
 
 import type { ContainerResult } from "../docker/driver.ts";
@@ -21,6 +23,7 @@ import {
   type ParseError,
   parseStructured,
   structuredID,
+  structuredKindOf,
   structuredTargets,
 } from "./artifacts_structured.ts";
 import { type Check, register } from "./check.ts";
@@ -31,6 +34,7 @@ import { readProjectFile } from "./readcap.ts";
 import {
   RedoclyNoJSON,
   redoclyFindings,
+  redoclyParseErrorFinding,
   unparseableFinding,
 } from "./repo_findings.ts";
 import { type OpenAPITarget, openAPITargets } from "./repo_targets.ts";
@@ -204,8 +208,9 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
       );
       continue;
     }
-    // Output that is not Redocly's report is a tool problem. The one thing
-    // that blames the file is a file that the native parser of
+    // Output that is not Redocly's report is a tool problem. Two things say
+    // something about the file: Redocly's documented "Failed to parse API
+    // description" message, and a file that the native parser of
     // artifacts.structured rejects too and that is not reported there.
     const found = outputs.read(
       "redocly",
@@ -215,11 +220,27 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
         try {
           return redoclyFindings(input, target, c.stdout, c.stderr);
         } catch (err) {
-          if (!(err instanceof RedoclyNoJSON) || perr === undefined) {
+          if (!(err instanceof RedoclyNoJSON)) {
             throw err;
           }
-          // Without artifacts.structured nothing else says the file is broken.
-          return [unparseableFinding(input, target, perr, err.output)];
+          if (perr !== undefined) {
+            // Without artifacts.structured nothing else says the file is broken.
+            return [unparseableFinding(input, target, perr, err.output)];
+          }
+          if (err.parseFailure !== null) {
+            // Redocly's parser rejects a file that ours accepts: the readers
+            // disagree, which says something about the file but not that it
+            // is broken.
+            return [
+              redoclyParseErrorFinding(
+                input,
+                target,
+                err.parseFailure,
+                structuredKindOf(target.path) === "json" ? "JSON" : "YAML",
+              ),
+            ];
+          }
+          throw err;
         }
       },
       shownPath(target.path),

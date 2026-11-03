@@ -1,0 +1,6 @@
+{
+  "name": "openapi-readers-disagree",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: two OpenAPI files that the tool's own parser accepts and Redocly's parser rejects."
+}

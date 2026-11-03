@@ -9,6 +9,7 @@ import { test } from "node:test";
 
 import {
   benchmarkPart,
+  byPath,
   errorsIn,
   executionIn,
   findingsIn,
@@ -78,6 +79,75 @@ test("an unparseable OpenAPI file is an error of api.lint without a Gate when ar
   assert.equal(f.gate, false);
   assert.equal(f.evidence.length, 1);
   assert.notEqual(f.evidence[0]?.text.trim(), "");
+  assertNothingLeft(r);
+});
+
+// openapi-readers-disagree holds two files that the tool's own parsers accept
+// and Redocly's parser rejects: a double-quoted description whose second line
+// starts in column 0 (openapi.yaml, "deficient indentation") and a JSON file
+// with a duplicated key (api/legacy.json). Redocly prints its "Failed to parse
+// API description" message for both and no report.
+
+test("files that Redocly cannot read and artifacts.structured accepts are warnings of api.lint, not a tool error", async (t) => {
+  const original = copyProject(t, "openapi-readers-disagree");
+
+  const r = await realRun(t, [
+    "benchmark",
+    original,
+    "--only",
+    "artifacts.structured,api.lint",
+  ]);
+
+  assert.equal(r.code, 0, r.stderr);
+  const s = parseReport(r);
+  // The two Checks no longer contradict each other: artifacts.structured has
+  // nothing to report, and api.lint completes with a warning per file.
+  const e = executionIn(s, "api.lint");
+  assert.deepEqual(
+    [e.status, e.reason_code, e.outcome, e.gate],
+    ["completed", null, "observations_only", 0],
+    `${e.reason_code ?? ""} ${e.reason ?? ""}`,
+  );
+  assert.deepEqual(findingsIn(s, "artifacts.structured"), []);
+  assert.deepEqual(s.limitations, []);
+  assert.deepEqual(
+    s.artifacts,
+    [],
+    "no raw output is kept for a message the tool documents",
+  );
+
+  const found = findingsIn(s, "api.lint");
+  assert.deepEqual(found.map((f) => [f.locations[0]?.path, f.rule_id]).sort(), [
+    ["api/legacy.json", "redocly-parse-error"],
+    ["openapi.yaml", "redocly-parse-error"],
+  ]);
+  for (const f of found) {
+    assert.deepEqual(
+      [f.severity, f.confidence, f.gate],
+      ["warning", "likely", false],
+      f.locations[0]?.path,
+    );
+    assert.equal(f.evidence.length, 1);
+    assert.equal(f.evidence[0]?.trust, "untrusted_data");
+    assert.match(
+      f.evidence.map((e) => e.text).join("\n"),
+      /^Failed to parse API description/,
+    );
+  }
+  const yaml = byPath(found).get("openapi.yaml");
+  assert.ok(yaml);
+  assert.deepEqual(yaml.locations[0]?.start, { line: 6, column: 1 });
+  assert.match(yaml.evidence[0]?.text ?? "", /deficient indentation/);
+  assert.match(yaml.message, /YAML parser accepts the file/);
+  assert.match(yaml.message, /YAML readers disagree/);
+  const json = byPath(found).get("api/legacy.json");
+  assert.ok(json);
+  assert.match(json.evidence[0]?.text ?? "", /duplicated mapping key/);
+  assert.match(json.message, /JSON parser accepts the file/);
+
+  // Warnings are not counted by the OpenAPI part, which counts errors.
+  const openapi = benchmarkPart(s, "openapi");
+  assert.deepEqual([openapi.state, openapi.raw_value], ["measured", 0]);
   assertNothingLeft(r);
 });
 

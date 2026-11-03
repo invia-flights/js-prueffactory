@@ -29,6 +29,7 @@ import type { OpenAPITarget } from "./repo_targets.ts";
 import { snapshotMount } from "./repo_tools.ts";
 import { requireShape, shape, UnreadableOutput } from "./tool_output.ts";
 import { errorMessage } from "../gocompat/errors.ts";
+import { atoiClamped } from "../gocompat/strconv.ts";
 
 /** projectPath turns a path a tool printed into a project-relative path. */
 export function projectPath(p: string): string {
@@ -356,7 +357,13 @@ export function shellcheckFindings(
  */
 export class RedoclyNoJSON extends UnreadableOutput {
   readonly output: string;
-  constructor(output: string) {
+  /**
+   * parseFailure is Redocly's documented "Failed to parse API description"
+   * message, when that is what it printed instead of the report; null for any
+   * other output. It is the one text that blames the file.
+   */
+  readonly parseFailure: RedoclyParseFailure | null;
+  constructor(output: string, parseFailure: RedoclyParseFailure | null = null) {
     super(
       output === ""
         ? "redocly printed no JSON and nothing else"
@@ -365,7 +372,81 @@ export class RedoclyNoJSON extends UnreadableOutput {
     );
     this.name = "RedoclyNoJSON";
     this.output = output;
+    this.parseFailure = parseFailure;
   }
+}
+
+/**
+ * RedoclyParseFailure is what Redocly prints when its YAML parser cannot read
+ * the file, as 2.70.0 does on stderr with exit code 1:
+ *
+ *     validating openapi.yaml...
+ *     Failed to parse API description at openapi.yaml:
+ *
+ *       - deficient indentation in "/snapshot/openapi.yaml" (6:1)
+ */
+export interface RedoclyParseFailure {
+  /** message is the lines from the header on, as printed, cut to 400 bytes. */
+  message: string;
+  /** line and column are 1-based, 0 when the message names no position. */
+  line: number;
+  column: number;
+}
+
+const redoclyParseHeader = "Failed to parse API description";
+// The position closes the first line of the reason: (line:col).
+const redoclyPosition = /\(([0-9]+):([0-9]+)\)[.:]?$/;
+
+/**
+ * redoclyParseFailure finds Redocly's "Failed to parse API description"
+ * message in what it printed, on either stream. Any other text is not it.
+ */
+export function redoclyParseFailure(
+  ...outputs: Uint8Array[]
+): RedoclyParseFailure | null {
+  for (const out of outputs) {
+    const lines = goString(out)
+      .split("\n")
+      .map((l) => trimSpace(l))
+      .filter((l) => l !== "");
+    const at = lines.findIndex((l) => l.startsWith(redoclyParseHeader));
+    if (at < 0) {
+      continue;
+    }
+    const message = lines.slice(at);
+    const reason = message[1];
+    const m = reason === undefined ? null : redoclyPosition.exec(reason);
+    return {
+      message: cutBytes(message.join("\n"), 400),
+      line: m === null ? 0 : atoiClamped(m[1] ?? "0"),
+      column: m === null ? 0 : atoiClamped(m[2] ?? "0"),
+    };
+  }
+  return null;
+}
+
+/**
+ * redoclyParseErrorFinding is the warning for a file that Redocly cannot read
+ * and that the tool's own parser of artifacts.structured accepts: the readers
+ * disagree about the file. parser names that native parser, "YAML" or
+ * "JSON". Redocly's words are Evidence and are not repeated in the message.
+ */
+export function redoclyParseErrorFinding(
+  input: Input,
+  target: OpenAPITarget,
+  failure: RedoclyParseFailure,
+  parser: "YAML" | "JSON",
+): Finding {
+  return repoFinding(input, "api.lint", {
+    tool: "redocly",
+    rule: "redocly-parse-error",
+    level: "warning",
+    path: target.path,
+    line: failure.line,
+    column: failure.column,
+    message: `Redocly cannot parse the file, but the tool's own ${parser} parser accepts the file, so ${parser === "YAML" ? "YAML" : "JSON and YAML"} readers disagree on it`,
+    raw: failure.message,
+  });
 }
 
 /** redoclyShape is the report Redocly documents for `lint --format json`. */
@@ -516,7 +597,10 @@ export function redoclyFindings(
     };
     problems = (doc.problems?.items() ?? []) as RedoclyProblem[];
   } catch {
-    throw new RedoclyNoJSON(outputHeadBytes(stderr, stdout));
+    throw new RedoclyNoJSON(
+      outputHeadBytes(stderr, stdout),
+      redoclyParseFailure(stderr, stdout),
+    );
   }
   requireShape("redocly", stdout, redoclyShape);
   const out: Finding[] = [];
