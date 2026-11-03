@@ -24,6 +24,7 @@ import type { Input, Result } from "./input.ts";
 import { runTestSuite } from "./runtime_warnings.ts";
 import {
   noteServicesNotStarted,
+  type ServiceNeed,
   servicesOfRuns,
 } from "./service_not_started.ts";
 import type { SuiteEvents, TestRecord } from "./test_events.ts";
@@ -205,10 +206,11 @@ export class SuiteRuns {
   /** flakyKeys are the keys of the tests compare reported as Flaky tests. */
   flakyKeys = new Set<string>();
   /**
-   * mayNeed are the Services the suite may need that the Run did not start,
-   * by the marks of the runs the Check read (see servicesOfRuns).
+   * mayNeed are the Services the suite may need that the Run did not start
+   * and the Init services whose Service it may use, by the marks of the runs
+   * the Check read (see servicesOfRuns).
    */
-  mayNeed: string[] = [];
+  mayNeed: ServiceNeed[] = [];
   /**
    * serviceLimits are the Limitations for the Services of mayNeed that the
    * first run did not mark, and noted says that a Finding of the suite

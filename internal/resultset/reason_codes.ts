@@ -22,6 +22,7 @@ export const reasonCodes = [
   "generator_failed",
   "helper_failed",
   "include_not_resolved",
+  "init_service_not_started",
   "install_out_of_memory",
   "internal_error",
   "knip_failed",
