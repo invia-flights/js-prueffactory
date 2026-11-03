@@ -14,7 +14,7 @@ import { imageRef } from "../toolset/toolset.ts";
 import { tail } from "./cut_text.ts";
 import { failedToRun } from "./helper_result.ts";
 import type { Input, Result } from "./input.ts";
-import { errorMessage } from "../gocompat/errors.ts";
+import type { ToolOutputs } from "./tool_output.ts";
 
 /** filesPerContainer bounds the number of file arguments of one tool container. */
 export const filesPerContainer = 100;
@@ -104,17 +104,21 @@ export function snapshotToolContainer(
 /**
  * runChunks runs one container per chunk of items and hands each stdout to
  * handle. A tool that fails to start, or exits with a code above 1, ends the
- * Check with a Result that says so; so does a handle that throws (its message
- * becomes the reason). It returns whether every chunk was handled.
+ * Check with a Result that says so. A handle that throws means the tool's
+ * output could not be read: outputs records the call, with its raw output,
+ * and the next chunk is run. The caller finishes with outputs.apply(res),
+ * which makes the Check tool_error, or partial when some chunk was read. It
+ * returns whether every chunk was run.
  */
 export async function runChunks<T>(
   signal: AbortSignal,
   input: Input,
   res: Result,
+  outputs: ToolOutputs,
   t: PinnedTool,
   items: readonly T[],
   spec: (n: number, chunk: T[]) => ContainerSpec,
-  handle: (chunk: T[], stdout: Buffer) => void,
+  handle: (chunk: T[], c: ContainerResult) => void,
 ): Promise<boolean> {
   const docker = input.docker;
   if (docker === null) {
@@ -125,9 +129,10 @@ export async function runChunks<T>(
   let n = 0;
   for (const chunk of chunks(items, filesPerContainer)) {
     n++;
+    const container = spec(n, chunk);
     let c: ContainerResult;
     try {
-      c = await docker.runContainer(signal, spec(n, chunk));
+      c = await docker.runContainer(signal, container);
     } catch (err) {
       failedToRun(res, err);
       return false;
@@ -140,14 +145,9 @@ export async function runChunks<T>(
       res.reason = `${t.name} exited with ${String(c.exitCode)}: ${tail(goString(c.stderr), 400)}`;
       return false;
     }
-    try {
-      handle(chunk, c.stdout);
-    } catch (err) {
-      res.status = StatusToolError;
-      res.reasonCode = "tool_output_unreadable";
-      res.reason = `${errorMessage(err)} (exit ${String(c.exitCode)}): ${tail(goString(c.stderr), 400)}`;
-      return false;
-    }
+    outputs.read(t.name, container.name ?? `${t.name}-${String(n)}`, c, () => {
+      handle(chunk, c);
+    });
   }
   return true;
 }

@@ -1,5 +1,5 @@
 import { compareBytes, sortStrings } from "../gocompat/strings.ts";
-import { capEvidence, fillArtifactDigests } from "./evidence.ts";
+import { capArtifacts, capEvidence, fillArtifactDigests } from "./evidence.ts";
 import { exitCode } from "./exitcode.ts";
 import { normalize } from "./normalize.ts";
 import { canonical, derefString, sortLists } from "./order.ts";
@@ -51,6 +51,7 @@ export function sequenceID(prefix: string, n: number): string {
  */
 export function finalize(s: Set): void {
   capEvidence(s);
+  capArtifacts(s);
   movePassedTestCases(s);
   fillArtifactDigests(s);
   const execMap = sortExecutions(s);
