@@ -790,4 +790,59 @@ test("sbom.generate: a document that is read is still read, and a failing npm st
   );
 });
 
+// --- the registry data fetch (deps.outdated, deps.deprecated) ---
+
+const registryPkg = {
+  "package.json":
+    '{"name":"x","version":"1.0.0","dependencies":{"minimist":"1.2.5"}}',
+  "package-lock.json": lock,
+};
+const registryGood =
+  '{"fetched_at":"2026-11-03T00:00:00.000Z","packages":[{"name":"minimist","registry":"registry.npmjs.org","status":"ok","latest":"1.2.5","latest_deprecated":"","versions":{"1.2.5":{"deprecated":"","published":"2020-03-12T00:00:00.000Z"}}}]}';
+const registryBad: Record<string, string> = {
+  "a changed JSON shape": '{"results":[{"name":"minimist","status":"ok"}]}',
+  "packages of another type":
+    '{"fetched_at":"2026-11-03T00:00:00.000Z","packages":{"minimist":"ok"}}',
+  "answers with other keys":
+    '{"fetched_at":"2026-11-03T00:00:00.000Z","packages":[{"pkg":"minimist","state":"ok"}]}',
+  "truncated output": registryGood.slice(0, 90),
+  "plain text": "node:internal/modules/cjs/loader:1228\n  throw err;",
+};
+
+for (const check of ["deps.outdated", "deps.deprecated"]) {
+  for (const [what, out] of Object.entries(registryBad)) {
+    test(`${check}: ${what} from the registry helper is a tool problem with the raw output kept`, async (t) => {
+      const res = await runInPackage(t, check, registryPkg, () => ({
+        stdout: out,
+        stderr: "helper stderr",
+      }));
+      assertUnreadable(res, {
+        status: "tool_error",
+        check,
+        context: "C-0002",
+        call: "registry",
+        stdout: out,
+        stderr: "helper stderr",
+      });
+      assert.deepEqual(res.findings ?? [], []);
+      assert.deepEqual(res.metrics ?? [], []);
+    });
+  }
+}
+
+test("deps.outdated: an answer that is read is still read, and a helper that exits with an error stays a helper failure", async (t) => {
+  const ok = await runInPackage(t, "deps.outdated", registryPkg, () => ({
+    stdout: registryGood,
+  }));
+  assert.equal(ok.status, "completed", ok.reason ?? "");
+  const failed = await runInPackage(t, "deps.outdated", registryPkg, () => ({
+    exitCode: 1,
+    stderr: "boom",
+  }));
+  assert.deepEqual(
+    [failed.status, failed.reasonCode],
+    ["tool_error", "helper_failed"],
+  );
+});
+
 // (more adapters below)

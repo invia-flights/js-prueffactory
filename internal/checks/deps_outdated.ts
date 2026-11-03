@@ -65,7 +65,7 @@ export const depsOutdated: Check = {
   async run(signal, input) {
     const data = await registryData(signal, input);
     if (data.fail !== null) {
-      return data.failed();
+      return data.failed(depsOutdatedID, input.context.id);
     }
     const res = data.result();
     const rows = outdatedRows(data.versions, data.answers);
