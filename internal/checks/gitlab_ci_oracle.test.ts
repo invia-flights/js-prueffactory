@@ -3,7 +3,10 @@
 // Findings, Limitations and Context tool as the Go build recorded in
 // testdata/gitlab-ci-oracle.json (generator gitlab-ci-oracle.go.txt). The
 // Findings are compared as JSON, with every field: rule, location, Gate,
-// severity, message, Evidence text and fingerprint.
+// severity, message, Evidence text and fingerprint. The Go build knew
+// Gates for this Check; under execution-v2 there are none, so the recorded
+// Gate flags are read as false (see withoutGates). It knew no in_documentation
+// either: the engine sets it, so the Check's own Findings carry false.
 import assert from "node:assert/strict";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -106,6 +109,20 @@ function normalise(v: unknown): unknown {
   return v;
 }
 
+// withoutGates is what execution-v2 and the report schema 0.5.0 changed in
+// what the Go build recorded: the Check fires no Gate any more, and every
+// Finding has the flag in_documentation, which only the engine sets. Every
+// error stays an error and every note a note; only these two flags move, so
+// the rest of each record is still compared as recorded.
+function withoutGates(findings: unknown): unknown {
+  if (!Array.isArray(findings)) return findings;
+  return (findings as Record<string, unknown>[]).map((f) => ({
+    ...f,
+    gate: false,
+    in_documentation: false,
+  }));
+}
+
 // generated holds the cases whose files the oracle leaves out, built as the
 // generator builds them (zzBombs in gitlab-ci-oracle.go.txt).
 function generated(name: string): string | undefined {
@@ -192,7 +209,7 @@ describe("repository.gitlab-ci reports what the Go build reports", () => {
       ): unknown => JSON.parse(marshal(v, array(shape)));
       assert.deepEqual(
         json(res.findings ?? [], FindingShape),
-        normalise(nullToEmpty(c.findings)),
+        withoutGates(normalise(nullToEmpty(c.findings))),
       );
       assert.deepEqual(
         json(res.limitations ?? [], LimitationShape),

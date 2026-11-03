@@ -12,6 +12,10 @@ import { describe, type TestContext, test } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { tempDir } from "../../internal/cli/cli.testutil.ts";
+import {
+  type UpgradedText,
+  upgradeGoText,
+} from "../../internal/resultset/goreport.testutil.ts";
 import { minimal } from "../../internal/resultset/resultsettest/sample.testutil.ts";
 import { write } from "../../internal/writer/writer.ts";
 import { check, checkFiles, main } from "./main.ts";
@@ -105,11 +109,15 @@ function run(args: string[]): { exitCode: number; stderr: string } {
 function folder(t: TestContext, c: FolderCase): string {
   const dir = join(tempDir(t), "run");
   const base = oracle.bases[c.base];
+  // The Go build wrote the schema 0.4.0: its base Report is read as the
+  // schema 0.5.0 holds it, and the byte offsets of the cases move with it.
+  let upgraded: UpgradedText | undefined;
   if (base === undefined) {
     cpSync(join(golden, c.base), dir, { recursive: true });
   } else {
+    upgraded = upgradeGoText(base);
     mkdirSync(dir);
-    writeFileSync(join(dir, "report.json"), base);
+    writeFileSync(join(dir, "report.json"), upgraded.text);
     writeFileSync(join(dir, "report.md"), "# Report\n");
   }
   for (const op of c.ops ?? []) {
@@ -144,12 +152,13 @@ function folder(t: TestContext, c: FolderCase): string {
       }
       case "splice": {
         const data = readFileSync(path);
+        const shift = upgraded?.shift ?? ((offset: number) => offset);
         writeFileSync(
           path,
           Buffer.concat([
-            data.subarray(0, op.start),
+            data.subarray(0, shift(op.start ?? 0)),
             replacement,
-            data.subarray(op.end),
+            data.subarray(op.end === undefined ? data.length : shift(op.end)),
           ]),
         );
         break;

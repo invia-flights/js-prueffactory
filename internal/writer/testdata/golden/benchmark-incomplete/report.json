@@ -1,6 +1,6 @@
 {
   "format": "js-prueffactory.report",
-  "schema_version": "0.4.0",
+  "schema_version": "0.5.0",
   "producer": {
     "name": "js-prueffactory",
     "version": "test",
@@ -41,7 +41,7 @@
   "profiles": {
     "catalog_version": "1",
     "execution_profile": "execution-v0",
-    "benchmark_profile": "benchmark-v1-uncalibrated",
+    "benchmark_profile": "benchmark-v2-uncalibrated",
     "toolset_version": "abc"
   },
   "selection": {
@@ -168,7 +168,7 @@
   },
   "benchmark": {
     "status": "incomplete",
-    "profile_id": "benchmark-v1-uncalibrated",
+    "profile_id": "benchmark-v2-uncalibrated",
     "score": null,
     "range": {
       "low": 35,
@@ -828,9 +828,9 @@
       }
     ],
     "fingerprint": {
-      "hash": "469be09e3925",
+      "hash": "0a511154caf3",
       "fields": {
-        "profile_id": "benchmark-v1-uncalibrated",
+        "profile_id": "benchmark-v2-uncalibrated",
         "catalog_version": "1",
         "toolset_version": "abc",
         "image_digests": [
@@ -1543,6 +1543,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "mocha/no-pending-tests hit 1",
       "message": "mocha/no-pending-tests hit 1",
       "locations": [

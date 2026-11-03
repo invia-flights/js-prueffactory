@@ -12,11 +12,11 @@ import {
   executionOf,
   findingsOf,
   fullReport,
-  gatesByPath,
+  errorsByPath,
   projectTools,
 } from "./repository.testutil.ts";
 
-test("repository files are linted with their standard tools and errors are Gates", async (t) => {
+test("repository files are linted with their standard tools and errors are no Gates", async (t) => {
   // Go: TestRepositoryFilesAreLintedWithTheirStandardToolsAndErrorsAreGates
   const original = copyProject(t, "repository-files");
 
@@ -27,21 +27,23 @@ test("repository files are linted with their standard tools and errors are Gates
     "repository.dockerfile,repository.shell",
   ]);
 
-  assert.equal(r.code, 1, r.stderr);
+  assert.equal(r.code, 0, r.stderr);
   const s = fullReport(r);
   for (const id of ["repository.dockerfile", "repository.shell"]) {
     const e = executionOf(s, id);
     assert.deepEqual(
-      [e.status, e.outcome, e.context_id, e.gate > 0],
-      ["completed", "failed", "C-0001", true],
+      [e.status, e.outcome, e.context_id, e.gate],
+      ["completed", "observations_only", "C-0001", 0],
       id,
     );
     assert.ok(e.tool?.version, `${id}: tool = ${JSON.stringify(e.tool)}`);
   }
 
-  // hadolint: the error is a Gate, the warning is not, Test data is left alone.
-  const docker = gatesByPath(s, "repository.dockerfile").get("Dockerfile");
-  assert.equal(docker?.rule_id, "DL3000");
+  // hadolint: the error is an error without a Gate, the warning is a warning,
+  // Test data is left alone.
+  const docker = errorsByPath(s, "repository.dockerfile").get("Dockerfile");
+  assert.ok(docker);
+  assert.deepEqual([docker.rule_id, docker.gate], ["DL3000", false]);
   assert.equal(docker.locations[0]?.start?.line, 2);
   let warned = false;
   for (const f of findingsOf(s, "repository.dockerfile")) {
@@ -50,9 +52,9 @@ test("repository files are linted with their standard tools and errors are Gates
   }
   assert.ok(warned, "hadolint warnings are non-Gate warnings");
 
-  // ShellCheck: the parse error is a Gate. The script in the folder with glob
+  // ShellCheck: the parse error is an error without a Gate. The script in the folder with glob
   // characters is checked and only has warnings.
-  const shell = gatesByPath(s, "repository.shell");
+  const shell = errorsByPath(s, "repository.shell");
   assert.deepEqual([...shell.keys()], ["scripts/broken.sh"]);
   assert.match(shell.get("scripts/broken.sh")?.rule_id ?? "", /^SC/);
   let globFolderChecked = false;
@@ -75,7 +77,7 @@ test("repository files are linted with their standard tools and errors are Gates
   assertNothingLeft(r);
 });
 
-test("a chart that fails to render with one values file is a Gate and the default render is not", async (t) => {
+test("a chart that fails to render with one values file is an error without a Gate and the default render is not", async (t) => {
   // Go: TestAChartThatFailsToRenderWithOneValuesFileIsAGateAndTheDefaultRenderIsNot
   const original = copyProject(t, "repository-files");
 
@@ -85,21 +87,23 @@ test("a chart that fails to render with one values file is a Gate and the defaul
   const e = executionOf(s, "repository.helm");
   assert.deepEqual(
     [r.code, e.status, e.outcome, e.gate, e.context_id],
-    [1, "completed", "failed", 1, "C-0001"],
+    [0, "completed", "observations_only", 0, "C-0001"],
     e.reason ?? r.stderr,
   );
   assert.equal(e.tool?.name, "helm");
   assert.match(e.tool.version ?? "", /^3\.22\./);
-  const gates = gatesByPath(s, "repository.helm");
-  const f = gates.get("charts/web/values-broken.yaml");
-  assert.equal(gates.size, 1);
-  assert.equal(f?.rule_id, "helm.template");
+  const rendering = findingsOf(s, "repository.helm").filter(
+    (g) => g.rule_id === "helm.template",
+  );
+  const f = rendering[0];
+  assert.equal(rendering.length, 1);
+  assert.ok(f);
+  assert.equal(f.locations[0]?.path, "charts/web/values-broken.yaml");
+  assert.deepEqual([f.gate, f.severity], [false, "error"]);
   assert.match(f.evidence[0]?.text ?? "", /service/);
   for (const g of findingsOf(s, "repository.helm")) {
-    if (g.gate) {
-      assert.equal(g.locations[0]?.path, "charts/web/values-broken.yaml");
-    }
-    if (g.severity === "error" && !g.gate) {
+    assert.equal(g.gate, false, "no Finding of repository.helm is a Gate");
+    if (g.severity === "error" && g.rule_id !== "helm.template") {
       assert.equal(g.rule_id, "helm.lint");
     }
   }
@@ -144,7 +148,9 @@ test("a chart with unvendored dependencies is blocked and the other charts still
     );
   }
   assert.equal(
-    gatesByPath(s, "repository.helm").size,
+    findingsOf(s, "repository.helm").filter(
+      (f) => f.rule_id === "helm.template",
+    ).length,
     1,
     "the other chart still runs and fails once",
   );

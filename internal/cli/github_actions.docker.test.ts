@@ -12,13 +12,13 @@ import {
   executionOf,
   findingsOf,
   fullReport,
-  gatesByPath,
+  errorsByPath,
 } from "./repository.testutil.ts";
 import { writeFiles } from "../testkit/fs.testutil.ts";
 
 const id = "repository.github-actions";
 
-test("a workflow with an actionlint error fails the Run, and zizmor and ShellCheck give warnings", async (t) => {
+test("a workflow with an actionlint error is an error without a Gate, and zizmor and ShellCheck give warnings", async (t) => {
   const original = copyProject(t, "ci-files");
   const before = treeFingerprint(original);
 
@@ -26,10 +26,10 @@ test("a workflow with an actionlint error fails the Run, and zizmor and ShellChe
 
   const s = fullReport(r);
   const e = executionOf(s, id);
-  assert.equal(r.code, 1, `reason: ${e.reason ?? ""}\n${r.stderr}`);
+  assert.equal(r.code, 0, `reason: ${e.reason ?? ""}\n${r.stderr}`);
   assert.deepEqual(
     [e.status, e.outcome, e.context_id, e.gate],
-    ["completed", "failed", "C-0001", 1],
+    ["completed", "observations_only", "C-0001", 0],
     e.reason ?? "",
   );
   assert.equal(e.tool?.name, "actionlint");
@@ -51,14 +51,14 @@ test("a workflow with an actionlint error fails the Run, and zizmor and ShellChe
   const byRule = new Map(findingsOf(s, id).map((f) => [f.rule_id ?? "", f]));
   const needs = byRule.get("actionlint.job-needs");
   assert.ok(needs);
-  assert.equal(needs.gate, true);
+  assert.equal(needs.gate, false);
   assert.equal(needs.severity, "error");
   assert.equal(needs.locations[0]?.path, ".github/workflows/ci.yml");
   assert.equal(needs.evidence[0]?.trust, "untrusted_data");
   assert.ok(needs.evidence[0].text.includes("biuld"));
   assert.ok(!(needs.title + needs.message).includes("biuld"));
 
-  // ShellCheck's SC2086 comes through actionlint as a warning, not a Gate.
+  // ShellCheck's SC2086 comes through actionlint as a warning.
   const shell = byRule.get("actionlint.shellcheck");
   assert.equal(shell?.gate, false);
   assert.equal(shell.severity, "warning");
@@ -73,12 +73,12 @@ test("a workflow with an actionlint error fails the Run, and zizmor and ShellChe
       assert.equal(f.gate, false, `zizmor Finding ${f.rule_id} is a Gate`);
     }
   }
-  assert.equal(s.summary.gates, 1);
+  assert.equal(s.summary.gates, 0);
   assert.equal(treeFingerprint(original), before, "the Original changed");
   assertNothingLeft(r);
 });
 
-test("workflows that are not YAML are Gates, and zizmor having nothing to audit is no failure", async (t) => {
+test("workflows that are not YAML are errors without a Gate, and zizmor having nothing to audit is no failure", async (t) => {
   const original = copyProject(t, "ci-files");
   // Replace the workflow with one that no parser reads.
   writeFiles(original, {
@@ -89,16 +89,16 @@ test("workflows that are not YAML are Gates, and zizmor having nothing to audit 
 
   const s = fullReport(r);
   const e = executionOf(s, id);
-  assert.deepEqual([e.status, e.gate], ["completed", 1], e.reason ?? "");
+  assert.deepEqual([e.status, e.gate], ["completed", 0], e.reason ?? "");
   assert.equal(
-    gatesByPath(s, id).get(".github/workflows/ci.yml")?.rule_id,
+    errorsByPath(s, id).get(".github/workflows/ci.yml")?.rule_id,
     "actionlint.syntax-check",
   );
 });
 
 // The project's own configuration of the two tools must not be able to
 // switch off the rules that audit its workflows.
-test("the project's own tool configuration cannot switch off the Gate or the warnings", async (t) => {
+test("the project's own tool configuration cannot switch off the errors or the warnings", async (t) => {
   const original = copyProject(t, "ci-files");
   writeFiles(original, {
     ".github/actionlint.yaml":
@@ -109,7 +109,11 @@ test("the project's own tool configuration cannot switch off the Gate or the war
   const r = await realRun(t, ["test", original, "--only", id]);
 
   const s = fullReport(r);
-  assert.equal(executionOf(s, id).gate, 1);
+  assert.equal(executionOf(s, id).gate, 0);
+  assert.ok(
+    findingsOf(s, id).some((f) => f.severity === "error"),
+    "the actionlint error is still reported",
+  );
   assert.ok(
     findingsOf(s, id).some((f) => f.rule_id === "zizmor.unpinned-uses"),
     "zizmor.unpinned-uses is gone: the project's zizmor.yml was read",

@@ -58,15 +58,21 @@ async function runGitlabCI(
 
 function findings(r: GitlabRun): Finding[] {
   assert.ok(r.result, `the Check was not applicable: ${r.reason}`);
-  return r.result.findings ?? [];
+  const found = r.result.findings ?? [];
+  // execution-v2: no Finding of this Check is a Gate, whatever its severity.
+  assert.deepEqual(
+    found.filter((f) => f.gate),
+    [],
+  );
+  return found;
 }
 
 function byRule(r: GitlabRun, rule: string): Finding[] {
   return findings(r).filter((f) => f.rule_id === rule);
 }
 
-function gates(r: GitlabRun): number {
-  return findings(r).filter((f) => f.gate).length;
+function errors(r: GitlabRun): number {
+  return findings(r).filter((f) => f.severity === SeverityError).length;
 }
 
 function line(f: Finding | undefined): number | undefined {
@@ -97,12 +103,12 @@ test:
 `;
 
 describe("the Check", () => {
-  test("is a Gate Check in the validity area for the project", () => {
+  test("fires no Gates and is in the validity area, for the project", () => {
     const e = lookup(gitlabCIID);
     assert.ok(e);
     assert.equal(e.status, Implemented);
     assert.equal(e.scope, PerProject);
-    assert.equal(e.canFireGates, true);
+    assert.equal(e.canFireGates, false);
     assert.equal(e.area, "validity");
   });
 
@@ -133,7 +139,7 @@ describe("the Check", () => {
     assert.ok(schema.version.startsWith("18.5.0"));
   });
 
-  test("a schema error is a Gate at the offending line", async (t) => {
+  test("a schema error is an error without a Gate at the offending line", async (t) => {
     const r = await runGitlabCI(t, {
       ".gitlab-ci.yml": "test:\n  script: make\n  allow_failure: perhaps\n",
     });
@@ -141,8 +147,8 @@ describe("the Check", () => {
     assert.equal(got.length, 1);
     const [f] = got;
     assert.ok(f);
-    assert.equal(f.gate, true);
     assert.equal(f.severity, SeverityError);
+    assert.equal(f.gate, false);
     assert.equal(f.confidence, "confirmed");
     assert.equal(f.check_id, gitlabCIID);
     assert.equal(f.locations[0]?.path, ".gitlab-ci.yml");
@@ -161,7 +167,7 @@ describe("includes", () => {
     });
     const got = byRule(r, "gitlab-ci.schema");
     assert.equal(got.length, 1);
-    assert.equal(got[0]?.gate, true);
+    assert.equal(got[0]?.severity, SeverityError);
     assert.equal(got[0].locations[0]?.path, "ci/deploy.yml");
     assert.equal(line(got[0]), 4);
   });
@@ -189,7 +195,7 @@ describe("includes", () => {
     );
   });
 
-  test("a missing local include is a Gate at the include line", async (t) => {
+  test("a missing local include is an error at the include line", async (t) => {
     const r = await runGitlabCI(t, {
       ".gitlab-ci.yml":
         "stages: [test]\ninclude:\n  - local: ci/there.yml\n  - local: ci/missing.yml\n  - ci/nothing/*.yml\n",
@@ -197,7 +203,7 @@ describe("includes", () => {
     });
     const got = byRule(r, "gitlab-ci.include-missing");
     assert.equal(got.length, 2);
-    assert.equal(gates(r), 2);
+    assert.equal(errors(r), 2);
     assert.equal(got[0]?.locations[0]?.path, ".gitlab-ci.yml");
     assert.equal(line(got[0]), 4);
     assert.ok(got[0].message.includes("ci/missing.yml"));
@@ -263,7 +269,7 @@ test:
 `,
     });
     const notes = byRule(r, "gitlab-ci.schema");
-    assert.equal(gates(r), 0);
+    assert.equal(errors(r), 0);
     assert.equal(notes.length, 1);
     assert.equal(notes[0]?.severity, SeverityNote);
     assert.equal(line(notes[0]), 8);
@@ -316,7 +322,7 @@ test:
     });
     const got = byRule(r, "gitlab-ci.unknown-job");
     assert.equal(got.length, 3);
-    assert.equal(gates(r), 3);
+    assert.equal(errors(r), 3);
     [
       [8, ".tmeplate"],
       [9, "buidl"],
@@ -324,7 +330,7 @@ test:
     ].forEach(([l, text], i) => {
       assert.equal(line(got[i]), l);
       assert.ok(got[i]?.message.includes(String(text)));
-      assert.equal(got[i]?.gate, true);
+      assert.equal(got[i]?.severity, SeverityError);
     });
     for (const key of ["extends", "dependencies", "needs"]) {
       assert.ok(
@@ -341,7 +347,7 @@ test:
     });
     let got = byRule(r, "gitlab-ci.unknown-stage");
     assert.equal(got.length, 1);
-    assert.equal(got[0]?.gate, true);
+    assert.equal(got[0]?.severity, SeverityError);
     assert.equal(line(got[0]), 6);
     assert.ok(got[0].message.includes("deploy"));
 
@@ -369,7 +375,7 @@ build:
     });
     const got = byRule(r, "gitlab-ci.unknown-job");
     assert.equal(got.length, 3);
-    assert.equal(gates(r), 0);
+    assert.equal(errors(r), 0);
     for (const f of got) assert.equal(f.severity, SeverityNote);
     assert.equal(r.result?.limitations?.length, 1);
     assert.equal(r.result.status, StatusCompleted);
@@ -382,14 +388,14 @@ build:
     });
     let got = byRule(r, "gitlab-ci.unknown-stage");
     assert.equal(got.length, 1);
-    assert.equal(got[0]?.gate, false);
+    assert.equal(got[0]?.severity, SeverityNote);
     r = await runGitlabCI(t, {
       ".gitlab-ci.yml":
         remote + "stages: [build]\na:\n  stage: from-remote\n  script: make\n",
     });
     got = byRule(r, "gitlab-ci.unknown-stage");
     assert.equal(got.length, 1);
-    assert.equal(got[0]?.gate, true);
+    assert.equal(got[0]?.severity, SeverityError);
   });
 
   test("a missing local include does not make references notes", async (t) => {
@@ -399,7 +405,7 @@ build:
     });
     const got = byRule(r, "gitlab-ci.unknown-job");
     assert.equal(got.length, 1);
-    assert.equal(got[0]?.gate, true);
+    assert.equal(got[0]?.severity, SeverityError);
   });
 
   test("stages declared in an include count when the main file declares none", async (t) => {
@@ -551,7 +557,7 @@ describe("alias bombs", () => {
     );
     const got = byRule(r, "gitlab-ci.yaml");
     assert.equal(got.length, 1);
-    assert.equal(got[0]?.gate, true);
+    assert.equal(got[0]?.severity, SeverityError);
     assert.ok(got[0].evidence[0]?.text.includes("YAML nodes"));
   });
 

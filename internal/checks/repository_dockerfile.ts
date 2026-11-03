@@ -1,6 +1,6 @@
 // repository.dockerfile runs hadolint on every Dockerfile outside
 // node_modules and Test data (Go: repository_dockerfile.go). Error-level
-// results are Gates.
+// results are errors, never Gates.
 import { readFileSync } from "node:fs";
 
 import {

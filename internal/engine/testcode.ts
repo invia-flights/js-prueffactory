@@ -1,8 +1,10 @@
-// in_test_code of Findings (Go: testcode.go).
+// in_test_code and in_documentation of Findings (Go: testcode.go, which knew
+// no Documentation).
 import { implementation } from "../checks/check.ts";
 import { probedTestFiles } from "../checks/test_files_probe.ts";
 import {
   classify,
+  Documentation,
   type FileClass,
   type Project,
   TestCode,
@@ -12,17 +14,18 @@ import type { Finding } from "../resultset/types.ts";
 import type { RunState } from "./engine.ts";
 
 /**
- * markTestCode is the one rule behind a Finding's in_test_code: it is true
- * when the File class of the Finding's primary location is Test code,
- * whatever Check produced it. The class is the one the file list holds once
- * the files the probes found (loaded) have moved to Test code; a path in no
- * file list is classified by its folder names. The rule only ever sets the
- * flag, so a flag a Check set itself stays, and a Finding without a primary
- * location keeps false. A Check with testCodeNote gets its note appended to
- * the message of each Finding the rule finds in Test code, since only here
- * is the class known for every file.
+ * markFileClasses is the one rule behind a Finding's in_test_code and
+ * in_documentation: each is true when the File class of the Finding's
+ * primary location is Test code or Documentation, whatever Check produced
+ * the Finding. The class is the one the file list holds once the files the
+ * probes found (loaded) have moved to Test code, and the probes never move
+ * Documentation; a path in no file list is classified by its name. The rule
+ * only ever sets the flags, so a flag a Check set itself stays, and a Finding
+ * without a primary location keeps false. A Check with testCodeNote gets its
+ * note appended to the message of each Finding the rule finds in Test code,
+ * since only here is the class known for every file.
  */
-export function markTestCode(
+export function markFileClasses(
   proj: Project,
   loaded: readonly TestFile[],
   findings: Finding[],
@@ -38,6 +41,10 @@ export function markTestCode(
       continue;
     }
     const cls = classes.get(path) ?? classify(path);
+    if (cls === Documentation) {
+      f.in_documentation = true;
+      continue;
+    }
     if (cls !== TestCode) {
       continue;
     }

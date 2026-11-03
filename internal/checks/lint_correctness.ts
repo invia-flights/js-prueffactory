@@ -189,6 +189,7 @@ export function eslintHitsResult(
           tool: "eslint",
           rule: m.rule_id,
           level: level(m.rule_id),
+          gate: true,
           path: project,
           line: m.line,
           column: m.column,

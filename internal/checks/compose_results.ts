@@ -48,8 +48,8 @@ export function composeSetLabel(set: ComposeSet): string {
  * composeSetFindings reads what one `docker compose config` run of a set
  * printed. A variable that has no value is a warning, wherever compose
  * mentions it: in a warning, when it goes on with a blank string, or in an
- * error, when the entry requires it. Any other error is a Gate, and
- * compose's message goes into untrusted Evidence only.
+ * error, when the entry requires it. Any other error is an error without a
+ * Gate, and compose's message goes into untrusted Evidence only.
  */
 export function composeSetFindings(
   input: Input,
@@ -147,7 +147,6 @@ function composeInvalid(
     kind: KindDefect,
     severity: SeverityError,
     confidence: ConfidenceConfirmed,
-    gate: true,
     title: cutTitle("Invalid compose set " + label),
     message: `docker compose config rejects the compose set ${label}, so docker compose cannot start it. Compose's message is in the Evidence.`,
     locations: [input.location("primary", at, 0, 0)],

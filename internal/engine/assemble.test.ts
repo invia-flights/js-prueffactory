@@ -52,7 +52,7 @@ import { execResult, newExec } from "./execution.ts";
 import { readIsolationProbe } from "./isolation.ts";
 import { registryDataDate } from "./registrydate.ts";
 import { reportServices } from "./services.ts";
-import { markTestCode } from "./testcode.ts";
+import { markFileClasses } from "./testcode.ts";
 
 // One execution as the engine runs it, and the parts of the Report that the
 // engine assembles (Go: artifact_links_test.go, testcases_test.go,
@@ -306,7 +306,7 @@ test("every Finding whose primary location is Test code is marked", (t) => {
     findingAt("lib/gone/test/removed.js"),
     findingAt("src/index.js", "test/helper.js"),
   ];
-  markTestCode(testCodeProject(t), probedSpec, findings);
+  markFileClasses(testCodeProject(t), probedSpec, findings);
   assert.deepEqual(
     findings.map((f) => f.in_test_code),
     [true, true, true, true, false],
@@ -326,7 +326,7 @@ test("Findings outside Test code stay unmarked", (t) => {
       locations: [newLocation({ role: "related", path: "test/helper.js" })],
     }),
   ];
-  markTestCode(testCodeProject(t), probedSpec, findings);
+  markFileClasses(testCodeProject(t), probedSpec, findings);
   assert.ok(findings.every((f) => !f.in_test_code));
 });
 
@@ -334,7 +334,7 @@ test("a flag a Check set itself is never cleared", (t) => {
   // Go: TestAFlagACheckSetItselfIsNeverCleared
   const f = findingAt("src/index.js");
   f.in_test_code = true;
-  markTestCode(testCodeProject(t), [], [f]);
+  markFileClasses(testCodeProject(t), [], [f]);
   assert.ok(f.in_test_code);
 });
 
@@ -358,7 +358,7 @@ test("a secret in Test code says the value may be made up", (t) => {
     secretAt(".env"),
     lint,
   ];
-  markTestCode(testCodeProject(t), probedSpec, findings);
+  markFileClasses(testCodeProject(t), probedSpec, findings);
   assert.deepEqual(
     findings.map((f) => f.message.endsWith(" " + note)),
     [true, true, false, false, false, false],
@@ -385,7 +385,7 @@ test("a typed lint hit in a probed spec is Test code and leaves the Typed lint p
       false,
       atPath("src/a.spec.js"),
     );
-    markTestCode(testCodeProject(t), probed, p.set.findings);
+    markFileClasses(testCodeProject(t), probed, p.set.findings);
     const s = p.done();
     applyBenchmark(s);
     return s.benchmark.areas
@@ -515,6 +515,54 @@ test("Services of several suites are merged with the worst status", () => {
     ],
   );
   assert.match(limits[0]?.message ?? "", /postgres:12/);
+});
+
+test("an Init service is listed as not started, with the Service it prepares and its command", () => {
+  const proj = new Project("/demo");
+  proj.services = [
+    compose({
+      name: "postgres",
+      family: "postgres",
+      declared: "postgres:17-alpine",
+    }),
+    compose({
+      name: "migrate",
+      build: true,
+      notStarted: {
+        code: "build_section",
+        reason: "the service has a build section",
+      },
+    }),
+    compose({
+      name: "other",
+      build: true,
+      notStarted: {
+        code: "build_section",
+        reason: "the service has a build section",
+      },
+    }),
+  ];
+  proj.initServices = [
+    {
+      name: "migrate",
+      file: "docker-compose.yml",
+      command: "npm run migrate",
+      prepares: ["postgres"],
+      criteria: ["build_section"],
+      package: "",
+    },
+  ];
+
+  const [services] = reportServices([], proj);
+
+  const migrate = services.find((s) => s.compose_service === "migrate");
+  assert.equal(migrate?.status, ServiceNotStarted);
+  assert.equal(
+    migrate.reason,
+    "the service has a build section; it is an Init service that prepares postgres (command npm run migrate), so the Suites that may use postgres are marked init_service_not_started and their failed tests and hooks are not Gates",
+  );
+  const other = services.find((s) => s.compose_service === "other");
+  assert.equal(other?.reason, "the service has a build section");
 });
 
 // --- registry data date (Go: registry_date_test.go) ---

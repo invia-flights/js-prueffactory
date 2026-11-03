@@ -28,6 +28,7 @@ import { shorten } from "./cut_text.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
 import { selected } from "./selection.ts";
 import {
+  initServiceNotStarted,
   noteServicesNotStarted,
   serviceNotStarted,
 } from "./service_not_started.ts";
@@ -146,9 +147,13 @@ export const runtimeWarnings: Check = {
     }
     // A run that did not complete keeps its status, and whatever it printed
     // before it ended still counts. The partial status of a package with a
-    // suite that may need a Service the Run did not start is about the Pass
-    // rate, which this Check does not report, so it does not carry over.
-    if (raw.reasonCode !== serviceNotStarted) {
+    // suite that may need a Service the Run did not start (or that an Init
+    // service prepares) is about the Pass rate, which this Check does not
+    // report, so it does not carry over.
+    if (
+      raw.reasonCode !== serviceNotStarted &&
+      raw.reasonCode !== initServiceNotStarted
+    ) {
       out.status = raw.status;
       out.reasonCode = raw.reasonCode ?? "";
       out.reason = raw.reason ?? "";

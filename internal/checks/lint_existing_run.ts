@@ -273,8 +273,10 @@ export function joinCommands(commands: string[][]): string[] {
 }
 
 /**
- * capFindings keeps at most max findings, and every Gate before any other
- * finding. It returns how many it left out.
+ * capFindings keeps at most max findings: every Gate first, then every other
+ * error, then the rest. An error outside Source code is no Gate but still
+ * counts in the Project linter part, so it must not be cut before a warning.
+ * It returns how many it left out.
  */
 export function capFindings(
   findings: Finding[],
@@ -283,9 +285,10 @@ export function capFindings(
   if (findings.length <= max) {
     return [findings, 0];
   }
-  const gates = findings.filter((f) => f.gate);
-  const rest = findings.filter((f) => !f.gate);
-  return [[...gates, ...rest].slice(0, max), findings.length - max];
+  const rank = (f: Finding): number =>
+    f.gate ? 0 : f.severity === SeverityError ? 1 : 2;
+  const ordered = findings.toSorted((a, b) => rank(a) - rank(b));
+  return [ordered.slice(0, max), findings.length - max];
 }
 
 /**

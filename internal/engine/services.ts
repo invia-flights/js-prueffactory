@@ -1,6 +1,15 @@
 // The test Services in the Preparation phase and in the Report (Go:
 // services.go).
-import { type Project, startable } from "../discovery/discovery.ts";
+import {
+  initServiceNotStarted,
+  shownService,
+} from "../checks/service_not_started.ts";
+import { shownCommand } from "../checks/shown_text.ts";
+import {
+  type InitService,
+  type Project,
+  startable,
+} from "../discovery/discovery.ts";
 import { sortStrings } from "../gocompat/strings.ts";
 import type { Limitation, Service } from "../resultset/types.ts";
 import {
@@ -87,6 +96,7 @@ export function reportServices(
 
   const services: Service[] = [];
   const limits: Limitation[] = [];
+  const inits = new Map(proj.initServices.map((i) => [i.name, i]));
   for (const sv of merged.values()) {
     sortStrings(sv.context_ids);
     services.push(sv);
@@ -112,9 +122,7 @@ export function reportServices(
       declared_image: s.declared,
       context_ids: [],
       status: ServiceNotStarted,
-      reason:
-        s.notStarted?.reason ??
-        "no test suite ran in this Run, so the Service was not needed",
+      reason: notStartedReason(s.notStarted?.reason, inits.get(s.name)),
     });
   }
   for (const p of proj.composeProblems) {
@@ -126,4 +134,24 @@ export function reportServices(
     });
   }
   return [services, limits];
+}
+
+/**
+ * notStartedReason says why the Run did not start a compose service. An Init
+ * service also says which Service it prepares and what that does to the
+ * suites that may use it, so that the Services list shows it for what it is.
+ */
+function notStartedReason(
+  reason: string | undefined,
+  init: InitService | undefined,
+): string {
+  const why =
+    reason ?? "no test suite ran in this Run, so the Service was not needed";
+  if (init === undefined) {
+    return why;
+  }
+  const prepares = init.prepares.map(shownService).join(", ");
+  const command =
+    init.command === "" ? "" : ` (command ${shownCommand(init.command)})`;
+  return `${why}; it is an Init service that prepares ${prepares}${command}, so the Suites that may use ${init.prepares.length > 1 ? "them" : prepares} are marked ${initServiceNotStarted} and their failed tests and hooks are not Gates`;
 }

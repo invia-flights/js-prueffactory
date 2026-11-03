@@ -1,6 +1,6 @@
 {
   "format": "js-prueffactory.report",
-  "schema_version": "0.4.0",
+  "schema_version": "0.5.0",
   "producer": {
     "name": "js-prueffactory",
     "version": "test",
@@ -41,7 +41,7 @@
   "profiles": {
     "catalog_version": "1",
     "execution_profile": "execution-v0",
-    "benchmark_profile": "benchmark-v1-uncalibrated",
+    "benchmark_profile": "benchmark-v2-uncalibrated",
     "toolset_version": "abc"
   },
   "selection": {
@@ -167,7 +167,7 @@
   },
   "benchmark": {
     "status": "computed",
-    "profile_id": "benchmark-v1-uncalibrated",
+    "profile_id": "benchmark-v2-uncalibrated",
     "score": 80.6,
     "range": {
       "low": 80.6,
@@ -827,9 +827,9 @@
       }
     ],
     "fingerprint": {
-      "hash": "469be09e3925",
+      "hash": "0a511154caf3",
       "fields": {
-        "profile_id": "benchmark-v1-uncalibrated",
+        "profile_id": "benchmark-v2-uncalibrated",
         "catalog_version": "1",
         "toolset_version": "abc",
         "image_digests": [
@@ -1549,6 +1549,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "no-undef hit 4",
       "message": "no-undef hit 4",
       "locations": [
@@ -1600,6 +1601,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "no-undef hit 5",
       "message": "no-undef hit 5",
       "locations": [
@@ -1651,6 +1653,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "no-undef hit 6",
       "message": "no-undef hit 6",
       "locations": [
@@ -1702,6 +1705,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "no-undef hit 7",
       "message": "no-undef hit 7",
       "locations": [
@@ -1753,6 +1757,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "GHSA-high hit 1",
       "message": "GHSA-high hit 1",
       "locations": [
@@ -1821,6 +1826,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "GHSA-mod-1 hit 2",
       "message": "GHSA-mod-1 hit 2",
       "locations": [
@@ -1889,6 +1895,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "GHSA-mod-2 hit 3",
       "message": "GHSA-mod-2 hit 3",
       "locations": [

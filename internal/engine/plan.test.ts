@@ -88,6 +88,21 @@ test("a package Check that reads File classes waits for its own install only", (
   }
 });
 
+test("lint.existing waits for its own install only, since its Gate depends on the File class", (t) => {
+  // Not in the Go build: lint.existing fires Gates only in Source code under
+  // execution-v2, and a file a test runner loads is Test code after the probe.
+  const all = plannedFor(probeProject(t));
+  const got = new Map<string, string[]>();
+  for (const p of executionsOf(all, "lint.existing")) {
+    got.set(p.context.package?.path ?? "", waitsOf(p));
+  }
+  assert.deepEqual(got.get("."), ["."]);
+  assert.deepEqual(got.get("api"), ["api"]);
+  for (const path of ["docs", "pnpm", "unsupported"]) {
+    assert.deepEqual(got.get(path), [], path);
+  }
+});
+
 test("Checks that do not read File classes do not wait", (t) => {
   // Go: TestChecksThatDoNotReadFileClassesDoNotWait
   const all = plannedFor(probeProject(t));
@@ -95,7 +110,6 @@ test("Checks that do not read File classes do not wait", (t) => {
     "syntax.parse",
     "package.manifest",
     "security.secrets",
-    "lint.existing",
     "repository.dockerfile",
     "package.install",
   ]) {

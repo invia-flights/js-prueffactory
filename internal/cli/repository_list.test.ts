@@ -6,10 +6,11 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { describe, test, type TestContext } from "node:test";
 
-import { tempDir } from "./cli.testutil.ts";
+import { call, tempDir } from "./cli.testutil.ts";
 import {
   applicabilityAt,
   listChecksJSON,
+  noDockerEnv,
   rowOf,
   testdataProject,
 } from "./listchecks.testutil.ts";
@@ -156,4 +157,49 @@ describe("repository.gitlab-ci", () => {
     assert.equal(got, "not_applicable");
     assert.notEqual(reason, "");
   });
+});
+
+// The nine Checks that never fire Gates under execution-v2: the files they
+// examine (API descriptions, JSON Schema files, pipeline and deployment
+// files) do not run in the service.
+const neverGates = [
+  "api.lint",
+  "schema.compile",
+  "repository.dockerfile",
+  "repository.shell",
+  "repository.helm",
+  "repository.gitlab-ci",
+  "repository.kubernetes",
+  "repository.compose",
+  "repository.github-actions",
+];
+
+describe("the Checks that never fire Gates", () => {
+  for (const name of ["ci-files", "repository-files"]) {
+    test(`list-checks says no in both formats: ${name}`, async (t) => {
+      const dir = testdataProject(name);
+      const l = await listChecksJSON(t, dir, "--format", "json");
+      for (const id of neverGates) {
+        assert.equal(rowOf(l, id).can_fire_gates, false, `json ${id}`);
+      }
+      // lint.existing still can: errors in Source code are Gates.
+      assert.equal(rowOf(l, "lint.existing").can_fire_gates, true);
+
+      const md = await call(noDockerEnv(t), "list-checks", dir);
+      assert.equal(md.code, 0, md.stderr);
+      const lines = md.stdout.split("\n");
+      const header = lines.find((x) => x.startsWith("| Check")) ?? "";
+      const column = header.split("|").map((c) => c.trim()).indexOf("Can fire Gates"); // prettier-ignore
+      assert.ok(column > 0, `no Can fire Gates column in ${header}`);
+      const cell = (id: string): string | undefined =>
+        lines
+          .find((x) => x.startsWith("| `" + id + "` |"))
+          ?.split("|")
+          .map((c) => c.trim())[column];
+      for (const id of neverGates) {
+        assert.equal(cell(id), "no", `markdown ${id}`);
+      }
+      assert.equal(cell("lint.existing"), "yes");
+    });
+  }
 });

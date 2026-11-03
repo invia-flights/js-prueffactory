@@ -1,6 +1,6 @@
 {
   "format": "js-prueffactory.report",
-  "schema_version": "0.4.0",
+  "schema_version": "0.5.0",
   "producer": {
     "name": "js-prueffactory",
     "version": "test",
@@ -208,6 +208,7 @@
       "gate": true,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 0",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -259,6 +260,7 @@
       "gate": true,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 1",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -310,6 +312,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 2",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -361,6 +364,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 3",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -412,6 +416,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 4",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -463,6 +468,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 5",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -514,6 +520,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 6",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -565,6 +572,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 7",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -616,6 +624,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 8",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -667,6 +676,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 9",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -718,6 +728,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 10",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -769,6 +780,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 11",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -820,6 +832,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 12",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -871,6 +884,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 13",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -922,6 +936,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 14",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -973,6 +988,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 15",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1024,6 +1040,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 16",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1075,6 +1092,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 17",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1126,6 +1144,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 18",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1177,6 +1196,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 19",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1228,6 +1248,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 20",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1279,6 +1300,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 21",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1330,6 +1352,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 22",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1381,6 +1404,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 23",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1432,6 +1456,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 24",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1483,6 +1508,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 25",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1534,6 +1560,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 26",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1585,6 +1612,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 27",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1636,6 +1664,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 28",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1687,6 +1716,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 29",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1738,6 +1768,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 30",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1789,6 +1820,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 31",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1840,6 +1872,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 32",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1891,6 +1924,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 33",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1942,6 +1976,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 34",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -1993,6 +2028,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 35",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2044,6 +2080,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 36",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2095,6 +2132,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 37",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2146,6 +2184,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 38",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2197,6 +2236,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 39",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2248,6 +2288,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 40",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2299,6 +2340,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 41",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2350,6 +2392,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 42",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2401,6 +2444,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 43",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2452,6 +2496,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 44",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2503,6 +2548,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 45",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2554,6 +2600,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 46",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2605,6 +2652,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 47",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2656,6 +2704,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 48",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2707,6 +2756,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 49",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2758,6 +2808,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 50",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2809,6 +2860,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 51",
       "message": "node --check reports a syntax error in this file.",
       "locations": [
@@ -2860,6 +2912,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "Problem 52",
       "message": "node --check reports a syntax error in this file.",
       "locations": [

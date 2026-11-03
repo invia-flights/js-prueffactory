@@ -14,13 +14,13 @@ import { array, marshal } from "../gocompat/json.ts";
 import { parseLock } from "../lockfile/lockfile.ts";
 import {
   type Finding,
-  FindingShape,
   type Limitation,
   LimitationShape,
   type Metric,
   MetricShape,
   TrustUntrusted,
 } from "../resultset/types.ts";
+import { GoFindingShape } from "../resultset/goreport.testutil.ts";
 import { writeFiles } from "../testkit/fs.testutil.ts";
 import { impl, tempDir } from "./checks.testutil.ts";
 import { Input } from "./input.ts";
@@ -107,8 +107,9 @@ function lockOf(entries: string) {
   );
 }
 
+// The Go build knew no in_documentation: Findings are written as it wrote them.
 const findingsJSON = (fs: readonly Finding[]): string =>
-  marshal(fs, array(FindingShape));
+  marshal(fs, array(GoFindingShape));
 
 // Go writes names, hosts and values of the project raw into the title and
 // message of a Finding, and the port shows the unusual ones as placeholders

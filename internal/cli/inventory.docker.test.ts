@@ -75,7 +75,9 @@ test("the Report carries size, suppressions and hashes in the Inventory", async 
   );
 
   const sizes = new Map(inv.size.map((x) => [`${x.group}|${x.name}`, x.lines]));
-  assert.equal(sizes.get("file_class|source"), 47);
+  assert.equal(sizes.get("file_class|source"), 44);
+  // README.md is Documentation, a class of its own.
+  assert.equal(sizes.get("file_class|documentation"), 3);
   assert.equal(sizes.get("extension|.js"), 33);
 
   assert.ok(

@@ -33,11 +33,11 @@ import { newShared } from "./shared.ts";
 
 const v2Chart = "apiVersion: v2\nname: app\nversion: 0.1.0\n";
 
-test("repository.helm is implemented and can fire Gates", () => {
+test("repository.helm is implemented and fires no Gates", () => {
   const entry = lookup("repository.helm");
   assert.equal(entry?.status, Implemented);
   assert.equal(entry.scope, PerProject);
-  assert.equal(entry.canFireGates, true);
+  assert.equal(entry.canFireGates, false);
 });
 
 test("every folder with a Chart.yaml is a chart outside node_modules and Test data", (t) => {
@@ -209,7 +209,7 @@ test("a lint message line keeps carriage returns and line separators inside it",
   );
 });
 
-test("a chart that fails to render is a Gate", (t) => {
+test("a chart that fails to render is an error without a Gate", (t) => {
   const input = repoInput(t, {
     "web/Chart.yaml": v2Chart,
     "web/values-prod.yaml": "a: 1\n",
@@ -227,7 +227,7 @@ test("a chart that fails to render is a Gate", (t) => {
     "Error: boom\n",
   );
   for (const f of [def, prod]) {
-    assert.equal(f.gate, true);
+    assert.equal(f.gate, false);
     assert.equal(f.severity, SeverityError);
     assert.equal(f.confidence, ConfidenceConfirmed);
     assert.equal(f.kind, KindDefect);

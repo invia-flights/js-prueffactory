@@ -186,7 +186,7 @@ test("the Markdown shows score, Verdict, areas, parts and fingerprint", () => {
   const got = benchmarkSection(s);
   assert.ok(s.benchmark.fingerprint);
   assertIncludesAll(got, [
-    "benchmark-v1-uncalibrated",
+    "benchmark-v2-uncalibrated",
     "uncalibrated",
     "**Score: 93.9 of 100**",
     "Verdict: **pass**",

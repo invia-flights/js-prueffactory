@@ -14,6 +14,7 @@ import { fileOf, project, tempDir } from "./discovery.testutil.ts";
 import {
   BuildOutput,
   discover,
+  Documentation,
   type FileClass,
   folderNames,
   Source,
@@ -35,10 +36,11 @@ test("folderNames lists the folders of a File class, sorted byte-wise", () => {
     "test",
     "tests",
   ]);
+  assert.deepEqual(folderNames(Documentation), ["doc", "docs"]);
   assert.deepEqual(folderNames(Source), []);
 });
 
-test("files get their File class from folder names and the .min.js suffix", () => {
+test("files get their File class from folder names, the extension and the .min.js suffix", () => {
   const want: Record<string, FileClass> = {
     "src/app.js": Source,
     "index.js": Source,
@@ -54,7 +56,12 @@ test("files get their File class from folder names and the .min.js suffix", () =
     "build/out.js": BuildOutput,
     "coverage/lcov-report/x.js": BuildOutput,
     "public/vendor.min.js": BuildOutput,
-    "README.md": Source,
+    "README.md": Documentation,
+    "docs/api/openapi.yaml": Documentation,
+    "docs/example.js": Source, // code below docs stays code
+    "test/notes.md": Documentation, // prose is never loaded by a runner
+    "fixtures/docs/broken.json": TestData, // Test data wins
+    "dist/docs/guide.md": BuildOutput, // Build output wins
     "scripts/docker/Dockerfile": Source,
     "tester/not-a-test-folder.js": Source,
     "src/fixtures-like/not-data.js": Source,

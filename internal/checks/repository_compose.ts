@@ -2,9 +2,9 @@
 // `docker compose config -q`, the way compose merges the files of a set (Go:
 // repository_compose.go). The project's .env file is read, because the
 // Snapshot is the working directory, and no environment variable of the host
-// is passed. A set that compose rejects is a Gate, unless the only trouble is
-// a variable without a value: that is a warning, so a variable that a CI
-// system sets does not fail the Run.
+// is passed. A set that compose rejects is an error, never a Gate, unless the
+// only trouble is a variable without a value: that is a warning, since a CI
+// system may set it.
 //
 // compose runs in the official Docker CLI image, which holds the compose
 // plugin and needs no daemon, with the Snapshot read-only on the Run's

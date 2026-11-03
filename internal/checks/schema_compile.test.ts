@@ -37,7 +37,7 @@ test("schema.compile is implemented for the project Context", () => {
   assert.ok(e);
   assert.equal(e.status, Implemented);
   assert.equal(e.scope, PerProject);
-  assert.equal(e.canFireGates, true);
+  assert.equal(e.canFireGates, false);
 });
 
 test("every JSON or YAML file whose top-level $schema names a known draft is a target", (t) => {
@@ -190,7 +190,7 @@ function result(
   return { path, draft, lax: null, strict: null, remote: [], ...fields };
 }
 
-test("a compile failure is a Gate and a strict-mode-only problem is a warning", (t) => {
+test("a compile failure is an error without a Gate and a strict-mode-only problem is a warning", (t) => {
   const [input] = schemaInput(t, {
     "broken.json": draft07,
     "loose.json": draft07,
@@ -220,7 +220,7 @@ test("a compile failure is a Gate and a strict-mode-only problem is a warning", 
   const gate = byPath.get("broken.json");
   assert.deepEqual(
     [gate?.gate, gate?.severity, gate?.confidence, gate?.rule_id],
-    [true, "error", "confirmed", "unresolved-ref"],
+    [false, "error", "confirmed", "unresolved-ref"],
   );
   assert.notEqual(gate?.locations[0]?.file_sha256, "");
   assert.equal(gate?.evidence.length, 1);

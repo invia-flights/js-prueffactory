@@ -106,7 +106,7 @@ class Resolver {
         gitlabFinding(this.input, {
           rule: ruleGitlabYAML,
           path: rel,
-          gate: !inTestData,
+          error: !inTestData,
           inTestData,
           title: "GitLab CI file does not parse",
           message: inTestData
@@ -203,7 +203,7 @@ class Resolver {
           path: from.path,
           line: pos.line,
           column: pos.column,
-          gate: true,
+          error: true,
           title: "Local include does not exist",
           key: value,
           message: `The local include ${shownGlob(value)} matches no file of the project, so GitLab rejects the pipeline.`,

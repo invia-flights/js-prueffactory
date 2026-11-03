@@ -56,7 +56,7 @@ function ghaInput(): Input {
 
 const bytes = (s: string): Buffer => Buffer.from(s);
 
-test("actionlint Findings from ShellCheck and pyflakes are warnings and the rest are Gates", () => {
+test("actionlint Findings from ShellCheck and pyflakes are warnings and the rest are errors, none a Gate", () => {
   const got = actionlintFindings(ghaInput(), bytes(actionlintOutput));
   assert.equal(got.length, 5);
   const want = new Map<string, [boolean, Severity]>([
@@ -69,7 +69,7 @@ test("actionlint Findings from ShellCheck and pyflakes are warnings and the rest
   for (const f of got) {
     const w = want.get(f.rule_id ?? "");
     assert.ok(w, f.rule_id ?? "");
-    assert.equal(f.gate, w[0]);
+    assert.equal(f.gate, false);
     assert.equal(f.severity, w[1]);
     assert.equal(f.check_id, "repository.github-actions");
     assert.equal(f.confidence, w[0] ? ConfidenceConfirmed : ConfidenceLikely);

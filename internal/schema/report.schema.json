@@ -12,7 +12,7 @@
   ],
   "properties": {
     "format": { "const": "js-prueffactory.report" },
-    "schema_version": { "const": "0.4.0" },
+    "schema_version": { "const": "0.5.0" },
     "producer": {
       "type": "object", "additionalProperties": false,
       "required": ["name", "version", "vcs_revision"],
@@ -593,7 +593,7 @@
       "type": "object", "additionalProperties": false,
       "required": [
         "id", "check_id", "execution_id", "context_id", "rule_id", "fingerprint", "kind", "severity",
-        "confidence", "gate", "in_test_data", "in_test_code", "title", "message", "locations", "expected", "actual",
+        "confidence", "gate", "in_test_data", "in_test_code", "in_documentation", "title", "message", "locations", "expected", "actual",
         "evidence", "reproduction", "limitations", "suite"
       ],
       "properties": {
@@ -621,6 +621,10 @@
         "in_test_code": {
           "type": "boolean",
           "description": "True when the File class of the primary location is Test code, whatever Check produced the Finding: a file the test file probe found the runner loads, or a file in a folder named test, tests, __tests__ or spec that is not Test data or Build output. False for a Finding without a file location."
+        },
+        "in_documentation": {
+          "type": "boolean",
+          "description": "True when the File class of the primary location is Documentation, whatever Check produced the Finding: a file with the extension .md, .mdx, .markdown, .rst, .adoc or .txt anywhere, or a file below a folder named docs or doc that is not JavaScript or TypeScript, unless it is Test data or Build output. False for a Finding without a file location."
         },
         "suite": { "type": ["string", "null"], "minLength": 1 },
         "title": { "type": "string" },

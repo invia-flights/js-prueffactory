@@ -5,6 +5,7 @@ import { describe, test } from "node:test";
 import { apply } from "../benchmark/score.ts";
 import { marshal } from "../gocompat/json.ts";
 import { goldenScored } from "../resultset/helpers.testutil.ts";
+import { upgradeGoDocument } from "../resultset/goreport.testutil.ts";
 import { populated } from "../resultset/resultsettest/populated.testutil.ts";
 import {
   type Project,
@@ -60,7 +61,9 @@ function baseDoc(name: string): unknown {
   }
   const base = oracle.bases[name];
   assert.ok(base !== undefined, `no base ${name}`);
-  return JSON.parse(base);
+  // The Go build wrote the schema 0.4.0: read its Report as the schema 0.5.0
+  // holds it, so every problem the oracle names is still the one found.
+  return upgradeGoDocument(JSON.parse(base));
 }
 
 function applyOp(doc: unknown, op: Op): unknown {
@@ -178,6 +181,58 @@ test("the schema rejects unknown fields everywhere", () => {
   assert.ok(finding);
   finding.surprise = true;
   assert.notDeepEqual(validate(Buffer.from(JSON.stringify(doc))), []);
+});
+
+// The schema 0.5.0 gives every Finding a boolean in_documentation.
+describe("in_documentation is a required boolean of every Finding", () => {
+  const withFinding = (change: (f: Record<string, unknown>) => void): Buffer => {
+    const doc = JSON.parse(reportBytes(populated()).toString("utf8")) as {
+      findings: Record<string, unknown>[];
+    };
+    const finding = doc.findings[0];
+    assert.ok(finding);
+    assert.equal(finding.in_documentation, false);
+    change(finding);
+    return Buffer.from(JSON.stringify(doc));
+  };
+  test("a Finding without it is rejected", () => {
+    const problems = validate(
+      withFinding((f) => {
+        delete f.in_documentation;
+      }),
+    );
+    assert.ok(
+      problems.some((p) => p.includes("in_documentation")),
+      problems.join("\n"),
+    );
+  });
+  test("a Finding with another type is rejected", () => {
+    assert.notDeepEqual(
+      validate(
+        withFinding((f) => {
+          f.in_documentation = "yes";
+        }),
+      ),
+      [],
+    );
+  });
+  test("true is valid", () => {
+    assert.deepEqual(
+      validate(
+        withFinding((f) => {
+          f.in_documentation = true;
+        }),
+      ),
+      [],
+    );
+  });
+  test("a Report of the schema 0.4.0 is rejected", () => {
+    const doc = JSON.parse(reportBytes(populated()).toString("utf8")) as {
+      schema_version: string;
+    };
+    doc.schema_version = "0.4.0";
+    assert.notDeepEqual(validate(Buffer.from(JSON.stringify(doc))), []);
+  });
 });
 
 // Go: TestABenchmarkReportWithEveryStateIsValid.

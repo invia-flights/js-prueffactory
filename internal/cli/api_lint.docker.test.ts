@@ -9,6 +9,7 @@ import { test } from "node:test";
 
 import {
   benchmarkPart,
+  errorsIn,
   executionIn,
   findingsIn,
   gatesIn,
@@ -59,45 +60,47 @@ test("an unparseable OpenAPI file is one Gate of artifacts.structured and api.li
   assertNothingLeft(r);
 });
 
-test("an unparseable OpenAPI file is a Gate of api.lint when artifacts.structured is not selected", async (t) => {
+test("an unparseable OpenAPI file is an error of api.lint without a Gate when artifacts.structured is not selected", async (t) => {
   const original = copyProject(t, "unparseable-openapi");
 
   const r = await realRun(t, ["test", original, "--only", "api.lint"]);
 
-  assert.equal(r.code, 1, r.stderr);
+  assert.equal(r.code, 0, r.stderr);
   const s = parseReport(r);
   const e = executionIn(s, "api.lint");
   assert.deepEqual(
     [e.status, e.outcome, e.gate],
-    ["completed", "failed", 1],
+    ["completed", "observations_only", 0],
     `${e.reason_code ?? ""} ${e.reason ?? ""}`,
   );
-  const f = gatesIn(s, "api.lint").get("openapi.yaml");
+  const f = errorsIn(s, "api.lint").get("openapi.yaml");
   assert.equal(f?.rule_id, "unparseable");
+  assert.equal(f.gate, false);
   assert.equal(f.evidence.length, 1);
   assert.notEqual(f.evidence[0]?.text.trim(), "");
   assertNothingLeft(r);
 });
 
-test("repository OpenAPI files are linted with Redocly and errors are Gates", async (t) => {
+test("repository OpenAPI files are linted with Redocly and errors are no Gates", async (t) => {
   // Go: the api.lint part of TestRepositoryFilesAreLintedWithTheirStandardToolsAndErrorsAreGates
   const original = copyProject(t, "repository-files");
 
   const r = await realRun(t, ["test", original, "--only", "api.lint"]);
 
-  assert.equal(r.code, 1, r.stderr);
+  assert.equal(r.code, 0, r.stderr);
   const s = parseReport(r);
   const e = executionIn(s, "api.lint");
   assert.deepEqual(
-    [e.status, e.outcome, e.context_id, e.gate > 0],
-    ["completed", "failed", "C-0001", true],
+    [e.status, e.outcome, e.context_id, e.gate],
+    ["completed", "observations_only", "C-0001", 0],
   );
   assert.ok(e.tool?.version, JSON.stringify(e.tool));
 
-  // The invalid file in a folder with glob characters is a Gate, the valid
-  // file is clean and Test data is left alone.
-  const gates = gatesIn(s, "api.lint");
-  assert.equal(gates.get("api [v1] {draft}*/openapi.yaml")?.rule_id, "struct");
+  // The invalid file in a folder with glob characters is an error without a
+  // Gate, the valid file is clean and Test data is left alone.
+  const bad = errorsIn(s, "api.lint").get("api [v1] {draft}*/openapi.yaml");
+  assert.deepEqual([bad?.rule_id, bad?.gate], ["struct", false]);
+  assert.equal(gatesIn(s, "api.lint").size, 0);
   for (const f of findingsIn(s, "api.lint")) {
     assert.equal(f.locations[0]?.path, "api [v1] {draft}*/openapi.yaml");
   }
