@@ -68,7 +68,7 @@ const skippedByFast = new Set(["tests.mutation", "api.fuzz", "api.dast"]);
 
 // The 29 milestone-1 Checks first, in the order milestone 1 shipped them,
 // followed by the Checks of later milestones.
-const table: readonly Meta[] = [
+const table = [
   ["package.manifest", "package.json and lockfile are readable and consistent; package manager detected", PerPackage, true, AreaValidity],
   ["artifacts.structured", "Every JSON and YAML file parses", PerProject, true, AreaValidity],
   ["syntax.parse", "Every .js, .cjs and .mjs file parses on the package's Node version", PerPackage, true, AreaValidity],
@@ -120,7 +120,10 @@ const table: readonly Meta[] = [
   ["api.fuzz", "API fuzzing", PerProject, false, AreaNone],
   ["api.dast", "Dynamic application security testing", PerProject, false, AreaNone],
   ["sbom.generate", "CycloneDX SBOM of the locked dependencies", PerPackage, false, AreaNone],
-]; // prettier-ignore
+]as const satisfies readonly Meta[]; // prettier-ignore
+
+/** CheckId is the ID of one Check of the Catalog. */
+export type CheckId = (typeof table)[number][0];
 
 function entryOf([id, description, scope, gates, area]: Meta): Entry {
   const dot = id.indexOf(".");

@@ -4,8 +4,7 @@
 // numbers were counted with wc, grep and shasum, not with the code under test
 // (Go: inventory_checks_test.go).
 import assert from "node:assert/strict";
-import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { test, type TestContext } from "node:test";
 
 import { discover } from "../discovery/discovery.ts";
@@ -18,6 +17,7 @@ import "./all.ts";
 import { Implemented, lookup, PerProject } from "./catalog.ts";
 import { impl, projectContext, runCheck, tempDir } from "./checks.testutil.ts";
 import { Input, type Result } from "./input.ts";
+import { writeFiles } from "../testkit/fs.testutil.ts";
 
 const suppressionsProject = join(
   import.meta.dirname,
@@ -43,14 +43,6 @@ async function runNativeCheck(id: string, root: string): Promise<Result> {
   );
   assert.equal(res.status, StatusCompleted, `${id}: ${res.reason ?? ""}`);
   return res;
-}
-
-function writeFiles(root: string, files: Record<string, string>): void {
-  for (const [rel, content] of Object.entries(files)) {
-    const p = join(root, rel);
-    mkdirSync(dirname(p), { recursive: true });
-    writeFileSync(p, content);
-  }
 }
 
 /** project writes files below a new folder. */

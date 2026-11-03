@@ -37,14 +37,26 @@ const FULL = 'application/json';
 // --- .npmrc ---
 
 function interpolate(value) {
+  // Each ${name} is found without a pattern that starts at every backslash:
+  // a long run of backslashes would make that quadratic. The backslashes in
+  // front of a match are counted by walking back from it.
   let missing = false;
-  const text = value.replace(/(\\*)\$\{([^}]+)\}/g, (all, slashes, name) => {
-    if (slashes.length % 2) return all.slice(slashes.length - 1);
-    const v = process.env[name];
-    if (v === undefined) { missing = true; return ''; }
-    return slashes.slice(slashes.length / 2) + v;
-  });
-  return missing ? null : text;
+  let out = '';
+  let from = 0;
+  const reference = /\$\{([^}]+)\}/g;
+  let m;
+  while ((m = reference.exec(value)) !== null) {
+    let slashes = 0;
+    while (m.index - slashes > from && value[m.index - slashes - 1] === '\\') slashes++;
+    out += value.slice(from, m.index - slashes);
+    from = m.index + m[0].length;
+    if (slashes % 2) { out += '\\' + m[0]; continue; }
+    const v = process.env[m[1]];
+    if (v === undefined) { missing = true; continue; }
+    out += '\\'.repeat(slashes / 2) + v;
+  }
+  out += value.slice(from);
+  return missing ? null : out;
 }
 
 function parseNpmrc(text) {
@@ -92,7 +104,7 @@ function credentials(registryUrl) {
     const pass = npmrc.get(nerf + ':_password');
     if (user && pass) return 'Basic ' + Buffer.from(user + ':' + Buffer.from(pass, 'base64').toString('utf8')).toString('base64');
     if (path === '/' || path === '') break;
-    path = path.replace(/[^/]*\/$/, '');
+    if (path.endsWith('/')) path = path.slice(0, (path.length >= 2 ? path.lastIndexOf('/', path.length - 2) : -1) + 1);
     if (path === '') path = '/';
   }
   const token = npmrc.get('_authToken');

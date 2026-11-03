@@ -14,6 +14,7 @@ import {
   fields,
   sortStrings,
   trimRight,
+  trimQuotes,
   trimSpace,
 } from "../gocompat/strings.ts";
 import { type Schema, unmarshal } from "../gocompat/unmarshal.ts";
@@ -33,15 +34,6 @@ export const envAssignment = /^[A-Za-z_][A-Za-z0-9_]*=/;
 
 /** commandSeparators are the shell operators that start a new command. */
 const commandSeparators = /&&|\|\||[;|()`\n]/;
-
-/** trimQuotes is strings.Trim(w, `"'`). */
-function trimQuotes(w: string): string {
-  let start = 0;
-  let end = w.length;
-  while (start < end && (w[start] === '"' || w[start] === "'")) start++;
-  while (end > start && (w[end - 1] === '"' || w[end - 1] === "'")) end--;
-  return w.slice(start, end);
-}
 
 /**
  * commandWords splits a command line into the words of each command in it,

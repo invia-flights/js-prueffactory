@@ -3,8 +3,8 @@
 // testdata/security-oracle.go.txt. Byte strings hold one character per byte;
 // file contents are base64.
 import assert from "node:assert/strict";
-import { mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { readFileSync, symlinkSync } from "node:fs";
+import { join } from "node:path";
 import { PassThrough } from "node:stream";
 import { buffer } from "node:stream/consumers";
 import { describe, test, type TestContext } from "node:test";
@@ -21,6 +21,7 @@ import {
   MetricShape,
   TrustUntrusted,
 } from "../resultset/types.ts";
+import { writeFiles } from "../testkit/fs.testutil.ts";
 import { impl, tempDir } from "./checks.testutil.ts";
 import { Input } from "./input.ts";
 import {
@@ -39,17 +40,18 @@ import {
   severityScore,
   severityWord,
 } from "./security_dependencies_osv.ts";
+import { patternsIgnoreLines } from "./security_patterns_ignore.ts";
 import {
   hasRegexWithOpener,
-  njsscanArgs,
-  njsscanReport,
-  patternsFiles,
-  patternsIgnoreLines,
-  patternsRulesHash,
   rewriteCommentOpeners,
-  semgrepArgs,
-  semgrepReport,
   writePatternsTar,
+} from "./security_patterns_opener.ts";
+import { njsscanReport, semgrepReport } from "./security_patterns_reports.ts";
+import { patternsFiles } from "./security_patterns_scope.ts";
+import {
+  njsscanArgs,
+  patternsRulesHash,
+  semgrepArgs,
 } from "./security_patterns.ts";
 
 const oracle = JSON.parse(
@@ -62,24 +64,26 @@ const oracle = JSON.parse(
 const bytes = (s: string): Buffer => Buffer.from(s, "latin1");
 
 // writeFiles writes files given as base64 below a new folder.
-function writeFiles(t: TestContext, files: Record<string, string>): string {
+function writeFilesBase64(
+  t: TestContext,
+  files: Record<string, string>,
+): string {
   const dir = tempDir(t);
-  for (const [name, b64] of Object.entries(files)) {
-    writeFile(join(dir, name), Buffer.from(b64, "base64"));
-  }
+  writeFiles(
+    dir,
+    Object.fromEntries(
+      Object.entries(files).map(([name, b64]) => [
+        name,
+        Buffer.from(b64, "base64"),
+      ]),
+    ),
+  );
   return dir;
-}
-
-function writeFile(p: string, data: Buffer): void {
-  mkdirSync(dirname(p), { recursive: true });
-  writeFileSync(p, data);
 }
 
 function writePlain(t: TestContext, files: Record<string, string>): string {
   const dir = tempDir(t);
-  for (const [name, content] of Object.entries(files)) {
-    writeFile(join(dir, name), Buffer.from(content, "utf8"));
-  }
+  writeFiles(dir, files);
   return dir;
 }
 
@@ -329,7 +333,7 @@ const hardenedProjects = new Set([
 describe("Go parity: the native lockfile Checks", () => {
   for (const n of oracle.native as Native[]) {
     test(`${n.check} on ${n.project.name}`, async (t) => {
-      const dir = writeFiles(t, n.project.files);
+      const dir = writeFilesBase64(t, n.project.files);
       const input = inputAt(dir, n.package);
       const res = await impl(n.check).run(new AbortController().signal, input);
       assert.ok(res);
@@ -404,7 +408,7 @@ test("Go parity: the ignore comments the engines honor", (t) => {
     nosemgrep: string[];
     candidates: string[];
   };
-  const input = inputAt(writeFiles(t, ignore.files), ".");
+  const input = inputAt(writeFilesBase64(t, ignore.files), ".");
   const pkg = input.context.package;
   assert.ok(pkg);
   assert.deepEqual(patternsFiles(pkg), ignore.candidates);
@@ -427,7 +431,7 @@ describe("Go parity: the njsscan and semgrep reports", () => {
     }[]
   ).entries()) {
     test(`${String(i)}: ${r.tool} in ${r.package}: ${r.report.slice(0, 40)}`, (t) => {
-      const input = inputAt(writeFiles(t, files), r.package);
+      const input = inputAt(writeFilesBase64(t, files), r.package);
       let got: [Finding[], string[]];
       try {
         got =
@@ -458,7 +462,7 @@ describe("Go parity: the tar copy of a package's Source code", () => {
     rewritten: { oversized: string[] | null; bytes: string };
   };
   const setup = (t: TestContext): Input => {
-    const dir = writeFiles(t, tar.files);
+    const dir = writeFilesBase64(t, tar.files);
     symlinkSync(join(dir, tar.symlink[1]), join(dir, tar.symlink[0]));
     return inputAt(dir, ".");
   };

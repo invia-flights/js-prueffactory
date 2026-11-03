@@ -38,6 +38,7 @@ test("register refuses an ID outside the Catalog and a second registration", () 
   const check = fake();
   assert.throws(
     () => {
+      // @ts-expect-error a typo in an ID does not compile; the runtime check is for callers that cast
       register("tests.exsting", fake());
     },
     { message: 'checks: "tests.exsting" is not in the Catalog' },

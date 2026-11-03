@@ -1,15 +1,6 @@
 // Helpers of the Check tests: a project written to a temporary folder and
 // discovered the way the engine discovers the Snapshot.
 import assert from "node:assert/strict";
-import {
-  mkdirSync,
-  mkdtempSync,
-  realpathSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
 import type { TestContext } from "node:test";
 
 import { type Context, discover, Project } from "../discovery/discovery.ts";
@@ -17,15 +8,9 @@ import { newContext } from "../resultset/zero.ts";
 import "./all.ts";
 import { type Check, implementation } from "./check.ts";
 import { Input, type Result } from "./input.ts";
+import { tempDir, writeFiles } from "../testkit/fs.testutil.ts";
 
-/** tempDir is a temporary folder, removed when the test ends. */
-export function tempDir(t: TestContext): string {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), "jspf-checks-")));
-  t.after(() => {
-    rmSync(dir, { recursive: true, force: true });
-  });
-  return dir;
-}
+export { tempDir };
 
 /** writeTree writes files (path -> content) below a new folder. */
 export function writeTree(
@@ -33,11 +18,7 @@ export function writeTree(
   files: Record<string, string>,
 ): string {
   const root = tempDir(t);
-  for (const [rel, content] of Object.entries(files)) {
-    const p = join(root, rel);
-    mkdirSync(dirname(p), { recursive: true });
-    writeFileSync(p, content);
-  }
+  writeFiles(root, files);
   return root;
 }
 

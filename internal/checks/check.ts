@@ -18,7 +18,7 @@
 import type { Context, Project } from "../discovery/discovery.ts";
 import { quote } from "../gocompat/fmt.ts";
 import type { Applicability, Finding } from "../resultset/types.ts";
-import { lookup } from "./catalog.ts";
+import { type CheckId, lookup } from "./catalog.ts";
 import type { Input, Result } from "./input.ts";
 import { registry } from "./registry.ts";
 
@@ -106,11 +106,11 @@ export interface Check {
 }
 
 /**
- * register makes an implementation of a Catalog Check available. It throws
- * for an ID that is not in the Catalog or is registered twice, because both
- * are programming errors found by any test run.
+ * register makes an implementation of a Catalog Check available. An ID that
+ * is not in the Catalog does not compile. It throws for one that is
+ * registered twice, a programming error found by any test run.
  */
-export function register(id: string, c: Check): void {
+export function register(id: CheckId, c: Check): void {
   if (lookup(id) === undefined) {
     throw new Error(`checks: ${quote(id)} is not in the Catalog`);
   }

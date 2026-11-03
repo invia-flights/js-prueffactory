@@ -121,7 +121,7 @@ async function compile(target, strict) {
   const doc = JSON.parse(JSON.stringify(target.schema));
   const ownId = typeof doc[key] === 'string' && doc[key] !== '' ? doc[key] : null;
   if (!ownId) doc[key] = fileURI(target.path);
-  const base = ownId ? ownId.replace(/[^/]*$/, '') : '';
+  const base = ownId ? ownId.slice(0, ownId.lastIndexOf('/') + 1) : '';
   const written = new Set(refStrings(target.schema, []).filter(isAbsolute).map(canon));
 
   const loadSchema = async (uri) => {

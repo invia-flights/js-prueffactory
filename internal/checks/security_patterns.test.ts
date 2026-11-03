@@ -17,17 +17,21 @@ import { readTar } from "../tarwriter/tar.testutil.ts";
 import { writeTree } from "./checks.testutil.ts";
 import { Input } from "./input.ts";
 import {
-  addFindingsOf,
   ignoreDirectives,
+  patternsIgnoreLines,
+} from "./security_patterns_ignore.ts";
+import {
+  addFindingsOf,
+  patternsRetryFiles,
+  rewriteCommentOpeners,
+  writePatternsTar,
+} from "./security_patterns_opener.ts";
+import {
   mergeOverlappingHits,
   njsscanReport,
   patternFinding,
-  patternsIgnoreLines,
-  patternsRetryFiles,
-  rewriteCommentOpeners,
   semgrepReport,
-  writePatternsTar,
-} from "./security_patterns.ts";
+} from "./security_patterns_reports.ts";
 
 function patternsInput(
   t: TestContext,

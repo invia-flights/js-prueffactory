@@ -280,3 +280,8 @@ export function trimLeft(s: string, cutset: string): string {
 export function trim(s: string, cutset: string): string {
   return trimLeft(trimRight(s, cutset), cutset);
 }
+
+/** trimQuotes is Go's strings.Trim(s, `"'`). */
+export function trimQuotes(s: string): string {
+  return trim(s, "\"'");
+}

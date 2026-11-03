@@ -9,7 +9,7 @@ import { join as joinPath, resolve } from "node:path";
 import type { Context } from "../discovery/discovery.ts";
 import { quoteJSONString } from "../gocompat/json.ts";
 import { join } from "../gocompat/path.ts";
-import { compareBytes, toLower } from "../gocompat/strings.ts";
+import { compareBytes, toLower, trimQuotes } from "../gocompat/strings.ts";
 import { toByteString } from "../gocompat/neturl.ts";
 import { goString, trimSpaceBytes } from "../gocompat/utf8.ts";
 import { NPM } from "../lockfile/detect.ts";
@@ -272,15 +272,6 @@ export function trimSpaceByteString(s: string): string {
   return Buffer.from(trimSpaceBytes(Buffer.from(s, "latin1"))).toString(
     "latin1",
   );
-}
-
-// trimQuotes is strings.Trim(s, `"'`).
-function trimQuotes(s: string): string {
-  let start = 0;
-  let end = s.length;
-  while (start < end && (s[start] === '"' || s[start] === "'")) start++;
-  while (end > start && (s[end - 1] === '"' || s[end - 1] === "'")) end--;
-  return s.slice(start, end);
 }
 
 /**
