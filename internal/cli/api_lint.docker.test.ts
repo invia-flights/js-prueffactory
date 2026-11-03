@@ -3,7 +3,7 @@
 // repository_files_docker_test.go). The Go tests run the default Selection;
 // these select api.lint, and artifacts.structured where it matters.
 import assert from "node:assert/strict";
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
@@ -280,6 +280,18 @@ test("api.lint lints a 3.0 template and a Swagger 2.0 file without paths as frag
   for (const f of findingsIn(s, "api.lint")) {
     assert.doesNotMatch(f.message, /`paths`/, f.message);
   }
+
+  // report.md lists each Limitation with the file it names.
+  const md = readFileSync(join(r.reportDir, "report.md"), "utf8");
+  for (const file of ["legacy.yaml", "template.yaml"]) {
+    assert.ok(
+      md.includes(
+        `- Limitation \`openapi_fragment\` in \`api.lint\` at \`${file}\`: `,
+      ),
+      `report.md lacks the Limitation for ${file}`,
+    );
+  }
+  assert.equal(md.match(/^- Limitation `openapi_fragment`/gm)?.length, 2);
 
   // The Original stays as it was; the copies live in a Docker volume of the
   // Run that goes away with it.
