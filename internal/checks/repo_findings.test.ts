@@ -169,6 +169,32 @@ test("Redocly structural errors are errors without a Gate", (t) => {
   assert.deepEqual([w?.gate, w?.severity], [false, SeverityWarning]);
 });
 
+// Redocly reports a field that the specification does not list as a struct
+// error. No version of the OpenAPI text forbids one, and 3.1 lets a Schema
+// Object carry them, so it is a warning; a missing REQUIRED field stays an
+// error.
+const redoclyUnknownProperty = `{"totals":{"errors":2,"warnings":0,"ignored":0},"version":"2.70.0","problems":[
+{"ruleId":"struct","severity":"error","message":"Property \`myKeyword\` is not expected here.","location":[{"source":{"ref":"api.yaml"},"pointer":"#/paths/~1a/get/responses/200/content/application~1json/schema/myKeyword","reportOnKey":true,"start":{"line":16,"col":17},"end":{"line":16,"col":26}}],"suggest":[]},
+{"ruleId":"struct","severity":"error","message":"The field \`version\` must be present on this level.","location":[{"source":{"ref":"api.yaml"},"pointer":"#/info","reportOnKey":true,"start":{"line":2,"col":1},"end":{"line":2,"col":5}}],"suggest":[]}]}`;
+
+test("Redocly's struct error for a field the specification does not list is a warning, a missing REQUIRED field stays an error", (t) => {
+  const input = repoInput(t, { "api.yaml": "openapi: 3.0.0\n" });
+  const got = redoclyFindings(
+    input,
+    { path: "api.yaml", remoteRef: false },
+    Buffer.from(redoclyUnknownProperty),
+    new Uint8Array(),
+  );
+  assert.deepEqual(
+    got.map((f) => [f.rule_id, f.severity, f.confidence, f.gate]),
+    [
+      ["struct", SeverityWarning, "likely", false],
+      ["struct", SeverityError, "confirmed", false],
+    ],
+  );
+  assert.deepEqual(got[0]?.locations[0]?.start, { line: 16, column: 17 });
+});
+
 test("Redocly unresolved remote refs are dropped only for files with remote refs", (t) => {
   const input = repoInput(t, { "remote.yaml": "openapi: 3.0.0\n" });
   const out = Buffer.from(redoclyRemoteRef);

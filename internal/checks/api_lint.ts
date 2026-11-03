@@ -1,7 +1,9 @@
-// api.lint runs Redocly CLI with the structural `spec` ruleset on every
-// OpenAPI or Swagger file outside node_modules and Test data (Go:
-// api_lint.go). Errors are never Gates. A file with a remote $ref is partial,
-// because the Execution phase has no network.
+// api.lint runs Redocly CLI with the pinned configuration (its `spec` ruleset,
+// audited against the OpenAPI text: config/redocly.yaml) on every OpenAPI or
+// Swagger file outside node_modules and Test data (Go: api_lint.go). Only a
+// rule that the specification requires reports errors, and errors are never
+// Gates. A file with a remote $ref is partial, because the Execution phase has
+// no network.
 import { readFileSync } from "node:fs";
 
 import type { ContainerResult } from "../docker/driver.ts";

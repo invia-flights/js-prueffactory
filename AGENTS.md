@@ -32,6 +32,12 @@ pre-commit run --all-files                 # every hook on every file, as CI run
 - `README.md` is the user guide: what the current build does and how to read its Report. Give each implemented Check one table row. Versions, part constants and the Catalog live in `internal/toolset/`, `internal/benchmark/profile.ts` and `list-checks`; link there.
 - The `go-*.json` and `*-oracle.json` files under `testdata/` folders are answers recorded from the last Go build and are the oracles of the tests that name them. Their generators (`*.go.txt`) need the Go sources of commit `238e07f66d8cafab24ef363cb79e207bd48babd8`. Keep them; an entry for a file that no longer exists may be dropped, nothing else edited by hand. [ADR-0005](docs/adr/0005-typescript-on-node.md) has the background.
 
+## Bumping a pinned tool
+
+Edit the tag or URL in `internal/toolset/`, run `node dev/toolsetupdate/main.ts` and review the diff, then run the tests that name the tool. One tool has more to do:
+
+- Redocly (`api.lint`): repeat the audit in `internal/checks/config/redocly.yaml` for every rule that the new version adds to its `spec` ruleset and for every OpenAPI version it newly supports. Read the specification text of each version the rule applies to. A rule stays `error` only next to a quoted sentence with MUST, MUST NOT, REQUIRED or SHALL that demands what the rule checks; every other rule is `warn` with a `no requirement:` comment. Set the rule in every version block (a version's setting wins over `rules:`), check by hand that each severity comes out as written, record the audit table in the ticket or pull request, then change the `audited-for-redocly` line: `internal/checks/redocly_config.test.ts` fails until it names the pinned version.
+
 ## Agent skills
 
 ### Issue tracker

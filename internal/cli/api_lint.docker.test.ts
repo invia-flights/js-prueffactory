@@ -98,8 +98,13 @@ test("repository OpenAPI files are linted with Redocly and errors are no Gates",
 
   // The invalid file in a folder with glob characters is an error without a
   // Gate, the valid file is clean and Test data is left alone.
+  // Reviewed against the audited rules (config/redocly.yaml): the file has no
+  // info.version, which every OpenAPI version marks REQUIRED, so `struct`
+  // stays the one error, and nothing else is reported for the file.
   const bad = errorsIn(s, "api.lint").get("api [v1] {draft}*/openapi.yaml");
   assert.deepEqual([bad?.rule_id, bad?.gate], ["struct", false]);
+  assert.match(bad?.message ?? "", /`version` must be present/);
+  assert.equal(findingsIn(s, "api.lint").length, 1);
   assert.equal(gatesIn(s, "api.lint").size, 0);
   for (const f of findingsIn(s, "api.lint")) {
     assert.equal(f.locations[0]?.path, "api [v1] {draft}*/openapi.yaml");
@@ -109,6 +114,42 @@ test("repository OpenAPI files are linted with Redocly and errors are no Gates",
   );
   assert.ok(redocly?.version);
   assert.match(redocly.digest ?? "", /^sha256:/);
+  assertNothingLeft(r);
+});
+
+test("api.lint reports only what the OpenAPI text requires as an error, and the rest as warnings", async (t) => {
+  // openapi-beyond-spec has `nullable: true` without `type`, a query string
+  // in a path key and a path parameter that no parameter defines. The first
+  // two are not invalid by the OpenAPI 3.0 text; the third breaks a MUST.
+  const original = copyProject(t, "openapi-beyond-spec");
+
+  const r = await realRun(t, ["benchmark", original, "--only", "api.lint"]);
+
+  assert.equal(r.code, 0, r.stderr);
+  const s = parseReport(r);
+  const e = executionIn(s, "api.lint");
+  assert.deepEqual(
+    [e.status, e.outcome, e.gate],
+    ["completed", "observations_only", 0],
+    `${e.reason_code ?? ""} ${e.reason ?? ""}`,
+  );
+  const found = findingsIn(s, "api.lint");
+  const summary = found
+    .map((f) => [f.rule_id, f.severity, f.gate, f.locations[0]?.path])
+    .sort();
+  assert.deepEqual(summary, [
+    ["nullable-type-sibling", "warning", false, "openapi.yaml"],
+    ["path-not-include-query", "warning", false, "openapi.yaml"],
+    ["path-parameters-defined", "error", false, "openapi.yaml"],
+  ]);
+  const error = found.find((f) => f.severity === "error");
+  assert.match(error?.message ?? "", /orderId/);
+  assert.equal(gatesIn(s, "api.lint").size, 0);
+  assert.equal(s.summary.gates, 0);
+
+  // The OpenAPI part counts the error and leaves the warnings out.
+  const part = benchmarkPart(s, "openapi");
+  assert.deepEqual([part.state, part.raw_value], ["measured", 1]);
   assertNothingLeft(r);
 });
 
