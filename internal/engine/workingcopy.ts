@@ -3,10 +3,7 @@ import { NetworkNone } from "../docker/driver.ts";
 import { trimSpace } from "../gocompat/strings.ts";
 import { goString } from "../gocompat/utf8.ts";
 import type { RunState } from "./engine.ts";
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
+import { errorMessage } from "../gocompat/errors.ts";
 
 /**
  * makeWorkingCopy creates the Working copy: a second run-owned volume
@@ -42,7 +39,7 @@ export async function makeWorkingCopy(
       ],
     });
   } catch (err) {
-    throw new Error(`cannot create the Working copy: ${message(err)}`, {
+    throw new Error(`cannot create the Working copy: ${errorMessage(err)}`, {
       cause: err,
     });
   }

@@ -6,6 +6,7 @@ import {
   Applicable,
   type Applicability,
   NotApplicable,
+  StatusCompleted,
   Unknown,
 } from "../resultset/types.ts";
 import { PerPackage, PerProject } from "./catalog.ts";
@@ -19,6 +20,7 @@ function fakeCheck(table: Record<string, Applicability> = {}): Check {
       const a = table[c.id];
       return a === undefined ? [Applicable, ""] : [a, "reason for " + c.id];
     },
+    run: () => Promise.resolve({ status: StatusCompleted }),
   };
 }
 

@@ -19,6 +19,7 @@ import { formatFloatV } from "../gocompat/fmt.ts";
 import { englishFloat, englishInt, goQuote } from "../schema/validator.ts";
 import { formats } from "./format.ts";
 import { type Matcher, re2 } from "../gocompat/regexp.ts";
+import { unescapePointerToken } from "../gocompat/jsonpointer.ts";
 
 export type Value =
   null | boolean | string | number | bigint | Value[] | Map<string, Value>;
@@ -93,10 +94,6 @@ function isObject(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
-function unescapeToken(t: string): string {
-  return t.replaceAll("~1", "/").replaceAll("~0", "~");
-}
-
 /** CompiledSchema validates values against a compiled draft-07 schema. */
 export class CompiledSchema {
   readonly #root: Schema;
@@ -135,7 +132,7 @@ export function compile(doc: JSONDoc): CompiledSchema {
     let node: unknown = doc;
     if (pointer === "") return node;
     for (const raw of pointer.slice(1).split("/")) {
-      const tok = unescapeToken(decodeURIComponent(raw));
+      const tok = unescapePointerToken(decodeURIComponent(raw));
       if (Array.isArray(node)) node = node[Number(tok)];
       else if (isObject(node)) node = node[tok];
       else node = undefined;

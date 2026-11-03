@@ -43,8 +43,9 @@ import { type Input, type Result, untrusted } from "./input.ts";
 import {
   shownCommand,
   shownGlobbedPath,
+  shownPath,
   shownSpecifier,
-} from "./module_names.ts";
+} from "./shown_text.ts";
 import {
   entryPointsLookedFor,
   productionEntryPoints,
@@ -60,9 +61,12 @@ import {
   unsupportedInstallReason,
   workPath,
 } from "./package_install.ts";
-import { toolContainer, toolImage, toolRun } from "./quality_unused.ts";
+import {
+  workingCopyToolContainer,
+  toolImage,
+  toolRun,
+} from "./quality_unused.ts";
 import { lstatRegular, maxProjectFileBytes, readCapped } from "./readcap.ts";
-import { shownPath } from "./shown_text.ts";
 
 export const cyclesID = "modules.cycles";
 
@@ -316,7 +320,7 @@ async function runCycles(signal: AbortSignal, input: Input): Promise<Result> {
   try {
     c = await docker.runContainer(
       signal,
-      toolContainer(
+      workingCopyToolContainer(
         input,
         "cruise",
         res.command ?? [],

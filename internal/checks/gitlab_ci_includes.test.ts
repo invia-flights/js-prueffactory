@@ -75,7 +75,6 @@ test("a too large include glob ends the Check like Go's panic did", async (t) =>
   const proj = tree(t, {
     ".gitlab-ci.yml": `include:\n  - local: '${"*a".repeat(1118480)}'\ntest:\n  script: make\n`,
   });
-  assert.ok(gitlabCI.run !== undefined);
   await assert.rejects(
     gitlabCI.run(
       background(),

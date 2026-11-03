@@ -31,6 +31,7 @@ import {
 import { dependencyLockfile } from "./security_dependencies.ts";
 import { packageName } from "./security_dependencies_osv.ts";
 import { oneLine } from "./test_report.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const sbomGenerateID = "sbom.generate";
 
@@ -161,7 +162,7 @@ export const sbomGenerate: Check = {
     } catch (err) {
       res.status = StatusToolError;
       res.reasonCode = "sbom_unreadable";
-      res.reason = err instanceof Error ? err.message : String(err);
+      res.reason = errorMessage(err);
       return res;
     }
 

@@ -42,8 +42,8 @@ test("a cache volume the Go build created is found and reused, not replaced", as
   }
   // A Run that starts while this test runs removes the toolset volumes of
   // other versions, unless they are in use (the Go build does the same at
-  // the start of a Run). Hold the volume until the end of the test, so that
-  // the tests of internal/cli, which run at the same time, leave it alone.
+  // the start of a Run). The file is serial, so no Run of internal/cli
+  // overlaps; the hold keeps the volume in use for the assertions below.
   await d.hold(never, "toolset-hold", image, toolsetName, "/toolset");
   for (const v of [name, toolsetName]) {
     const r = docker(

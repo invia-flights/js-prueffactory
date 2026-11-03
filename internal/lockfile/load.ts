@@ -5,11 +5,12 @@ import type { Lock } from "./lockfile.ts";
 import { parseLock, SyntaxError, UnsupportedVersionError } from "./lockfile.ts";
 import type { Manifest } from "./manifest.ts";
 import { parseManifest } from "./manifest.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 // Unsupported says why the lockfile of a package cannot be used by the
 // lockfile-based native Checks. code is a stable reason code for the Report.
 export interface Unsupported {
-  readonly code: string;
+  readonly code: ReasonCode;
   readonly reason: string;
 }
 

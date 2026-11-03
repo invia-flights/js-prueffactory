@@ -10,7 +10,7 @@ import { base, ext } from "../gocompat/path.ts";
 import { fields } from "../gocompat/strings.ts";
 import { type Schema, unmarshal } from "../gocompat/unmarshal.ts";
 import { goString } from "../gocompat/utf8.ts";
-import { lstatRegular, readUpTo } from "./readcap.ts";
+import { readRegular as readSafely } from "../safefile/safefile.ts";
 
 /**
  * maxOpenAPIBytes is the size above which a YAML or JSON file is not read to
@@ -41,15 +41,8 @@ export function readRegular(
   rel: string,
   n: number,
 ): Uint8Array | undefined {
-  const full = join(root, rel);
-  if (lstatRegular(full) === undefined) {
-    return undefined;
-  }
-  try {
-    return readUpTo(full, n);
-  } catch {
-    return undefined;
-  }
+  const r = readSafely(join(root, rel), { limit: n, over: "truncate" });
+  return r.kind === "ok" ? r.data : undefined;
 }
 
 /**

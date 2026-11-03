@@ -4,7 +4,7 @@ import { symlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { Project } from "../discovery/discovery.ts";
+import { discover, Project } from "../discovery/discovery.ts";
 import { tempDir, writeTree } from "./checks.testutil.ts";
 import { Input } from "./input.ts";
 import { maxProjectFileBytes } from "./readcap.ts";
@@ -47,4 +47,18 @@ test("location and reproduction", (t) => {
     test: null,
     verified_by: ["x.y"],
   });
+});
+
+test("pkg is the package of a package Context and throws for the project Context", (t) => {
+  const dir = writeTree(t, { "package.json": "{}" });
+  const proj = discover(dir);
+  const pkgContext = proj.contexts.find((c) => c.kind === "package");
+  const projectContext = proj.contexts.find((c) => c.kind === "project");
+  assert.ok(pkgContext?.package);
+  assert.ok(projectContext);
+
+  const inPackage = new Input({ project: proj, context: pkgContext });
+  assert.equal(inPackage.pkg(), pkgContext.package);
+  const inProject = new Input({ project: proj, context: projectContext });
+  assert.throws(() => inProject.pkg(), /C-0001 is not a package Context/);
 });

@@ -131,8 +131,3 @@ export function joinErrors(errs: readonly Error[]): Error | undefined {
   }
   return new AggregateError(errs, errs.map((e) => e.message).join("\n"));
 }
-
-// errorMessage is the message of a thrown value.
-export function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}

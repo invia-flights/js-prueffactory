@@ -72,6 +72,31 @@ export function atoi(s: string): bigint | undefined {
 }
 
 /**
+ * atoiClamped is strconv.Atoi of a run of ASCII digits with the error
+ * ignored: a number that does not fit is the largest int64, which a
+ * JavaScript number holds rounded up. Unlike atoiOrZero it never gives 0
+ * for a large value.
+ */
+export function atoiClamped(digits: string): number {
+  const max = (1n << 63n) - 1n;
+  const n = BigInt(digits);
+  return Number(n <= max ? n : max);
+}
+
+/**
+ * atoiOrZero is strconv.Atoi with the error dropped, as a JavaScript number:
+ * 0 for anything that is not a decimal integer, and for one beyond 2^53
+ * (unlike atoiClamped, which clamps).
+ */
+export function atoiOrZero(s: string): number {
+  if (!/^[+-]?\d+$/.test(s)) {
+    return 0;
+  }
+  const n = Number(s);
+  return Number.isSafeInteger(n) ? n : 0;
+}
+
+/**
  * parseFloat is Go's strconv.ParseFloat(s, 64). It returns undefined where Go
  * returns an error: text that is no Go float literal over its whole length
  * (decimal, or hex with a p exponent; underscores between digits; "inf",

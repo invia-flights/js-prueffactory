@@ -8,10 +8,7 @@ import { serviceImages } from "./services.ts";
 import { prepareAdvisoryDB } from "./advisorydb.ts";
 import { prepareToolset } from "./toolset.ts";
 import { makeWorkingCopy } from "./workingcopy.ts";
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
+import { errorMessage } from "../gocompat/errors.ts";
 
 /**
  * prepare is the Preparation phase for the Execution phase's containers: it
@@ -60,9 +57,12 @@ export async function prepare(r: RunState, signal: AbortSignal): Promise<void> {
   try {
     await drv.putTar(signal, r.volume, refs[0] ?? "", (w) => snap.writeTar(w));
   } catch (err) {
-    throw new Error(`cannot stream the Snapshot into Docker: ${message(err)}`, {
-      cause: err,
-    });
+    throw new Error(
+      `cannot stream the Snapshot into Docker: ${errorMessage(err)}`,
+      {
+        cause: err,
+      },
+    );
   }
   if (workImage !== "") {
     await makeWorkingCopy(r, signal, workImage);

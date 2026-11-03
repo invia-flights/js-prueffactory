@@ -37,12 +37,13 @@ import { type OpenAPITarget, openAPITargets } from "./repo_targets.ts";
 import {
   projectImages,
   snapshotMount,
-  toolContainer,
+  snapshotToolContainer,
   toolInfo,
   toolRef,
 } from "./repo_tools.ts";
 import { selected } from "./selection.ts";
 import { shownPath } from "./shown_text.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const apiLintID = "api.lint";
 const reasonNotParseable = "file_not_parseable";
@@ -178,7 +179,7 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
     try {
       c = await docker.runContainer(
         signal,
-        toolContainer(
+        snapshotToolContainer(
           input,
           `redocly-${String(i + 1)}`,
           Redocly,
@@ -211,9 +212,7 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
         found = [unparseableFinding(input, target, perr, err.output)];
       }
     } catch (err) {
-      unreadable.push(
-        `${shownPath(target.path)}: ${err instanceof Error ? err.message : String(err)}`,
-      );
+      unreadable.push(`${shownPath(target.path)}: ${errorMessage(err)}`);
       continue;
     }
     findings.push(...found);

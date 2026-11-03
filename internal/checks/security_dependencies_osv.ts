@@ -6,7 +6,7 @@
 // advisory.
 import { quote } from "../gocompat/fmt.ts";
 import { marshal, string as stringShape } from "../gocompat/json.ts";
-import { parseFloat, parseInt64 } from "../gocompat/strconv.ts";
+import { atoi, parseFloat } from "../gocompat/strconv.ts";
 import {
   compareBytes,
   sortStrings,
@@ -27,6 +27,7 @@ import type { Limitation } from "../resultset/types.ts";
 import { newLimitation } from "../resultset/zero.ts";
 import { shownByteString } from "./lockfile_support.ts";
 import { shownWord } from "./shown_text.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** advisory is one vulnerability that affects one locked package version. */
 export interface Advisory {
@@ -245,7 +246,8 @@ function items(v: unknown): unknown[] {
   return v instanceof GoSlice ? v.items() : [];
 }
 
-function stringsOf(v: unknown): string[] {
+// sliceStrings is the items of a decoded JSON array (Go: a []string).
+function sliceStrings(v: unknown): string[] {
   return items(v) as string[];
 }
 
@@ -256,8 +258,8 @@ function toPackage(raw: Raw): OsvPackage {
     groups: items(raw.groups).map((g) => {
       const r = g as Raw;
       return {
-        ids: stringsOf(r.ids),
-        aliases: stringsOf(r.aliases),
+        ids: sliceStrings(r.ids),
+        aliases: sliceStrings(r.aliases),
         maxSeverity: r.max_severity as string,
       };
     }),
@@ -265,7 +267,7 @@ function toPackage(raw: Raw): OsvPackage {
       const r = v as Raw;
       return {
         id: r.id as string,
-        aliases: stringsOf(r.aliases),
+        aliases: sliceStrings(r.aliases),
         summary: r.summary as string,
         severity: (r.database_specific as Raw).severity as string,
         affected: items(r.affected).map((a) => {
@@ -303,7 +305,7 @@ export function unmarshalText(err: unknown, root: string): string {
     const into = /^[0-9]+$/.test(last) ? "" : "Go struct field ";
     return `json: cannot unmarshal ${err.value} into ${into}${root}.${err.field} of type ${err.type}`;
   }
-  return err instanceof Error ? err.message : String(err);
+  return errorMessage(err);
 }
 
 /** parseReport decodes the report; it throws Go's error text. */
@@ -877,15 +879,6 @@ export function entryName(key: string): string {
     return key;
   }
   return key.slice(i + "node_modules/".length);
-}
-
-/** atoi is Go's strconv.Atoi on 64-bit Go, or undefined where it fails. */
-function atoi(s: string): bigint | undefined {
-  try {
-    return parseInt64(s);
-  } catch {
-    return undefined;
-  }
 }
 
 /**

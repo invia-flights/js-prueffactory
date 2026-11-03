@@ -48,6 +48,7 @@ import { shownPath } from "./shown_text.ts";
 import type { SuiteEvents } from "./test_events.ts";
 import { oneLine, projectRel } from "./test_report.ts";
 import { unsupportedTests } from "./tests_existing.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /**
  * hasTestFileProbe says whether package.install probes the package's suites:
@@ -394,11 +395,7 @@ export async function addTestFileProbe(
     } catch (err) {
       if (!aborted(signal)) {
         (res.limitations ??= []).push(
-          testFilesNotResolvedLimitation(
-            input,
-            suite,
-            err instanceof Error ? err.message : String(err),
-          ),
+          testFilesNotResolvedLimitation(input, suite, errorMessage(err)),
         );
       }
       continue;

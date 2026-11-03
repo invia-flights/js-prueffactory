@@ -42,10 +42,11 @@ import {
   recordedCommand,
   runChunks,
   snapshotPath,
-  toolContainer,
+  snapshotToolContainer,
   toolInfo,
   toolRef,
 } from "./repo_tools.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export { githubActionsID };
 
@@ -133,7 +134,7 @@ async function runGithubActions(
     paths,
     (n, chunk) =>
       // The image's entrypoint is actionlint.
-      toolContainer(
+      snapshotToolContainer(
         input,
         `actionlint-${String(n)}`,
         Actionlint,
@@ -220,7 +221,7 @@ async function runZizmor(
       // The image's entrypoint is zizmor.
       c = await docker.runContainer(
         signal,
-        toolContainer(
+        snapshotToolContainer(
           input,
           `zizmor-${String(n + 1)}`,
           Zizmor,
@@ -254,7 +255,7 @@ async function runZizmor(
       res.tool = toolInfo(Zizmor, c.exitCode);
       res.status = StatusToolError;
       res.reasonCode = "tool_output_unreadable";
-      res.reason = `${err instanceof Error ? err.message : String(err)}: ${tail(stderr, 400)}`;
+      res.reason = `${errorMessage(err)}: ${tail(stderr, 400)}`;
       return false;
     }
   }

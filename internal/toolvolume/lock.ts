@@ -32,6 +32,7 @@ import { hostname } from "node:os";
 import { contextError } from "../docker/common.ts";
 import { errnoCode, errnoText, mkdirAll, pathError } from "../gocompat/os.ts";
 import { dir } from "../gocompat/path.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** Lock is a held lock; release gives it up. */
 export interface Lock {
@@ -64,7 +65,7 @@ export async function acquireWith(
   try {
     mkdirAll(dir(path), 0o755);
   } catch (err) {
-    throw new Error(`cannot create the cache folder: ${message(err)}`, {
+    throw new Error(`cannot create the cache folder: ${errorMessage(err)}`, {
       cause: err,
     });
   }
@@ -93,10 +94,6 @@ interface Attempt {
   try(): Lock | null;
   /** close frees what the attempts needed. */
   close(): void;
-}
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }
 
 function wait(signal: AbortSignal, ms: number): Promise<void> {

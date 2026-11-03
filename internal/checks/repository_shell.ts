@@ -19,7 +19,7 @@ import {
   recordedCommand,
   runChunks,
   snapshotPath,
-  toolContainer,
+  snapshotToolContainer,
   toolRef,
 } from "./repo_tools.ts";
 
@@ -80,7 +80,7 @@ async function runShell(signal: AbortSignal, input: Input): Promise<Result> {
       ShellCheck,
       paths,
       (n, chunk) =>
-        toolContainer(
+        snapshotToolContainer(
           input,
           `shellcheck-${dialect}-${String(n)}`,
           ShellCheck,

@@ -76,7 +76,7 @@ test("the suites are run and measured once whichever Check asks first", async (t
   stubSuites(t, () => ({ status: StatusCompleted, coverage: { ...measured } }));
   const n = stubCoverageStore(t, summaryTwoFiles);
 
-  await testsExisting.run?.(background(), input);
+  await testsExisting.run(background(), input);
   await runTestsCoverage(input);
 
   assert.deepEqual([n.volumes, n.reports], [1, 1]);
@@ -88,7 +88,7 @@ test("without tests.coverage selected no location and no report are made", async
   stubSuites(t, () => ({ status: StatusCompleted }));
   const n = stubCoverageStore(t, summaryTwoFiles);
 
-  await testsExisting.run?.(background(), input);
+  await testsExisting.run(background(), input);
 
   assert.deepEqual([n.volumes, n.reports], [0, 0]);
 });

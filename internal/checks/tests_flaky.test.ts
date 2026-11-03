@@ -89,7 +89,7 @@ test("each suite runs two more times after the shared first run, one after anoth
   const order = threeRuns(t, okRun, okRun, okRun);
 
   // tests.existing performs the first run; tests.flaky reads it.
-  await testsExisting.run?.(background(), input);
+  await testsExisting.run(background(), input);
   const res = await runCheck(testsFlakyID, input);
 
   assert.equal(

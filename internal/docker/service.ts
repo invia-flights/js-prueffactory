@@ -5,7 +5,6 @@ import {
   byteOrder,
   containerName,
   envKey,
-  errorMessage,
   fastLookupFailure,
   hardening,
   LimitedBuffer,
@@ -14,6 +13,7 @@ import {
   volumeName,
 } from "./common.ts";
 import type { ContainerResult, Driver } from "./driver.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 // ServiceSpec describes a Service container: a long-running container, such as
 // Valkey, that stays up while the tests of a suite use it.

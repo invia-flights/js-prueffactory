@@ -44,6 +44,8 @@ import {
   typesTsconfigFor,
   typesUnsupported,
 } from "./types_javascript.ts";
+import { errorMessage } from "../gocompat/errors.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 export const typesStrictnessID = "types.strictness";
 
@@ -195,7 +197,7 @@ export interface TscRun {
  * error and no diagnostic. It returns the reason code and the reason, or two
  * empty strings.
  */
-export function tscProblem(r: TscRun): [code: string, reason: string] {
+export function tscProblem(r: TscRun): [code: ReasonCode | "", reason: string] {
   if (r.exit < 0 || r.exit > 2) {
     return ["tsc_failed", `tsc exited with ${String(r.exit)}`];
   }
@@ -498,7 +500,7 @@ async function runTypesStrictness(
         status: StatusToolError,
         reasonCode: "type_coverage_failed",
         reason:
-          (err instanceof Error ? err.message : String(err)) +
+          errorMessage(err) +
           ": " +
           tail(
             goString(container.stderr) + "\n" + goString(container.stdout),

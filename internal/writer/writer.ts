@@ -29,6 +29,7 @@ import {
   report,
   validate as validateSchema,
 } from "../schema/schema.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** File names in the report folder. */
 export const JSONFile = "report.json";
@@ -89,10 +90,6 @@ export class InvalidReportError extends Error {
   }
 }
 
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
-
 /**
  * write validates s and writes the selected files into dir, creating it. It
  * throws an InvalidReportError when the set is not a valid Report, and a
@@ -107,21 +104,23 @@ export function write(dir: string, s: Set, f: Formats): void {
   try {
     doc = json(s);
   } catch (err) {
-    throw new GoError(`cannot render report.json: ${message(err)}`);
+    throw new GoError(`cannot render report.json: ${errorMessage(err)}`);
   }
   const problems = [...validateSchema(doc), ...validateRules(s)];
 
   try {
     mkdirAll(dir, 0o755);
   } catch (err) {
-    throw new GoError(`cannot create the report folder: ${message(err)}`);
+    throw new GoError(`cannot create the report folder: ${errorMessage(err)}`);
   }
   if (problems.length > 0) {
     const path = join(dir, InvalidFile);
     try {
       writeAtomic(path, doc);
     } catch (err) {
-      problems.push("also failed to keep the invalid report: " + message(err));
+      problems.push(
+        "also failed to keep the invalid report: " + errorMessage(err),
+      );
     }
     throw new InvalidReportError(problems, path);
   }
@@ -134,7 +133,7 @@ export function write(dir: string, s: Set, f: Formats): void {
       mkdirAll(dirname(target), 0o755);
     } catch (err) {
       throw new GoError(
-        `cannot create the folder for artifact ${a.path}: ${message(err)}`,
+        `cannot create the folder for artifact ${a.path}: ${errorMessage(err)}`,
       );
     }
     writeAtomic(target, a.content);
@@ -156,7 +155,7 @@ function writeAtomic(path: string, data: Uint8Array): void {
   try {
     [fd, tmp] = createTemp(dirname(path), "." + name + ".tmp-");
   } catch (err) {
-    throw new GoError(`cannot write ${name}: ${message(err)}`);
+    throw new GoError(`cannot write ${name}: ${errorMessage(err)}`);
   }
   let renamed = false;
   try {

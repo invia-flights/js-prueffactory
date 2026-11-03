@@ -5,7 +5,7 @@
 import { type FileClass, Source, TestData } from "../discovery/discovery.ts";
 import { GoError } from "../gocompat/os.ts";
 import { clean } from "../gocompat/path.ts";
-import { sortStrings } from "../gocompat/strings.ts";
+import { sortStrings, stringsOf } from "../gocompat/strings.ts";
 import type { Value } from "../jsonschema/jsonschema.ts";
 import type { Finding, Limitation } from "../resultset/types.ts";
 import { CIDoc, type CIPos, CIReadError, readCIDoc } from "./gitlab_ci_yaml.ts";
@@ -316,14 +316,6 @@ function includeEntry(e: Value, pointer: string): CIInclude[] {
       ];
     }
   }
-  return [];
-}
-
-/** stringsOf returns the strings of a string or of a list of strings. */
-export function stringsOf(v: Value): string[] {
-  if (typeof v === "string") return [v];
-  if (Array.isArray(v))
-    return v.filter((e): e is string => typeof e === "string");
   return [];
 }
 

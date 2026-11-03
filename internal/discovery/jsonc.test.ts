@@ -5,6 +5,7 @@ import { test } from "node:test";
 
 import { unmarshal } from "../gocompat/unmarshal.ts";
 import { stripJSONC } from "./discovery.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 test("stripJSONC blanks comments and trailing commas and keeps every offset", () => {
   const input = '{\n // c\n "a": "x // y", /* z\n */ "b": [1,],\n}';
@@ -34,7 +35,7 @@ test("every JSON file under testdata/ reads as JSONC as in Go", () => {
     try {
       unmarshal(stripJSONC(data, true), { kind: "any" });
     } catch (e) {
-      got = e instanceof Error ? e.message : String(e);
+      got = errorMessage(e);
     }
     assert.equal(got, c.jsoncError, c.path);
   }

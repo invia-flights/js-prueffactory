@@ -3,7 +3,7 @@
 // together, beside input.go.
 import type { Writable } from "node:stream";
 
-import type { Context, Project } from "../discovery/discovery.ts";
+import type { Context, Package, Project } from "../discovery/discovery.ts";
 import type { Suite } from "../discovery/testcommand.ts";
 import type { Driver } from "../docker/driver.ts";
 import { join } from "../gocompat/path.ts";
@@ -23,6 +23,7 @@ import type {
   Tool,
   ToolRef,
 } from "../resultset/types.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 import { TrustUntrusted } from "../resultset/types.ts";
 import { newLocation } from "../resultset/zero.ts";
 import { sha256File } from "./readcap.ts";
@@ -132,6 +133,19 @@ export class Input implements InputFields {
     this.project = fields.project;
     this.context = fields.context;
     Object.assign(this, fields);
+  }
+
+  /**
+   * pkg is the package of the Context. A Check that examines packages calls
+   * it where the engine guarantees a package Context; it throws for the
+   * project Context, which the Check's applicability already ruled out.
+   */
+  pkg(): Package {
+    const pkg = this.context.package;
+    if (pkg === null) {
+      throw new Error(`${this.context.id} is not a package Context`);
+    }
+    return pkg;
   }
 
   /**
@@ -260,7 +274,8 @@ export interface SuiteTestCase {
  */
 export interface Result {
   status: ExecStatus;
-  reasonCode?: string;
+  /** reasonCode is one of reasonCodes; "" (Go's zero value) says there is none. */
+  reasonCode?: ReasonCode | "";
   reason?: string;
   findings?: Finding[];
   metrics?: Metric[];

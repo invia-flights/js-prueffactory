@@ -28,6 +28,7 @@ import {
 import type { Input, Result } from "./input.ts";
 import { selected } from "./selection.ts";
 import { newShared } from "./shared.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 // --- the registry of rule groups ---
 
@@ -361,7 +362,7 @@ async function defaultRunESLintContainer(
       {
         status: StatusToolError,
         reasonCode: "internal_error",
-        reason: err instanceof Error ? err.message : String(err),
+        reason: errorMessage(err),
       },
     ];
   }

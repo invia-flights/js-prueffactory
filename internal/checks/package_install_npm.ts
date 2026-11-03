@@ -6,7 +6,7 @@
 // U+2029), and \S stops only at Go's ASCII spaces [\t\n\f\r ] (V8's \s is
 // Unicode-wide and holds \v).
 import { quote } from "../gocompat/fmt.ts";
-import { trimSpace } from "../gocompat/strings.ts";
+import { trimRight, trimSpace } from "../gocompat/strings.ts";
 import {
   type ExecStatus,
   StatusBlocked,
@@ -14,6 +14,7 @@ import {
   StatusInfrastructureError,
   StatusToolError,
 } from "../resultset/types.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 /**
  * InstallVerdict is what npm's result of an install means for the Report. It
@@ -22,7 +23,7 @@ import {
  */
 export interface InstallVerdict {
   status: ExecStatus;
-  reasonCode: string;
+  reasonCode: ReasonCode | "";
   reason: string;
   /**
    * projectFault is true when the project's own files make the install
@@ -209,7 +210,7 @@ function httpStatusOf(code: string, output: string): string {
 function npmErrorSummary(output: string): string {
   const lines: string[] = [];
   for (const line of output.split("\n")) {
-    const m = npmErrorLine.exec(line.replace(/\r+$/, ""));
+    const m = npmErrorLine.exec(trimRight(line, "\r"));
     if (m === null) {
       continue;
     }

@@ -16,11 +16,7 @@ import {
   type Suite,
   type TestSetup,
 } from "./testcommand.ts";
-
-// q puts project text into a reason as a code span.
-function q(s: string): string {
-  return quote(s);
-}
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 // MaxScriptDepth is how many levels of `npm run` references a script may
 // nest, for a test script and for the script of a deployment file. The
@@ -85,7 +81,7 @@ export function parseTestScript(script: string): TestSetup {
 }
 
 interface StepProblem {
-  code: string;
+  code: ReasonCode;
   reason: string;
 }
 
@@ -99,8 +95,8 @@ function unsupportedStep(reason: string): { problem: StepProblem } {
 
 // scriptSubject names a script in a reason.
 function scriptSubject(name: string, text: string): string {
-  if (name === "test") return "the test script " + q(text);
-  return `the npm script ${q(name)} (${q(text)})`;
+  if (name === "test") return "the test script " + quote(text);
+  return `the npm script ${quote(name)} (${quote(text)})`;
 }
 
 // maxChainWork caps the references followed and the suites produced for one
@@ -146,7 +142,7 @@ class ChainResolver {
     ]) {
       if (this.scripts.has(hook.prefix + name)) {
         return unsupportedStep(
-          `the script ${q(name)} has a ${q(hook.prefix + name)} script that npm runs ${hook.when} it, and this release does not run lifecycle scripts, so it would not run what npm runs; ${onlyRunners}`,
+          `the script ${quote(name)} has a ${quote(hook.prefix + name)} script that npm runs ${hook.when} it, and this release does not run lifecycle scripts, so it would not run what npm runs; ${onlyRunners}`,
         );
       }
     }
@@ -174,7 +170,7 @@ class ChainResolver {
     }
     if (extra.length > 0 && steps.length > 1) {
       return unsupportedStep(
-        `${refSubject} passes arguments after \`--\` to the script ${q(name)}, which is a chain of steps and not one command; ${onlyRunners}`,
+        `${refSubject} passes arguments after \`--\` to the script ${quote(name)}, which is a chain of steps and not one command; ${onlyRunners}`,
       );
     }
     const origin = name === "test" ? "scripts.test" : name;
@@ -182,7 +178,8 @@ class ChainResolver {
     const suites: Suite[] = [];
     for (const st of steps) {
       let subject = scriptSubject(name, text);
-      if (steps.length > 1) subject = `the step ${q(st.text)} of ${subject}`;
+      if (steps.length > 1)
+        subject = `the step ${quote(st.text)} of ${subject}`;
       const parsed = parseStep(st.words, env, subject);
       if ("problem" in parsed) return parsed;
       switch (parsed.kind) {
@@ -203,17 +200,17 @@ class ChainResolver {
           if ("problem" in ref) return ref;
           if (!this.scripts.has(ref.name)) {
             return unsupportedStep(
-              `${subject} refers to the script ${q(ref.name)}, which does not exist in the package.json; ${onlyRunners}`,
+              `${subject} refers to the script ${quote(ref.name)}, which does not exist in the package.json; ${onlyRunners}`,
             );
           }
           if (stack.includes(ref.name)) {
             return unsupportedStep(
-              `${subject} refers to the script ${q(ref.name)} again, a reference cycle (${q([...stack, ref.name].join(" -> "))}); ${onlyRunners}`,
+              `${subject} refers to the script ${quote(ref.name)} again, a reference cycle (${quote([...stack, ref.name].join(" -> "))}); ${onlyRunners}`,
             );
           }
           if (stack.length > MaxScriptDepth) {
             return unsupportedStep(
-              `${subject} refers to the script ${q(ref.name)}, which is nested more than ${String(MaxScriptDepth)} levels deep; ${onlyRunners}`,
+              `${subject} refers to the script ${quote(ref.name)}, which is nested more than ${String(MaxScriptDepth)} levels deep; ${onlyRunners}`,
             );
           }
           const p = this.tooMuch(subject);
@@ -270,7 +267,7 @@ function parseStep(
   inherited: ReadonlyMap<string, string>,
   subject: string,
 ): ParsedStep | { problem: StepProblem } {
-  const unsupported = (code: string, msg: string) => ({
+  const unsupported = (code: ReasonCode, msg: string) => ({
     problem: { code, reason: `${subject} ${msg}; ${onlyRunners}` },
   });
   const cmd = newSuite();
@@ -339,7 +336,7 @@ function parseStep(
     }
     return unsupported(
       CodeTestCommandUnsupported,
-      `is not a test runner command (it starts with ${q(word)})`,
+      `is not a test runner command (it starts with ${quote(word)})`,
     );
   }
   cmd.env = new Map(env);
@@ -384,7 +381,7 @@ function parseNPMReference(
   words: readonly string[],
   subject: string,
 ): ScriptReference | { problem: StepProblem } {
-  const fail = (msg: string) => ({
+  const fail = (msg: string): { problem: StepProblem } => ({
     problem: {
       code: CodeTestCommandUnsupported,
       reason: `${subject} ${msg}; ${onlyRunners}`,
@@ -408,7 +405,7 @@ function parseNPMReference(
   };
   const workspaceFail = (bad: string) =>
     fail(
-      `uses the npm option ${q(bad)}, which selects another package (workspace options are not supported)`,
+      `uses the npm option ${quote(bad)}, which selects another package (workspace options are not supported)`,
     );
   let bad = options();
   if (bad !== "") return workspaceFail(bad);
@@ -434,7 +431,7 @@ function parseNPMReference(
       break;
     default:
       return fail(
-        `runs ${q("npm " + cmd)}, and only \`npm run\`, \`npm run-script\` and \`npm test\` are followed`,
+        `runs ${quote("npm " + cmd)}, and only \`npm run\`, \`npm run-script\` and \`npm test\` are followed`,
       );
   }
   bad = options();
@@ -442,7 +439,7 @@ function parseNPMReference(
   if (i < words.length) {
     if (words[i] !== "--") {
       return fail(
-        `passes the argument ${q(words[i] ?? "")} to npm without \`--\``,
+        `passes the argument ${quote(words[i] ?? "")} to npm without \`--\``,
       );
     }
     ref.extra = words.slice(i + 1);

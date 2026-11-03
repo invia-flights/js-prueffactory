@@ -125,11 +125,11 @@ test("a package that needs a build step for its TypeScript stays unsupported wit
       assert.equal(check.images?.(c).length, 0);
       assert.equal(check.usesToolset?.(c), false);
       assert.deepEqual(check.prerequisites?.(c), []);
-      const res = await check.run?.(
+      const res = await check.run(
         new AbortController().signal,
         new Input({ project: proj, context: c }),
       );
-      assert.equal(res?.status, StatusUnsupported);
+      assert.equal(res.status, StatusUnsupported);
       assert.equal(res.reasonCode, "build_step_required");
       assert.ok(res.reason?.includes("build step"), res.reason);
     });

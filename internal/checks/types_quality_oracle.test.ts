@@ -30,6 +30,7 @@ import {
   type TypeCoverage,
   typeCoveragePercent,
 } from "./types_strictness.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 interface TscCase {
   out: string;
@@ -282,7 +283,7 @@ test("type-coverage's document is read as Go reads it", () => {
     } catch (err) {
       got = {
         error: true,
-        errorText: err instanceof Error ? err.message : String(err),
+        errorText: errorMessage(err),
       };
     }
     assert.deepEqual(got, want, show(c));

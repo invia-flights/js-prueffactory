@@ -43,7 +43,7 @@ import { type Check, register } from "./check.ts";
 import { cutList, tail } from "./cut_text.ts";
 import { failedToRun, toolsetUnavailable } from "./helper_result.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
-import { shownIdentifier, shownSpecifier } from "./module_names.ts";
+import { shownIdentifier, shownPath, shownSpecifier } from "./shown_text.ts";
 import {
   packageInstallID,
   unsupportedInstallReason,
@@ -56,7 +56,6 @@ import {
 } from "./quality_unused_knip_config.ts";
 import { correctKnip } from "./quality_unused_mocha.ts";
 import type { KnipIssue, KnipItem } from "./quality_unused_report.ts";
-import { shownPath } from "./shown_text.ts";
 
 export const unusedID = "quality.unused";
 
@@ -162,11 +161,11 @@ export const unused: Check = {
 register(unusedID, unused);
 
 /**
- * toolContainer is the container that runs a toolset tool in the package's
+ * workingCopyToolContainer is the container that runs a toolset tool in the package's
  * folder of the Working copy. Both are mounted read-only: the tools only
  * read. The container joins the Run's network, which has no way out.
  */
-export function toolContainer(
+export function workingCopyToolContainer(
   input: Input,
   name: string,
   cmd: readonly string[],
@@ -249,7 +248,7 @@ async function runKnip(signal: AbortSignal, input: Input): Promise<Result> {
   try {
     c = await docker.runContainer(
       signal,
-      toolContainer(input, "knip", res.command ?? []),
+      workingCopyToolContainer(input, "knip", res.command ?? []),
     );
   } catch (err) {
     return failedToRun(res, err);
@@ -279,7 +278,7 @@ async function runKnip(signal: AbortSignal, input: Input): Promise<Result> {
     try {
       c2 = await docker.runContainer(
         signal,
-        toolContainer(input, "knip-mocha", again, {
+        workingCopyToolContainer(input, "knip-mocha", again, {
           path: knipGeneratedConfigPath,
           mode: 0o644,
           content: cfg,

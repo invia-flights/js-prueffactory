@@ -9,6 +9,7 @@ import {
   compareBytes,
   sortStrings,
   toLower,
+  trimRight,
   trimSpace,
 } from "../gocompat/strings.ts";
 import { goString } from "../gocompat/utf8.ts";
@@ -43,6 +44,8 @@ import {
 } from "./package_install.ts";
 import { lstatRegular } from "./readcap.ts";
 import { rawJSON, repoFinding } from "./repo_findings.ts";
+import { atoiClamped } from "../gocompat/strconv.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 export const typesJavascriptID = "types.javascript";
 
@@ -154,7 +157,9 @@ export function typesApplicability(c: Context): [Applicability, string] {
  * emits next to TypeScript sources); a tsconfig.json only for the editor does
  * not.
  */
-export function typesUnsupported(pkg: Package): [code: string, reason: string] {
+export function typesUnsupported(
+  pkg: Package,
+): [code: ReasonCode | "", reason: string] {
   if (pkg.buildStepReason === "") {
     return ["", ""];
   }
@@ -407,15 +412,6 @@ const tscFileDiagnostic =
 const tscGlobalDiagnostic = /^(?:error|warning) TS[0-9]+: [^\n]*$/;
 
 /**
- * atoi is strconv.Atoi with the error ignored: a number that does not fit is
- * the largest int64 (which a JavaScript number holds rounded up).
- */
-function atoi(digits: string): number {
-  const n = BigInt(digits);
-  return Number(n <= (1n << 63n) - 1n ? n : (1n << 63n) - 1n);
-}
-
-/**
  * parseTSC reads the text output of tsc. A diagnostic without a file, which is
  * a problem with the configuration or the run, goes into global as it was
  * printed.
@@ -430,7 +426,7 @@ export function parseTSC(out: string): {
   // for a global one.
   let last = -1;
   for (let line of out.split("\n")) {
-    line = line.replace(/\r+$/, "");
+    line = trimRight(line, "\r");
     if (trimSpace(line) === "") {
       continue;
     }
@@ -449,8 +445,8 @@ export function parseTSC(out: string): {
     if (m !== null) {
       diags.push({
         path: m[1] ?? "",
-        line: atoi(m[2] ?? "0"),
-        column: atoi(m[3] ?? "0"),
+        line: atoiClamped(m[2] ?? "0"),
+        column: atoiClamped(m[3] ?? "0"),
         category: m[4] ?? "",
         code: m[5] ?? "",
         message: m[6] ?? "",
@@ -533,19 +529,11 @@ export function projectTsconfigNotUsed(
 
 // --- the Check's own run (Go: types_javascript.go) ---
 
-function packageOf(input: Input): Package {
-  const pkg = input.context.package;
-  if (pkg === null) {
-    throw new Error("the type Checks examine packages");
-  }
-  return pkg;
-}
-
 async function runTypesJavascript(
   signal: AbortSignal,
   input: Input,
 ): Promise<Result> {
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   const u = pkg.installUnsupported;
   if (u !== null) {
     return { status: StatusUnsupported, reasonCode: u.code, reason: u.reason };
@@ -768,7 +756,7 @@ export function interpretTypes(
     return res;
   }
 
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   const source = new Set(typesTargets(input));
   let findings: Finding[] = [];
   const dropped: DroppedJSONError[] = [];

@@ -6,6 +6,7 @@
 // Copyright (c) 2011-2019 Canonical Ltd
 // Apache License 2.0, see LICENSE in this folder.
 import { GoTime } from "./gotime.ts";
+import { daysIn } from "../gocompat/time.ts";
 
 export const nullTag = "!!null";
 export const boolTag = "!!bool";
@@ -293,14 +294,6 @@ function parseDate(c: Cursor): [number, number, number] | null {
   const day = c.num();
   if (day === null) return null;
   return [Number(y), month, day];
-}
-
-function daysIn(month: number, year: number): number {
-  if (month === 2) {
-    const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-    return leap ? 29 : 28;
-  }
-  return [4, 6, 9, 11].includes(month) ? 30 : 31;
 }
 
 function parseDateOnly(s: string): GoTime | null {

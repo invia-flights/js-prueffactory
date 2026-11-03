@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { symlinkSync, writeFileSync } from "node:fs";
+import { mkdirSync, symlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
@@ -186,10 +186,10 @@ test("Mocha config files name the test files too", () => {
   });
 });
 
-// Go reads the Mocha config with a plain os.ReadFile (testfiles.go:268);
-// the port reads it like the build step rules do. Hardening beyond Go, see
-// traps.md.
-test("a Mocha config linked out of the package or huge names no files", () => {
+// Go reads the Mocha config with a plain os.ReadFile (testfiles.go:268),
+// which follows every link. The port follows a link that stays inside the
+// project, refuses one that leaves it and a file over 16 MiB; see traps.md.
+test("a Mocha config linked out of the project or over 16 MiB names no files, one linked inside is read", () => {
   const config = "spec:\n  - 'lib/**/*.js'\n";
   const outside = tempDir();
   writeFileSync(join(outside, "mocharc.yml"), config);
@@ -198,6 +198,15 @@ test("a Mocha config linked out of the package or huge names no files", () => {
       "a small config is read",
       (root) => {
         writeFileSync(join(root, ".mocharc.yml"), config);
+      },
+      TestCode,
+    ],
+    [
+      "a config symlinked to a file elsewhere in the project",
+      (root) => {
+        mkdirSync(join(root, "conf"));
+        writeFileSync(join(root, "conf", "mocharc.yml"), config);
+        symlinkSync("conf/mocharc.yml", join(root, ".mocharc.yml"));
       },
       TestCode,
     ],
@@ -213,7 +222,7 @@ test("a Mocha config linked out of the package or huge names no files", () => {
       (root) => {
         writeFileSync(
           join(root, ".mocharc.json"),
-          JSON.stringify({ spec: "lib/**/*.js", x: "a".repeat(2 << 20) }),
+          JSON.stringify({ spec: "lib/**/*.js", x: "a".repeat(17 << 20) }),
         );
       },
       Source,

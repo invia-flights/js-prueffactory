@@ -33,6 +33,7 @@ import { ErrHelp, type Formats, type Options, parse } from "./options.ts";
 import { type OutputPlan, resolveOriginal, resolveOutput } from "./paths.ts";
 import { type DockerSetup, preflightDocker } from "./preflight.ts";
 import { runListChecks } from "./selection.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 const usage = `usage:
   js-prueffactory test <path> [--format json|markdown|json,markdown] [--output-dir <dir>]
@@ -109,10 +110,6 @@ export function main(
   }
 }
 
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
-
 // parseOrExit parses the arguments, or writes the usage text (for -h) or the
 // error and gives the exit code.
 function parseOrExit(
@@ -128,7 +125,7 @@ function parseOrExit(
       stdout.write(usage);
       return ExitOK;
     }
-    stderr.write(`js-prueffactory: ${message(err)}\n`);
+    stderr.write(`js-prueffactory: ${errorMessage(err)}\n`);
     return ExitInternalError;
   }
 }
@@ -142,7 +139,7 @@ async function runTest(
   signal: AbortSignal,
 ): Promise<number> {
   const fail = (err: unknown): number => {
-    stderr.write(`js-prueffactory: ${message(err)}\n`);
+    stderr.write(`js-prueffactory: ${errorMessage(err)}\n`);
     return ExitInternalError;
   };
 
@@ -276,7 +273,7 @@ async function startRun(plan: RunPlan, io: RunIO): Promise<number> {
     if (err === ErrAborted) {
       return interrupted(stderr);
     }
-    stderr.write(`js-prueffactory: ${message(err)}\n`);
+    stderr.write(`js-prueffactory: ${errorMessage(err)}\n`);
     return ExitInternalError;
   }
   stdout.write(res.reportDir + "\n");
@@ -309,7 +306,7 @@ async function sweepLeftovers(
   }
   if (error !== undefined && !signal.aborted) {
     log.print(
-      `warning: could not sweep every leftover of dead Runs: ${message(error)}`,
+      `warning: could not sweep every leftover of dead Runs: ${errorMessage(error)}`,
     );
   }
 }

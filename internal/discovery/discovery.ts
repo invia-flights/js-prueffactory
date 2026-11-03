@@ -32,6 +32,7 @@ import {
 import { readServiceRefs, type ServiceRef } from "./service_refs.ts";
 import type { TestSetup, Unsupported } from "./testcommand.ts";
 import { readTestInfo, usesMocha } from "./testfiles.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export * from "./buildstep.ts";
 export * from "./classify.ts";
@@ -170,10 +171,7 @@ export function discover(root: string): Project {
       });
     });
   } catch (e) {
-    throw new Error(
-      "discovery: " + (e instanceof Error ? e.message : String(e)),
-      { cause: e },
-    );
+    throw new Error("discovery: " + errorMessage(e), { cause: e });
   }
   files.sort((a, b) => compareBytes(a.path, b.path));
 

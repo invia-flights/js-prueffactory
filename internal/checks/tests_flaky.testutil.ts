@@ -141,7 +141,7 @@ export async function runCheck(
   input: Input,
   signal: AbortSignal = background(),
 ): Promise<Result> {
-  const res = await checkOf(id).run?.(signal, input);
+  const res = await checkOf(id).run(signal, input);
   assert.ok(res, `${id} has no run`);
   return res;
 }

@@ -108,12 +108,12 @@ test("a failed run ends every Check that reads it the same way without running a
   const check = impl("lint.correctness");
   const signal = new AbortController().signal;
 
-  const a = await check.run?.(signal, input);
-  const b = await check.run?.(signal, input);
+  const a = await check.run(signal, input);
+  const b = await check.run(signal, input);
 
-  assert.equal(a?.status, StatusToolError);
+  assert.equal(a.status, StatusToolError);
   assert.equal(a.reasonCode, "helper_failed");
-  assert.equal(b?.reasonCode, "helper_failed");
+  assert.equal(b.reasonCode, "helper_failed");
   assert.equal(calls, 1, "ESLint ran once");
 });
 
@@ -143,12 +143,12 @@ test("without a toolset volume the Check ends as an infrastructure error", async
   const { proj, dir } = eslintProblems();
   const input = packageInput(proj, dir, ".", { toolsetError: "no network" });
 
-  const res = await impl("lint.correctness").run?.(
+  const res = await impl("lint.correctness").run(
     new AbortController().signal,
     input,
   );
 
-  assert.equal(res?.status, StatusInfrastructureError);
+  assert.equal(res.status, StatusInfrastructureError);
   assert.equal(res.reasonCode, "toolset_unavailable");
   assert.ok(res.reason?.includes("no network"), res.reason);
 });

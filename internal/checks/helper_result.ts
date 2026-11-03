@@ -9,6 +9,7 @@ import {
 } from "../resultset/types.ts";
 import { tail } from "./cut_text.ts";
 import type { Input, Result } from "./input.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /**
  * toolsetUnavailable is the Result of a Check whose tool could not be put
@@ -63,7 +64,7 @@ export function failedToRun(res: Result, err: unknown): Result {
     default:
       res.status = StatusInfrastructureError;
       res.reasonCode = "docker_error";
-      res.reason = err instanceof Error ? err.message : String(err);
+      res.reason = errorMessage(err);
   }
   return res;
 }

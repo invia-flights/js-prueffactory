@@ -36,10 +36,8 @@ import {
 } from "./prerequisites.ts";
 import { takeSecretScan } from "./redaction.ts";
 import { recordNPM, recordTools } from "./tools.ts";
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
+import { errorMessage } from "../gocompat/errors.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 /** usesDocker says whether an execution starts a container and so needs the Preparation phase. */
 export function usesDocker(p: Planned): boolean {
@@ -190,7 +188,7 @@ export function orderJobs(jobs: Job[]): void {
 export function reasonFor(
   status: ExecStatus,
   limit: Duration,
-): [string, string] {
+): [ReasonCode, string] {
   switch (status) {
     case StatusCancelled:
       return ["cancelled", "the Run was cancelled"];
@@ -238,12 +236,12 @@ function failedPreparation(
   if (endReason(signal, budget, budget) !== null) {
     return notStarted(r, signal, p);
   }
-  r.log.print(`preparation failed: ${message(err)}`);
+  r.log.print(`preparation failed: ${errorMessage(err)}`);
   return stopped(
     p,
     StatusInfrastructureError,
     "docker_setup_failed",
-    message(err),
+    errorMessage(err),
   );
 }
 
@@ -381,8 +379,7 @@ export function linkEvidence(
 
 /**
  * safeRun calls the Check and turns an exception into a tool_error, so one
- * broken Check never takes the Run down. A Check whose family is not ported
- * yet has no run; its execution is a tool_error that says so.
+ * broken Check never takes the Run down.
  */
 async function safeRun(
   r: RunState,
@@ -390,13 +387,6 @@ async function safeRun(
   p: Planned,
   docker: boolean,
 ): Promise<Result> {
-  if (p.check.run === undefined) {
-    return {
-      status: StatusToolError,
-      reasonCode: "internal_error",
-      reason: `the TypeScript build does not run ${p.entry.id} yet`,
-    };
-  }
   try {
     const proj = r.proj;
     const snap = r.snap;
@@ -443,11 +433,13 @@ async function safeRun(
     return await p.check.run(signal, input);
   } catch (v) {
     const stack = v instanceof Error ? (v.stack ?? "") : "";
-    r.log.print(`internal error in ${p.entry.id}: ${message(v)}\n${stack}`);
+    r.log.print(
+      `internal error in ${p.entry.id}: ${errorMessage(v)}\n${stack}`,
+    );
     return {
       status: StatusToolError,
       reasonCode: "internal_error",
-      reason: `the Check panicked: ${message(v)}`,
+      reason: `the Check panicked: ${errorMessage(v)}`,
     };
   }
 }

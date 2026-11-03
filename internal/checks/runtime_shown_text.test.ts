@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { StatusCompleted } from "../resultset/types.ts";
-import { shownPackage, warningFindings } from "./runtime_warnings.ts";
+import { warningFindings } from "./runtime_warnings.ts";
 import { Shared } from "./shared.ts";
 import {
   stubSuites,
@@ -19,19 +19,6 @@ import {
   stubCoverageStore,
   summaryTwoFiles,
 } from "./tests_coverage.testutil.ts";
-
-test("a dependency name in the message of a warning is shown only when it is a package name", () => {
-  for (const name of ["old-buffer", "@scope/tr46", "left_pad", "a.b~c"]) {
-    assert.equal(shownPackage(name), name);
-  }
-  for (const name of ["we ird", "x`y", "@a/b/c", "", "x\n", "a".repeat(300)]) {
-    assert.equal(
-      shownPackage(name),
-      "(package name with unusual characters)",
-      JSON.stringify(name),
-    );
-  }
-});
 
 test("the dependency of a warning with an unusual name is not named in the message", (t) => {
   const input = suiteInput(t, { "src/index.js": "x" });
@@ -68,6 +55,22 @@ test("the first frame in the project is named in the message only when it looks 
   assert.ok(!fs[0]?.message.includes("we`ird"), fs[0]?.message);
 });
 
+test("a route folder such as [id] or {slug} is named in the message", (t) => {
+  const input = suiteInput(t, { "src/index.js": "x" });
+  const first = (path: string): string | undefined => {
+    const stderr = `(node:7) Warning: x\n    at f (/work/${path}:3:15)\n`;
+    return warningFindings(input, stderr)[0][0]?.message;
+  };
+
+  const plain = first("src/app/[id]/{slug}/page.js");
+  assert.ok(
+    plain?.includes(
+      "The first frame in the project is src/app/[id]/{slug}/page.js.",
+    ),
+    plain,
+  );
+});
+
 test("a suite that did not run is named in the coverage note only when its name looks like a word", async (t) => {
   const input = twoSuiteInput(t);
   const second = input.context.package?.tests?.suites[1];
@@ -76,7 +79,11 @@ test("a suite that did not run is named in the coverage note only when its name 
   input.shared = new Shared();
   stubSuites(t, (_i, ran) =>
     ran === 1
-      ? { status: "infrastructure_error", reasonCode: "x", reason: "no" }
+      ? {
+          status: "infrastructure_error",
+          reasonCode: "helper_failed",
+          reason: "no",
+        }
       : {
           status: StatusCompleted,
           coverage: {

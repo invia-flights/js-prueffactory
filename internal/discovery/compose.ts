@@ -3,15 +3,24 @@ import { join as joinPath } from "node:path";
 
 import { formatFloatV } from "../gocompat/fmt.ts";
 import { GoError, pathError } from "../gocompat/os.ts";
-import { compareBytes, sortStrings } from "../gocompat/strings.ts";
+import { compareBytes, sortStrings, trim } from "../gocompat/strings.ts";
 import { type ServiceFamily, serviceFamilyOf } from "../toolset/services.ts";
 import * as yaml from "../yamlv3/yaml.ts";
 import { interpolate, readDotEnv } from "./compose_env.ts";
 import { cut } from "./nodetestargs.ts";
-import type { Unsupported } from "./testcommand.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 // ComposeService is one service of the project's compose files: either a
 // test Service the Run starts for its test suites, or one it never starts.
+/**
+ * NotStarted says why the Run never starts a compose service. Its code is a
+ * vocabulary of its own (not a reason code of an execution).
+ */
+export interface NotStarted {
+  readonly code: string;
+  readonly reason: string;
+}
+
 export interface ComposeService {
   // name is the compose service name. It is the host name tests reach the
   // Service under.
@@ -27,7 +36,7 @@ export interface ComposeService {
   family: string;
   // notStarted says why the Run never starts the service. It is null for a
   // test Service the Run starts, also when its variables are unresolved.
-  notStarted: Unsupported | null;
+  notStarted: NotStarted | null;
   // env holds the service's `environment` entries, interpolated from the
   // project's .env file. Only test Services have it (null otherwise, as
   // Go's nil map).
@@ -141,7 +150,7 @@ export function readCompose(
     try {
       data = readComposeFile(joinPath(root, name));
     } catch (e) {
-      problems.push({ path: name, reason: errorText(e) });
+      problems.push({ path: name, reason: errorMessage(e) });
       continue;
     }
     let doc: ComposeDoc;
@@ -178,10 +187,6 @@ export function readCompose(
   const out = [...merged].map(([name, m]) => resolveService(m, name, dotenv));
   out.sort((a, b) => compareBytes(a.name, b.name));
   return [out, problems];
-}
-
-function errorText(e: unknown): string {
-  return e instanceof Error ? e.message : String(e);
 }
 
 function firstLine(s: string): string {
@@ -415,7 +420,7 @@ function versionDiffers(ref: ImageRef, family: ServiceFamily): boolean {
 function versionParts(tag: string): bigint[] {
   const head = /^[0-9.]*/.exec(tag)?.[0] ?? "";
   const parts: bigint[] = [];
-  for (const p of head.replace(/^\.+|\.+$/g, "").split(".")) {
+  for (const p of trim(head, ".").split(".")) {
     // strconv.Atoi: decimal digits within the int64 range.
     if (!/^[0-9]+$/.test(p)) break;
     const n = BigInt(p);

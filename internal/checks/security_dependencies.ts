@@ -35,8 +35,12 @@ import { type Check, register } from "./check.ts";
 import { cutList, tail } from "./cut_text.ts";
 import { failedToRun } from "./helper_result.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
-import { shownPackage, shownPair, shownVersion } from "./shown_lockfile.ts";
-import { shownWord } from "./shown_text.ts";
+import {
+  shownPackage,
+  shownPair,
+  shownVersion,
+  shownWord,
+} from "./shown_text.ts";
 import {
   loadPackageLockfile,
   type PackageLockfile,
@@ -58,6 +62,8 @@ import {
   scannedPackages,
   unmarshalText,
 } from "./security_dependencies_osv.ts";
+import { errorMessage } from "../gocompat/errors.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 export const depsSecurityID = "security.dependencies";
 
@@ -295,7 +301,7 @@ async function runDependencies(
 /** ScanFailure says why a scan cannot be trusted at all. */
 export interface ScanFailure {
   status: ExecStatus;
-  code: string;
+  code: ReasonCode;
   reason: string;
 }
 
@@ -457,7 +463,7 @@ function newDependencySource(
         reasonCode: "lockfile_unreadable",
         reason:
           "the lockfile could not be prepared for the scan: " +
-          (err instanceof Error ? err.message : String(err)),
+          errorMessage(err),
       },
     ];
   }
@@ -530,7 +536,7 @@ export function dependencyLockfile(
         reasonCode: "lockfile_unreadable",
         reason:
           "the lockfile that npm install produced cannot be used: " +
-          (err instanceof Error ? err.message : String(err)),
+          errorMessage(err),
       },
     ];
   }

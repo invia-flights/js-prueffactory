@@ -13,14 +13,16 @@ import { isDeadline, withTimeout } from "../gocompat/context.ts";
 import { formatRFC3339 } from "../gocompat/json.ts";
 import { trimSpace } from "../gocompat/strings.ts";
 import {
-  type Duration,
+  daysIn,
   durationString,
   hour,
   minute,
+  type Duration,
 } from "../gocompat/time.ts";
 import { goString } from "../gocompat/utf8.ts";
 import { acquire } from "./lock.ts";
 import { lastLines } from "./toolvolume.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** AdvisoryMountPath is where the advisory database volume is mounted. */
 export const AdvisoryMountPath = "/osv-db";
@@ -136,14 +138,6 @@ export function parseDBDate(s: string): Date | null {
   return new Date(date.getTime() - offset * 60_000);
 }
 
-function daysIn(month: number, year: number): number {
-  if (month === 2) {
-    const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-    return leap ? 29 : 28;
-  }
-  return [4, 6, 9, 11].includes(month) ? 30 : 31;
-}
-
 /**
  * needsRefresh says whether a database of the given date is too old at time
  * now. A missing date and a date in the future (a clock that went back)
@@ -176,7 +170,9 @@ export async function ensureAdvisoryDB(
   try {
     lock = await acquire(signal, join(cfg.cacheDir, "advisorydb.lock"));
   } catch (err) {
-    throw new Error(`advisory database lock: ${message(err)}`, { cause: err });
+    throw new Error(`advisory database lock: ${errorMessage(err)}`, {
+      cause: err,
+    });
   }
   try {
     const name = await cfg.docker.cacheVolume(signal, kind);
@@ -197,18 +193,18 @@ export async function ensureAdvisoryDB(
       }
       if (date === null) {
         throw new Error(
-          `the advisory database could not be downloaded: ${message(err)}`,
+          `the advisory database could not be downloaded: ${errorMessage(err)}`,
           { cause: err },
         );
       }
       logf(
-        `warning: the advisory database could not be refreshed, using the one of ${formatDBDate(date)}: ${message(err)}`,
+        `warning: the advisory database could not be refreshed, using the one of ${formatDBDate(date)}: ${errorMessage(err)}`,
       );
       return {
         name,
         date,
         refreshed: false,
-        warning: `the refresh failed: ${message(err)}`,
+        warning: `the refresh failed: ${errorMessage(err)}`,
       };
     }
     logf("downloaded the advisory database");
@@ -216,10 +212,6 @@ export async function ensureAdvisoryDB(
   } finally {
     lock.release();
   }
-}
-
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
 }
 
 /**
@@ -246,7 +238,7 @@ async function readAdvisoryDate(
     });
   } catch (err) {
     throw new Error(
-      `cannot inspect the advisory database volume: ${message(err)}`,
+      `cannot inspect the advisory database volume: ${errorMessage(err)}`,
       { cause: err },
     );
   }
@@ -301,7 +293,7 @@ async function refreshAdvisoryDB(
             { cause: err },
           );
         }
-        throw new Error(`${what}: ${message(err)}`, { cause: err });
+        throw new Error(`${what}: ${errorMessage(err)}`, { cause: err });
       }
       if (!ok(res.exitCode)) {
         throw new Error(

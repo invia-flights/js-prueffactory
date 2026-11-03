@@ -1,3 +1,4 @@
+import { daysIn } from "../gocompat/time.ts";
 // The formats whose judgement and error text the port takes from the Go
 // build's validator (santhosh-tekuri/jsonschema/v6 format.go): date-time, date
 // and time of RFC 3339. Ajv's own date-time accepts a space for the T, which
@@ -37,9 +38,10 @@ function dateTime(value: string): string | undefined {
   return undefined;
 }
 
-// atoi is strconv.Atoi for the short fields of a time: an optional sign and
+// atoiField is strconv.Atoi for the short fields of a time (it does not
+// check the range, unlike gocompat/strconv): an optional sign and
 // decimal digits; undefined where Go returns an error.
-function atoi(s: string): number | undefined {
+function atoiField(s: string): number | undefined {
   return /^[+-]?[0-9]+$/.test(s) ? Number(s) : undefined;
 }
 
@@ -52,7 +54,7 @@ function time(str: string): string | undefined {
   }
   const hms: number[] = [];
   for (const tok of [str.slice(0, 2), str.slice(3, 5), str.slice(6, 8)]) {
-    const i = atoi(tok);
+    const i = atoiField(tok);
     if (i === undefined) {
       return "invalid hour/min/sec";
     }
@@ -101,7 +103,7 @@ function time(str: string): string | undefined {
     }
     const zhm: number[] = [];
     for (const tok of [str.slice(0, 2), str.slice(3)]) {
-      const i = atoi(tok);
+      const i = atoiField(tok);
       if (i === undefined) {
         return "invalid hour/min in offset";
       }
@@ -133,9 +135,9 @@ function time(str: string): string | undefined {
 function date(s: string): string | undefined {
   const layout = "2006-01-02";
   const cannot = (valueElem: string, layoutElem: string) =>
-    `parsing time ${timeQuote(s)} as ${timeQuote(layout)}: cannot parse ${timeQuote(valueElem)} as ${timeQuote(layoutElem)}`;
+    `parsing time ${timeQuoteBytes(s)} as ${timeQuoteBytes(layout)}: cannot parse ${timeQuoteBytes(valueElem)} as ${timeQuoteBytes(layoutElem)}`;
   const outOfRange = (what: string) =>
-    `parsing time ${timeQuote(s)}: ${what} out of range`;
+    `parsing time ${timeQuoteBytes(s)}: ${what} out of range`;
 
   let value = s;
   // Go's stdLongYear wants a digit first, so a sign is not a year.
@@ -172,7 +174,7 @@ function date(s: string): string | undefined {
   }
   value = value.slice(2);
   if (value.length > 0) {
-    return `parsing time ${timeQuote(s)}: extra text: ${timeQuote(value)}`;
+    return `parsing time ${timeQuoteBytes(s)}: extra text: ${timeQuoteBytes(value)}`;
   }
   if (day < 1 || day > daysIn(month, year)) {
     return outOfRange("day");
@@ -191,17 +193,10 @@ function twoDigits(s: string): number | undefined {
   return /^[0-9]{2}/.test(s) ? Number(s.slice(0, 2)) : undefined;
 }
 
-function daysIn(month: number, year: number): number {
-  if (month === 2) {
-    const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
-    return leap ? 29 : 28;
-  }
-  return [4, 6, 9, 11].includes(month) ? 30 : 31;
-}
-
-// timeQuote is the time package's quote of a byte string: bytes that are not
+// timeQuoteBytes is the time package's quote of a byte string (gocompat/time
+// has timeQuote for a text): bytes that are not
 // printable ASCII are written as \xNN.
-function timeQuote(s: string): string {
+function timeQuoteBytes(s: string): string {
   let out = '"';
   for (const c of s) {
     const b = c.charCodeAt(0);

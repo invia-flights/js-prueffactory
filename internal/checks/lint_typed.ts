@@ -88,6 +88,7 @@ import {
   tscProblem,
   typesTestTargets,
 } from "./types_strictness.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const lintTypedID = "lint.typed";
 
@@ -230,14 +231,6 @@ export const lintTyped: Check = {
 
 register(lintTypedID, lintTyped);
 
-function packageOf(input: Input): NonNullable<Input["context"]["package"]> {
-  const pkg = input.context.package;
-  if (pkg === null) {
-    throw new Error("lint.typed examines packages");
-  }
-  return pkg;
-}
-
 /**
  * typedLintFiles lists the files of the run, relative to the package folder
  * and sorted: lint is what ESLint reads, program what the TypeScript program
@@ -273,7 +266,7 @@ export function typedLintFiles(input: Input): {
  */
 export function typedLintTsconfig(input: Input): string {
   const { program } = typedLintFiles(input);
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   const node = input.context.node === null ? "" : input.context.node.version;
   return typesTsconfigFor(program, pkg.path, node, pkg.usesMocha(), false);
 }
@@ -448,7 +441,7 @@ export function parseTypedLintOutput(
       []) as typeof files;
   } catch (err) {
     throw new Error(
-      `ESLint did not print its JSON document: ${err instanceof Error ? err.message : String(err)}`,
+      `ESLint did not print its JSON document: ${errorMessage(err)}`,
       { cause: err },
     );
   }
@@ -569,7 +562,7 @@ export function interpretTypedLint(input: Input, run: TypedLintRun): Result {
     }),
   ];
 
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   const tests = new Set<string>();
   for (const f of pkg.files) {
     if (f.class === TestCode) {
@@ -742,7 +735,7 @@ async function runLintTyped(
   signal: AbortSignal,
   input: Input,
 ): Promise<Result> {
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   const u = pkg.installUnsupported;
   if (u != null) {
     return { status: StatusUnsupported, reasonCode: u.code, reason: u.reason };
@@ -817,9 +810,7 @@ async function runLintTyped(
       run.messages = parseTypedLintOutput(container.stdout, workPath(pkg));
     } catch (err) {
       run.failed =
-        (err instanceof Error ? err.message : String(err)) +
-        ": " +
-        tail(goString(container.stderr), 800);
+        errorMessage(err) + ": " + tail(goString(container.stderr), 800);
     }
   }
 

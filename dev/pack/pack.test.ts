@@ -8,6 +8,7 @@ import {
   readFileSync,
   rmSync,
   symlinkSync,
+  writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, posix } from "node:path";
@@ -33,11 +34,12 @@ function gitEnv(dir: string): Record<string, string | undefined> {
 async function packIn(
   root: string,
   out: string,
+  ...flags: string[]
 ): Promise<{ code: number; stderr: string }> {
   const stderr = new PassThrough();
   const chunks: Buffer[] = [];
   stderr.on("data", (c: Buffer) => chunks.push(c));
-  const code = await pack(["-o", out], {
+  const code = await pack(["-o", out, ...flags], {
     root,
     env: gitEnv(root),
     stdout: new PassThrough(),
@@ -69,6 +71,79 @@ test("pack refuses a git work tree without a commit", async (t) => {
     `pack: ${root} has no commit to stamp into the package\n`,
   );
   assert.deepEqual(readdirSync(outDir), []);
+});
+
+// repoWithCommit makes a git work tree with one commit and a tracked file.
+function repoWithCommit(root: string): void {
+  const env = gitEnv(root);
+  const git = (...args: string[]): void => {
+    execFileSync(
+      "git",
+      [
+        "-c",
+        "user.name=Test",
+        "-c",
+        "user.email=test@example.test",
+        "-c",
+        "commit.gpgsign=false",
+        "-c",
+        "core.hooksPath=/dev/null",
+        ...args,
+      ],
+      { cwd: root, env, stdio: "ignore" },
+    );
+  };
+  git("init", "--quiet");
+  writeFileSync(join(root, "tracked.txt"), "one\n");
+  git("add", "tracked.txt");
+  git("commit", "--quiet", "-m", "first");
+}
+
+test("pack refuses to stamp a work tree with uncommitted changes", async (t) => {
+  const out = join(tempDir(t), "x.tgz");
+  const changed = tempDir(t);
+  repoWithCommit(changed);
+  writeFileSync(join(changed, "tracked.txt"), "two\n");
+  const a = await packIn(changed, out);
+  assert.equal(a.code, 1);
+  assert.equal(
+    a.stderr,
+    `pack: ${changed} has uncommitted changes (M tracked.txt), so the commit would not describe what is packed; commit them, or pass --allow-dirty\n`,
+  );
+
+  const untracked = tempDir(t);
+  repoWithCommit(untracked);
+  writeFileSync(join(untracked, "new.ts"), "export {};\n");
+  const b = await packIn(untracked, out);
+  assert.equal(b.code, 1);
+  assert.match(b.stderr, /has uncommitted changes \(\?\? new\.ts\)/);
+  assert.equal(existsSync(out), false);
+});
+
+test("--allow-dirty packs anyway, and a clean work tree needs no flag", async (t) => {
+  // Neither folder has a TypeScript compiler, so the build stops there: what
+  // matters is that the check for changes did not.
+  const out = join(tempDir(t), "x.tgz");
+  const dirty = tempDir(t);
+  repoWithCommit(dirty);
+  writeFileSync(join(dirty, "tracked.txt"), "two\n");
+  const a = await packIn(dirty, out, "--allow-dirty");
+  assert.equal(a.code, 1);
+  assert.match(a.stderr, /^pack: the TypeScript compiler failed/);
+
+  const clean = tempDir(t);
+  repoWithCommit(clean);
+  const b = await packIn(clean, out);
+  assert.match(b.stderr, /^pack: the TypeScript compiler failed/);
+});
+
+test("npm pack at the repository root refuses and names the pack command", () => {
+  const r = spawnSync("npm", ["pack", "--dry-run", "--json"], {
+    cwd: join(import.meta.dirname, "..", ".."),
+    encoding: "utf8",
+  });
+  assert.notEqual(r.status, 0);
+  assert.match(r.stderr, /npm run pack:tarball/);
 });
 
 // The source tree is the repository this test file belongs to.
@@ -115,7 +190,7 @@ describe("a packed tarball", () => {
     const stderr = new PassThrough();
     const chunks: Buffer[] = [];
     stderr.on("data", (c: Buffer) => chunks.push(c));
-    const code = await pack(["-o", tarball], {
+    const code = await pack(["-o", tarball, "--allow-dirty"], {
       root: repoRoot,
       env: process.env,
       stdout: new PassThrough(),
@@ -170,6 +245,7 @@ describe("a packed tarball", () => {
       // .ts file; comments may still name one.
       assert.doesNotMatch(
         text,
+        // eslint-disable-next-line regexp/no-super-linear-move -- reads the packed sources of this repository, which are not untrusted input
         /^[^/\n]*from "\.{1,2}\/[^"]*\.ts";$|import\("\.{1,2}\/[^"]*\.ts"\)/m,
         entry,
       );

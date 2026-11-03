@@ -31,7 +31,7 @@ import { newFinding } from "../resultset/zero.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
 import { unsupportedInstallReason } from "./package_install.ts";
 import { maxProjectFileBytes, readCapped } from "./readcap.ts";
-import { shownLockKey } from "./shown_lockfile.ts";
+import { shownLockKey } from "./shown_text.ts";
 
 /**
  * lockfileApplicability is the Applicability of the lockfile Checks: they

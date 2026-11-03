@@ -5,7 +5,7 @@ import { randomBytes } from "node:crypto";
 
 import { parseMochaArgs, RunnerNodeTest } from "../discovery/discovery.ts";
 import type { ContainerResult, EndMarker } from "../docker/driver.ts";
-import { fields, trimSpace } from "../gocompat/strings.ts";
+import { fields, trimRight, trimSpace } from "../gocompat/strings.ts";
 import { goString } from "../gocompat/utf8.ts";
 import {
   fingerprintWithSuite,
@@ -31,7 +31,7 @@ import {
   noteServicesNotStarted,
   serviceNotStarted,
 } from "./service_not_started.ts";
-import { shownPath } from "./shown_text.ts";
+import { shownPackage, shownPath } from "./shown_text.ts";
 import type { SuiteEvents } from "./test_events.ts";
 import {
   type Frame,
@@ -507,15 +507,6 @@ export interface RawWarning {
   count: number;
 }
 
-/** trimRight removes every trailing carriage return (Go: strings.TrimRight(s, "\r")). */
-function trimCR(s: string): string {
-  let n = s.length;
-  while (n > 0 && s.charCodeAt(n - 1) === 0x0d) {
-    n--;
-  }
-  return s.slice(0, n);
-}
-
 /**
  * parseNodeWarnings reads the warnings Node printed, with their stack
  * traces. A trace is the run of "at" lines right below the warning line; the
@@ -528,7 +519,7 @@ export function parseNodeWarnings(stderr: string): RawWarning[] {
   const byKey = new Map<string, RawWarning>();
   const lines = stderr.split("\n");
   for (let i = 0; i < lines.length; i++) {
-    const m = nodeWarning.exec(trimCR(lines[i] ?? ""));
+    const m = nodeWarning.exec(trimRight(lines[i] ?? "", "\r"));
     if (m === null) {
       continue;
     }
@@ -540,7 +531,7 @@ export function parseNodeWarnings(stderr: string): RawWarning[] {
       count: 1,
     };
     for (; i + 1 < lines.length; i++) {
-      const sm = stackLine.exec(trimCR(lines[i + 1] ?? ""));
+      const sm = stackLine.exec(trimRight(lines[i + 1] ?? "", "\r"));
       if (sm === null) {
         break;
       }
@@ -584,20 +575,6 @@ export function topFrameFile(stack: readonly string[]): string {
     }
   }
   return "";
-}
-
-/**
- * shownPackage is the name of a dependency as trusted text allows it: it
- * comes from a path in the test output, so a name that is no npm package
- * name is replaced (hardening beyond Go, which wrote it raw; real names read
- * the same).
- */
-export function shownPackage(name: string): string {
-  return /^(?:@[A-Za-z0-9~][A-Za-z0-9._~-]{0,213}\/)?[A-Za-z0-9~][A-Za-z0-9._~-]{0,213}$/.test(
-    name,
-  )
-    ? name
-    : "(package name with unusual characters)";
 }
 
 /** dependencyOf names the package a path inside node_modules belongs to, or "". */

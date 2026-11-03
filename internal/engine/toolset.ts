@@ -10,6 +10,7 @@ import { imageRef } from "../toolset/toolset.ts";
 import { ensure as ensureToolset } from "../toolvolume/toolvolume.ts";
 import type { RunState } from "./engine.ts";
 import { runnable } from "./plan.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** needsToolset says whether any execution that will run mounts the toolset volume. */
 export function needsToolset(r: RunState): boolean {
@@ -51,7 +52,7 @@ export async function prepareToolset(
     if (signal.aborted) {
       throw contextError(signal);
     }
-    r.toolsetErr = err instanceof Error ? err.message : String(err);
+    r.toolsetErr = errorMessage(err);
     r.log.print(`toolset preparation failed: ${r.toolsetErr}`);
   }
 }

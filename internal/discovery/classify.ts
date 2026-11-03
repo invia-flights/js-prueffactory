@@ -1,5 +1,5 @@
 import { split } from "../gocompat/path.ts";
-import { sortStrings } from "../gocompat/strings.ts";
+import { sortStrings, trim } from "../gocompat/strings.ts";
 
 // FileClass is the File class of a project file.
 export type FileClass = "source" | "test_code" | "test_data" | "build_output";
@@ -40,7 +40,7 @@ export function classify(rel: string): FileClass {
 }
 
 function trimSlashes(s: string): string {
-  return s.replace(/^\/+|\/+$/g, "");
+  return trim(s, "/");
 }
 
 // folderNames returns the folder names that put a file into a File class,

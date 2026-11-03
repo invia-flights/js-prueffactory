@@ -14,6 +14,7 @@ import { ExitInternalError, ExitOK } from "../resultset/exitcode.ts";
 import type { Options } from "./options.ts";
 import { resolveOriginal } from "./paths.ts";
 import { usageError } from "./usage.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 // catalogEntries is the Catalog the command line resolves against. Tests
 // replace it through useCatalog.
@@ -46,7 +47,7 @@ export function validateSelection(o: Options): void {
   try {
     o.selection = resolveFast(catalogEntries(), o.only, o.exclude, o.fast);
   } catch (err) {
-    throw usageError(err instanceof Error ? err.message : String(err));
+    throw usageError(errorMessage(err));
   }
 }
 
@@ -99,9 +100,7 @@ export function runListChecks(
         ? listChecksJSON(listing)
         : listChecksMarkdown(listing);
   } catch (err) {
-    stderr.write(
-      `js-prueffactory: ${err instanceof Error ? err.message : String(err)}\n`,
-    );
+    stderr.write(`js-prueffactory: ${errorMessage(err)}\n`);
     return ExitInternalError;
   }
   stdout.write(out);

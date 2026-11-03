@@ -70,6 +70,7 @@ import {
   testKeyInSuite,
 } from "./tests_repeat.ts";
 import { testsExistingID } from "./tests_existing.ts";
+import type { ReasonCode } from "../resultset/reason_codes.ts";
 
 export const testsFlakyID = "tests.flaky";
 
@@ -289,7 +290,7 @@ register(testsFlakyID, testsFlaky);
  * the execution partial.
  */
 export interface RepeatCut {
-  code: string;
+  code: ReasonCode;
   reason: string;
   end: RepeatEnd;
 }

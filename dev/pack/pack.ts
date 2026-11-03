@@ -19,6 +19,7 @@ import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import type { Writable } from "node:stream";
 import { parseArgs } from "node:util";
+import { errorMessage } from "../../internal/gocompat/errors.ts";
 
 export interface IO {
   // root is the source folder: the repository root.
@@ -30,27 +31,32 @@ export interface IO {
 
 class PackError extends Error {}
 
-const usage = "usage: node dev/pack/main.ts -o <tarball>\n";
+const usage = "usage: node dev/pack/main.ts -o <tarball> [--allow-dirty]\n";
 
 /** pack builds the tarball and returns the exit code: 0, 1 (failed) or 2 (usage). */
 export async function pack(args: readonly string[], io: IO): Promise<number> {
   let out: string;
+  let allowDirty: boolean;
   try {
     const { values } = parseArgs({
       args: [...args],
-      options: { o: { type: "string" } },
+      options: { o: { type: "string" }, "allow-dirty": { type: "boolean" } },
       allowPositionals: false,
     });
     if (values.o === undefined || values.o === "") {
       throw new Error("-o is required");
     }
     out = values.o;
+    allowDirty = values["allow-dirty"] === true;
   } catch (error) {
-    io.stderr.write(`pack: ${message(error)}\n${usage}`);
+    io.stderr.write(`pack: ${errorMessage(error)}\n${usage}`);
     return 2;
   }
   try {
     const commit = await revision(io);
+    if (!allowDirty) {
+      await requireClean(io);
+    }
     const version = await build(io, commit, out);
     io.stdout.write(`${out}: js-prueffactory ${version} at ${commit}\n`);
     return 0;
@@ -59,10 +65,6 @@ export async function pack(args: readonly string[], io: IO): Promise<number> {
     io.stderr.write(`pack: ${error.message}\n`);
     return 1;
   }
-}
-
-function message(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }
 
 // git runs git in root and returns its trimmed stdout, or undefined when git
@@ -105,6 +107,27 @@ async function revision(io: IO): Promise<string> {
     throw new PackError(`${io.root} has no commit to stamp into the package`);
   }
   return commit;
+}
+
+// requireClean refuses a work tree with changes that the commit does not
+// have: the tarball is built from the files on disk and stamped with the
+// commit, so the stamp would name something other than what is packed.
+async function requireClean(io: IO): Promise<void> {
+  const status = await git(io, "status", "--porcelain");
+  if (status === undefined) {
+    throw new PackError(`cannot read the state of the work tree at ${io.root}`);
+  }
+  if (status === "") {
+    return;
+  }
+  const lines = status.split("\n");
+  const shown = lines.slice(0, 5).map((l) => l.trim());
+  if (lines.length > shown.length) {
+    shown.push(`and ${String(lines.length - shown.length)} more`);
+  }
+  throw new PackError(
+    `${io.root} has uncommitted changes (${shown.join(", ")}), so the commit would not describe what is packed; commit them, or pass --allow-dirty`,
+  );
 }
 
 // dataFiles are the files besides the emitted JavaScript that the package
@@ -201,7 +224,7 @@ async function build(io: IO, commit: string, out: string): Promise<string> {
     try {
       copyFileSync(join(dest, result.filename), out);
     } catch (error) {
-      throw new PackError(`cannot write ${out}: ${message(error)}`);
+      throw new PackError(`cannot write ${out}: ${errorMessage(error)}`);
     }
     return String(source.version);
   } finally {

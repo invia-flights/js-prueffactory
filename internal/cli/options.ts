@@ -8,6 +8,7 @@ import { quote } from "../gocompat/fmt.ts";
 import type { BudgetValue } from "./budget.ts";
 import { validateListChecks, validateSelection } from "./selection.ts";
 import { usageError } from "./usage.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export { ErrHelp };
 
@@ -78,7 +79,7 @@ export function parse(command: string, args: readonly string[]): Options {
       if (err === ErrHelp) {
         throw err;
       }
-      throw usageError(err instanceof Error ? err.message : String(err));
+      throw usageError(errorMessage(err));
     }
     const [first, ...after] = fs.args();
     if (first === undefined) {

@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import type { GeneratorScript } from "../discovery/generators.ts";
 import { quoteJSONString } from "../gocompat/json.ts";
 import { base, clean, isAbs, join } from "../gocompat/path.ts";
-import { compareBytes } from "../gocompat/strings.ts";
+import { compareBytes, trimRight } from "../gocompat/strings.ts";
 import { checkValid, unquote } from "../gocompat/unmarshal.ts";
 import { goString } from "../gocompat/utf8.ts";
 import { newFingerprint } from "../resultset/fingerprint.ts";
@@ -511,7 +511,7 @@ function exactDecimal(n: string): string {
   const negative = n.startsWith("-");
   const [intPart = "", frac = ""] = (negative ? n.slice(1) : n).split(".");
   const i = intPart.replace(/^0+/, "");
-  const f = frac.replace(/0+$/, "");
+  const f = trimRight(frac, "0");
   if (i === "" && f === "") {
     return "0";
   }

@@ -5,6 +5,7 @@ import { imageRef } from "../toolset/toolset.ts";
 import { ensureKubernetesSchemas } from "../toolvolume/kubernetesschemas.ts";
 import type { RunState } from "./engine.ts";
 import { runnable } from "./plan.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** needsKubernetesSchemas says whether any execution that will run validates with the Kubernetes schemas. */
 export function needsKubernetesSchemas(r: RunState): boolean {
@@ -47,7 +48,7 @@ export async function prepareKubernetesSchemas(
     if (signal.aborted) {
       throw contextError(signal);
     }
-    const text = err instanceof Error ? err.message : String(err);
+    const text = errorMessage(err);
     r.log.print(`Kubernetes schema preparation failed: ${text}`);
     r.kubernetesSchemas = { volume: "", err: text };
   }

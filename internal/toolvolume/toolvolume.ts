@@ -27,6 +27,7 @@ import {
 import { version as toolsetVersion } from "../toolset/all.ts";
 import { helmChecksumMarker, helmInstallScript, MountPath } from "./helm.ts";
 import { acquire } from "./lock.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export { HelmBin, MountPath } from "./helm.ts";
 
@@ -71,10 +72,6 @@ export function volumeName(version: string): string {
   return volumePrefix + version;
 }
 
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
-
 /** isDeadlineError is errors.Is(err, context.DeadlineExceeded) over the cause chain. */
 function isDeadlineError(err: unknown): boolean {
   for (let e: unknown = err, depth = 0; depth < 32; depth++) {
@@ -115,7 +112,7 @@ export async function ensure(
   try {
     l = await acquire(signal, lockFile(cfg));
   } catch (err) {
-    throw new Error(`toolset lock: ${message(err)}`, { cause: err });
+    throw new Error(`toolset lock: ${errorMessage(err)}`, { cause: err });
   }
   try {
     await createLabelled(signal, d, name, version);
@@ -201,7 +198,7 @@ async function isComplete(
       ],
     });
   } catch (err) {
-    throw new Error(`cannot inspect the toolset volume: ${message(err)}`, {
+    throw new Error(`cannot inspect the toolset volume: ${errorMessage(err)}`, {
       cause: err,
     });
   }
@@ -258,7 +255,7 @@ async function install(
           { cause: err },
         );
       }
-      throw new Error(`cannot install the tools: ${message(err)}`, {
+      throw new Error(`cannot install the tools: ${errorMessage(err)}`, {
         cause: err,
       });
     }
@@ -337,7 +334,7 @@ async function removeOtherVersions(
   try {
     names = await cfg.docker.listVolumes(signal, `label=${LabelCache}=toolset`);
   } catch (err) {
-    logf(`warning: cannot list toolset volumes: ${message(err)}`);
+    logf(`warning: cannot list toolset volumes: ${errorMessage(err)}`);
     return;
   }
   for (const n of names) {
@@ -350,7 +347,7 @@ async function removeOtherVersions(
       }
     } catch (err) {
       logf(
-        `warning: cannot remove the toolset volume ${n} of another version: ${message(err)}`,
+        `warning: cannot remove the toolset volume ${n} of another version: ${errorMessage(err)}`,
       );
     }
   }

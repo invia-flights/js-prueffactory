@@ -16,6 +16,7 @@ import { compareBytes } from "../gocompat/strings.ts";
 import { type Schema, unmarshal } from "../gocompat/unmarshal.ts";
 import type { Metric } from "../resultset/types.ts";
 import { newMetric } from "../resultset/zero.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const testsCoverageID = "tests.coverage";
 
@@ -125,10 +126,7 @@ export function interpretCoverage(
   try {
     entries = decodeSummary(summary);
   } catch (err) {
-    return failed(
-      "c8's JSON summary is not readable: " +
-        (err instanceof Error ? err.message : String(err)),
-    );
+    return failed("c8's JSON summary is not readable: " + errorMessage(err));
   }
   const total = entries.get("total");
   if (total === undefined) {

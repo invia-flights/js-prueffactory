@@ -234,19 +234,6 @@ test("a Check that throws is a tool_error, not the end of the Run", async (t) =>
   assert.equal(res.exec.reason, "the Check panicked: index out of range");
 });
 
-test("a Check whose family is not ported yet is a tool_error that names the gap", async (t) => {
-  const p = planned({
-    entry: entry("syntax.parse"),
-    check: { applicability: () => ["applicable", ""] },
-  });
-  const res = await executeOne(runState(t), p);
-  assert.equal(res.exec.status, StatusToolError);
-  assert.equal(
-    res.exec.reason,
-    "the TypeScript build does not run syntax.parse yet",
-  );
-});
-
 test("the tools and the npm version a Check reports go into its Context, once and in name order", async (t) => {
   const tool = (name: string) => ({ name, version: "1", digest: "sha256:x" });
   const p = planned({

@@ -13,12 +13,13 @@
   },
   "scripts": {
     "test": "node --test 'bin/**/!(*.docker).test.ts' 'cmd/**/!(*.docker).test.ts' 'dev/**/!(*.docker).test.ts' 'internal/**/!(*.docker).test.ts'",
-    "test:docker": "node --test --test-timeout=3600000 'bin/**/*.docker.test.ts' 'cmd/**/*.docker.test.ts' 'dev/**/*.docker.test.ts' 'internal/**/*.docker.test.ts'",
+    "test:docker": "s=0; node --test --test-timeout=3600000 'bin/**/!(*.serial).docker.test.ts' 'cmd/**/!(*.serial).docker.test.ts' 'dev/**/!(*.serial).docker.test.ts' 'internal/**/!(*.serial).docker.test.ts' || s=1; node --test --test-concurrency=1 --test-timeout=3600000 'internal/**/*.serial.docker.test.ts' || s=1; exit $s",
     "lint": "eslint --max-warnings=0 .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc",
     "pack:tarball": "node dev/pack/main.ts -o js-prueffactory.tgz",
+    "prepack": "echo 'npm pack of the repository root would ship sources and test data: run npm run pack:tarball instead' >&2; exit 1",
     "test:golden-update": "UPDATE_GOLDEN=1 node --test internal/writer/golden.test.ts"
   },
   "overrides": {
@@ -28,6 +29,7 @@
     "@eslint/js": "10.0.1",
     "@types/node": "24.19.2",
     "eslint": "10.14.0",
+    "eslint-plugin-regexp": "3.3.1",
     "prettier": "3.9.10",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1"

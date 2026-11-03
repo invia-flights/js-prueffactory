@@ -609,6 +609,7 @@ test("topFrameFile skips Node's own frames", () => {
 
 test("framePath equals the regular expression it replaces on many frames", () => {
   // Go's ^(?:.*\()?(.*?):\d+(?::\d+)?\)?$ without a line feed in the text.
+  // eslint-disable-next-line regexp/no-super-linear-backtracking -- the reference that framePath replaces, run only on short generated strings; its backtracking is why framePath exists
   const re = /^(?:[^\n]*\()?([^\n]*?):\d+(?::\d+)?\)?$/;
   const alphabet = ["a", "(", ")", ":", "1", "2", " ", "/", "."];
   let seed = 12345;

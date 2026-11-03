@@ -19,7 +19,7 @@ import {
   recordedCommand,
   runChunks,
   snapshotPath,
-  toolContainer,
+  snapshotToolContainer,
   toolRef,
 } from "./repo_tools.ts";
 
@@ -83,7 +83,7 @@ async function runDockerfile(
     Hadolint,
     paths,
     (n, chunk) =>
-      toolContainer(
+      snapshotToolContainer(
         input,
         `hadolint-${String(n)}`,
         Hadolint,

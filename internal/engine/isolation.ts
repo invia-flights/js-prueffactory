@@ -11,6 +11,7 @@ import {
 import { Alpine } from "../toolset/helm.ts";
 import { imageRef } from "../toolset/toolset.ts";
 import type { RunState } from "./engine.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /**
  * isolationProbeScript runs in the pinned Alpine image on the Run's internal
@@ -52,10 +53,6 @@ export function readIsolationProbe(
   return IsolationNotProbed;
 }
 
-function message(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
-}
-
 /**
  * probeIsolation checks that a container on the Run's internal network
  * cannot reach the internet, because the behaviour of `--internal` on Docker
@@ -76,7 +73,7 @@ export async function probeIsolation(
     await drv.pull(signal, imageRef(Alpine));
   } catch (err) {
     r.log.print(
-      `warning: the network isolation probe could not start: ${message(err)}`,
+      `warning: the network isolation probe could not start: ${errorMessage(err)}`,
     );
     return;
   }
@@ -94,7 +91,7 @@ export async function probeIsolation(
   } catch (err) {
     if (!signal.aborted) {
       r.log.print(
-        `warning: the network isolation probe could not run: ${message(err)}`,
+        `warning: the network isolation probe could not run: ${errorMessage(err)}`,
       );
     }
     return;

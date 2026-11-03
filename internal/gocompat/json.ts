@@ -7,7 +7,7 @@
 // nil slice as null, keeps the sign of negative zero and formats times as RFC
 // 3339 with trimmed fractional seconds.
 
-import { compareBytes } from "./strings.ts";
+import { compareBytes, trimRight, zeroPad } from "./strings.ts";
 
 /** RedactTag is the `redact` struct tag of a report field (see redaction). */
 export type RedactTag = "vocabulary" | "identifier";
@@ -174,15 +174,11 @@ export function formatNumber(x: number): string {
   return Object.is(x, -0) ? "-0" : String(x);
 }
 
-function pad(n: number, width: number): string {
-  return String(n).padStart(width, "0");
-}
-
 /** formatRFC3339 is Go's t.UTC().Format(time.RFC3339): seconds, no fraction. */
 export function formatRFC3339(d: Date): string {
   return (
-    `${pad(d.getUTCFullYear(), 4)}-${pad(d.getUTCMonth() + 1, 2)}-${pad(d.getUTCDate(), 2)}` +
-    `T${pad(d.getUTCHours(), 2)}:${pad(d.getUTCMinutes(), 2)}:${pad(d.getUTCSeconds(), 2)}Z`
+    `${zeroPad(d.getUTCFullYear(), 4)}-${zeroPad(d.getUTCMonth() + 1, 2)}-${zeroPad(d.getUTCDate(), 2)}` +
+    `T${zeroPad(d.getUTCHours(), 2)}:${zeroPad(d.getUTCMinutes(), 2)}:${zeroPad(d.getUTCSeconds(), 2)}Z`
   );
 }
 
@@ -197,7 +193,7 @@ export function formatTime(d: Date): string {
   if (ms === 0) {
     return base;
   }
-  return `${base.slice(0, -1)}.${pad(ms, 3).replace(/0+$/, "")}Z`;
+  return `${base.slice(0, -1)}.${trimRight(zeroPad(ms, 3), "0")}Z`;
 }
 
 export interface MarshalOptions {

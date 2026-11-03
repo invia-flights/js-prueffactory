@@ -9,6 +9,7 @@ import type { Finding } from "../resultset/types.ts";
 import type { Input } from "./input.ts";
 import { workPath } from "./package_install.ts";
 import { repoFinding } from "./repo_findings.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 /** lintExistingID is defined here so that the parts of the Check need no cycle. */
 export const lintExistingID = "lint.existing";
@@ -79,12 +80,11 @@ export function projectESLintFindings(
     files = ((unmarshal(stdout, eslintSchema) as GoSlice | null)?.items() ??
       []) as typeof files;
   } catch (err) {
-    throw new Error(
-      `ESLint printed no JSON report: ${err instanceof Error ? err.message : String(err)}`,
-      { cause: err },
-    );
+    throw new Error(`ESLint printed no JSON report: ${errorMessage(err)}`, {
+      cause: err,
+    });
   }
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   const prefix = workPath(pkg) + "/";
   const out: Finding[] = [];
   for (const f of files) {
@@ -182,10 +182,9 @@ export function biomeFindings(input: Input, stdout: Uint8Array): Finding[] {
     };
     diagnostics = (doc.diagnostics?.items() ?? []) as BiomeDiagnostic[];
   } catch (err) {
-    throw new Error(
-      `Biome printed no JSON report: ${err instanceof Error ? err.message : String(err)}`,
-      { cause: err },
-    );
+    throw new Error(`Biome printed no JSON report: ${errorMessage(err)}`, {
+      cause: err,
+    });
   }
   const out: Finding[] = [];
   for (const d of diagnostics) {
@@ -267,20 +266,12 @@ export function biomeLineAndColumn(
   return [line, column];
 }
 
-function packageOf(input: Input): NonNullable<Input["context"]["package"]> {
-  const pkg = input.context.package;
-  if (pkg === null) {
-    throw new Error("lint.existing examines packages");
-  }
-  return pkg;
-}
-
 /**
  * projectFile is a path relative to the folder of the package as a path
  * relative to the project root. The paths come from a linter that ran project
  * code, so the result is confined to the project root, whatever they hold.
  */
 export function projectFile(input: Input, rel: string): string {
-  const p = join("/", packageOf(input).path, rel);
+  const p = join("/", input.pkg().path, rel);
   return p.startsWith("/") ? p.slice(1) : p;
 }

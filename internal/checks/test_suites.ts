@@ -3,7 +3,7 @@
 // test_suites.go): one Input is bound to one suite, and the results of the
 // suites are added up for the Checks that report the package as a whole.
 import type { Package } from "../discovery/discovery.ts";
-import { toLower } from "../gocompat/strings.ts";
+import { toLower, trim } from "../gocompat/strings.ts";
 import { fingerprintWithSuite } from "../resultset/fingerprint.ts";
 import { quote } from "../resultset/quote.ts";
 import {
@@ -55,7 +55,7 @@ export function fileNameSlug(s: string): string {
   for (const ch of toLower(s)) {
     b += /^[a-z0-9.]$/.test(ch) ? ch : "-";
   }
-  return b.replace(/^-+|-+$/g, "");
+  return trim(b, "-");
 }
 
 /**

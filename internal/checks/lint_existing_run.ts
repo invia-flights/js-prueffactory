@@ -145,19 +145,11 @@ const outcome = (o: Partial<LintOutcome>): LintOutcome => ({
   ...o,
 });
 
-function packageOf(input: Input): NonNullable<Input["context"]["package"]> {
-  const pkg = input.context.package;
-  if (pkg === null) {
-    throw new Error("lint.existing examines packages");
-  }
-  return pkg;
-}
-
 export async function runLintExisting(
   signal: AbortSignal,
   input: Input,
 ): Promise<Result> {
-  const pkg = packageOf(input);
+  const pkg = input.pkg();
   const u = pkg.installUnsupported;
   if (u != null) {
     return {
@@ -634,7 +626,7 @@ function firstBiomeError(stderr: string): string {
  * package.json when the package has none.
  */
 function biomeConfigFile(input: Input): string {
-  for (const f of packageOf(input).files) {
+  for (const f of input.pkg().files) {
     if (f.packageRel === "biome.json" || f.packageRel === "biome.jsonc") {
       return f.packageRel;
     }
