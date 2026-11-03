@@ -1,0 +1,36 @@
+/p/biome.json:1:72 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `bogusKey`.
+  
+  > 1 │ { "files": { "includes": ["**/*.js"] }, "linter": { "enabled": true }, "bogusKey": 1 }
+      │                                                                        ^^^^^^^^^^
+    2 │ 
+  
+  i Known keys:
+  
+  - $schema
+  - root
+  - extends
+  - vcs
+  - files
+  - formatter
+  - linter
+  - tailwind
+  - javascript
+  - json
+  - css
+  - markdown
+  - yaml
+  - graphql
+  - grit
+  - html
+  - overrides
+  - plugins
+  - assist
+  
+
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+
