@@ -146,9 +146,9 @@ describe("a Run failure makes a part unknown and the range covers both ends", ()
     [
       "tool error",
       (p) => {
-        p.status("tests.existing", StatusToolError, "no_test_events");
+        p.status("tests.existing", StatusToolError, "tool_output_unreadable");
       },
-      "tool_error: no_test_events",
+      "tool_error: tool_output_unreadable",
     ],
     [
       "infrastructure error",

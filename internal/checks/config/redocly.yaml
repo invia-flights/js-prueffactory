@@ -1,5 +1,178 @@
-# Pinned configuration of api.lint: the structural-only "spec" ruleset. It is
-# the only configuration Redocly CLI reads: a redocly.yaml in the project is
+# Pinned configuration of api.lint: Redocly's "spec" ruleset, audited against
+# the text of the specification of every version a rule applies to. It is the
+# only configuration Redocly CLI reads: a redocly.yaml in the project is
 # ignored.
+#
+# An error of api.lint says the document breaks the specification, so a rule
+# stays `error` only where a sentence of the specification with MUST, MUST NOT,
+# REQUIRED or SHALL (Swagger 2.0 writes "Required") demands what the rule
+# checks, and that sentence is quoted next to the rule with its section.
+# A sentence that only says what a consumer does with a construct (it SHALL be
+# ignored) describes the construct's effect and does not forbid it. Every
+# other rule is `warn`. Redocly sets one severity per rule and version, so a
+# rule that reports two kinds of problems is judged by what it is for, and a
+# kind the text does not back is named under the rule.
+#
+# Redocly's "spec" ruleset sets each rule per version (oas2Rules, oas3_0Rules,
+# oas3_1Rules, oas3_2Rules), and a version's setting wins over `rules:`, so a
+# rule is set in the version block that holds it. Rules that the "spec"
+# ruleset leaves off (no-invalid-media-type-examples for 3.0, spec-example-values
+# for 3.0 and 3.1) stay off. The quotes are from the latest patch release of
+# each version (Swagger 2.0, OpenAPI 3.0.4, 3.1.2 and 3.2.0); every quote was
+# checked to read the same in 3.0.3 and in 3.1.0 and 3.1.1.
+#
+# The sentence lines have the form `# <version> <section>: "<text>"`, and
+# internal/checks/redocly_config.test.ts checks that every `error` has one with
+# a requirement word and every `warn` says why not.
+#
+# Bumping the pinned Redocly version (internal/toolset/redocly.ts) means
+# repeating this audit for every rule the new version adds to "spec" and for
+# every version it newly supports, then changing the version on the next line.
+# audited-for-redocly: 2.70.0
 extends:
   - spec
+
+# Rules that "spec" sets for every version.
+rules:
+  # struct checks a document against the fixed fields of the specification:
+  # that a REQUIRED field is present, that a field has the type of its table
+  # and that a field with a closed set of values has one of them.
+  # 2.0 6.4.2.1: "Required. The title of the application."
+  # 3.0.4 4.7.2.1: "REQUIRED. The title of the API."
+  # 3.1.2 4.8.2.1: "REQUIRED. The title of the API."
+  # 3.2.0 4.2.1: "REQUIRED. The title of the API."
+  # One kind of problem it reports has no requirement behind it: "Property `x`
+  # is not expected here" for a field the specification does not list. No
+  # version says such a field MUST NOT exist, and 3.1 and 3.2 say a Schema
+  # Object may carry them:
+  # 3.1.2 4.8.24: "additional properties MAY omit the x- prefix within this object."
+  # 3.2.0 4.24: "additional properties MAY omit the x- prefix within this object."
+  # Redocly cannot set a severity per message, so the adapter
+  # (internal/checks/repo_findings.ts, redoclyLevel) reports that one
+  # message as a warning and leaves this rule at error.
+  struct: error
+  # no-unresolved-refs reports a $ref whose target cannot be found.
+  # no requirement: no version says a reference MUST resolve. OpenAPI 3.0 and
+  # 2.0 defer to JSON Reference, which says resolution SHOULD yield the value:
+  # JSON-Reference-03 4: "Resolution of a JSON Reference object SHOULD yield the referenced"
+  # 3.1.2 4.8.23: "The $ref string value contains a URI [RFC3986], which identifies"
+  # 3.2.0 4.23: "The $ref string value contains a URI [RFC3986], which identifies"
+  no-unresolved-refs: warn
+
+oas2Rules:
+  # 2.0 6.4.1.1: "Each tag name in the list MUST be unique."
+  no-duplicated-tag-names: error
+  # no requirement: 6.4.5.1 only says "The field name MUST begin with a slash." and that "Path templating is allowed."; nothing makes templated paths of the same hierarchy identical or invalid.
+  no-identical-paths: warn
+  # 2.0 6.4.7.1: "The id MUST be unique among all operations described in the API."
+  operation-operationId-unique: error
+  # 2.0 6.4.6.1: "The list MUST NOT include duplicated parameters."
+  # 2.0 6.4.7.1: "The list MUST NOT include duplicated parameters."
+  operation-parameters-unique: error
+  # no requirement: nothing in 2.0 says what a template expression looks like or forbids an empty `{}`.
+  path-declaration-must-exist: warn
+  # no requirement: 6.4.5.1 only says "The field name MUST begin with a slash."
+  path-not-include-query: warn
+  # no requirement: the rule is for a template expression without a path parameter. 2.0 has no sentence for that: 5.1 says "Path templating refers to the usage of curly braces ({}) to mark a section of a URL path as replaceable using path parameters." Only the other half is required (6.4.9.1: "If in is "path", the name field MUST correspond to the associated path segment from the path field in the Paths Object."), and Redocly cannot split the rule.
+  path-parameters-defined: warn
+  # no requirement: the Reference Object has the field "$ref" and 2.0 says nothing about other fields (6.4.17.1: "Required. The reference string."); JSON Reference says members other than "$ref" SHALL be ignored, which is their effect.
+  spec-ref-siblings: warn
+  # no requirement: 6.4.17 says "It can be used to reference parameters and responses that are defined at the top level for reuse." and no sentence forbids a $ref elsewhere.
+  spec-strict-refs: warn
+
+oas3_0Rules:
+  # 3.0.4 4.7.1.1: "Each tag name in the list MUST be unique."
+  no-duplicated-tag-names: error
+  # no requirement: 4.7.19.1 says "The value field and externalValue field are mutually exclusive." without a requirement word.
+  no-example-value-and-externalValue: warn
+  # 3.0.4 4.7.8.1: "Templated paths with the same hierarchy but different templated names MUST NOT exist as they are identical."
+  no-identical-paths: error
+  # no requirement: 4.7.5.1 says only "Variable substitutions will be made when a variable is named in" the URL, and no sentence says the variable has to be defined (or that a defined one has to be used). The `default` of a defined variable is REQUIRED (4.7.6.1), which struct checks.
+  no-undefined-server-variable: warn
+  # no requirement: 4.7.24.2 says nullable only takes effect "if type is explicitly defined within the same Schema Object"; without `type` it has no effect, and the text does not call that invalid.
+  nullable-type-sibling: warn
+  # 3.0.4 4.7.10.1: "The id MUST be unique among all operations described in the API."
+  operation-operationId-unique: error
+  # 3.0.4 4.7.9.1: "The list MUST NOT include duplicated parameters."
+  # 3.0.4 4.7.10.1: "The list MUST NOT include duplicated parameters."
+  operation-parameters-unique: error
+  # no requirement: a template expression has to match a path parameter (3.5), but nothing in 3.0 says what a template expression looks like or forbids an empty `{}`.
+  path-declaration-must-exist: warn
+  # no requirement: 4.7.8.1 only says "The field name MUST begin with a forward slash (/)." and "Path templating is allowed."; a query string in the field name is not forbidden.
+  path-not-include-query: warn
+  # 3.0.4 3.5: "Each template expression in the path MUST correspond to a path parameter that is included in the Path Item itself and/or in each of the Path Item's Operations."
+  # 3.0.4 4.7.12.2.1: "If in is "path", the name field MUST correspond to a template expression occurring within the path field in the Paths Object."
+  path-parameters-defined: error
+  # 3.0.4 4.7.7.1: "All the fixed fields declared above are objects that MUST use keys that match the regular expression: ^[a-zA-Z0-9\.\-_]+$."
+  spec-components-invalid-map-name: error
+  # no requirement: 4.7.23.1 says "This object cannot be extended with additional properties" and "any properties added SHALL be ignored." The SHALL is about what a consumer does with them, which describes their effect.
+  spec-ref-siblings: warn
+  # no requirement: 4.7.23 says the Reference Object "follows the same structure, behavior and rules" as a JSON Reference, and no sentence limits the places where one may appear.
+  spec-strict-refs: warn
+
+oas3_1Rules:
+  # 3.1.2 4.8.1.1: "Each tag name in the list MUST be unique."
+  no-duplicated-tag-names: error
+  # no requirement: 4.8.19.1 says "The value field and externalValue field are mutually exclusive." without a requirement word.
+  no-example-value-and-externalValue: warn
+  # 3.1.2 4.8.8.1: "Templated paths with the same hierarchy but different templated names MUST NOT exist as they are identical."
+  no-identical-paths: error
+  # no requirement: 4.8.5.1 says only "Variable substitutions will be made when a variable is named in" the URL, and no sentence says the variable has to be defined (or that a defined one has to be used). The `default` of a defined variable is REQUIRED (4.8.6.1), which struct checks.
+  no-undefined-server-variable: warn
+  # 3.1.2 4.8.10.1: "The id MUST be unique among all operations described in the API."
+  operation-operationId-unique: error
+  # 3.1.2 4.8.9.1: "The list MUST NOT include duplicated parameters."
+  # 3.1.2 4.8.10.1: "The list MUST NOT include duplicated parameters."
+  operation-parameters-unique: error
+  # no requirement: a template expression has to match a path parameter (3.5), but nothing in 3.1 says what a template expression looks like or forbids an empty `{}`.
+  path-declaration-must-exist: warn
+  # no requirement: 4.8.8.1 only says "The field name MUST begin with a forward slash (/)." and "Path templating is allowed."; a query string in the field name is not forbidden.
+  path-not-include-query: warn
+  # 3.1.2 3.5: "Each template expression in the path MUST correspond to a path parameter that is included in the Path Item itself and/or in each of the Path Item's Operations."
+  # 3.1.2 4.8.12.2.1: "If in is "path", the name field MUST correspond to a template expression occurring within the path field in the Paths Object."
+  path-parameters-defined: error
+  # 3.1.2 4.8.7.1: "All the fixed fields declared above are objects that MUST use keys that match the regular expression: ^[a-zA-Z0-9\.\-_]+$."
+  spec-components-invalid-map-name: error
+  # no requirement: 4.8.23.1 says "This object cannot be extended with additional properties" and "any properties added SHALL be ignored." The SHALL is about what a consumer does with them, which describes their effect.
+  spec-ref-siblings: warn
+  # no requirement: 4.8.23 only says "The $ref string value contains a URI [RFC3986], which identifies" the value, and no sentence limits the places where a Reference Object may appear.
+  spec-strict-refs: warn
+
+oas3_2Rules:
+  # 3.2.0 4.1.1: "Each tag name in the list MUST be unique."
+  no-duplicated-tag-names: error
+  # 3.2.0 4.8.1: "Templated paths with the same hierarchy but different templated names MUST NOT exist as they are identical."
+  no-identical-paths: error
+  # no requirement: 4.5.1 says only "Variable substitutions will be made when a variable is named in" the URL, and no sentence says the variable has to be defined (or that a defined one has to be used). The `default` of a defined variable is REQUIRED (4.6.1), which struct checks.
+  no-undefined-server-variable: warn
+  # 3.2.0 4.10.1: "The id MUST be unique among all operations described in the API."
+  operation-operationId-unique: error
+  # 3.2.0 4.9.1: "The list MUST NOT include duplicated parameters."
+  # 3.2.0 4.10.1: "The list MUST NOT include duplicated parameters."
+  operation-parameters-unique: error
+  # no requirement: 4.8.2 gives an ABNF in which a template expression has at least one character, but "The path templating is defined by the following" grammar is not a sentence with a requirement word, and nothing else forbids an empty `{}`.
+  path-declaration-must-exist: warn
+  # no requirement: 4.8.1 only says "The field name MUST begin with a forward slash (/)." The ABNF of 4.8.2 ("path-literal = 1*pchar") leaves "?" out of a path, but no sentence with a requirement word says a field name has to match it.
+  path-not-include-query: warn
+  # 3.2.0 4.8.2: "Each template expression in the path MUST correspond to a path parameter that is included in the Path Item itself and/or in each of the Path Item's Operations."
+  # 3.2.0 4.12.2.1: "If in is "path", the name field MUST correspond to a single template expression occurring within the path field in the Paths Object."
+  path-parameters-defined: error
+  # 3.2.0 4.7.1: "All the fixed fields declared above are objects that MUST use keys that match the regular expression: ^[a-zA-Z0-9\.\-_]+$."
+  spec-components-invalid-map-name: error
+  # 3.2.0 4.25.1: "when defined as optional the Discriminator Object MUST include a defaultMapping field"
+  # The rule also reports a defaultMapping that names no schema, which the text only describes ("The schema name or URI reference to a schema that is expected to validate").
+  spec-discriminator-defaultMapping: error
+  # 3.2.0 4.19.1: "If this field is present, serializedValue and value MUST be absent."
+  # 3.2.0 4.19.1: "If this field is present, value MUST be absent."
+  # 3.2.0 4.19.1: "If this field is present, value, and externalValue MUST be absent."
+  spec-example-values: error
+  # 3.2.0 4.14.1: "This field MUST NOT be present if prefixEncoding or itemEncoding are present."
+  spec-no-invalid-encoding-combinations: error
+  # 3.2.0 4.22.1: "The named tag MUST exist in the API description, and circular references between parent and child tags MUST NOT be used."
+  spec-no-invalid-tag-parents: error
+  # 3.2.0 4.12.1: "MUST NOT appear more than once, and MUST NOT appear in the same operation (or in the operation's path-item) as any in: "query" parameters."
+  spec-querystring-parameters: error
+  # no requirement: 4.23.1 says "This object cannot be extended with additional properties" and "any properties added SHALL be ignored." The SHALL is about what a consumer does with them, which describes their effect.
+  spec-ref-siblings: warn
+  # no requirement: 4.23 only says "The $ref string value contains a URI [RFC3986], which identifies" the value, and no sentence limits the places where a Reference Object may appear.
+  spec-strict-refs: warn

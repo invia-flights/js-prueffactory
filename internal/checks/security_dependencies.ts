@@ -2,7 +2,7 @@ import type { Context } from "../discovery/discovery.ts";
 import { formatRFC3339 } from "../gocompat/json.ts";
 import { join } from "../gocompat/path.ts";
 import { compareBytes, toLower } from "../gocompat/strings.ts";
-import { goString } from "../gocompat/utf8.ts";
+import { goString, trimSpaceBytes } from "../gocompat/utf8.ts";
 import { type Lock, parseLock } from "../lockfile/lockfile.ts";
 import { newFingerprint } from "../resultset/fingerprint.ts";
 import {
@@ -64,6 +64,12 @@ import {
 } from "./security_dependencies_osv.ts";
 import { errorMessage } from "../gocompat/errors.ts";
 import type { ReasonCode } from "../resultset/reason_codes.ts";
+import {
+  requireShape,
+  shape,
+  UnreadableOutput,
+  unreadableResult,
+} from "./tool_output.ts";
 
 export const depsSecurityID = "security.dependencies";
 
@@ -248,7 +254,34 @@ async function runDependencies(
     return res;
   }
 
+  // A report that is not the JSON osv-scanner documents says nothing about
+  // the lockfile: a tool problem, with the raw output kept.
+  const unreadable = osvUnreadable(exit, c.stdout);
+  if (unreadable !== "") {
+    return unreadableResult(
+      res,
+      depsSecurityID,
+      input.context.id,
+      "osv-scanner",
+      "osv",
+      c,
+      unreadable,
+    );
+  }
   const verdict = judgeScan(exit, c.stdout, src.scanLock);
+  if (verdict.fail?.code === "report_unreadable") {
+    return unreadableResult(
+      res,
+      depsSecurityID,
+      input.context.id,
+      "osv-scanner",
+      "osv",
+      c,
+      verdict.fail.reason.startsWith("osv-scanner reported vulnerabilities")
+        ? "it exited with its code for found vulnerabilities but its report names none"
+        : "it is not the JSON report that osv-scanner documents",
+    );
+  }
   if (verdict.fail !== null) {
     res.status = verdict.fail.status;
     res.reasonCode = verdict.fail.code;
@@ -296,6 +329,52 @@ async function runDependencies(
     );
   }
   return res;
+}
+
+/**
+ * osvReportShape is the report osv-scanner documents for its json format, as
+ * far as the Check relies on it: a list of results, each with the packages it
+ * scanned.
+ */
+const osvReportShape = shape.object({
+  results: shape.nullable(
+    shape.array(
+      shape.object(
+        {},
+        {
+          packages: shape.nullable(
+            shape.array(
+              shape.object({
+                package: shape.object({
+                  name: shape.string,
+                  version: shape.string,
+                }),
+              }),
+            ),
+          ),
+        },
+      ),
+    ),
+  ),
+});
+
+/**
+ * osvUnreadable says why osv-scanner's output is not the report it documents,
+ * or "" when it is, or when there is nothing to read: no output is a clean
+ * scan, and the exit code for a lockfile without packages comes with none.
+ */
+function osvUnreadable(exit: number, report: Uint8Array): string {
+  if (exit === osvNoPackages || trimSpaceBytes(report).length === 0) {
+    return "";
+  }
+  try {
+    requireShape("osv-scanner", report, osvReportShape);
+  } catch (err) {
+    return err instanceof UnreadableOutput
+      ? err.summary
+      : "it is not the JSON report that osv-scanner documents";
+  }
+  return "";
 }
 
 /** ScanFailure says why a scan cannot be trusted at all. */

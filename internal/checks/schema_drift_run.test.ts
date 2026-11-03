@@ -8,6 +8,7 @@ import type { ContainerResult, ContainerSpec } from "../docker/driver.ts";
 import { impl, packageContext, tree } from "./checks.testutil.ts";
 import { Input, type Result } from "./input.ts";
 import { useDriftDocker } from "./schema_drift.ts";
+import { assertUnreadable } from "./unreadable_output.testutil.ts";
 import {
   ruleDriftChanged,
   ruleDriftCreated,
@@ -22,7 +23,10 @@ interface DriftStub {
   volumes: string[];
   specs: ContainerSpec[];
   exit: Record<string, number>;
+  /** manifest is what the manifest step prints, compare what the compare step prints. */
+  manifest: string;
   compare: string;
+  compareExit: number;
 }
 
 function answer(
@@ -49,10 +53,10 @@ function stubDriftContainers(t: TestContext, s: DriftStub): void {
       s.specs.push(spec);
       const cmd = spec.cmd ?? [];
       if (cmd[1] === "/jspf/schema-drift.js" && cmd[2] === "manifest") {
-        return Promise.resolve(answer(0, '{"files":{}}'));
+        return Promise.resolve(answer(0, s.manifest));
       }
       if (cmd[1] === "/jspf/schema-drift.js" && cmd[2] === "compare") {
-        return Promise.resolve(answer(0, s.compare));
+        return Promise.resolve(answer(s.compareExit, s.compare));
       }
       if (cmd[0] === "node") {
         const file = cmd[1] ?? "";
@@ -93,7 +97,9 @@ function stub(fields: Partial<DriftStub> = {}): DriftStub {
     volumes: [],
     specs: [],
     exit: {},
+    manifest: '{"files":{}}',
     compare: '{"changed":[],"created":[]}',
+    compareExit: 0,
     ...fields,
   };
 }
@@ -190,8 +196,64 @@ test("the compare result of the copy becomes Findings", async (t) => {
   assert.deepEqual(res.command, ["node", "gen.js"]);
 });
 
-test("an unreadable compare answer is a helper failure", async (t) => {
-  stubDriftContainers(t, stub({ compare: "not json" }));
+// An answer of the helper that is not its document says nothing about the
+// generators' work: a tool problem with the raw output kept, and never a
+// changed or created file.
+const compareGood = '{"changed":[],"created":[]}';
+const compareBad: Record<string, string> = {
+  "a changed JSON shape": '{"modified":[{"path":"schemas/a.json"}]}',
+  "files of another type": '{"changed":{"schemas/a.json":1},"created":[]}',
+  "files with other keys":
+    '{"changed":[{"file":"schemas/a.json","bytes":7}],"created":[]}',
+  "truncated output": compareGood.slice(0, 15),
+  "plain text": "not json",
+};
+for (const [what, out] of Object.entries(compareBad)) {
+  test(`schema.drift: ${what} from the compare step is a tool problem with the raw output kept`, async (t) => {
+    stubDriftContainers(t, stub({ compare: out }));
+
+    const res = await run(driftRunInput(t, '"gen:schema":"node gen.js"'));
+
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "schema.drift",
+      context: "C-0002",
+      call: "compare",
+      stdout: out,
+    });
+    assert.deepEqual(res.findings ?? [], []);
+  });
+}
+
+const manifestBad: Record<string, string> = {
+  "a changed JSON shape": '{"hashes":{"schemas/a.json":"abc"}}',
+  "files of another type": '{"files":["schemas/a.json"]}',
+  "plain text": "usage: schema-drift.js manifest <root>",
+};
+for (const [what, out] of Object.entries(manifestBad)) {
+  test(`schema.drift: ${what} from the manifest step is a tool problem with the raw output kept`, async (t) => {
+    const s = stub({ manifest: out });
+    stubDriftContainers(t, s);
+
+    const res = await run(driftRunInput(t, '"gen:schema":"node gen.js"'));
+
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "schema.drift",
+      context: "C-0002",
+      call: "manifest",
+      stdout: out,
+    });
+    assert.deepEqual(res.findings ?? [], []);
+    assert.ok(
+      !s.specs.some((x) => x.cmd?.[0] === "node" && x.cmd[1] === "gen.js"),
+      "no generator ran after the manifest was unreadable",
+    );
+  });
+}
+
+test("a compare step that exits with an error stays a helper failure", async (t) => {
+  stubDriftContainers(t, stub({ compareExit: 1 }));
 
   const res = await run(driftRunInput(t, '"gen:schema":"node gen.js"'));
 

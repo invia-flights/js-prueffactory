@@ -42,8 +42,10 @@ import {
   typesRunnable,
   typesTargets,
   typesTsconfigFor,
+  tscUnreadable,
   typesUnsupported,
 } from "./types_javascript.ts";
+import { unreadableResult } from "./tool_output.ts";
 import { errorMessage } from "../gocompat/errors.ts";
 import type { ReasonCode } from "../resultset/reason_codes.ts";
 
@@ -226,22 +228,14 @@ function tscKey(d: TscDiagnostic): string {
   return `${clean(d.path)}:${String(d.line)}:${String(d.column)}:${d.code}`;
 }
 
-/**
- * interpretStrictness turns the two tsc runs and the type-coverage counts into
- * the Result. tests is null when the package has no Test code that TypeScript
- * reads.
- */
-export function interpretStrictness(
-  input: Input,
-  basic: TscRun,
-  strict: TscRun,
-  source: TypeCoverage,
-  tests: TypeCoverage | null,
-): Result {
-  const res: Result = { status: StatusCompleted };
+/** strictnessToolInfo is the Tool and the Context's tools of the Check. */
+function strictnessToolInfo(
+  exit: number,
+): Pick<Result, "tool" | "contextTools"> {
+  const info: Pick<Result, "tool" | "contextTools"> = {};
   const tsc6 = npmTool("typescript6");
   if (tsc6 !== undefined) {
-    res.tool = { name: "tsc6", version: tsc6.version, exit_code: strict.exit };
+    info.tool = { name: "tsc6", version: tsc6.version, exit_code: exit };
   }
   const refs: ToolRef[] = [];
   for (const name of [
@@ -259,7 +253,26 @@ export function interpretStrictness(
       });
     }
   }
-  res.contextTools = refs;
+  info.contextTools = refs;
+  return info;
+}
+
+/**
+ * interpretStrictness turns the two tsc runs and the type-coverage counts into
+ * the Result. tests is null when the package has no Test code that TypeScript
+ * reads.
+ */
+export function interpretStrictness(
+  input: Input,
+  basic: TscRun,
+  strict: TscRun,
+  source: TypeCoverage,
+  tests: TypeCoverage | null,
+): Result {
+  const res: Result = {
+    status: StatusCompleted,
+    ...strictnessToolInfo(strict.exit),
+  };
   for (const [profile, r] of [
     ["basic", basic],
     ["strict", strict],
@@ -464,9 +477,28 @@ async function runTypesStrictness(
     if (!("exitCode" in container)) {
       return container;
     }
-    const { diags, global } = parseTSC(goString(container.stdout));
+    const text = goString(container.stdout);
+    const parsed = parseTSC(text);
+    // Output that is not the diagnostics tsc documents says nothing about
+    // the code: a tool problem, with the raw output kept.
+    const unreadable = tscUnreadable(text, parsed, container.exitCode);
+    if (unreadable !== "") {
+      return unreadableResult(
+        { status: StatusCompleted, ...strictnessToolInfo(container.exitCode) },
+        typesStrictnessID,
+        input.context.id,
+        "tsc6",
+        name,
+        container,
+        unreadable,
+      );
+    }
     return {
-      run: { diagnostics: diags, global, exit: container.exitCode },
+      run: {
+        diagnostics: parsed.diags,
+        global: parsed.global,
+        exit: container.exitCode,
+      },
       cmd,
     };
   };
@@ -496,6 +528,23 @@ async function runTypesStrictness(
     try {
       return parseTypeCoverage(container.stdout);
     } catch (err) {
+      // type-coverage documents the exit codes 0 and 1. With one of them,
+      // output that is not its JSON document says nothing about the code: a
+      // tool problem, with the raw output kept. Another exit code is a crash.
+      if (container.exitCode === 0 || container.exitCode === 1) {
+        return unreadableResult(
+          {
+            status: StatusCompleted,
+            ...strictnessToolInfo(container.exitCode),
+          },
+          typesStrictnessID,
+          input.context.id,
+          "type-coverage",
+          name,
+          container,
+          "it is not the JSON document that type-coverage documents",
+        );
+      }
       return {
         status: StatusToolError,
         reasonCode: "type_coverage_failed",

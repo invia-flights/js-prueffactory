@@ -12,6 +12,7 @@ import {
   shape,
   ToolOutputs,
   UnreadableOutput,
+  unreadableResult,
 } from "./tool_output.ts";
 
 const bytes = (s: string): Uint8Array => Buffer.from(s);
@@ -153,4 +154,80 @@ test("a reader that throws something else is unreadable output too, and says not
   outputs.apply(res);
   assert.equal(res.reasonCode, "tool_output_unreadable");
   assert.ok(!(res.reason ?? "").includes("Cannot read"));
+});
+
+test("mapOf is an object whose every value has the shape, whatever its keys", () => {
+  const rules = shape.mapOf(shape.object({ files: shape.array(shape.string) }));
+  requireShape("t", bytes("{}"), rules);
+  requireShape("t", bytes('{"a.b":{"files":["x"]},"c":{"files":[]}}'), rules);
+  for (const out of ['{"a":1}', '{"a":{"files":"x"}}', "[]", "null"]) {
+    assert.throws(
+      () => {
+        requireShape("t", bytes(out), rules);
+      },
+      UnreadableOutput,
+      out,
+    );
+  }
+});
+
+test("files a tool wrote are kept as artifacts under their own names, and the reason names them", () => {
+  const outputs = new ToolOutputs("tests.coverage", "C-0002");
+  outputs.rejectFiles(
+    "c8",
+    "c8",
+    [
+      { name: "coverage-summary.json", content: bytes('{"total":') },
+      { name: "coverage-final.json", content: bytes("{}") },
+    ],
+    "it is not valid JSON",
+  );
+  const res: Result = { status: "completed" };
+  outputs.apply(res);
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["tool_error", "tool_output_unreadable"],
+  );
+  assert.deepEqual(
+    (res.artifacts ?? []).map((a) => a.path),
+    [
+      "artifacts/tests.coverage/C-0002/c8.coverage-summary.json",
+      "artifacts/tests.coverage/C-0002/c8.coverage-final.json",
+    ],
+  );
+  for (const a of res.artifacts ?? []) {
+    assert.equal(a.maxBytes, maxRawOutputBytes);
+    assert.ok((res.reason ?? "").includes(a.path), a.path);
+  }
+  assert.ok((res.reason ?? "").includes("c8"), res.reason ?? "");
+});
+
+test("unreadableResult makes the unreadable Result and keeps what the Check already knew", () => {
+  const res = unreadableResult(
+    {
+      status: "completed",
+      command: ["knip"],
+      tool: { name: "knip", version: "1", exit_code: 0 },
+    },
+    "quality.unused",
+    "C-0003",
+    "knip",
+    "knip",
+    call,
+    "it is not valid JSON",
+  );
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["tool_error", "tool_output_unreadable"],
+  );
+  assert.deepEqual(res.command, ["knip"]);
+  assert.equal(res.tool?.name, "knip");
+  assert.deepEqual(
+    (res.artifacts ?? []).map((a) => a.path),
+    [
+      "artifacts/quality.unused/C-0003/knip.stdout.txt",
+      "artifacts/quality.unused/C-0003/knip.stderr.txt",
+    ],
+  );
+  assert.equal(res.findings, undefined);
 });

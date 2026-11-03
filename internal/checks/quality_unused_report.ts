@@ -1,6 +1,7 @@
 // Knip's JSON report as quality.unused reads it (Go: the knipItem and
 // knipIssue types of quality_unused.go, and the decoding in correctKnip).
 import { type Schema, unmarshal } from "../gocompat/unmarshal.ts";
+import { shape } from "./tool_output.ts";
 
 /** KnipItem is one entry of an issue type in Knip's JSON report. */
 export interface KnipItem {
@@ -77,6 +78,28 @@ const reportSchema: Schema = {
     },
   ],
 };
+
+const itemShape = shape.object(
+  { name: shape.string },
+  { line: shape.number, col: shape.number },
+);
+
+/**
+ * knipReportShape is the report Knip's JSON reporter documents, as far as the
+ * Check relies on it: a list of issues, one entry per file, each with the
+ * lists of what Knip found there. The lists are optional, because Knip leaves
+ * out an empty one in some versions.
+ */
+export const knipReportShape = shape.object({
+  issues: shape.array(
+    shape.object(
+      { file: shape.string },
+      Object.fromEntries(
+        listFields.map((name) => [name, shape.array(itemShape)] as const),
+      ),
+    ),
+  ),
+});
 
 interface RawItem {
   name: string;

@@ -151,6 +151,12 @@ export class SuiteEvents {
    */
   resources: string[] = [];
   resourcesKnown = false;
+  /**
+   * raw is the event file as it was, kept only when it holds no event line
+   * at all (started is false): the content a reader needs to see why, such
+   * as plain text or one line that was cut off. It is empty otherwise.
+   */
+  raw: Uint8Array = new Uint8Array(0);
 
   /**
    * find returns the test a result or retry line belongs to: the one
@@ -420,6 +426,9 @@ export function parseTestEvents(data: Uint8Array | null): SuiteEvents {
         }
         break;
     }
+  }
+  if (!ev.started && data !== null) {
+    ev.raw = data;
   }
   return ev;
 }

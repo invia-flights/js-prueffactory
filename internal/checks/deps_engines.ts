@@ -34,7 +34,7 @@ export const depsEngines: Check = {
   },
 
   async run(signal, input) {
-    const r = await eslintRunOf(signal, input);
+    const r = await eslintRunOf(signal, input, depsEnginesID);
     if ("failed" in r) {
       return r.failed;
     }

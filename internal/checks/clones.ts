@@ -37,6 +37,12 @@ import {
 import { type Input, type Result, untrusted } from "./input.ts";
 import { toolImage } from "./quality_unused.ts";
 import { shownPath } from "./shown_text.ts";
+import {
+  requireShape,
+  shape,
+  UnreadableOutput,
+  unreadableResult,
+} from "./tool_output.ts";
 
 export const clonesID = "quality.clones";
 
@@ -197,6 +203,38 @@ const outputSchema: Schema = {
   ],
 };
 
+const clonePlaceShape = shape.object(
+  { path: shape.string },
+  { start: shape.number, end: shape.number },
+);
+
+/** cloneOutputShape is the document js/clones.js documents. */
+const cloneOutputShape = shape.object({
+  version: shape.string,
+  groups: shape.array(
+    shape.object(
+      {
+        name: shape.string,
+        files: shape.number,
+        percentage: shape.number,
+        duplicated_lines: shape.number,
+        lines: shape.number,
+        clones: shape.array(
+          shape.object(
+            { first: clonePlaceShape, second: clonePlaceShape },
+            {
+              lines: shape.number,
+              tokens: shape.number,
+              fragment: shape.string,
+            },
+          ),
+        ),
+      },
+      { error: shape.string },
+    ),
+  ),
+});
+
 interface RawList<T> {
   items(): T[];
 }
@@ -307,16 +345,27 @@ async function runClones(signal: AbortSignal, input: Input): Promise<Result> {
   const exit = container.exitCode;
   res.tool = { name: "jscpd", version: null, exit_code: exit };
 
-  let out: CloneOutput | undefined;
-  if (exit === 0) {
-    try {
-      out = parseCloneOutput(container.stdout);
-    } catch {
-      out = undefined;
-    }
-  }
-  if (out === undefined) {
+  if (exit !== 0) {
     return helperFailed(res, "jscpd", container, 800);
+  }
+  // A helper that exits cleanly but prints something else than its document
+  // says nothing about the code: a tool problem, with the raw output kept.
+  let out: CloneOutput;
+  try {
+    requireShape("the jscpd helper", container.stdout, cloneOutputShape);
+    out = parseCloneOutput(container.stdout);
+  } catch (err) {
+    return unreadableResult(
+      res,
+      clonesID,
+      input.context.id,
+      "jscpd",
+      "clones",
+      container,
+      err instanceof UnreadableOutput
+        ? err.summary
+        : "it is not the document the helper writes",
+    );
   }
   return interpretClones(input, out);
 }

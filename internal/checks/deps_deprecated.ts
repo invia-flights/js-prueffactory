@@ -56,7 +56,7 @@ export const depsDeprecated: Check = {
   async run(signal, input) {
     const data = await registryData(signal, input);
     if (data.fail !== null) {
-      return data.failed();
+      return data.failed(depsDeprecatedID, input.context.id);
     }
     const res = data.result();
     res.findings = deprecatedFindings(

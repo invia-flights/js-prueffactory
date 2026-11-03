@@ -578,6 +578,27 @@ function redoclyRaw(p: RedoclyProblem): string {
 }
 
 /**
+ * redoclyLevel is the level of a Redocly problem as a Finding. It is the one
+ * Redocly prints, except for one kind of problem of `struct`: a field that the
+ * specification does not list ("Property `x` is not expected here."). No
+ * version of the OpenAPI or Swagger text forbids such a field, and OpenAPI 3.1
+ * lets a Schema Object carry them, so it is a warning. Redocly sets one
+ * severity per rule, so the kind cannot be told apart in config/redocly.yaml.
+ * The text is Redocly's own message, pinned with the version of the tool.
+ */
+function redoclyLevel(p: RedoclyProblem): string {
+  if (
+    p.severity === "error" &&
+    p.ruleId === "struct" &&
+    p.message.startsWith("Property `") &&
+    p.message.endsWith("` is not expected here.")
+  ) {
+    return "warn";
+  }
+  return p.severity;
+}
+
+/**
  * redoclyFindings reads `redocly lint --format json` output for one file.
  * For a file with a remote $ref it drops the failures to fetch that
  * reference, since the Execution phase has no network: the caller records a
@@ -617,7 +638,7 @@ export function redoclyFindings(
       repoFinding(input, "api.lint", {
         tool: "redocly",
         rule: p.ruleId,
-        level: p.severity,
+        level: redoclyLevel(p),
         path: target.path,
         line: first === undefined ? 0 : Number(first.start.line),
         column: first === undefined ? 0 : Number(first.start.col),

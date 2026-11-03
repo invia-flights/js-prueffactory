@@ -29,6 +29,7 @@ import {
   workPath,
 } from "./package_install.ts";
 import { shownProblem } from "./shown_text.ts";
+import { UnreadableOutput, unreadableResult } from "./tool_output.ts";
 import { errorMessage } from "../gocompat/errors.ts";
 
 export const depsTreeID = "deps.tree";
@@ -108,6 +109,24 @@ export const depsTree: Check = {
     try {
       problems = parseNPMLs(c.stdout, c.exitCode);
     } catch (err) {
+      // npm ls documents the exit codes 0 and 1. With one of them, output
+      // that is not its JSON document, or an exit code 1 that names no
+      // problem, says nothing about the tree: a tool problem, with the raw
+      // output kept. Another exit code is a failure of npm itself.
+      if (
+        err instanceof UnreadableOutput &&
+        (c.exitCode === 0 || c.exitCode === 1)
+      ) {
+        return unreadableResult(
+          res,
+          depsTreeID,
+          input.context.id,
+          "npm ls",
+          "npm-ls",
+          c,
+          err.summary,
+        );
+      }
       // Go writes npm's stderr tail raw into the reason; kept for parity
       // (traps.md: Go bug for a later spec, untrusted text in trusted field).
       res.status = StatusToolError;
@@ -154,14 +173,16 @@ export function parseNPMLs(
   try {
     out = json.unmarshal(stdout, lsSchema) as typeof out;
   } catch {
-    throw new Error(
+    throw new UnreadableOutput(
       `\`npm ls\` exited with ${String(exitCode)} and wrote no JSON`,
+      "it is not the JSON document that npm ls documents",
     );
   }
   const texts = (out.problems?.items() ?? []) as string[];
   if (exitCode !== 0 && (exitCode !== 1 || texts.length === 0)) {
-    throw new Error(
+    throw new UnreadableOutput(
       `\`npm ls\` exited with ${String(exitCode)} without naming a problem`,
+      "it exited with an error code but its document names no problem",
     );
   }
   const seen = new Set<string>();

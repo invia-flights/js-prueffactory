@@ -154,7 +154,7 @@ void test("Knip output that is not JSON is a tool error", () => {
     Buffer.from("Error: Cannot find module 'jiti'"),
   );
   assert.equal(res.status, StatusToolError);
-  assert.equal(res.reasonCode, "knip_output_unreadable");
+  assert.equal(res.reasonCode, "tool_output_unreadable");
 });
 
 void test("a Finding's evidence is untrusted tool output and its title is a trusted text", () => {
@@ -219,5 +219,5 @@ void test("a report of the wrong type is as unreadable as one that is not JSON",
     ),
   );
   assert.equal(res.status, StatusToolError);
-  assert.equal(res.reasonCode, "knip_output_unreadable");
+  assert.equal(res.reasonCode, "tool_output_unreadable");
 });
