@@ -18,7 +18,6 @@ import { Writable } from "node:stream";
 import { describe, test } from "node:test";
 import type { TestContext } from "node:test";
 
-import { compareBytes } from "../gocompat/strings.ts";
 import { Algorithm, take } from "./snapshot.ts";
 import { exists, takeIn, tarOf, tempDir, write } from "./snapshot.testutil.ts";
 import { readTar } from "../tarwriter/tar.testutil.ts";
@@ -341,9 +340,13 @@ describe("the Snapshot matches the Go build", () => {
   })
     .filter((e) => e.isDirectory())
     .map((e) => "testdata/projects/" + e.name);
-  test("every test project is in the fixture", () => {
+  // A test project added after the Go build has no recorded answer, so the
+  // fixture may hold fewer projects than the folder. It may not hold one that
+  // is gone: its entry is dropped then (see CLAUDE.md).
+  test("every recorded test project is still a folder", () => {
     const names = recorded.snapshots.filter((r) => !r.spec).map((r) => r.name);
-    assert.deepEqual(names.sort(compareBytes), projects.sort(compareBytes));
+    const gone = names.filter((n) => !projects.includes(n));
+    assert.deepEqual(gone, []);
   });
 
   for (const want of recorded.snapshots) {

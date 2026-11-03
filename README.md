@@ -41,6 +41,7 @@ The code, the Report and this README use a fixed vocabulary.
 | Limitation | Something that was not checked or cannot be known, always with a reason code. |
 | Budget | The maximum wall-clock time of a whole Run, Preparation included. |
 | Service | A container the Run starts for the tests, such as Valkey or Postgres. |
+| Init service | A compose service the Run does not start that prepares a Service the Run does start, for example by migrating its schema, and whose image is the project's own. _Avoid_: init container, migration container. |
 
 ## Requirements
 
@@ -83,7 +84,7 @@ The examples use `testdata/projects/failing-test`, a made-up project with one pa
    js-prueffactory list-checks testdata/projects/failing-test
    ```
 
-   It prints every Check with its Applicability, the Contexts with the Node version chosen for each, and the Suites of every package. `unknown` means the answer depends on something only the install reveals. A package whose tests the tool cannot run shows the reason here.
+   It prints every Check with its Applicability, the Contexts with the Node version chosen for each, the Suites of every package and the compose services, each with whether the Run starts it. `unknown` means the answer depends on something only the install reveals. A package whose tests the tool cannot run shows the reason here.
 
 2. Run the Checks.
 
@@ -205,6 +206,8 @@ The tool changes a few things and lists each change in the Report. Mocha and `no
 The tool reads the compose files in the project root. A service whose image belongs to a supported family starts empty, at a pinned version, under its compose service name, so tests that expect `REDIS_HOST=redis` work unchanged. Each Suite gets its own fresh Services.
 
 Other compose services are not started. When a Suite seems to need one, because env files or Test code name it as a host or a test fails with a lookup or connection error for it, the Report adds the Limitation `service_not_started`. That Suite's test failures are then not Gates, `tests.existing` is `partial`, and the exit code is 2 unless another Gate fires.
+
+`list-checks` shows which compose services the Run starts and which it does not, and marks the Init services among the latter with the Service each prepares. A compose service is an Init service when the Run does not start it, it `depends_on` a Service the Run does start, and its image is the project's own: the service has a `build:` section, or it names the image of a service that has one or of the service that runs a package's start command, or its command is `npm run <script>`, `npm start` or `node <file>` of a package of the project. The service that runs the start command itself (`npm start`, a `start`, `serve` or `dev` script, the package's main file, or a `build:` service without a command) is the application and never an Init service.
 
 ### File classes
 
