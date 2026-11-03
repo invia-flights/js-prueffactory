@@ -20,6 +20,14 @@
 //   res.status = StatusCompleted;
 //   outputs.apply(res); // tool_error, or partial when some call was read
 //
+// A call that gave an answer the adapter understood without `read` (a
+// documented error message that blames the project) is recorded with
+// outputs.answered(), so that unreadable output of another call makes the
+// Check partial and not a tool error. A call whose streams the execution
+// already keeps in a log is recorded with rejectLogged, which stores only the
+// files besides it; a tool whose raw output may hold what redaction removes
+// (gitleaks) is recorded with rejectWithheld and keeps none.
+//
 // A reader that also wants to reject JSON with another shape than the
 // documented one calls requireShape after it decoded the output. The raw
 // stdout and stderr of an unreadable call become two artifacts of the
