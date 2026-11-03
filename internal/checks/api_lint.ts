@@ -4,10 +4,17 @@
 // rule that the specification requires reports errors, and errors are never
 // Gates. A file with a remote $ref is partial, because the Execution phase has
 // no network. A file that Redocly cannot parse but that artifacts.structured's
-// native parser accepts is a warning, not a tool error.
+// native parser accepts is a warning, not a tool error. A file of OpenAPI 3.0
+// or Swagger 2.0 without `paths` is linted as a fragment: Redocly reads a copy
+// with an empty `paths` map (see api_fragments.ts).
 import { readFileSync } from "node:fs";
 
-import type { ContainerResult } from "../docker/driver.ts";
+import {
+  type ContainerResult,
+  type ContainerSpec,
+  type Driver,
+  NetworkNone,
+} from "../docker/driver.ts";
 import { split } from "../gocompat/path.ts";
 import { goString } from "../gocompat/utf8.ts";
 import {
@@ -27,6 +34,7 @@ import {
   structuredKindOf,
   structuredTargets,
 } from "./artifacts_structured.ts";
+import { fragmentCopy } from "./api_fragments.ts";
 import { type Check, register } from "./check.ts";
 import { tail } from "./cut_text.ts";
 import { failedToRun } from "./helper_result.ts";
@@ -52,6 +60,13 @@ import { ToolOutputs } from "./tool_output.ts";
 
 export const apiLintID = "api.lint";
 const reasonNotParseable = "file_not_parseable";
+const reasonFragment = "openapi_fragment";
+
+/**
+ * fragmentMount is where the copy of the Snapshot that holds the fragments is
+ * mounted in a tool container.
+ */
+const fragmentMount = "/fragments";
 
 const redoclyConfig = readFileSync(
   new URL("config/redocly.yaml", import.meta.url),
@@ -120,6 +135,65 @@ function structuredReports(input: Input, rel: string): boolean {
   return checked.some((f) => f.path === rel);
 }
 
+/**
+ * fragmentOf is the copy that Redocly lints in place of a file of OpenAPI 3.0
+ * or Swagger 2.0 without `paths`, or null for any other file.
+ */
+function fragmentOf(input: Input, rel: string): Uint8Array | null {
+  let data: Uint8Array;
+  try {
+    data = readProjectFile(input, rel);
+  } catch {
+    return null;
+  }
+  return fragmentCopy(data);
+}
+
+/** workDirIn is the folder of a file below the mount of a volume. */
+function workDirIn(mount: string, dir: string): string {
+  return dir === ""
+    ? mount
+    : mount + "/" + (dir.endsWith("/") ? dir.slice(0, -1) : dir);
+}
+
+/**
+ * SnapshotCopy is the volume that holds a copy of the Snapshot for the
+ * fragments, or why the copy could not be made. The Snapshot is mounted
+ * read-only, and the Working copy is shared with the tests, which must never
+ * see a changed description file, so neither takes the copy of a file.
+ */
+type SnapshotCopy = { volume: string } | { failure: string };
+
+async function copySnapshot(
+  signal: AbortSignal,
+  input: Input,
+  docker: Driver,
+): Promise<SnapshotCopy> {
+  const volume = await docker.createVolume(signal, "api-fragments");
+  const base = snapshotToolContainer(
+    input,
+    "redocly-fragments",
+    Redocly,
+    ["-a", "/snapshot/.", fragmentMount + "/"],
+    "/",
+    undefined,
+  );
+  const spec: ContainerSpec = {
+    ...base,
+    // The image starts Redocly; the copy is plain cp, and needs no network.
+    entrypoint: "cp",
+    network: NetworkNone,
+    mounts: [...(base.mounts ?? []), { volume, path: fragmentMount }],
+  };
+  const c = await docker.runContainer(signal, spec);
+  if (c.exitCode !== 0) {
+    return {
+      failure: `copying the Snapshot for the fragments failed with exit code ${String(c.exitCode)}: ${tail(goString(c.stderr), 200)}`,
+    };
+  }
+  return { volume };
+}
+
 async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
   const findings: Finding[] = [];
   const limitations: Limitation[] = [];
@@ -148,6 +222,7 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
   const outputs = new ToolOutputs(apiLintID, input.context.id);
   let worst = 0;
   let remoteRefs = 0;
+  let snapshotCopy: SnapshotCopy | undefined;
   for (const [i, target] of targets.entries()) {
     const perr = broken.get(target.path);
     if (perr !== undefined && structuredReports(input, target.path)) {
@@ -165,10 +240,6 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
     // never passed: the container starts in the file's own folder and gets
     // the bare file name, which it opens literally.
     const [dir, name] = split(target.path);
-    const workDir =
-      dir === ""
-        ? snapshotMount
-        : snapshotMount + "/" + (dir.endsWith("/") ? dir.slice(0, -1) : dir);
     const file = name.startsWith("-") ? "./" + name : name;
     const cmd = [
       "lint",
@@ -183,20 +254,58 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
       // Go dereferenced the nil driver here and panicked.
       throw new Error("no Docker driver is configured");
     }
-    let c: ContainerResult;
-    try {
-      c = await docker.runContainer(
-        signal,
-        snapshotToolContainer(
+    const config = {
+      path: "/jspf/redocly.yaml",
+      mode: 0o644,
+      content: redoclyConfig,
+    };
+    const containerName = `redocly-${String(i + 1)}`;
+    let spec = snapshotToolContainer(
+      input,
+      containerName,
+      Redocly,
+      cmd,
+      workDirIn(snapshotMount, dir),
+      env,
+      config,
+    );
+    const copy = fragmentOf(input, target.path);
+    if (copy !== null) {
+      // A fragment is linted as a copy in a copy of the Snapshot, made once
+      // when the first fragment needs it. The copy replaces the file there,
+      // so that its relative references still resolve.
+      let volume: SnapshotCopy;
+      try {
+        snapshotCopy ??= await copySnapshot(signal, input, docker);
+        volume = snapshotCopy;
+      } catch (err) {
+        return failedToRun(res, err);
+      }
+      if ("failure" in volume) {
+        failed.push(`${shownPath(target.path)}: ${volume.failure}`);
+        continue;
+      }
+      spec = {
+        ...snapshotToolContainer(
           input,
-          `redocly-${String(i + 1)}`,
+          containerName,
           Redocly,
           cmd,
-          workDir,
+          workDirIn(fragmentMount, dir),
           env,
-          { path: "/jspf/redocly.yaml", mode: 0o644, content: redoclyConfig },
+          config,
+          {
+            path: fragmentMount + "/" + target.path,
+            mode: 0o644,
+            content: copy,
+          },
         ),
-      );
+        mounts: [{ volume: volume.volume, path: fragmentMount }],
+      };
+    }
+    let c: ContainerResult;
+    try {
+      c = await docker.runContainer(signal, spec);
     } catch (err) {
       return failedToRun(res, err);
     }
@@ -251,6 +360,15 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
     }
     findings.push(...found);
 
+    if (copy !== null) {
+      limitations.push({
+        reason_code: reasonFragment,
+        message:
+          "the file has no paths, which OpenAPI 3.0 and Swagger 2.0 require, so it was linted as a fragment: Redocly read a copy with an empty paths map, and the requirement that the file has paths was not checked",
+        check_id: apiLintID,
+        path: target.path,
+      });
+    }
     if (target.remoteRef) {
       remoteRefs++;
       limitations.push({

@@ -1,0 +1,20 @@
+openapi: 3.0.3
+info:
+  title: Order template
+  version: "1.0.0"
+# The service fills in its paths at runtime, so the field is null on purpose.
+# api.lint lints the template as a fragment: the missing paths are no error,
+# and the Limitation openapi_fragment says they were not checked.
+paths:
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        price:
+          # A relative reference: it must still resolve in the copy.
+          $ref: "components/money.yaml"
+        # Warning (nullable-type-sibling), reported at this file's own line.
+        note:
+          nullable: true
+          description: Free text of the customer

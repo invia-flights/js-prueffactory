@@ -1,0 +1,10 @@
+openapi: 3.1.0
+info:
+  title: Modern description
+  version: "1.0.0"
+# OpenAPI 3.1 does not require paths when the file has components, so this file
+# is not a fragment either.
+components:
+  schemas:
+    Id:
+      type: string
