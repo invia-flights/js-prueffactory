@@ -1,0 +1,14 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "Legacy orders", "version": "1.0.0", "title": "Orders" },
+  "paths": {
+    "/legacy-orders": {
+      "get": {
+        "summary": "List the legacy orders",
+        "responses": {
+          "200": { "description": "The legacy orders of the shop" }
+        }
+      }
+    }
+  }
+}

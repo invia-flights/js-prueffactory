@@ -1,0 +1,13 @@
+openapi: 3.0.3
+info:
+  title: Orders
+  version: "1.0.0"
+  description: "The orders service keeps every order of a shop
+and tells the shop when an order changes."
+paths:
+  /orders:
+    get:
+      summary: List the orders
+      responses:
+        "200":
+          description: The orders of the shop
