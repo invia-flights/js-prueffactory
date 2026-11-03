@@ -123,7 +123,7 @@ test("coverage output that cannot be read is a tool error with null metrics", (t
   });
 
   assert.equal(got.status, StatusToolError);
-  assert.equal(got.reasonCode, "coverage_output_unreadable");
+  assert.equal(got.reasonCode, "tool_output_unreadable");
   allNullWithReason(got.metrics, "not readable");
 });
 

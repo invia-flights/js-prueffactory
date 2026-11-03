@@ -32,7 +32,12 @@ import { tail } from "./cut_text.ts";
 import { failedToRun } from "./helper_result.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
 import { maxProjectFileBytes, readCapped } from "./readcap.ts";
-import { errorMessage } from "../gocompat/errors.ts";
+import {
+  requireShape,
+  shape,
+  UnreadableOutput,
+  unreadableResult,
+} from "./tool_output.ts";
 
 export const secretsID = "security.secrets";
 
@@ -156,14 +161,38 @@ async function runSecrets(signal: AbortSignal, input: Input): Promise<Result> {
     return res;
   }
 
+  // A report that is not the JSON gitleaks documents says nothing about the
+  // files: a tool problem, with the raw output kept. gitleaks documents the
+  // exit code 2 as "leaks were found", so an empty report with it is no clean
+  // scan. gitleaks redacts the secrets in its report (--redact), so the raw
+  // output holds none; redaction still runs over the artifact.
   let found: [Finding[], (string | Uint8Array)[]];
   try {
+    if (
+      exit === gitleaksLeaksFound &&
+      trimSpaceBytes(container.stdout).length === 0
+    ) {
+      throw new UnreadableOutput(
+        "gitleaks exited with its leaks-found code and printed no report",
+        "it exited with its code for found leaks but printed no report",
+      );
+    }
+    if (trimSpaceBytes(container.stdout).length > 0) {
+      requireShape("gitleaks", container.stdout, gitleaksReportShape);
+    }
     found = interpretGitleaks(container.stdout, input);
   } catch (err) {
-    res.status = StatusToolError;
-    res.reasonCode = "report_unreadable";
-    res.reason = "the gitleaks report could not be read: " + errorMessage(err);
-    return res;
+    return unreadableResult(
+      res,
+      secretsID,
+      input.context.id,
+      "gitleaks",
+      "gitleaks",
+      container,
+      err instanceof UnreadableOutput
+        ? err.summary
+        : "it is not the JSON report that gitleaks documents",
+    );
   }
   [res.findings, res.redact] = found;
   res.status = StatusCompleted;
@@ -376,6 +405,25 @@ const leaksSchema: Schema = {
     ],
   },
 };
+
+/**
+ * gitleaksReportShape is the report gitleaks documents for the json format:
+ * a list of leaks, or null when it found none, each with its rule, file and
+ * position.
+ */
+const gitleaksReportShape = shape.nullable(
+  shape.array(
+    shape.object(
+      { RuleID: shape.string, File: shape.string, StartLine: shape.number },
+      {
+        Description: shape.string,
+        EndLine: shape.number,
+        StartColumn: shape.number,
+        EndColumn: shape.number,
+      },
+    ),
+  ),
+);
 
 // gitleaksMountPrefix is where the container sees the Snapshot.
 const gitleaksMountPrefix = "/snapshot/";

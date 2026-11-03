@@ -17,6 +17,7 @@ import { type Input, untrusted } from "./input.ts";
 import { readProjectFile } from "./readcap.ts";
 import { cutTitle } from "./repo_findings.ts";
 import { unmarshalText } from "./security_dependencies_osv.ts";
+import { shape } from "./tool_output.ts";
 import {
   latin1,
   patternsID,
@@ -391,6 +392,65 @@ const semgrepDocSchema: Schema = {
     { name: "errors", schema: scanErrors },
   ],
 };
+
+const njsscanErrorsShape = shape.nullable(
+  shape.array(shape.object({}, { path: shape.string, message: shape.string })),
+);
+const njsscanRuleShape = shape.object(
+  { metadata: shape.object({ cwe: shape.string, description: shape.string }) },
+  {
+    files: shape.nullable(
+      shape.array(
+        shape.object(
+          { file_path: shape.string },
+          {
+            match_lines: shape.nullable(shape.array(shape.number)),
+            match_position: shape.nullable(shape.array(shape.number)),
+            match_string: shape.string,
+          },
+        ),
+      ),
+    ),
+  },
+);
+
+/**
+ * njsscanReportShape is the report njsscan documents for --json, as far as
+ * the Check relies on it: the rules that matched in Node.js code and in
+ * templates, and the files it could not scan.
+ */
+export const njsscanReportShape = shape.object(
+  { nodejs: shape.nullable(shape.mapOf(njsscanRuleShape)) },
+  {
+    templates: shape.nullable(shape.mapOf(njsscanRuleShape)),
+    errors: njsscanErrorsShape,
+  },
+);
+
+const semgrepPositionShape = shape.object(
+  {},
+  { line: shape.number, col: shape.number },
+);
+
+/**
+ * semgrepReportShape is the report semgrep documents for --json, as far as
+ * the Check relies on it: its results and the files it could not scan.
+ */
+export const semgrepReportShape = shape.object(
+  {
+    results: shape.array(
+      shape.object(
+        {
+          check_id: shape.string,
+          path: shape.string,
+          extra: shape.object({ message: shape.string }),
+        },
+        { start: semgrepPositionShape, end: semgrepPositionShape },
+      ),
+    ),
+  },
+  { errors: njsscanErrorsShape },
+);
 
 type Raw = Record<string, unknown>;
 

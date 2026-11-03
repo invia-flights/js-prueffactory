@@ -15,6 +15,9 @@ import {
   runInPackage,
 } from "./unreadable_output.testutil.ts";
 import { newShared } from "./shared.ts";
+import { suiteInput } from "./test_report.testutil.ts";
+import { coverageResult } from "./tests_coverage.ts";
+import { finalTwoFiles, summaryTwoFiles } from "./tests_coverage.testutil.ts";
 
 const pkg = {
   "package.json": '{"name":"x","version":"1.0.0"}',
@@ -390,6 +393,299 @@ test("types.strictness: type-coverage output that is read is still read, and a c
   assert.deepEqual(
     [crashed.status, crashed.reasonCode],
     ["tool_error", "type_coverage_failed"],
+  );
+});
+
+// --- c8 (tests.coverage) ---
+
+const c8Bad: Record<string, string> = {
+  "a changed JSON shape":
+    '{"total":{"lines":{"pct":61.5},"functions":{"pct":33}}}',
+  "a summary without a total":
+    '{"/work/pkg/src/index.js":{"lines":{"total":1,"covered":1}}}',
+  "counts of another type":
+    '{"total":{"lines":{"total":"13","covered":"8"},"functions":{"total":1,"covered":1},"branches":{"total":1,"covered":1}}}',
+  "truncated output": summaryTwoFiles.slice(0, 120),
+  "plain text": "c8: cannot find the coverage directory",
+};
+
+for (const [what, out] of Object.entries(c8Bad)) {
+  test(`tests.coverage: ${what} from c8 is a tool problem with the raw files kept`, (t) => {
+    const input = suiteInput(t, { "src/index.js": "x" });
+    const res = coverageResult(input, {
+      status: "completed",
+      coverage: {
+        unavailable: "",
+        unavailableCode: "",
+        summary: Buffer.from(out),
+        perFile: Buffer.from(finalTwoFiles),
+      },
+    });
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "tests.coverage",
+      context: input.context.id,
+      call: "c8",
+      files: {
+        "coverage-summary.json": out,
+        "coverage-final.json": finalTwoFiles,
+      },
+    });
+    assert.deepEqual(res.findings ?? [], []);
+    for (const m of res.metrics ?? []) {
+      assert.equal(m.value, null, `${m.name} is not measured`);
+    }
+  });
+}
+
+test("tests.coverage: a summary that is read is still read", (t) => {
+  const res = coverageResult(suiteInput(t, { "src/index.js": "x" }), {
+    status: "completed",
+    coverage: {
+      unavailable: "",
+      unavailableCode: "",
+      summary: Buffer.from(summaryTwoFiles),
+      perFile: null,
+    },
+  });
+  assert.equal(res.status, "completed", res.reason ?? "");
+  assert.equal(res.metrics?.length, 3);
+});
+
+// --- gitleaks (security.secrets) ---
+
+const leak =
+  '{"RuleID":"generic-api-key","Description":"a key","StartLine":1,"EndLine":1,"StartColumn":1,"EndColumn":12,"File":"/snapshot/a.js"}';
+const gitleaksBad: Record<string, string> = {
+  "a changed JSON shape": '{"findings":[' + leak + "]}",
+  "elements with other keys": '[{"rule":"generic-api-key","path":"a.js"}]',
+  "truncated output": "[" + leak.slice(0, 60),
+  "plain text": "6:12AM FTL failed to load config",
+};
+
+const secretsRun = (
+  t: Parameters<typeof run>[0],
+  answer: Parameters<typeof run>[3],
+) =>
+  run(t, "security.secrets", { "a.js": "var a = 1;\n" }, answer, {
+    snapshotTar: () => Promise.resolve(),
+  });
+
+for (const [what, out] of Object.entries(gitleaksBad)) {
+  test(`security.secrets: ${what} from gitleaks is a tool problem with the raw output kept`, async (t) => {
+    const res = await secretsRun(t, () => ({
+      exitCode: 2,
+      stdout: out,
+      stderr: "gitleaks stderr",
+    }));
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "security.secrets",
+      call: "gitleaks",
+      stdout: out,
+      stderr: "gitleaks stderr",
+    });
+    assert.deepEqual(res.findings ?? [], []);
+  });
+}
+
+test("security.secrets: an exit code that says leaks were found with an empty report is a tool problem", async (t) => {
+  const res = await secretsRun(t, () => ({ exitCode: 2 }));
+  assertUnreadable(res, {
+    status: "tool_error",
+    check: "security.secrets",
+    call: "gitleaks",
+    stdout: "",
+  });
+});
+
+test("security.secrets: a report that is read is still read, and another exit code stays a tool failure", async (t) => {
+  const clean = await secretsRun(t, () => ({ stdout: "[]" }));
+  assert.equal(clean.status, "completed", clean.reason ?? "");
+  assert.equal(clean.findings?.length ?? 0, 0);
+  const none = await secretsRun(t, () => ({}));
+  assert.equal(none.status, "completed", "no output at all is no leak");
+  const found = await secretsRun(t, () => ({
+    exitCode: 2,
+    stdout: "[" + leak + "]",
+  }));
+  assert.equal(found.status, "completed", found.reason ?? "");
+  assert.equal(found.findings?.length, 1);
+  const failed = await secretsRun(t, () => ({
+    exitCode: 1,
+    stderr: "boom",
+  }));
+  assert.deepEqual(
+    [failed.status, failed.reasonCode],
+    ["tool_error", "tool_failed"],
+  );
+});
+
+// --- osv-scanner (security.dependencies) ---
+
+const lock = JSON.stringify({
+  name: "x",
+  version: "1.0.0",
+  lockfileVersion: 3,
+  requires: true,
+  packages: {
+    "": { name: "x", version: "1.0.0", dependencies: { minimist: "1.2.5" } },
+    "node_modules/minimist": {
+      version: "1.2.5",
+      resolved: "https://registry.npmjs.org/minimist/-/minimist-1.2.5.tgz",
+      integrity: "sha512-AAAA",
+    },
+  },
+});
+const osvPkg = {
+  "package.json": '{"name":"x","version":"1.0.0"}',
+  "package-lock.json": lock,
+};
+const osvGood =
+  '{"results":[{"source":{"path":"/scan/package-lock.json","type":"lockfile"},"packages":[{"package":{"name":"minimist","version":"1.2.5","ecosystem":"npm"}}]}]}';
+const osvBad: Record<string, string> = {
+  "a changed JSON shape": '{"findings":[{"id":"GHSA-1"}]}',
+  "results of another type": '{"results":{"packages":[]}}',
+  "truncated output": osvGood.slice(0, 80),
+  "plain text": "Scanned /scan/package-lock.json file and found 1 package",
+};
+const osvAdvisories = {
+  advisoryVolume: "jspf-advisory",
+  advisoryDate: new Date("2026-11-03T00:00:00Z"),
+};
+
+for (const [what, out] of Object.entries(osvBad)) {
+  test(`security.dependencies: ${what} from osv-scanner is a tool problem with the raw output kept`, async (t) => {
+    const res = await runInPackage(
+      t,
+      "security.dependencies",
+      osvPkg,
+      () => ({ stdout: out, stderr: "osv stderr" }),
+      osvAdvisories,
+    );
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "security.dependencies",
+      context: "C-0002",
+      call: "osv",
+      stdout: out,
+      stderr: "osv stderr",
+    });
+    assert.deepEqual(res.findings ?? [], []);
+  });
+}
+
+test("security.dependencies: exit 1 for vulnerabilities with a report that names none is a tool problem", async (t) => {
+  const res = await runInPackage(
+    t,
+    "security.dependencies",
+    osvPkg,
+    () => ({ exitCode: 1, stdout: osvGood }),
+    osvAdvisories,
+  );
+  assertUnreadable(res, {
+    status: "tool_error",
+    check: "security.dependencies",
+    context: "C-0002",
+    call: "osv",
+    stdout: osvGood,
+  });
+});
+
+test("security.dependencies: a report that is read is still read, and a crash stays a tool failure", async (t) => {
+  const ok = await runInPackage(
+    t,
+    "security.dependencies",
+    osvPkg,
+    () => ({ stdout: osvGood }),
+    osvAdvisories,
+  );
+  assert.equal(ok.status, "completed", ok.reason ?? "");
+  const failed = await runInPackage(
+    t,
+    "security.dependencies",
+    osvPkg,
+    () => ({ exitCode: 127, stderr: "boom" }),
+    osvAdvisories,
+  );
+  assert.deepEqual(
+    [failed.status, failed.reasonCode],
+    ["tool_error", "tool_failed"],
+  );
+});
+
+// --- njsscan and semgrep (security.patterns) ---
+
+const njsscanGood =
+  '{"errors":[],"njsscan_version":"0.4.3","nodejs":{},"templates":{},"version":"1.0"}';
+const semgrepGood =
+  '{"version":"1.0","results":[],"errors":[],"paths":{"scanned":[]}}';
+const njsscanBad: Record<string, string> = {
+  "a changed JSON shape": '{"findings":[{"rule":"x"}]}',
+  "rules of another type": '{"nodejs":["node_xss"],"templates":{}}',
+  "rules with other keys":
+    '{"nodejs":{"node_xss":{"description":"x"}},"templates":{}}',
+  "truncated output": njsscanGood.slice(0, 50),
+  "plain text": "njsscan: error: unrecognized arguments: --json",
+};
+const semgrepBad: Record<string, string> = {
+  "a changed JSON shape": '{"findings":[{"rule":"x"}]}',
+  "results of another type": '{"results":{"path":"a.js"}}',
+  "results with other keys": '{"results":[{"file":"a.js","rule":"x"}]}',
+  "truncated output": semgrepGood.slice(0, 40),
+  "plain text": "semgrep: error: unrecognized arguments",
+};
+
+for (const [what, out] of Object.entries(njsscanBad)) {
+  test(`security.patterns: ${what} from njsscan is a tool problem with the raw output kept`, async (t) => {
+    const res = await runInPackage(t, "security.patterns", pkg, () => ({
+      exitCode: 1,
+      stdout: out,
+      stderr: "njsscan stderr",
+    }));
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "security.patterns",
+      context: "C-0002",
+      call: "njsscan-c-0002",
+      stdout: out,
+      stderr: "njsscan stderr",
+    });
+    assert.deepEqual(res.findings ?? [], []);
+  });
+}
+
+for (const [what, out] of Object.entries(semgrepBad)) {
+  test(`security.patterns: ${what} from semgrep is a tool problem with the raw output kept`, async (t) => {
+    const res = await runInPackage(t, "security.patterns", pkg, (spec) =>
+      (spec.name ?? "").startsWith("semgrep")
+        ? { stdout: out, stderr: "semgrep stderr" }
+        : { stdout: njsscanGood },
+    );
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "security.patterns",
+      context: "C-0002",
+      call: "semgrep-c-0002",
+      stdout: out,
+      stderr: "semgrep stderr",
+    });
+    assert.deepEqual(res.findings ?? [], []);
+  });
+}
+
+test("security.patterns: reports that are read are still read, and a crash stays a tool failure", async (t) => {
+  const ok = await runInPackage(t, "security.patterns", pkg, (spec) => ({
+    stdout: (spec.name ?? "").startsWith("semgrep") ? semgrepGood : njsscanGood,
+  }));
+  assert.equal(ok.status, "completed", ok.reason ?? "");
+  const failed = await runInPackage(t, "security.patterns", pkg, () => ({
+    exitCode: 2,
+    stderr: "boom",
+  }));
+  assert.deepEqual(
+    [failed.status, failed.reasonCode],
+    ["tool_error", "tool_failed"],
   );
 });
 

@@ -4,7 +4,6 @@ import { readFileSync } from "node:fs";
 import { join } from "../gocompat/path.ts";
 import { sortStrings, toLower } from "../gocompat/strings.ts";
 import { goString } from "../gocompat/utf8.ts";
-import { errorMessage } from "../gocompat/errors.ts";
 import {
   Applicable,
   type Finding,
@@ -32,10 +31,18 @@ import { patternsIgnoreLines } from "./security_patterns_ignore.ts";
 import {
   mergeOverlappingHits,
   mergeSorted,
+  njsscanReportShape,
   type Reading,
   readNjsscan,
   readSemgrep,
+  semgrepReportShape,
 } from "./security_patterns_reports.ts";
+import {
+  type RawCall,
+  requireShape,
+  UnreadableOutput,
+  unreadableResult,
+} from "./tool_output.ts";
 import {
   patternsFiles,
   patternsID,
@@ -380,6 +387,7 @@ async function patternsScan(
   }
   let njsFound: Reading;
   try {
+    requireShape("njsscan", njs.stdout, njsscanReportShape);
     njsFound = readNjsscan(input, njs.stdout, rewritten);
   } catch (err) {
     return {
@@ -387,7 +395,8 @@ async function patternsScan(
       unparsed: [],
       notes: [],
       njsExit: exit,
-      fail: (res) => reportUnreadable(res, "njsscan", err, njs.stderr),
+      fail: (res) =>
+        reportUnreadable(res, input, "njsscan", "njsscan-" + name, njs, err),
     };
   }
 
@@ -418,15 +427,17 @@ async function patternsScan(
   }
   let sgFound: Reading;
   try {
+    requireShape("semgrep", sg.stdout, semgrepReportShape);
     sgFound = readSemgrep(input, sg.stdout);
   } catch (err) {
-    const stderr = sg.stderr;
+    const raw = sg;
     return {
       findings: [],
       unparsed: [],
       notes: [],
       njsExit: exit,
-      fail: (res) => reportUnreadable(res, "semgrep", err, stderr),
+      fail: (res) =>
+        reportUnreadable(res, input, "semgrep", "semgrep-" + name, raw, err),
     };
   }
   return {
@@ -455,14 +466,28 @@ function toolFailed(
   return res;
 }
 
+/**
+ * reportUnreadable is the Result of a scan whose report is not the JSON the
+ * tool documents: it says nothing about the files, so it is a tool problem,
+ * with the raw output kept. call names the container.
+ */
 function reportUnreadable(
   res: Result,
+  input: Input,
   tool: string,
+  call: string,
+  raw: RawCall,
   err: unknown,
-  stderr: Uint8Array,
 ): Result {
-  res.status = StatusToolError;
-  res.reasonCode = "report_unreadable";
-  res.reason = `the ${tool} report could not be read: ${errorMessage(err)}: ${tail(goString(stderr), 400)}`;
-  return res;
+  return unreadableResult(
+    res,
+    patternsID,
+    input.context.id,
+    tool,
+    call,
+    raw,
+    err instanceof UnreadableOutput
+      ? err.summary
+      : `it is not the JSON report that ${tool} documents`,
+  );
 }

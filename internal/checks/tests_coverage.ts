@@ -40,6 +40,13 @@ import {
   testsCoverageID,
 } from "./tests_coverage_report.ts";
 import { runnable, testsExisting, testsExistingID } from "./tests_existing.ts";
+import {
+  type RawFile,
+  requireShape,
+  shape,
+  ToolOutputs,
+  UnreadableOutput,
+} from "./tool_output.ts";
 import { errorMessage } from "../gocompat/errors.ts";
 import type { ReasonCode } from "../resultset/reason_codes.ts";
 
@@ -412,6 +419,24 @@ async function readVolumeFile(
   }
 }
 
+const coverageCountShape = shape.object({
+  total: shape.number,
+  covered: shape.number,
+});
+
+/**
+ * coverageSummaryShape is what c8's json-summary reporter documents, as far
+ * as the Check relies on it: a total with the counts of each measure. The
+ * entries of the files are read by interpretCoverage.
+ */
+const coverageSummaryShape = shape.object({
+  total: shape.object({
+    lines: coverageCountShape,
+    branches: coverageCountShape,
+    functions: coverageCountShape,
+  }),
+});
+
 /** coverageResult is the result of tests.coverage, from the suite's one run. */
 export function coverageResult(input: Input, suite: Result): Result {
   const res: Result = { status: StatusCompleted };
@@ -494,17 +519,37 @@ export function coverageResult(input: Input, suite: Result): Result {
   if (pkg === null) {
     throw new Error("tests.coverage ran in a Context without a package");
   }
-  const measured = interpretCoverage(
-    cov.summary,
-    cov.perFile,
-    workPath(pkg),
-    pkg.path,
-  );
-  if (measured.err !== "") {
-    res.status = StatusToolError;
-    res.reasonCode = "coverage_output_unreadable";
-    res.reason = measured.err;
-    res.metrics = unmeasuredCoverage(measured.err);
+  // A summary that is not the JSON c8 documents says nothing about the
+  // package: a tool problem, with the files c8 wrote kept as they are.
+  let unreadable = "";
+  try {
+    requireShape("c8", cov.summary, coverageSummaryShape);
+  } catch (err) {
+    unreadable =
+      err instanceof UnreadableOutput
+        ? err.summary
+        : "it is not the JSON summary that c8 documents";
+  }
+  const measured =
+    unreadable === ""
+      ? interpretCoverage(cov.summary, cov.perFile, workPath(pkg), pkg.path)
+      : null;
+  if (measured !== null && measured.err !== "") {
+    unreadable = "it is not the JSON summary that c8 documents";
+  }
+  if (unreadable !== "" || measured === null) {
+    const files: RawFile[] = [
+      { name: "coverage-summary.json", content: cov.summary },
+    ];
+    if (cov.perFile !== null) {
+      files.push({ name: "coverage-final.json", content: cov.perFile });
+    }
+    const outputs = new ToolOutputs(testsCoverageID, input.context.id);
+    outputs.rejectFiles("c8", "c8", files, unreadable);
+    outputs.apply(res);
+    res.metrics = unmeasuredCoverage(
+      `c8's JSON summary is not readable: ${unreadable}`,
+    );
     return res;
   }
   const note = coverageNote(input, suite);
