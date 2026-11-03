@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
+import { SchemaVersion } from "../resultset/types.ts";
 import { runProject, selection, tempDir } from "./engine.testutil.ts";
 
 // Whole Runs without a Docker daemon (Go: selection_test.go, fast_test.go).
@@ -75,7 +76,7 @@ test("--fast is recorded and named as the reason of the Checks it left out", asy
     budgetSource: "fast_default",
   });
   assert.equal(report.selection.fast, true);
-  assert.equal(report.schema_version, "0.5.0");
+  assert.equal(report.schema_version, SchemaVersion);
   assert.deepEqual(report.profiles, {
     ...(report.profiles as object),
     catalog_version: "milestone-2",

@@ -1,1 +1,1 @@
-../../../GLOSSARY.md
+../../../README.md
