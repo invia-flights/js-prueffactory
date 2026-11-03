@@ -230,7 +230,7 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
       limitations.push({
         reason_code: reasonNotParseable,
         message:
-          "the file is not valid YAML or JSON, so it was not linted; artifacts.structured reports it as a Gate",
+          "the file is not valid YAML or JSON, so it was not linted; artifacts.structured reports the file",
         check_id: apiLintID,
         path: target.path,
       });

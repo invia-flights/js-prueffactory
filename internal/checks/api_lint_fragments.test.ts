@@ -35,6 +35,32 @@ function textOf(spec: ContainerSpec, path: string): string | undefined {
   return f === undefined ? undefined : Buffer.from(f.content).toString();
 }
 
+test("a file that is not valid YAML is not linted, and the Limitation does not claim a Gate that artifacts.structured does not have for a file in Documentation", async (t) => {
+  const specs: ContainerSpec[] = [];
+  const res = await run(
+    t,
+    "api.lint",
+    { "docs/openapi.yaml": "openapi: 3.0.3\ninfo: [\n  title: x\n" },
+    (spec) => {
+      specs.push(spec);
+      return {};
+    },
+  );
+  assert.deepEqual([res.status, res.reasonCode ?? ""], ["completed", ""]);
+  assert.equal(
+    specs.filter((s) => lintOf(s) !== undefined).length,
+    0,
+    "the broken file is not linted",
+  );
+  const l = (res.limitations ?? []).find(
+    (x) => x.reason_code === "file_not_parseable",
+  );
+  assert.ok(l, JSON.stringify(res.limitations));
+  assert.equal(l.path, "docs/openapi.yaml");
+  assert.ok(l.message.includes("artifacts.structured"), l.message);
+  assert.ok(!/gate/i.test(l.message), l.message);
+});
+
 test("a file without paths is linted as a copy with an empty paths map and the Limitation openapi_fragment names it", async (t) => {
   const specs: ContainerSpec[] = [];
   const res = await run(
