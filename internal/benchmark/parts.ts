@@ -1,5 +1,10 @@
 import { compareBytes } from "../gocompat/strings.ts";
-import type { Finding, Metric, Set } from "../resultset/types.ts";
+import {
+  type Finding,
+  type Metric,
+  type Set,
+  SeverityError,
+} from "../resultset/types.ts";
 import { nEff } from "./formula.ts";
 
 /**
@@ -50,6 +55,7 @@ const ruleRunnerMissing = "test-runner-not-installed";
 const ruleFileLoadFailed = "test-file-load-failed";
 const ruleLockfileAbsent = "lockfile-missing";
 const ruleHelmTemplate = "helm.template";
+const ruleKubernetesInvalid = "kubernetes.invalid";
 const ruleGitlabSchema = "gitlab-ci.schema";
 const ruleGitlabYAML = "gitlab-ci.yaml";
 
@@ -58,6 +64,15 @@ const evidenceDependencyScope = "dependency_scope";
 
 export function ruleOf(f: Finding): string {
   return f.rule_id ?? "";
+}
+
+/**
+ * isError says a Finding has the severity error. The parts that count what
+ * their Checks report as errors select by this and not by `gate`, so that a
+ * change of which Findings are Gates never changes a part's raw value.
+ */
+export function isError(f: Finding): boolean {
+  return f.severity === SeverityError;
 }
 
 /** primaryPath is the project path a Finding points at, or "" without one. */
@@ -230,14 +245,15 @@ export function helmChartInMessage(message: string): string | null {
 }
 
 /**
- * measureHelm counts the charts that fail to render, with any values file.
- * The chart is named in the Finding's message; without that, its folder is
- * taken from the Finding's path.
+ * measureHelm counts the charts that fail to render, with any values file:
+ * the errors of rule helm.template. The chart is named in the Finding's
+ * message; without that, its folder is taken from the Finding's path. Errors
+ * of `helm lint` never count.
  */
 export function measureHelm(input: PartInput): Measurement {
   const charts = new globalThis.Set<string>();
   for (const f of input.findings) {
-    if (!f.gate || ruleOf(f) !== ruleHelmTemplate) {
+    if (!isError(f) || ruleOf(f) !== ruleHelmTemplate) {
       continue;
     }
     let chart = helmChartInMessage(f.message) ?? "";
@@ -252,14 +268,14 @@ export function measureHelm(input: PartInput): Measurement {
 /**
  * measureGitlabCI counts the invalid files and the other problems that make
  * GitLab reject the pipeline: a missing local include, and a reference to a
- * job or stage that does not exist. A file with several schema errors counts
- * once. Notes, such as references while an include is unresolved, never
- * count.
+ * job or stage that does not exist: the errors of the Check. A file with
+ * several schema errors counts once. Notes, such as references while an
+ * include is unresolved, never count.
  */
 export function measureGitlabCI(input: PartInput): Measurement {
   const problems = new globalThis.Set<string>();
   for (const f of input.findings) {
-    if (!f.gate) {
+    if (!isError(f)) {
       continue;
     }
     switch (ruleOf(f)) {
@@ -275,21 +291,25 @@ export function measureGitlabCI(input: PartInput): Measurement {
 }
 
 /**
- * measureGates counts the Gate Findings. The Kubernetes Check merges one
- * resource that several values files render into one Gate Finding, so the
- * Gates are the resources; the compose Check reports at most one Gate per
- * set, because compose stops at its first error. Notes and warnings never
- * count.
+ * measureKubernetes counts the invalid resources: the Findings of rule
+ * kubernetes.invalid. The Check merges one resource that several values files
+ * render into one Finding, so these are the resources. A resource that
+ * kubeconform could not validate is a Finding of rule kubernetes.error and
+ * never counts.
  */
-function measureGates(input: PartInput): Measurement {
-  return measurement({ raw: input.findings.filter((f) => f.gate).length });
-}
+export const measureKubernetes: Measure = (input) =>
+  measurement({
+    raw: input.findings.filter((f) => ruleOf(f) === ruleKubernetesInvalid)
+      .length,
+  });
 
-/** measureKubernetes counts the invalid resources. */
-export const measureKubernetes: Measure = measureGates;
-
-/** measureCompose counts the compose sets that `docker compose config` rejects. */
-export const measureCompose: Measure = measureGates;
+/**
+ * measureCompose counts the compose sets that `docker compose config`
+ * rejects: the errors of the Check, at most one per set, because compose
+ * stops at its first error. Warnings never count.
+ */
+export const measureCompose: Measure = (input) =>
+  measurement({ raw: input.findings.filter(isError).length });
 
 /** dir is the part of a path before its last slash, or "." without one. */
 export function dir(p: string): string {
