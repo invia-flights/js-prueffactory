@@ -19,7 +19,7 @@ export const CatalogVersion = "milestone-2";
  * ExecutionProfile identifies the versioned defaults of a Run: Selection,
  * limits, and which Findings are Gates.
  */
-export const ExecutionProfile = "execution-v1";
+export const ExecutionProfile = "execution-v2";
 
 /** Scope says which Contexts a Check runs in. */
 export type Scope = "package" | "project";
@@ -93,11 +93,11 @@ const table = [
   ["package.install-scripts", "Packages with install scripts", PerPackage, false, AreaSideIndicator],
   ["deps.tree", "Missing, invalid or extraneous packages and peer conflicts", PerPackage, false, AreaValidity],
   ["deps.engines", "Node APIs and syntax unsupported or deprecated on the package's Node version", PerPackage, false, AreaCodeCorrectness],
-  ["repository.dockerfile", "Dockerfile problems", PerProject, true, AreaValidity],
-  ["repository.shell", "Shell script problems", PerProject, true, AreaValidity],
-  ["repository.helm", "Helm chart lint and template rendering", PerProject, true, AreaValidity],
-  ["api.lint", "OpenAPI files are structurally valid", PerProject, true, AreaValidity],
-  ["schema.compile", "JSON Schema files compile, including draft-04", PerProject, true, AreaValidity],
+  ["repository.dockerfile", "Dockerfile problems", PerProject, false, AreaValidity],
+  ["repository.shell", "Shell script problems", PerProject, false, AreaValidity],
+  ["repository.helm", "Helm chart lint and template rendering", PerProject, false, AreaValidity],
+  ["api.lint", "OpenAPI files are structurally valid", PerProject, false, AreaValidity],
+  ["schema.compile", "JSON Schema files compile, including draft-04", PerProject, false, AreaValidity],
 
   // Planned for milestone 2 or later. They are listed by list-checks and are
   // never part of a Selection while planned. The IDs are provisional until
@@ -111,10 +111,10 @@ const table = [
   ["security.containers", "Container image scans", PerProject, false, AreaNone],
   ["deps.outdated", "Outdated dependencies", PerPackage, false, AreaSideIndicator],
   ["deps.deprecated", "Deprecated dependencies", PerPackage, false, AreaSideIndicator],
-  ["repository.gitlab-ci", "GitLab CI schema validation", PerProject, true, AreaValidity],
-  ["repository.kubernetes", "Kubernetes schema validation", PerProject, true, AreaValidity],
-  ["repository.github-actions", "GitHub Actions linting", PerProject, true, AreaValidity],
-  ["repository.compose", "Compose file validation", PerProject, true, AreaValidity],
+  ["repository.gitlab-ci", "GitLab CI schema validation", PerProject, false, AreaValidity],
+  ["repository.kubernetes", "Kubernetes schema validation", PerProject, false, AreaValidity],
+  ["repository.github-actions", "GitHub Actions linting", PerProject, false, AreaValidity],
+  ["repository.compose", "Compose file validation", PerProject, false, AreaValidity],
   ["schema.drift", "Regenerate the project's JSON Schemas and compare", PerPackage, false, AreaValidity],
   ["app.lifecycle", "Application start and shutdown", PerPackage, false, AreaNone],
   ["api.fuzz", "API fuzzing", PerProject, false, AreaNone],

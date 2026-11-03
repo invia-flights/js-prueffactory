@@ -30,7 +30,7 @@ function byRule(found: Finding[]): Map<string, Finding> {
   return new Map(found.map((f) => [f.rule_id ?? "", f]));
 }
 
-test("hadolint errors are Gates and the rest are not", (t) => {
+test("hadolint errors are errors without a Gate and the rest are not", (t) => {
   const input = repoInput(t, {
     Dockerfile: "FROM node\n",
     "weird [1] {a,b}*/Dockerfile": "FROM node\nRUN\n",
@@ -40,7 +40,7 @@ test("hadolint errors are Gates and the rest are not", (t) => {
   const rules = byRule(got);
   const e = rules.get("DL1000");
   assert.ok(e);
-  assert.equal(e.gate, true);
+  assert.equal(e.gate, false);
   assert.equal(e.severity, SeverityError);
   assert.equal(e.confidence, ConfidenceConfirmed);
   const loc = e.locations[0];
@@ -83,14 +83,14 @@ const shellcheckOutput = `{"comments":[
 {"file":"/snapshot/bin/run","line":5,"endLine":5,"column":1,"endColumn":2,"level":"style","code":2250,"message":"Prefer putting braces around variable references.","fix":null},
 {"file":"/snapshot/bin/run","line":6,"endLine":6,"column":1,"endColumn":2,"level":"info","code":2034,"message":"x appears unused.","fix":null}]}`;
 
-test("ShellCheck errors are Gates and rules are SC codes", (t) => {
+test("ShellCheck errors are errors without a Gate and rules are SC codes", (t) => {
   const input = repoInput(t, { "bad.sh": "x\n", "bin/run": "x\n" });
   const got = shellcheckFindings(input, Buffer.from(shellcheckOutput));
   assert.equal(got.length, 4);
   const rules = byRule(got);
   const e = rules.get("SC1073");
   assert.ok(e);
-  assert.equal(e.gate, true);
+  assert.equal(e.gate, false);
   assert.equal(e.severity, SeverityError);
   assert.equal(e.check_id, "repository.shell");
   assert.equal(e.locations[0]?.path, "bad.sh");
@@ -150,7 +150,7 @@ const redoclyStructError = `{"totals":{"errors":1,"warnings":1,"ignored":0},"ver
 const redoclyRemoteRef = `{"totals":{"errors":1,"warnings":0,"ignored":0},"version":"2.70.0","problems":[
 {"ruleId":"no-unresolved-refs","severity":"error","location":[{"source":{"ref":"remote.yaml"},"pointer":"#/paths/~1a","reportOnKey":false,"start":{"line":7,"col":5},"end":{"line":7,"col":39}}],"message":"Can't resolve $ref: fetch failed","reference":"https://redocly.com/docs/cli/rules/oas/no-unresolved-refs","suggest":[]}]}`;
 
-test("Redocly structural errors are Gates", (t) => {
+test("Redocly structural errors are errors without a Gate", (t) => {
   const input = repoInput(t, { "weird [1]/api.yaml": "openapi: 3.0.0\n" });
   const got = redoclyFindings(
     input,
@@ -162,7 +162,7 @@ test("Redocly structural errors are Gates", (t) => {
   const [e, w] = got;
   assert.deepEqual(
     [e?.rule_id, e?.gate, e?.severity, e?.check_id],
-    ["struct", true, SeverityError, "api.lint"],
+    ["struct", false, SeverityError, "api.lint"],
   );
   assert.equal(e?.locations[0]?.path, "weird [1]/api.yaml");
   assert.deepEqual(e.locations[0].start, { line: 2, column: 1 });
@@ -188,7 +188,7 @@ test("Redocly unresolved remote refs are dropped only for files with remote refs
     new Uint8Array(),
   );
   assert.equal(local.length, 1);
-  assert.equal(local[0]?.gate, true);
+  assert.equal(local[0]?.gate, false);
 });
 
 test("Redocly output that is not JSON is an error that quotes what Redocly printed", (t) => {
@@ -222,7 +222,7 @@ test("Redocly output that is not JSON is an error that quotes what Redocly print
   );
 });
 
-test("an unparseable OpenAPI file is a Gate with Redocly's output as Evidence", (t) => {
+test("an unparseable OpenAPI file is an error without a Gate with Redocly's output as Evidence", (t) => {
   const f = unparseableFinding(
     repoInput(t, {}),
     { path: "api/openapi.yaml", remoteRef: false },
@@ -236,7 +236,7 @@ test("an unparseable OpenAPI file is a Gate with Redocly's output as Evidence", 
   );
   assert.deepEqual(
     [f.check_id, f.rule_id, f.gate, f.severity],
-    ["api.lint", "unparseable", true, SeverityError],
+    ["api.lint", "unparseable", false, SeverityError],
   );
   assert.equal(f.locations[0]?.path, "api/openapi.yaml");
   assert.equal(f.locations[0].start?.line, 5);

@@ -47,7 +47,7 @@ test("Catalog IDs are unique and keep their order", () => {
 
 test("the shipped profiles are the milestone-two ones", () => {
   assert.equal(CatalogVersion, "milestone-2");
-  assert.equal(ExecutionProfile, "execution-v1");
+  assert.equal(ExecutionProfile, "execution-v2");
 });
 
 test("syntax.parse metadata", () => {

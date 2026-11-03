@@ -307,8 +307,8 @@ function invalidResourceFinding(
   input: Pick<Input, "context" | "location" | "reproduction">,
   inv: KubeInvalid,
 ): Finding {
-  const gate = inv.status === "statusInvalid";
-  const rule = gate ? ruleKubernetesInvalid : ruleKubernetesError;
+  const invalid = inv.status === "statusInvalid";
+  const rule = invalid ? ruleKubernetesInvalid : ruleKubernetesError;
   const resource =
     shownWord(inv.kind, "kind") + "/" + shownWord(inv.name, "name");
   let where = "the file " + shownPath(inv.source.path);
@@ -332,12 +332,11 @@ function invalidResourceFinding(
     kind: KindDefect,
     severity: SeverityError,
     confidence: ConfidenceConfirmed,
-    gate,
     locations: [input.location("primary", inv.source.path, 0, 0)],
     reproduction: input.reproduction(kubernetesID),
     limitations: [],
   });
-  if (gate) {
+  if (invalid) {
     f.title = cutTitle("Invalid Kubernetes resource " + resource);
     f.message = `kubeconform reports the resource ${resource} in ${where} as invalid against the Kubernetes ${KubernetesVersion} schema, so a cluster would reject it. The validation errors are in the Evidence.`;
   } else {

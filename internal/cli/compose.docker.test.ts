@@ -24,26 +24,28 @@ function ruleFindings(s: FullReport, rule: string): FullReport["findings"] {
   return findingsOf(s, id).filter((f) => f.rule_id === rule);
 }
 
-test("an invalid compose set fails the Run and a missing variable is only a warning", async (t) => {
+test("an invalid compose set is an error without a Gate and a missing variable is only a warning", async (t) => {
   const original = copyProject(t, "ci-files");
   const before = treeFingerprint(original);
 
   const r = await realRun(t, ["test", original, "--only", id]);
 
-  assert.equal(r.code, 1, r.stderr);
+  // The set with a remote include is not run, so the Check is partial and the
+  // Run is incomplete (exit code 2); the invalid set is no Gate.
+  assert.equal(r.code, 2, r.stderr);
   const s = fullReport(r);
   const e = executionOf(s, id);
-  // The set with a remote include is not run, so the Check is partial.
   assert.deepEqual(
     [e.status, e.outcome, e.context_id, e.gate],
-    ["partial", "failed", "C-0001", 1],
+    ["partial", "unknown", "C-0001", 0],
     e.reason ?? "",
   );
   assert.equal(e.tool?.name, "docker-cli");
 
   const invalid = ruleFindings(s, "compose.invalid");
   assert.equal(invalid.length, 1);
-  assert.equal(invalid[0]?.gate, true);
+  assert.equal(invalid[0]?.gate, false);
+  assert.equal(invalid[0].severity, "error");
   assert.equal(invalid[0].locations[0]?.path, "compose.broken.yaml");
   assert.equal(invalid[0].evidence.length, 1);
   assert.equal(invalid[0].evidence[0]?.trust, "untrusted_data");
@@ -65,7 +67,7 @@ test("an invalid compose set fails the Run and a missing variable is only a warn
       "https://git.example.com/platform/shared-compose.git",
     ),
   );
-  assert.equal(s.summary.gates, 1);
+  assert.equal(s.summary.gates, 0);
   assert.equal(treeFingerprint(original), before, "the Original changed");
   assertNothingLeft(r);
 });

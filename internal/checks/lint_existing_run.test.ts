@@ -796,6 +796,180 @@ test("more findings than the cap keep every Gate and cut the warnings and say ho
   );
 });
 
+test("more errors than the cap outside Source code are kept before every warning", async (t) => {
+  const input = lintTree(t, {
+    "package.json": eslint9,
+    "eslint.config.js": "export default [];\n",
+  });
+  const messages: string[] = [];
+  for (let i = 0; i < eslintMaxFindings + 50; i++) {
+    messages.push(
+      '{"ruleId":"eqeqeq","severity":1,"message":"w","line":1,"column":1}',
+    );
+  }
+  messages.push(
+    '{"ruleId":"no-undef","severity":2,"message":"e","line":1,"column":1}',
+  );
+  const out = `[{"filePath":"/work/test/a.test.js","messages":[${messages.join(",")}]}]`;
+  withFakeLinters(t, (cmd) =>
+    isVersionQuery(cmd)
+      ? ok("9.39.0\n")
+      : cr({ exitCode: 1, stdout: Buffer.from(out) }),
+  );
+
+  const res = await lint(input);
+
+  assert.equal(res.findings?.length, eslintMaxFindings);
+  const errors = res.findings.filter((f) => f.severity === SeverityError);
+  assert.equal(errors.length, 1, "the error in Test code is kept");
+  assert.equal(errors[0]?.gate, false);
+  assert.equal(res.limitations?.[0]?.reason_code, "findings_cut");
+});
+
+/**
+ * errorsIn is the report of a linter that found an error in each of the
+ * files, as ESLint prints it.
+ */
+function eslintErrorsIn(...files: string[]): string {
+  const entries = files.map(
+    (f) =>
+      `{"filePath":"/work/${f}","messages":[{"ruleId":"no-undef","severity":2,"message":"x is not defined.","line":1,"column":1}]}`,
+  );
+  return `[${entries.join(",")}]`;
+}
+
+const lintTreeOfEveryFileClass = {
+  "package.json": eslint9,
+  "eslint.config.js": "export default [];\n",
+  "src/a.js": "1;\n",
+  "src/helper.js": "1;\n",
+  "test/a.test.js": "1;\n",
+  "fixtures/f.js": "1;\n",
+  "dist/d.js": "1;\n",
+};
+
+test("lint.existing waits for the test file probe to know which files are Test code", () => {
+  assert.equal(impl("lint.existing").readsFileClasses?.(), true);
+});
+
+test("an ESLint error is a Gate in Source code and an error without a Gate elsewhere", async (t) => {
+  const input = lintTree(t, lintTreeOfEveryFileClass);
+  withFakeLinters(t, (cmd) =>
+    isVersionQuery(cmd)
+      ? ok("9.39.0\n")
+      : cr({
+          exitCode: 1,
+          stdout: Buffer.from(
+            eslintErrorsIn(
+              "src/a.js",
+              "test/a.test.js",
+              "fixtures/f.js",
+              "dist/d.js",
+            ),
+          ),
+        }),
+  );
+
+  const res = await lint(input);
+
+  assert.equal(res.status, StatusCompleted);
+  assert.deepEqual(
+    res.findings?.map((f) => [
+      f.locations[0]?.path,
+      f.severity,
+      f.confidence,
+      f.gate,
+    ]),
+    [
+      ["src/a.js", SeverityError, ConfidenceConfirmed, true],
+      ["test/a.test.js", SeverityError, ConfidenceConfirmed, false],
+      ["fixtures/f.js", SeverityError, ConfidenceConfirmed, false],
+      ["dist/d.js", SeverityError, ConfidenceConfirmed, false],
+    ],
+  );
+});
+
+test("an ESLint error in a file the test runner loads is no Gate", async (t) => {
+  const input = lintTree(t, lintTreeOfEveryFileClass);
+  // What the probe of the installed Mocha found: a helper under src/ that the
+  // suite requires.
+  input.project = input.project.withTestFiles([
+    {
+      contextID: input.context.id,
+      path: "src/helper.js",
+      suite: "test",
+      kind: "require",
+    },
+  ]);
+  withFakeLinters(t, (cmd) =>
+    isVersionQuery(cmd)
+      ? ok("9.39.0\n")
+      : cr({
+          exitCode: 1,
+          stdout: Buffer.from(eslintErrorsIn("src/a.js", "src/helper.js")),
+        }),
+  );
+
+  const res = await lint(input);
+
+  assert.deepEqual(
+    res.findings?.map((f) => [f.locations[0]?.path, f.gate]),
+    [
+      ["src/a.js", true],
+      ["src/helper.js", false],
+    ],
+  );
+});
+
+test("a Biome error is a Gate in Source code and an error without a Gate in Test code", async (t) => {
+  const input = lintTree(t, {
+    "package.json": '{"devDependencies":{"@biomejs/biome":"2.1.2"}}',
+    "biome.json": "{}\n",
+    "src/index.js": "1;\n",
+    "test/index.test.js": "1;\n",
+  });
+  const diagnostic = (file: string): string =>
+    `{"category":"lint/suspicious/noDebugger","severity":"error","description":"This is an unexpected use of the debugger statement.","location":{"path":{"file":"${file}"},"span":[0,1],"sourceCode":"debugger;\\n"}}`;
+  const report = `{"diagnostics":[${diagnostic("src/index.js")},${diagnostic("test/index.test.js")}]}`;
+  withFakeLinters(t, (cmd) =>
+    isVersionQuery(cmd)
+      ? ok("2.1.2\n")
+      : cr({ exitCode: 1, stdout: Buffer.from(report) }),
+  );
+
+  const res = await lint(input);
+
+  assert.deepEqual(
+    res.findings?.map((f) => [f.locations[0]?.path, f.severity, f.gate]),
+    [
+      ["src/index.js", SeverityError, true],
+      ["test/index.test.js", SeverityError, false],
+    ],
+  );
+});
+
+test("a linter that is not installed and a configuration it cannot load stay Gates", async (t) => {
+  const input = lintTree(t, {
+    "package.json": eslint9,
+    "eslint.config.js": "export default [];\n",
+  });
+  withFakeLinters(t, (cmd) =>
+    isVersionQuery(cmd) ? cr({ exitCode: 1 }) : null,
+  );
+
+  const res = await lint(input);
+
+  assert.equal(res.findings?.length, 1);
+  assert.deepEqual(
+    [
+      res.findings[0]?.rule_id,
+      res.findings[0]?.severity,
+      res.findings[0]?.gate,
+    ],
+    ["eslint-not-installed", SeverityError, true],
+  );
+});
+
 test("a linter version with unusual characters is not quoted in a trusted message", async (t) => {
   const input = lintTree(t, {
     "package.json": '{"devDependencies":{"eslint":"^10"}}',

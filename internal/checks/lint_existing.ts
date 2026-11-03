@@ -20,9 +20,11 @@ export { lintExistingID };
 // lintExisting runs the project's own linter, ESLint or Biome, at the version
 // the lockfile locked, from the package's node_modules in the Working copy,
 // with the project's own configuration and check-only. A project with both
-// linters gets both. Diagnostics of error level are Gates, warnings are
-// warnings (Go: lint_existing.go, lint_existing_run.go,
-// lint_existing_parse.go).
+// linters gets both. Diagnostics of error level are Gates in Source code (the
+// File class after the test file probe) and errors without a Gate elsewhere;
+// warnings are warnings. A configuration the linter cannot load and a linter
+// that is missing after the install are Gates too (Go: lint_existing.go,
+// lint_existing_run.go, lint_existing_parse.go).
 //
 // Unlike the combined ESLint run, this Check executes the project's own
 // configuration, which is JavaScript and therefore project code. It runs in

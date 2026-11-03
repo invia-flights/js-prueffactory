@@ -110,6 +110,17 @@ export function gatesIn(
   return byPath(findingsIn(s, check).filter((f) => f.gate));
 }
 
+/**
+ * errorsIn are the error Findings of a Check by the path of their primary
+ * location, whether they are Gates or not.
+ */
+export function errorsIn(
+  s: ParseReport,
+  check: string,
+): Map<string, ParseFinding> {
+  return byPath(findingsIn(s, check).filter((f) => f.severity === "error"));
+}
+
 /** benchmarkPart is a part of the Benchmark section; it fails the test when there is none. */
 export function benchmarkPart(
   s: ParseReport,

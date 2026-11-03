@@ -38,9 +38,9 @@ The rules for tests and the commands are in [AGENTS.md](../../AGENTS.md).
 | `jest-unsupported` | Jest makes `tests.existing` unsupported, exit 2, Verdict `incomplete` |
 | `syntax-error` | A parse error in Source code is a Gate, one in Test data a note |
 | `broken-structured-files` | Broken JSON and YAML are Gates, JSONC and `!reference` are accepted |
-| `unparseable-openapi` | An unparseable OpenAPI file is a Gate of `artifacts.structured`, and `api.lint` leaves it to that Check |
-| `ci-files` | A `.gitlab-ci.yml` with a local include, a `!reference`, a remote include (Limitation), a schema error (Gate) and a `needs` typo (a note while the remote include is unresolved, otherwise a Gate), a plain manifest with an invalid field and a chart that renders an invalid Deployment with two values files (Gates), a custom resource kind (Limitation), compose files with an invalid key (Gate), a missing variable (warning) and a remote include (Limitation), and a GitHub workflow with an actionlint error (Gate) and a zizmor finding |
-| `repository-files` | hadolint and ShellCheck errors, a Helm chart that doesn't render, invalid OpenAPI, a broken draft-04 `$ref`, folder names with glob characters |
+| `unparseable-openapi` | An unparseable OpenAPI file is a Gate of `artifacts.structured`, and `api.lint` leaves it to that Check; when `artifacts.structured` is not selected, `api.lint` reports it as an error without a Gate |
+| `ci-files` | A `.gitlab-ci.yml` with a local include, a `!reference`, a remote include (Limitation), a schema error and a `needs` typo (a note while the remote include is unresolved, otherwise an error), neither a Gate, a plain manifest with an invalid field and a chart that renders an invalid Deployment with two values files (errors), a custom resource kind (Limitation), compose files with an invalid key (error), a missing variable (warning) and a remote include (Limitation), and a GitHub workflow with an actionlint error (error) and a zizmor finding; none of the errors of the repository Checks is a Gate (execution-v2) |
+| `repository-files` | hadolint and ShellCheck errors, a Helm chart that doesn't render, invalid OpenAPI, a broken draft-04 `$ref`, folder names with glob characters; all of them errors without a Gate |
 | `no-lockfile` | `npm install` is used and the produced lockfile is saved |
 | `yarn-unsupported` | A hand-written `yarn.lock` and no npm lockfile: the native lockfile Checks are applicable and end `unsupported` with `package_manager_unsupported`, "Lockfile integrity" is unknown, exit 2. Unit tests cover a `packageManager` field next to an npm lockfile: one that names another manager gives the same result, one that names npm changes nothing |
 | `lockfile-mismatch` | `npm ci` fails because of the project, dependent Checks are blocked |
@@ -60,7 +60,8 @@ The rules for tests and the commands are in [AGENTS.md](../../AGENTS.md).
 | `closed-vocabulary-env` | `.env` values that are also words of the Report's vocabulary don't corrupt the Report |
 | `ordinary-env-values` | Ordinary `.env` values stay readable, secret-looking ones are redacted |
 | `placeholder-env-values` | A placeholder (`empty`) under a secret-sounding `.env` name stays readable in a test title and its re-run command, a real-looking secret is redacted |
-| `project-eslint` | The project's ESLint config: an error is a Gate, a warning is not, a disabled hit stays silent |
+| `project-eslint` | The project's ESLint config: an error in Source code is a Gate, a warning is not, a disabled hit stays silent |
+| `project-eslint-test-code` | `project-eslint` plus an error-level hit in Test code: an error without a Gate, counted by the Project linter part, while the error in Source code stays the one Gate (a copy, because `project-eslint` is recorded in the Go oracles) |
 | `project-biome` | The project's Biome config, including a VCS setting that needs a retry |
 | `eslint-legacy` | A legacy `.eslintrc` with ESLint 10 is a project error |
 | `eslint-no-config` | ESLint as a dependency without config makes `lint.existing` not applicable |

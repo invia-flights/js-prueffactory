@@ -1,6 +1,6 @@
 // repository.shell runs ShellCheck on shell scripts, once per dialect (Go:
-// repository_shell.go). Error-level results are Gates. The project's own
-// .shellcheckrc is not read, so the result does not depend on a
+// repository_shell.go). Error-level results are errors, never Gates. The
+// project's own .shellcheckrc is not read, so the result does not depend on a
 // configuration the project controls; inline directives keep working.
 import { sortStrings } from "../gocompat/strings.ts";
 import {

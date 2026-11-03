@@ -1,0 +1,10 @@
+{
+  "name": "project-eslint-test-code",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: project-eslint plus an error-level rule hit in Test code, which is an error without a Gate.",
+  "main": "src/index.js",
+  "devDependencies": {
+    "eslint": "^9.39.0"
+  }
+}

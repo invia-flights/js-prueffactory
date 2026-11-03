@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 
+import { ProfileID } from "../benchmark/profile.ts";
 import { at, goldenScored, goOracle } from "./helpers.testutil.ts";
 import { minimal } from "./resultsettest/sample.testutil.ts";
 import { scoredProject } from "./resultsettest/scored.testutil.ts";
@@ -209,10 +210,19 @@ describe("the validator catches a score that disagrees with its Verdict, with th
         problems.join("\n").includes(want),
         `problems ${JSON.stringify(problems)} lack ${want}`,
       );
-      assert.deepEqual(problems, goOracle.validation[`scored: ${name}`]);
+      assert.deepEqual(
+        problems,
+        goOracle.validation[`scored: ${name}`]?.map(inThisProfile),
+      );
     });
   }
 });
+
+// The Go build recorded its only Benchmark profile ID in a few messages; the
+// scored baselines of this build carry the ID of the profile of this build.
+function inThisProfile(message: string): string {
+  return message.replaceAll("benchmark-v1-uncalibrated", ProfileID);
+}
 
 test("a benchmark mode Report must carry a benchmark section", () => {
   const s = scoredProject().done();

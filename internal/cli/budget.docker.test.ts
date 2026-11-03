@@ -29,7 +29,7 @@ test("a --fast Run of clean-mocha records fast and the fast default Budget", asy
       s.profiles.catalog_version,
       s.profiles.execution_profile,
     ],
-    ["0.4.0", "milestone-2", "execution-v1"],
+    ["0.4.0", "milestone-2", "execution-v2"],
   );
   // Every Check marked for --fast is still planned, so nothing is left out.
   assert.deepEqual(s.selection.deselected_checks, []);

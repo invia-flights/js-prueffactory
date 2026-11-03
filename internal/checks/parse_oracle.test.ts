@@ -191,7 +191,9 @@ test("Redocly output becomes the Go build's Findings and errors", (t) => {
         gate: f.gate,
         severity: f.severity,
       })),
-      c.findings ?? [],
+      // The Go build made every error a Gate; under execution-v2 api.lint
+      // fires none, and every other field is as recorded.
+      (c.findings ?? []).map((f) => ({ ...f, gate: false })),
       what,
     );
   }

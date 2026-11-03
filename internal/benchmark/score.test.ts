@@ -19,8 +19,8 @@ test("a clean project scores 100 and passes", () => {
   const b = s.benchmark;
 
   assert.equal(b.status, BenchmarkComputed);
-  assert.equal(b.profile_id, "benchmark-v1-uncalibrated");
-  assert.equal(s.profiles.benchmark_profile, "benchmark-v1-uncalibrated");
+  assert.equal(b.profile_id, "benchmark-v2-uncalibrated");
+  assert.equal(s.profiles.benchmark_profile, "benchmark-v2-uncalibrated");
   wantScore("score", b.score, 100);
   assert.deepEqual(b.range, { low: 100, high: 100 });
   assert.equal(b.verdict, VerdictPass);

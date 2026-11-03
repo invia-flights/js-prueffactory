@@ -79,7 +79,7 @@ test("--fast is recorded and named as the reason of the Checks it left out", asy
   assert.deepEqual(report.profiles, {
     ...(report.profiles as object),
     catalog_version: "milestone-2",
-    execution_profile: "execution-v1",
+    execution_profile: "execution-v2",
   });
   assert.equal(report.run.budget_source, "fast_default");
   const code = (id: string) =>

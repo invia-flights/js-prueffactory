@@ -44,7 +44,7 @@ test("benchmark on a clean project gives a single score and the Verdict pass", a
   assert.deepEqual([s.run.command, s.run.exit_code], ["benchmark", 0]);
   const b = s.benchmark;
   assert.equal(b.status, "computed");
-  assert.equal(b.profile_id, "benchmark-v1-uncalibrated");
+  assert.equal(b.profile_id, "benchmark-v2-uncalibrated");
   const score = b.score;
   assert.ok(
     score !== null && score >= 0 && score <= 100,
@@ -92,7 +92,7 @@ test("benchmark on a clean project gives a single score and the Verdict pass", a
     "**Score: ",
     " of 100**",
     "Verdict: **pass**",
-    "benchmark-v1-uncalibrated",
+    "benchmark-v2-uncalibrated",
     "comparable only between Runs with equal fingerprints",
     f.hash,
   ]) {

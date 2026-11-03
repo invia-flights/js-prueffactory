@@ -6,7 +6,7 @@
 // that the reader of this build, like Go's, does not understand; the fix
 // belongs to the trustworthy-gates spec and is not made here.
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 
@@ -16,6 +16,7 @@ import {
   findingsOf,
   lintReport,
   oneExecution,
+  partOf,
   type LintReport,
 } from "./lint.testutil.ts";
 import {
@@ -34,7 +35,7 @@ function lintFindingsByRule(
   );
 }
 
-test("lint.existing runs the project's own ESLint with its config and directives and fires a Gate for an error rule", async (t) => {
+test("lint.existing runs the project's own ESLint with its config and directives and fires a Gate for an error rule in Source code", async (t) => {
   const original = copyProject(t, "project-eslint");
   const before = treeFingerprint(original);
 
@@ -129,6 +130,75 @@ test("lint.existing runs Biome and retries without VCS when its ignore file cann
   assert.ok(
     doc.includes("--vcs-enabled=false") && doc.includes('"override"'),
     doc,
+  );
+  assertNothingLeft(r);
+});
+
+test("an error at the project's error level in Test code is an error without a Gate, and the Source code error stays a Gate", async (t) => {
+  const original = copyProject(t, "project-eslint-test-code");
+
+  const r = await realRun(t, [
+    "benchmark",
+    original,
+    "--only",
+    "lint.existing",
+  ]);
+
+  // The Source code error (no-unused-vars in src/index.js) is the one Gate.
+  assert.equal(r.code, 1, `exit 1 for the Source code error\n${r.stderr}`);
+  const s = lintReport(r);
+  const exec = oneExecution(s, "lint.existing");
+  assert.deepEqual([exec.status, exec.gate], ["completed", 1]);
+  assert.equal(s.summary.gates, 1);
+  const byRule = lintFindingsByRule(s);
+  const source = byRule.get("no-unused-vars");
+  assert.ok(source);
+  assert.deepEqual(
+    [source.gate, source.severity, source.in_test_code],
+    [true, "error", false],
+  );
+  assert.equal(source.locations[0]?.path, "src/index.js");
+  // The Test code error keeps its severity; it is only no Gate.
+  const inTest = byRule.get("no-var");
+  assert.ok(inTest);
+  assert.deepEqual(
+    [inTest.gate, inTest.severity, inTest.in_test_code],
+    [false, "error", true],
+  );
+  assert.equal(inTest.locations[0]?.path, "test/index.test.js");
+  // The Project linter part counts both errors, whatever their Gate.
+  const part = partOf(s, "project_linter");
+  assert.deepEqual([part.state, part.raw_value], ["measured", 2]);
+  assertNothingLeft(r);
+});
+
+test("with no error in Source code an error in Test code leaves the Run at exit code 0", async (t) => {
+  const original = copyProject(t, "project-eslint-test-code");
+  writeFileSync(
+    join(original, "src", "index.js"),
+    "function same(a, b) {\n  return a === b;\n}\n\nmodule.exports = { same };\n",
+  );
+
+  const r = await realRun(t, [
+    "benchmark",
+    original,
+    "--only",
+    "lint.existing",
+  ]);
+
+  assert.equal(r.code, 0, `no Gate\n${r.stderr}`);
+  const s = lintReport(r);
+  const exec = oneExecution(s, "lint.existing");
+  assert.deepEqual(
+    [exec.status, exec.outcome, exec.gate],
+    ["completed", "observations_only", 0],
+  );
+  const f = lintFindingsByRule(s).get("no-var");
+  assert.deepEqual([f?.gate, f?.severity], [false, "error"]);
+  assert.equal(
+    partOf(s, "project_linter").raw_value,
+    1,
+    "the error in Test code still counts",
   );
   assertNothingLeft(r);
 });
