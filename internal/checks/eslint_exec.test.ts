@@ -75,9 +75,9 @@ test("checks of one package share one ESLint run and packages do not", async (t)
     });
   const signal = new AbortController().signal;
 
-  const first = await eslintRunOf(signal, make("."));
-  const second = await eslintRunOf(signal, make("."));
-  await eslintRunOf(signal, make("packages/b"));
+  const first = await eslintRunOf(signal, make("."), "lint.correctness");
+  const second = await eslintRunOf(signal, make("."), "lint.correctness");
+  await eslintRunOf(signal, make("packages/b"), "lint.correctness");
 
   assert.ok("run" in first && "run" in second);
   assert.equal(
@@ -133,8 +133,8 @@ test("a run cut short by cancellation is not kept for the next Check", async (t)
   );
   const input = packageInput(proj, dir, ".", { shared: newShared() });
 
-  await eslintRunOf(ctl.signal, input);
-  await eslintRunOf(new AbortController().signal, input);
+  await eslintRunOf(ctl.signal, input, "lint.correctness");
+  await eslintRunOf(new AbortController().signal, input, "lint.correctness");
 
   assert.equal(calls, 2);
 });

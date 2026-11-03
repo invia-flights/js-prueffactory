@@ -62,7 +62,13 @@ import {
 } from "./registry_data.ts";
 import { readRegistryAnswers, RegistryAnswers } from "./registry_answers.ts";
 import { dependencyLockfile } from "./security_dependencies.ts";
-import { errorMessage } from "../gocompat/errors.ts";
+import {
+  type RawCall,
+  requireShape,
+  shape,
+  UnreadableOutput,
+  unreadableResult,
+} from "./tool_output.ts";
 
 const registryScriptPath = "/registry/registry-data.js";
 const registryInputPath = "/registry/input.json";
@@ -176,10 +182,33 @@ export class RegistryData {
    * return a copy of it (see failed).
    */
   fail: Result | null = null;
+  /**
+   * unreadable is set, together with fail, when the helper exited cleanly but
+   * printed an answer that cannot be read: the fixed summary and the raw
+   * output. Each dependent Check keeps the raw output as artifacts of its own
+   * execution.
+   */
+  unreadable: { summary: string; raw: RawCall } | null = null;
 
-  /** failed is the Result of a dependent Check when the data is unusable. */
-  failed(): Result {
-    return { ...(this.fail ?? { status: StatusToolError }) };
+  /**
+   * failed is the Result of a dependent Check when the data is unusable.
+   * checkID and contextID say whose execution it is, for the artifacts of an
+   * answer that could not be read.
+   */
+  failed(checkID: string, contextID: string): Result {
+    const res: Result = { ...(this.fail ?? { status: StatusToolError }) };
+    if (this.unreadable === null) {
+      return res;
+    }
+    return unreadableResult(
+      res,
+      checkID,
+      contextID,
+      "the registry-data helper",
+      "registry",
+      this.unreadable.raw,
+      this.unreadable.summary,
+    );
   }
 
   /** result starts the Result of a dependent Check that has data to evaluate. */
@@ -388,14 +417,23 @@ async function fetchRegistryData(
     d.fail = helperFailed({ status: StatusCompleted }, "registry-data", c, 400);
     return d;
   }
+  // A helper that exits cleanly but prints something else than its answer
+  // says nothing about the packages: a tool problem, with the raw output
+  // kept, and never a registry that did not answer.
   try {
+    requireShape("the registry-data helper", c.stdout, registryAnswersShape);
     d.answers = readRegistryAnswers(c.stdout);
   } catch (err) {
+    const summary =
+      err instanceof UnreadableOutput
+        ? err.summary
+        : "it is not the document the helper writes";
     d.fail = {
       status: StatusToolError,
-      reasonCode: "helper_failed",
-      reason: errorMessage(err),
+      reasonCode: "tool_output_unreadable",
+      reason: `The output of the registry-data helper could not be read: ${summary}.`,
     };
+    d.unreadable = { summary, raw: c };
     return d;
   }
   const [code, reason] = d.answers.allFailed(d.asked);
@@ -410,6 +448,33 @@ async function fetchRegistryData(
   }
   return d;
 }
+
+/** registryAnswersShape is the document js/registry-data.js documents. */
+const registryAnswersShape = shape.object({
+  fetched_at: shape.string,
+  packages: shape.nullable(
+    shape.array(
+      shape.object(
+        { name: shape.string, status: shape.string },
+        {
+          registry: shape.string,
+          http_status: shape.number,
+          error: shape.string,
+          latest: shape.string,
+          latest_deprecated: shape.string,
+          versions: shape.nullable(
+            shape.mapOf(
+              shape.object(
+                {},
+                { deprecated: shape.string, published: shape.string },
+              ),
+            ),
+          ),
+        },
+      ),
+    ),
+  ),
+});
 
 /** scriptInputShape is the JSON the fetch script reads, in Go's field order. */
 const scriptInputShape = gojson.object([

@@ -67,6 +67,12 @@ import {
   toolRun,
 } from "./quality_unused.ts";
 import { lstatRegular, maxProjectFileBytes, readCapped } from "./readcap.ts";
+import {
+  requireShape,
+  shape,
+  UnreadableOutput,
+  unreadableResult,
+} from "./tool_output.ts";
 
 export const cyclesID = "modules.cycles";
 
@@ -253,6 +259,32 @@ const cruiseSchema: Schema = {
   ],
 };
 
+/** cruiseOutputShape is the document js/depcruise.js documents. */
+const cruiseOutputShape = shape.object(
+  {
+    version: shape.string,
+    total_cruised: shape.number,
+    violations: shape.array(
+      shape.object(
+        { rule: shape.string },
+        {
+          from: shape.string,
+          to: shape.string,
+          specifier: shape.string,
+          cycle: shape.nullable(shape.array(shape.string)),
+        },
+      ),
+    ),
+    unresolved: shape.array(
+      shape.object({}, { from: shape.string, module: shape.string }),
+    ),
+  },
+  {
+    edges: shape.mapOf(shape.nullable(shape.array(shape.string))),
+    error: shape.string,
+  },
+);
+
 interface RawList<T> {
   items(): T[];
 }
@@ -332,20 +364,31 @@ async function runCycles(signal: AbortSignal, input: Input): Promise<Result> {
   } catch (err) {
     return failedToRun(res, err);
   }
-  let out: CruiseResult | undefined;
-  if (c.exitCode === 0) {
-    try {
-      out = parseCruiseResult(c.stdout);
-    } catch {
-      out = undefined;
-    }
+  toolRun(res, "dependency-cruiser");
+  if (res.tool !== undefined && res.tool !== null) {
+    res.tool.exit_code = c.exitCode;
   }
-  if (out === undefined) {
-    toolRun(res, "dependency-cruiser");
-    if (res.tool !== undefined && res.tool !== null) {
-      res.tool.exit_code = c.exitCode;
-    }
+  if (c.exitCode !== 0) {
     return helperFailed(res, "dependency-cruiser", c, 800);
+  }
+  // A helper that exits cleanly but prints something else than its document
+  // says nothing about the package: a tool problem, with the raw output kept.
+  let out: CruiseResult;
+  try {
+    requireShape("the cruise helper", c.stdout, cruiseOutputShape);
+    out = parseCruiseResult(c.stdout);
+  } catch (err) {
+    return unreadableResult(
+      res,
+      cyclesID,
+      input.context.id,
+      "dependency-cruiser",
+      "cruise",
+      c,
+      err instanceof UnreadableOutput
+        ? err.summary
+        : "it is not the document the helper writes",
+    );
   }
   const r = interpretCycles(
     input,

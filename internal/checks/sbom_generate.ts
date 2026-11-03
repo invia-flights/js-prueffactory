@@ -31,7 +31,7 @@ import {
 import { dependencyLockfile } from "./security_dependencies.ts";
 import { packageName } from "./security_dependencies_osv.ts";
 import { oneLine } from "./test_report.ts";
-import { errorMessage } from "../gocompat/errors.ts";
+import { UnreadableOutput, unreadableResult } from "./tool_output.ts";
 
 export const sbomGenerateID = "sbom.generate";
 
@@ -156,14 +156,23 @@ export const sbomGenerate: Check = {
       }
       return res;
     }
+    // A document that is not the CycloneDX JSON npm documents says nothing
+    // about the lockfile: a tool problem, with the raw output kept.
     let components: number;
     try {
       components = sbomComponents(c.stdout);
     } catch (err) {
-      res.status = StatusToolError;
-      res.reasonCode = "sbom_unreadable";
-      res.reason = errorMessage(err);
-      return res;
+      return unreadableResult(
+        res,
+        sbomGenerateID,
+        input.context.id,
+        "npm sbom",
+        "sbom",
+        c,
+        err instanceof UnreadableOutput
+          ? err.summary
+          : "it is not the CycloneDX document that npm sbom documents",
+      );
     }
 
     res.status = StatusCompleted;
@@ -215,12 +224,16 @@ export function sbomComponents(doc: Uint8Array): number {
   try {
     bom = json.unmarshal(doc, bomSchema) as typeof bom;
   } catch {
-    throw new Error(
+    throw new UnreadableOutput(
       `\`npm sbom\` wrote no JSON document: ${quote(oneLine(tail(goString(doc), 200), 200))}`,
+      "it is not the JSON document that npm sbom documents",
     );
   }
   if (bom.bomFormat !== "CycloneDX") {
-    throw new Error("`npm sbom` wrote a JSON document that is not CycloneDX");
+    throw new UnreadableOutput(
+      "`npm sbom` wrote a JSON document that is not CycloneDX",
+      "its JSON document is not a CycloneDX document",
+    );
   }
   return bom.components?.len ?? 0;
 }

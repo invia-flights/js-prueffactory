@@ -10,7 +10,6 @@ import {
   type Limitation,
   StatusCompleted,
   StatusPartial,
-  StatusToolError,
 } from "../resultset/types.ts";
 import { ContainerMemoryMB } from "../toolset/toolset.ts";
 import { failedToRun } from "./helper_result.ts";
@@ -29,6 +28,7 @@ import {
   testsExistingID,
 } from "./tests_existing.ts";
 import { testLogPath } from "./tests_repeat.ts";
+import { ToolOutputs } from "./tool_output.ts";
 
 /** SuiteLaunch is what differs between runners when the suite's container is started. */
 export interface SuiteLaunch {
@@ -202,9 +202,21 @@ export function finishSuite(
     res.reasonCode = "out_of_memory";
     res.reason = `the test process ran out of its ${String(ContainerMemoryMB)} MB of memory, so the tests not yet run are reported as never run`;
   } else if (!ev.started && c.exitCode === 0) {
-    res.status = StatusToolError;
-    res.reasonCode = "no_test_events";
-    res.reason = end.noEvents;
+    // The runner exited cleanly and the reporter's file holds no event line,
+    // not even a started one: the output of the reporter cannot be read, and
+    // that says nothing about the project's tests. A tool problem, with the
+    // raw output kept: the runner's streams and the file, when it has content.
+    const outputs = new ToolOutputs(testsExistingID, input.context.id);
+    outputs.reject(
+      "the test reporter",
+      "reporter",
+      c,
+      "its event file holds no event line",
+      "",
+      ev.raw.length > 0 ? [{ name: "events.jsonl", content: ev.raw }] : [],
+    );
+    outputs.apply(res);
+    res.reason = `${res.reason ?? ""} ${end.noEvents}.`;
   } else if (!ev.started) {
     const [findings, limitations] = end.notStarted();
     (res.findings ??= []).push(...findings);

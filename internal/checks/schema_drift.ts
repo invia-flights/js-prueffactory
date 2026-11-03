@@ -35,6 +35,12 @@ import {
   driftResult,
   schemaDriftID,
 } from "./schema_drift_results.ts";
+import {
+  requireShape,
+  shape,
+  UnreadableOutput,
+  unreadableResult,
+} from "./tool_output.ts";
 
 export { schemaDriftID } from "./schema_drift_results.ts";
 
@@ -155,8 +161,26 @@ const compareSchema: Schema = {
   ],
 };
 
-/** parseCompare decodes the compare helper's answer; it throws for anything else. */
+/** manifestShape is what the helper's manifest step documents: a hash for each file. */
+const manifestShape = shape.object({ files: shape.mapOf(shape.string) });
+
+const driftFileShape = shape.object(
+  { path: shape.string },
+  { size: shape.number, content: shape.string, too_large: shape.boolean },
+);
+
+/** compareShape is what the helper's compare step documents. */
+const compareShape = shape.object({
+  changed: shape.nullable(shape.array(driftFileShape)),
+  created: shape.nullable(shape.array(driftFileShape)),
+});
+
+/**
+ * parseCompare decodes the compare helper's answer; it throws
+ * UnreadableOutput for anything else.
+ */
 function parseCompare(stdout: Uint8Array): DriftCompareOutput {
+  requireShape("the schema-drift helper", stdout, compareShape);
   const out = unmarshal(stdout, compareSchema) as {
     changed: GoSlice | null;
     created: GoSlice | null;
@@ -259,6 +283,24 @@ async function runSchemaDrift(
   if (before.exitCode !== 0) {
     return helperFailed(res, "schema drift", before, 400);
   }
+  // A manifest that is not the helper's document would make every file look
+  // as if the generators had created or changed it: a tool problem, with the
+  // raw output kept, before any generator runs.
+  try {
+    requireShape("the schema-drift helper", before.stdout, manifestShape);
+  } catch (err) {
+    return unreadableResult(
+      res,
+      schemaDriftID,
+      input.context.id,
+      "the schema-drift helper",
+      "manifest",
+      before,
+      err instanceof UnreadableOutput
+        ? err.summary
+        : "it is not the document the helper writes",
+    );
+  }
 
   const failures: DriftFailure[] = [];
   for (const [i, s] of scripts.entries()) {
@@ -316,14 +358,24 @@ async function runSchemaDrift(
   } catch (err) {
     return failedToRun(res, err);
   }
+  if (after.exitCode !== 0) {
+    return helperFailed(res, "schema drift", after, 400);
+  }
   let out: DriftCompareOutput;
   try {
-    if (after.exitCode !== 0) {
-      throw new Error("exit");
-    }
     out = parseCompare(after.stdout);
-  } catch {
-    return helperFailed(res, "schema drift", after, 400);
+  } catch (err) {
+    return unreadableResult(
+      res,
+      schemaDriftID,
+      input.context.id,
+      "the schema-drift helper",
+      "compare",
+      after,
+      err instanceof UnreadableOutput
+        ? err.summary
+        : "it is not the document the helper writes",
+    );
   }
 
   const done = driftResult(input, scripts, failures, out);

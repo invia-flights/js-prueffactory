@@ -44,6 +44,7 @@ import {
 } from "./package_install.ts";
 import { lstatRegular } from "./readcap.ts";
 import { rawJSON, repoFinding } from "./repo_findings.ts";
+import { unreadableResult } from "./tool_output.ts";
 import { atoiClamped } from "../gocompat/strconv.ts";
 import type { ReasonCode } from "../resultset/reason_codes.ts";
 
@@ -462,6 +463,57 @@ export function parseTSC(out: string): {
   return { diags, global };
 }
 
+// A line that talks about a diagnostic but that neither pattern above reads,
+// such as tsc's pretty format or a line cut off in the middle.
+const tscDiagnosticMention = /\b(?:error|warning) TS[0-9]+/;
+// eslint-disable-next-line no-control-regex -- the escape sequences of tsc's pretty format
+const ansiEscape = /\u001b\[[0-9;]*m/g;
+
+/**
+ * tscUnreadable says why the text of a tsc run cannot be read, or returns ""
+ * when it can. tsc documents its exit code (1 or 2 when it reported errors)
+ * and the line format of its diagnostics, and a run that exited with errors
+ * must show at least one diagnostic in that format. So output is unreadable
+ * when
+ *   - tsc exited with 1 or 2 and printed text but no diagnostic that is read
+ *     (a changed format, plain text), or
+ *   - a line mentions a diagnostic that neither format reads (a line cut off,
+ *     the pretty format between readable lines).
+ * A run that printed nothing is a silent failure and a crash another exit
+ * code; both stay the tool failures they are, and nothing is said of them
+ * here. The summary holds fixed words only.
+ */
+export function tscUnreadable(
+  stdout: string,
+  parsed: { diags: readonly unknown[]; global: readonly unknown[] },
+  exit: number,
+): string {
+  if (exit < 1 || exit > 2) {
+    return "";
+  }
+  if (
+    parsed.diags.length === 0 &&
+    parsed.global.length === 0 &&
+    trimSpace(stdout) !== ""
+  ) {
+    return "it printed text that is not a diagnostic in the format tsc documents";
+  }
+  for (let line of stdout.split("\n")) {
+    line = trimRight(line, "\r");
+    if (line.startsWith(" ") || line.startsWith("\t")) {
+      continue;
+    }
+    if (
+      tscDiagnosticMention.test(line.replace(ansiEscape, "")) &&
+      !tscFileDiagnostic.test(line) &&
+      !tscGlobalDiagnostic.test(line)
+    ) {
+      return "it printed a diagnostic in another format than tsc documents";
+    }
+  }
+  return "";
+}
+
 const tscCannotFindModule = /^Cannot find module '([^']+)'/;
 
 /**
@@ -592,8 +644,23 @@ async function runTypesJavascript(
       "tsc ran out of memory: " + tail(goString(container.stderr), 400);
     return res;
   }
-  const { diags, global } = parseTSC(goString(container.stdout));
-  const out = interpretTypes(input, diags, global, container.exitCode);
+  const text = goString(container.stdout);
+  const parsed = parseTSC(text);
+  const unreadable = tscUnreadable(text, parsed, container.exitCode);
+  // Output that is not the diagnostics tsc documents says nothing about the
+  // code: a tool problem, with the raw output kept.
+  const out =
+    unreadable === ""
+      ? interpretTypes(input, parsed.diags, parsed.global, container.exitCode)
+      : unreadableResult(
+          { status: StatusCompleted, ...typesToolInfo(container.exitCode) },
+          typesJavascriptID,
+          input.context.id,
+          "tsc",
+          "tsc",
+          container,
+          unreadable,
+        );
   out.command = res.command;
   if (out.status === StatusToolError && out.reasonCode === "tsc_failed") {
     out.reason =
@@ -704,6 +771,28 @@ export function tscDiagnosticJSON(d: TscDiagnostic): string {
   ]);
 }
 
+/** typesToolInfo is the Tool and the Context's tools of a run of tsc. */
+function typesToolInfo(exit: number): Pick<Result, "tool" | "contextTools"> {
+  const info: Pick<Result, "tool" | "contextTools"> = {};
+  const tsc = npmTool("typescript");
+  if (tsc !== undefined) {
+    info.tool = { name: "tsc", version: tsc.version, exit_code: exit };
+  }
+  const refs: ToolRef[] = [];
+  for (const name of ["typescript", "@types/node", "@types/mocha"]) {
+    const tool = npmTool(name);
+    if (tool !== undefined) {
+      refs.push({
+        name: tool.name,
+        version: tool.version,
+        digest: tool.integrity,
+      });
+    }
+  }
+  info.contextTools = refs;
+  return info;
+}
+
 /**
  * interpretTypes turns tsc's diagnostics and exit code into the Result. tsc
  * exits with 0 for a clean run and 1 or 2 when it reported errors; anything
@@ -718,23 +807,7 @@ export function interpretTypes(
   global: readonly string[],
   exit: number,
 ): Result {
-  const res: Result = { status: StatusCompleted };
-  const tsc = npmTool("typescript");
-  if (tsc !== undefined) {
-    res.tool = { name: "tsc", version: tsc.version, exit_code: exit };
-  }
-  const refs: ToolRef[] = [];
-  for (const name of ["typescript", "@types/node", "@types/mocha"]) {
-    const tool = npmTool(name);
-    if (tool !== undefined) {
-      refs.push({
-        name: tool.name,
-        version: tool.version,
-        digest: tool.integrity,
-      });
-    }
-  }
-  res.contextTools = refs;
+  const res: Result = { status: StatusCompleted, ...typesToolInfo(exit) };
   if (exit < 0 || exit > 2) {
     res.status = StatusToolError;
     res.reasonCode = "tsc_failed";

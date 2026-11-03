@@ -69,6 +69,7 @@ export type Shape =
   | { readonly kind: "string" | "number" | "boolean" }
   | { readonly kind: "array"; readonly of: Shape }
   | { readonly kind: "nullable"; readonly of: Shape }
+  | { readonly kind: "map"; readonly of: Shape }
   | { readonly kind: "oneOf"; readonly values: readonly string[] }
   | {
       readonly kind: "object";
@@ -82,6 +83,8 @@ export const shape = {
   boolean: { kind: "boolean" } as Shape,
   array: (of: Shape): Shape => ({ kind: "array", of }),
   nullable: (of: Shape): Shape => ({ kind: "nullable", of }),
+  /** mapOf is an object whose every value has the shape, whatever its keys. */
+  mapOf: (of: Shape): Shape => ({ kind: "map", of }),
   /** oneOf is a string that is one of the documented words. */
   oneOf: (...values: string[]): Shape => ({ kind: "oneOf", values }),
   /**
@@ -141,6 +144,18 @@ function shapeProblem(value: unknown, expected: Shape, at: string): string {
         : `${at} is not one of the documented words`;
     case "nullable":
       return value === null ? "" : shapeProblem(value, expected.of, at);
+    case "map": {
+      if (typeof value !== "object" || value === null || Array.isArray(value)) {
+        return `${at} is not an object`;
+      }
+      for (const [key, v] of Object.entries(value)) {
+        const p = shapeProblem(v, expected.of, `${at}.${key}`);
+        if (p !== "") {
+          return p;
+        }
+      }
+      return "";
+    }
     case "array": {
       if (!Array.isArray(value)) {
         return `${at} is not an array`;
@@ -229,11 +244,43 @@ export function rawOutputArtifacts(
   return [make("stdout", c.stdout), make("stderr", c.stderr)];
 }
 
+/** RawFile is a file a tool wrote, such as the coverage report of c8. */
+export interface RawFile {
+  /** name is the file's name, unique among the files of one call. */
+  readonly name: string;
+  readonly content: Uint8Array;
+}
+
+/**
+ * rawFileArtifacts are the artifacts of files a tool wrote and the adapter
+ * could not read, for a tool whose answer is a file and not its stdout.
+ * call is the call's own name; each artifact is `<call>.<name>` below the
+ * Check's folder, cut to maxRawOutputBytes by finalize like the streams.
+ */
+export function rawFileArtifacts(
+  checkID: string,
+  contextID: string,
+  call: string,
+  files: readonly RawFile[],
+): Artifact[] {
+  return files.map((f) =>
+    newArtifact({
+      id: `raw-${call}-${f.name}`,
+      path: `artifacts/${checkID}/${contextID}/${call}.${f.name}`,
+      media_type: "text/plain; charset=utf-8",
+      content: f.content,
+      maxBytes: maxRawOutputBytes,
+    }),
+  );
+}
+
 interface Unreadable {
   tool: string;
   summary: string;
   where: string;
   artifacts: Artifact[];
+  /** files is true for a call whose raw output is files the tool wrote. */
+  files: boolean;
 }
 
 /**
@@ -285,7 +332,8 @@ export class ToolOutputs {
 
   /**
    * reject records a call as unreadable for a reason the adapter found
-   * itself, such as an exit code that contradicts an empty answer.
+   * itself, such as an exit code that contradicts an empty answer. extra are
+   * files the call wrote besides its streams, kept with them.
    */
   reject(
     tool: string,
@@ -293,14 +341,42 @@ export class ToolOutputs {
     c: RawCall,
     summary: string,
     where = "",
+    extra: readonly RawFile[] = [],
   ): void {
     this.#unreadable.push({
       tool,
       summary,
       where,
+      files: extra.length > 0,
       artifacts:
         this.#unreadable.length < maxKeptCalls
-          ? rawOutputArtifacts(this.#check, this.#context, call, c)
+          ? [
+              ...rawOutputArtifacts(this.#check, this.#context, call, c),
+              ...rawFileArtifacts(this.#check, this.#context, call, extra),
+            ]
+          : [],
+    });
+  }
+
+  /**
+   * rejectFiles is reject for a tool whose answer is files it wrote, not
+   * its stdout: the files are kept as the call's raw output.
+   */
+  rejectFiles(
+    tool: string,
+    call: string,
+    files: readonly RawFile[],
+    summary: string,
+    where = "",
+  ): void {
+    this.#unreadable.push({
+      tool,
+      summary,
+      where,
+      files: true,
+      artifacts:
+        this.#unreadable.length < maxKeptCalls
+          ? rawFileArtifacts(this.#check, this.#context, call, files)
           : [],
     });
   }
@@ -345,7 +421,10 @@ export class ToolOutputs {
       keptCalls === 1
         ? "that call are"
         : `the first ${String(keptCalls)} such calls are`;
-    reason += ` The raw stdout and stderr of ${which} in ${artifacts.map((a) => quote(a.path)).join(", ")}. No Finding was made from them.`;
+    const raw = this.#unreadable.some((u) => u.files)
+      ? "raw output"
+      : "raw stdout and stderr";
+    reason += ` The ${raw} of ${which} in ${artifacts.map((a) => quote(a.path)).join(", ")}. No Finding was made from them.`;
     if (res.status === StatusPartial && (res.reason ?? "") !== "") {
       reason += " Also: " + (res.reason ?? "");
     }
@@ -353,4 +432,31 @@ export class ToolOutputs {
     res.reasonCode = "tool_output_unreadable";
     res.reason = reason;
   }
+}
+
+/**
+ * unreadableResult is the Result of a Check whose only tool call printed
+ * output that could not be read: res with the status tool_error, the reason
+ * code tool_output_unreadable and the call's raw output as artifacts. Whatever
+ * res already holds, such as the command and the tool, is kept; its Findings
+ * are the adapter's to leave out. call names the call, as ToolOutputs.reject
+ * wants it.
+ */
+export function unreadableResult(
+  res: Result,
+  checkID: string,
+  contextID: string,
+  tool: string,
+  call: string,
+  c: RawCall,
+  summary: string,
+  where = "",
+): Result {
+  const outputs = new ToolOutputs(checkID, contextID);
+  outputs.reject(tool, call, c, summary, where);
+  const out: Result = { ...res, status: StatusCompleted };
+  delete out.reasonCode;
+  delete out.reason;
+  outputs.apply(out);
+  return out;
 }

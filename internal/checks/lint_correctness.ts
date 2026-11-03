@@ -89,7 +89,7 @@ export const lintCorrectness: Check = {
   },
 
   async run(signal, input) {
-    const r = await eslintRunOf(signal, input);
+    const r = await eslintRunOf(signal, input, lintCorrectnessID);
     if ("failed" in r) {
       return r.failed;
     }

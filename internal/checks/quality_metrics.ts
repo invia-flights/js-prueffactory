@@ -58,7 +58,7 @@ export const qualityMetrics: Check = {
   },
 
   async run(signal, input) {
-    const r = await eslintRunOf(signal, input);
+    const r = await eslintRunOf(signal, input, qualityMetricsID);
     if ("failed" in r) {
       return r.failed;
     }

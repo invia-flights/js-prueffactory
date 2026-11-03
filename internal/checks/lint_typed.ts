@@ -89,6 +89,13 @@ import {
   typesTestTargets,
 } from "./types_strictness.ts";
 import { errorMessage } from "../gocompat/errors.ts";
+import {
+  type RawCall,
+  requireShape,
+  shape,
+  UnreadableOutput,
+  unreadableResult,
+} from "./tool_output.ts";
 
 export const lintTypedID = "lint.typed";
 
@@ -424,6 +431,27 @@ const outputSchema: Schema = {
   },
 };
 
+/** typedLintOutputShape is the JSON that `eslint --format json` documents. */
+const typedLintOutputShape = shape.array(
+  shape.object(
+    {
+      filePath: shape.string,
+      messages: shape.array(
+        shape.object(
+          { message: shape.string },
+          {
+            ruleId: shape.nullable(shape.string),
+            line: shape.number,
+            column: shape.number,
+            fatal: shape.boolean,
+          },
+        ),
+      ),
+    },
+    {},
+  ),
+);
+
 /**
  * parseTypedLintOutput reads `eslint --format json`: an array of one entry per
  * file with absolute paths below folder. It throws for output that is not that.
@@ -492,6 +520,11 @@ export interface TypedLintRun {
   /** failed says that ESLint produced nothing usable, and why. */
   failed: string;
   /**
+   * unreadable is set when ESLint exited as it documents but printed output
+   * that cannot be read: the fixed summary and the raw output.
+   */
+  unreadable: { summary: string; raw: RawCall } | null;
+  /**
    * tsc is the tsc run over the generated tsconfig, for the resolution-error
    * rules. It is null when it did not run or did not finish.
    */
@@ -507,6 +540,7 @@ export function newTypedLintRun(
     exitCode: 0,
     oversized: [],
     failed: "",
+    unreadable: null,
     tsc: null,
     ...fields,
   };
@@ -552,6 +586,17 @@ export function interpretTypedLint(input: Input, run: TypedLintRun): Result {
     res.reasonCode = "eslint_failed";
     res.reason = run.failed;
     return res;
+  }
+  if (run.unreadable !== null) {
+    return unreadableResult(
+      res,
+      lintTypedID,
+      input.context.id,
+      "ESLint",
+      "typedlint",
+      run.unreadable.raw,
+      run.unreadable.summary,
+    );
   }
   res.artifacts = [
     newArtifact({
@@ -808,15 +853,24 @@ async function runLintTyped(
   } else {
     try {
       run.messages = parseTypedLintOutput(container.stdout, workPath(pkg));
+      requireShape("ESLint", container.stdout, typedLintOutputShape);
     } catch (err) {
-      run.failed =
-        errorMessage(err) + ": " + tail(goString(container.stderr), 800);
+      // Exit 0 or 1 with output that is not ESLint's JSON says nothing about
+      // the project: a tool problem, with the raw output kept.
+      run.messages = [];
+      run.unreadable = {
+        summary:
+          err instanceof UnreadableOutput
+            ? err.summary
+            : "it is not the JSON that ESLint documents",
+        raw: container,
+      };
     }
   }
 
   // The same program, once more with the compiler, for the resolution-error
   // rules. A failure of this run says nothing about the lint and is left out.
-  if (run.failed === "") {
+  if (run.failed === "" && run.unreadable === null) {
     const tscCmd = [
       "node",
       ToolBin + "/@typescript/typescript6/bin/tsc6",
