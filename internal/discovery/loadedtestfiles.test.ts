@@ -7,6 +7,7 @@ import { test } from "node:test";
 import { fileOf, project } from "./discovery.testutil.ts";
 import {
   BuildOutput,
+  Documentation,
   type FileClass,
   type Project,
   Source,
@@ -157,6 +158,49 @@ test("only Source code inside the package becomes Test code, and Test data wins"
   for (const [rel, cls] of Object.entries(want))
     assert.equal(classOf(view, rel), cls, rel);
   assert.equal(view.files.length, proj.files.length, "no file may be added");
+});
+
+test("the probe never moves a Documentation file, a prose file in a test folder or a non-code file in docs", () => {
+  const proj = project({
+    "package.json": '{"scripts":{"test":"mocha"}}',
+    "docs/guide.md": "",
+    "docs/example.js": "",
+    "test/notes.md": "",
+    "test/b.js": "",
+    "src/notes.txt": "",
+  });
+  const root = contextID(proj, 1);
+  const loaded: TestFile[] = [
+    "docs/guide.md",
+    "docs/example.js",
+    "test/notes.md",
+    "test/b.js",
+    "src/notes.txt",
+  ].map((path) => ({
+    contextID: root,
+    path,
+    suite: "scripts.test",
+    kind: "require",
+  }));
+  const view = proj.withTestFiles(loaded);
+  const want: Record<string, FileClass> = {
+    "docs/guide.md": Documentation,
+    "docs/example.js": TestCode, // code below docs is Source code: it moves
+    "test/notes.md": Documentation,
+    "test/b.js": TestCode,
+    "src/notes.txt": Documentation,
+  };
+  for (const [rel, cls] of Object.entries(want)) {
+    assert.equal(classOf(view, rel), cls, rel);
+    assert.equal(pkgClassOf(view, ".", rel), cls, `package: ${rel}`);
+  }
+  const pkg = proj.packages[0];
+  assert.ok(pkg);
+  assert.deepEqual(
+    proj.movedTestFiles(pkg, loaded).map((l) => l.path),
+    ["docs/example.js"],
+    "only the code file is reported as moved",
+  );
 });
 
 test("moved test files are the Source files of the package the runner loads", () => {
