@@ -241,7 +241,7 @@ Run `list-checks` for the Catalog and what applies to a project. The Gate column
 | `syntax.parse` | `.js`, `.cjs` and `.mjs` files that don't parse on the package's Node version | `node --check` | yes |
 | `artifacts.structured` | JSON and YAML files that don't parse | native | yes |
 | `schema.compile` | JSON Schema files that don't compile | Ajv | no |
-| `api.lint` | Invalid OpenAPI and Swagger files | Redocly CLI | no |
+| `api.lint` | Invalid OpenAPI and Swagger files. Errors come only from rules the specification requires: a rule of Redocly's `spec` ruleset is an error only where a MUST, MUST NOT, REQUIRED or SHALL sentence of the OpenAPI or Swagger text demands what it checks, and every other rule is a warning, as is a field that the specification does not list. The Benchmark's OpenAPI part does not count warnings. [`redocly.yaml`](internal/checks/config/redocly.yaml) quotes the sentence next to each rule. | Redocly CLI | no |
 | `repository.dockerfile` | Dockerfile problems | hadolint | no |
 | `repository.shell` | Shell script problems | ShellCheck | no |
 | `repository.helm` | Helm charts that fail to lint or render | Helm | no |

@@ -1,0 +1,6 @@
+{
+  "name": "openapi-beyond-spec",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: an OpenAPI 3.0 file that breaks two rules of Redocly's spec ruleset that the OpenAPI text does not require and one that it does."
+}
