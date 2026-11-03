@@ -121,3 +121,36 @@ export function fillArtifactDigests(s: Set): void {
     a.size = a.content.length;
   }
 }
+
+/**
+ * capArtifacts cuts every artifact whose maxBytes is below the size of its
+ * content, and marks it truncated. The cut keeps the start, which is where
+ * the shape of a tool's output shows, ends at a character, and is followed by
+ * one line that records how many bytes the content had, as a cut Evidence
+ * item records its original size. The artifact stays within maxBytes with
+ * that line.
+ *
+ * It runs after redaction, so a secret is replaced whole before the cut and
+ * never left half in the artifact, and before the digests, which are made
+ * from what is written.
+ */
+export function capArtifacts(s: Set): void {
+  for (const a of s.artifacts) {
+    const max = a.maxBytes;
+    if (max === undefined || a.content === null || a.content.length <= max) {
+      continue;
+    }
+    const original = a.content.length;
+    const note = (kept: number): Buffer =>
+      Buffer.from(
+        `\n[js-prueffactory cut this text: the tool wrote ${String(original)} bytes, the first ${String(kept)} are kept]\n`,
+      );
+    let keep = Math.max(0, max - note(max).length);
+    // Do not end inside a multi-byte character: skip back over continuation bytes.
+    while (keep > 0 && ((a.content[keep] ?? 0) & 0xc0) === 0x80) {
+      keep--;
+    }
+    a.content = Buffer.concat([a.content.subarray(0, keep), note(keep)]);
+    a.truncated = true;
+  }
+}

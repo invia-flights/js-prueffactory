@@ -24,6 +24,7 @@ import { type Input, untrusted } from "./input.ts";
 import type { ParseError } from "./artifacts_structured.ts";
 import type { OpenAPITarget } from "./repo_targets.ts";
 import { snapshotMount } from "./repo_tools.ts";
+import { requireShape, shape, UnreadableOutput } from "./tool_output.ts";
 import { errorMessage } from "../gocompat/errors.ts";
 
 /** projectPath turns a path a tool printed into a project-relative path. */
@@ -160,6 +161,20 @@ const hadolintSchema: Schema = {
   },
 };
 
+/** hadolintShape is the array hadolint documents for `-f json`. */
+const hadolintShape = shape.array(
+  shape.object(
+    {
+      code: shape.string,
+      file: shape.string,
+      level: shape.string,
+      line: shape.number,
+      message: shape.string,
+    },
+    { column: shape.number },
+  ),
+);
+
 /**
  * rawJSON is Go's json.Marshal of a decoded record: its fields in order, the
  * strings with HTML escaped.
@@ -188,10 +203,13 @@ export function hadolintFindings(input: Input, stdout: Uint8Array): Finding[] {
     const decoded = unmarshal(stdout, hadolintSchema) as GoSlice | null;
     results = (decoded?.items() ?? []) as HadolintResult[];
   } catch (err) {
-    throw new Error(`hadolint printed no JSON: ${errorMessage(err)}`, {
-      cause: err,
-    });
+    throw new UnreadableOutput(
+      `hadolint printed no JSON: ${errorMessage(err)}`,
+      "it is not valid JSON of the expected kind",
+      { cause: err },
+    );
   }
+  requireShape("hadolint", stdout, hadolintShape);
   return results.map((r) =>
     repoFinding(input, "repository.dockerfile", {
       tool: "hadolint",
@@ -253,6 +271,20 @@ const shellcheckSchema: Schema = {
   ],
 };
 
+/** shellcheckShape is the document ShellCheck documents for `-f json1`. */
+const shellcheckShape = shape.object({
+  comments: shape.array(
+    shape.object({
+      file: shape.string,
+      line: shape.number,
+      column: shape.number,
+      level: shape.string,
+      code: shape.number,
+      message: shape.string,
+    }),
+  ),
+});
+
 /** scCode is Go's fmt.Sprintf("SC%04d", code). */
 function scCode(code: bigint): string {
   const digits = (code < 0n ? -code : code).toString();
@@ -275,10 +307,13 @@ export function shellcheckFindings(
     };
     comments = (doc.comments?.items() ?? []) as ShellcheckComment[];
   } catch (err) {
-    throw new Error(`shellcheck printed no JSON: ${errorMessage(err)}`, {
-      cause: err,
-    });
+    throw new UnreadableOutput(
+      `shellcheck printed no JSON: ${errorMessage(err)}`,
+      "it is not valid JSON of the expected kind",
+      { cause: err },
+    );
   }
+  requireShape("shellcheck", stdout, shellcheckShape);
   return comments.map((c) =>
     repoFinding(input, "repository.shell", {
       tool: "shellcheck",
@@ -307,18 +342,44 @@ export function shellcheckFindings(
  * cannot read or parse a file. output is the first 200 bytes of what it
  * printed.
  */
-export class RedoclyNoJSON extends Error {
+export class RedoclyNoJSON extends UnreadableOutput {
   readonly output: string;
   constructor(output: string) {
     super(
       output === ""
         ? "redocly printed no JSON and nothing else"
         : "redocly printed no JSON, it said: " + output,
+      "it is not the JSON report Redocly documents",
     );
     this.name = "RedoclyNoJSON";
     this.output = output;
   }
 }
+
+/** redoclyShape is the report Redocly documents for `lint --format json`. */
+const redoclyShape = shape.object({
+  problems: shape.array(
+    shape.object(
+      {
+        ruleId: shape.string,
+        severity: shape.string,
+        message: shape.string,
+      },
+      {
+        location: shape.nullable(
+          shape.array(
+            shape.object(
+              {},
+              {
+                start: shape.object({ line: shape.number, col: shape.number }),
+              },
+            ),
+          ),
+        ),
+      },
+    ),
+  ),
+});
 
 /**
  * unparseableFinding is the Gate for an OpenAPI file that is not valid YAML
@@ -444,6 +505,7 @@ export function redoclyFindings(
   } catch {
     throw new RedoclyNoJSON(outputHeadBytes(stderr, stdout));
   }
+  requireShape("redocly", stdout, redoclyShape);
   const out: Finding[] = [];
   for (const p of problems) {
     if (
