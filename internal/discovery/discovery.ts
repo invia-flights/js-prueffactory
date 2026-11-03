@@ -30,7 +30,12 @@ import {
   nodeRuntimeFor,
   readNodeInfo,
 } from "./nodeversion.ts";
-import { readServiceRefs, type ServiceRef } from "./service_refs.ts";
+import {
+  type InitServiceRef,
+  readInitServiceRefs,
+  readServiceRefs,
+  type ServiceRef,
+} from "./service_refs.ts";
 import type { TestSetup, Unsupported } from "./testcommand.ts";
 import { readTestInfo, usesMocha } from "./testfiles.ts";
 import { errorMessage } from "../gocompat/errors.ts";
@@ -101,6 +106,9 @@ export class Package {
   // package's env files or Test code refer to, one per Service. The
   // package's suites may need them.
   serviceRefs: ServiceRef[] = [];
+  // initServiceRefs lists the Init services that prepare a Service the
+  // package's suites may use, one per Init service (see InitServiceRef).
+  initServiceRefs: InitServiceRef[] = [];
   // files holds the files whose nearest enclosing package this is.
   files: File[] = [];
 
@@ -228,6 +236,7 @@ export function discover(root: string): Project {
   readTestInfo(root, proj);
   readServiceRefs(root, proj);
   proj.initServices = findInitServices(root, proj);
+  readInitServiceRefs(root, proj);
   for (const pkg of proj.packages) {
     pkg.buildStepReason = buildStepReason(root, pkg, pkg.files);
     proj.contexts.push({

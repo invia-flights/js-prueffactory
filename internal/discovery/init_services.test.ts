@@ -285,3 +285,120 @@ ${postgres}  migrate:
   assert.equal(s.file, "docker-compose.yml");
   assert.equal(s.command, "./migrate.sh");
 });
+
+// --- the packages whose Suites may use the prepared Service ---
+
+const composeWithInit = `services:
+${postgres}  migrate:
+    build: .
+    command: ["./migrate.sh"]
+    depends_on: [postgres]
+`;
+
+function packageAt(p: Project, path: string): Project["packages"][number] {
+  const pkg = p.packages.find((x) => x.path === path);
+  assert.ok(pkg, `no package ${path}`);
+  return pkg;
+}
+
+test("a package whose env file names the prepared Service as a host is marked with the reference", () => {
+  const p = project({
+    "package.json": "{}",
+    "docker-compose.yml": composeWithInit,
+    "test/.test.env": "PORT=1\nDATABASE_URL=postgres://u@postgres:5432/db\n",
+  });
+  assert.deepEqual(packageAt(p, ".").initServiceRefs, [
+    {
+      initService: "migrate",
+      services: ["postgres"],
+      file: "test/.test.env",
+      line: 2,
+    },
+  ]);
+});
+
+test("Test code that names the prepared Service as a URL host marks the package too", () => {
+  const p = project({
+    "package.json": "{}",
+    "docker-compose.yml": composeWithInit,
+    "test/db.test.js": "const url = 'postgres://postgres:5432/db'\n",
+  });
+  assert.deepEqual(packageAt(p, ".").initServiceRefs, [
+    {
+      initService: "migrate",
+      services: ["postgres"],
+      file: "test/db.test.js",
+      line: 1,
+    },
+  ]);
+});
+
+test("only the packages that name the prepared Service are marked", () => {
+  const p = project({
+    "package.json": "{}",
+    "docker-compose.yml": composeWithInit,
+    "api/package.json": "{}",
+    "api/.env.test": "DB=postgres://postgres/db\n",
+    "web/package.json": "{}",
+    "web/.env.test": "API=http://localhost:3000\n",
+  });
+  assert.deepEqual(packageAt(p, "api").initServiceRefs, [
+    {
+      initService: "migrate",
+      services: ["postgres"],
+      file: "api/.env.test",
+      line: 1,
+    },
+  ]);
+  assert.deepEqual(packageAt(p, "web").initServiceRefs, []);
+  assert.deepEqual(packageAt(p, ".").initServiceRefs, []);
+});
+
+test("when no package names the prepared Service, every package is marked without a reference", () => {
+  const p = project({
+    "package.json": "{}",
+    "docker-compose.yml": composeWithInit,
+    "api/package.json": "{}",
+    "web/package.json": "{}",
+  });
+  const every = [
+    { initService: "migrate", services: ["postgres"], file: "", line: 0 },
+  ];
+  for (const path of [".", "api", "web"]) {
+    assert.deepEqual(packageAt(p, path).initServiceRefs, every, path);
+  }
+});
+
+test("a package refers to the Services of an Init service that it names, not to the other ones", () => {
+  const p = project({
+    "package.json": "{}",
+    "docker-compose.yml": `services:
+  postgres:
+    image: postgres:16
+  redis:
+    image: valkey/valkey:8.1-alpine
+  migrate:
+    build: .
+    command: ["./migrate.sh"]
+    depends_on: [postgres, redis]
+`,
+    ".env.test": "CACHE=redis://redis:6379\n",
+  });
+  assert.deepEqual(packageAt(p, ".").initServiceRefs, [
+    {
+      initService: "migrate",
+      services: ["redis"],
+      file: ".env.test",
+      line: 1,
+    },
+  ]);
+});
+
+test("a project without an Init service marks no package", () => {
+  const p = project({
+    "package.json": "{}",
+    "docker-compose.yml": `services:\n${postgres}`,
+    "test/.test.env": "DATABASE_URL=postgres://u@postgres:5432/db\n",
+  });
+  assert.deepEqual(packageAt(p, ".").initServiceRefs, []);
+});
