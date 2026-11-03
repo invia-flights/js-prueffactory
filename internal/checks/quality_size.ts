@@ -1,5 +1,6 @@
 import {
   BuildOutput,
+  Documentation,
   type FileClass,
   Source,
   TestCode,
@@ -32,7 +33,8 @@ export const qualitySizeID = "quality.size";
 /** largestFileCount is how many of the biggest files are listed. */
 const largestFileCount = 20;
 
-// qualitySize counts lines per File class and per file extension, counts the
+// qualitySize counts lines per File class (Documentation is a class of its
+// own) and per file extension, counts the
 // lines of JavaScript and TypeScript in Source code, and lists the largest
 // JavaScript and TypeScript files of Source code and Test code. It is native:
 // it reads the host-side Snapshot copy and starts no container. The counts are
@@ -62,6 +64,7 @@ const fileClassOrder: readonly FileClass[] = [
   TestCode,
   TestData,
   BuildOutput,
+  Documentation,
 ];
 
 /** LineCount is the lines and the non-blank lines of a file or a group. */

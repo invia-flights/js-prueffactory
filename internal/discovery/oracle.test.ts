@@ -8,6 +8,7 @@ import path from "node:path";
 import { test } from "node:test";
 
 import { tempDir } from "./discovery.testutil.ts";
+import { goClass } from "./goclasses.testutil.ts";
 import {
   discover,
   type File,
@@ -62,8 +63,10 @@ function dumpTests(t: TestSetup | null): unknown {
   };
 }
 
+// The Go build knew no Documentation class, so a file reads as the class it
+// gave it.
 function dumpFiles(files: readonly File[]): unknown {
-  return files.map((f) => [f.path, f.packageRel, f.class, f.contextID]);
+  return files.map((f) => [f.path, f.packageRel, goClass(f), f.contextID]);
 }
 
 function dumpProject(p: Project): unknown {

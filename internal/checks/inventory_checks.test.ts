@@ -84,14 +84,17 @@ test("size counts lines per File class and extension", async () => {
     await runNativeCheck("quality.size", suppressionsProject),
   );
   const want: Record<string, number> = {
-    "lines.file_class:source": 47,
-    "non_blank_lines.file_class:source": 45,
+    "lines.file_class:source": 44,
+    "non_blank_lines.file_class:source": 43,
     "lines.file_class:test_code": 9,
     "non_blank_lines.file_class:test_code": 9,
     "lines.file_class:test_data": 5,
     "non_blank_lines.file_class:test_data": 5,
     "lines.file_class:build_output": 2,
     "non_blank_lines.file_class:build_output": 2,
+    // README.md is Documentation, not Source code.
+    "lines.file_class:documentation": 3,
+    "non_blank_lines.file_class:documentation": 2,
     "lines.extension:.json": 20,
     "non_blank_lines.extension:.json": 20,
     "lines.extension:.js": 33,
@@ -152,6 +155,35 @@ test("the size code lines indicator counts only JavaScript and TypeScript files 
   }
 });
 
+test("size reports the lines of Documentation as their own class", async (t) => {
+  const root = project(t, {
+    "package.json": '{"name":"p"}\n',
+    "src/a.js": lines(10),
+    "README.md": lines(7),
+    "docs/guide.txt": lines(5),
+    "docs/openapi.yaml": lines(11),
+    "docs/example.js": lines(3), // code below docs stays Source code
+    "test/notes.md": lines(2),
+    "fixtures/docs/broken.json": lines(4), // Test data wins
+    "dist/README.md": lines(6), // Build output wins
+  });
+  const res = await runNativeCheck("quality.size", root);
+  const got = metricsByName(res);
+  assert.equal(got.get("lines.file_class:documentation"), 7 + 5 + 11 + 2);
+  assert.equal(got.get("non_blank_lines.file_class:documentation"), 25);
+  assert.equal(got.get("lines.file_class:source"), 1 + 10 + 3);
+  assert.equal(got.get("lines.file_class:test_data"), 4);
+  assert.equal(got.get("lines.file_class:build_output"), 6);
+  assert.equal(got.has("lines.file_class:test_code"), false);
+  // The side indicator counts code only: the example under docs/ is code, the
+  // prose is not.
+  assert.equal(got.get("lines.source_code:javascript_typescript"), 13);
+  const docs = inventoryOf(res).size.find(
+    (s) => s.group === "file_class" && s.name === "documentation",
+  );
+  assert.deepEqual([docs?.lines, docs?.non_blank_lines], [25, 25]);
+});
+
 test("the size code lines indicator is zero when Source code has no code", async (t) => {
   const root = project(t, {
     "package.json": '{"name":"p"}\n',
@@ -206,8 +238,16 @@ test("the size Inventory mirrors the metrics", async () => {
   const js = inv.size.find((s) => s.group === "extension" && s.name === ".js");
   assert.deepEqual(
     [src?.lines, src?.non_blank_lines],
-    [47, 45],
-    "source: 47 lines, 45 non-blank",
+    [44, 43],
+    "source: 44 lines, 43 non-blank",
+  );
+  const docs = inv.size.find(
+    (s) => s.group === "file_class" && s.name === "documentation",
+  );
+  assert.deepEqual(
+    [docs?.lines, docs?.non_blank_lines],
+    [3, 2],
+    "documentation: 3 lines, 2 non-blank",
   );
   assert.deepEqual(
     [js?.lines, js?.non_blank_lines],

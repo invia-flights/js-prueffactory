@@ -9,12 +9,24 @@
 //   - runtime: a failing test or hook shows a lookup or connection error for
 //     the Service's name.
 //
+// An Init service (see discovery) marks a suite the same way: when the Run
+// does not start a compose service that prepares a Service the Run does start
+// (it creates the schema), the suites of the packages that refer to the
+// prepared Service, or every suite when no package does, may fail because of
+// it. That is static as well, with the reason code init_service_not_started,
+// and the note names the Init service.
+//
 // A marked suite gets a Limitation per Service, its failed tests and hooks
 // are no Gates and carry a note, and tests.existing is partial, so that the
 // Benchmark does not measure the Pass rate (see runSuites). The Findings of
 // runtime.warnings, runtime.unhandled-rejections and tests.flaky from a
 // marked suite carry the note too and are suspected (see
 // noteServicesNotStarted).
+import {
+  type InitService,
+  type InitServiceRef,
+  initCriterionText,
+} from "../discovery/discovery.ts";
 import { sortStrings } from "../gocompat/strings.ts";
 import { quote } from "../resultset/quote.ts";
 import {
@@ -30,6 +42,39 @@ import { shownName } from "./shown_text.ts";
 import { oneLine } from "./test_report.ts";
 
 export const serviceNotStarted = "service_not_started";
+
+/**
+ * initServiceNotStarted is the reason code of a suite that may use a Service
+ * an Init service prepares (see discovery's InitService), which the Run did
+ * not start. Such a suite is marked like one with a Service that was not
+ * started, by the static reference search (see discovery's InitServiceRef).
+ */
+export const initServiceNotStarted = "init_service_not_started";
+
+/**
+ * ServiceNeed is what a marked suite may need and the Run did not provide: a
+ * string is a compose Service the Run did not start, an InitService is an Init
+ * service the Run did not start, and with it the Service it prepares.
+ */
+export type ServiceNeed = string | InitService;
+
+/** needKey tells two needs apart: a compose Service name is never "init:...". */
+function needKey(n: ServiceNeed): string {
+  return typeof n === "string" ? n : "init:" + n.name;
+}
+
+/** reasonCodeOf is the reason code of a need, for Findings and Limitations. */
+function reasonCodeOf(n: ServiceNeed): string {
+  return typeof n === "string" ? serviceNotStarted : initServiceNotStarted;
+}
+
+/** reasonCodesOf lists the reason codes of the needs once each, plain first. */
+function reasonCodesOf(needs: readonly ServiceNeed[]): string[] {
+  const codes = needs.map(reasonCodeOf);
+  return [serviceNotStarted, initServiceNotStarted].filter((c) =>
+    codes.includes(c),
+  );
+}
 
 /**
  * shownService is a compose service name as trusted text allows it: the name
@@ -56,6 +101,13 @@ export interface ServiceMark {
   static: boolean;
   /** seen is the error text of a runtime mark, as found in a Finding. */
   seen: string;
+  /**
+   * init is the Init service when the suite may use a Service it prepares.
+   * Then service is its name, notStarted is empty and ref says which package
+   * file refers to the prepared Service, if any does.
+   */
+  init: InitService | null;
+  ref: InitServiceRef | null;
 }
 
 /**
@@ -164,9 +216,42 @@ const codeDefect =
 /**
  * serviceMarks is every way the suite of the Result may need a Service that
  * was not started, one mark per Service: the static ones first, then the
- * runtime ones for the Services not already marked.
+ * runtime ones for the Services not already marked, then one mark per Init
+ * service whose Service the suite may use.
  */
 export function serviceMarks(input: Input, res: Result): ServiceMark[] {
+  return [...notStartedMarks(input, res), ...initServiceMarks(input)];
+}
+
+/**
+ * initServiceMarks are the marks of the Init services whose prepared Service
+ * the suite's package may use. Discovery decided it from the package's files,
+ * and no run changes it.
+ */
+function initServiceMarks(input: Input): ServiceMark[] {
+  const marks: ServiceMark[] = [];
+  for (const ref of input.context.package?.initServiceRefs ?? []) {
+    const init = input.project.initServices.find(
+      (s) => s.name === ref.initService,
+    );
+    if (init === undefined) {
+      continue;
+    }
+    marks.push({
+      service: init.name,
+      notStarted: "",
+      file: ref.file,
+      line: ref.line,
+      static: ref.file !== "",
+      seen: "",
+      init,
+      ref,
+    });
+  }
+  return marks;
+}
+
+function notStartedMarks(input: Input, res: Result): ServiceMark[] {
   const missing = notStartedServices(input);
   if (missing.size === 0) {
     return [];
@@ -184,6 +269,8 @@ export function serviceMarks(input: Input, res: Result): ServiceMark[] {
         line: ref.line,
         static: true,
         seen: "",
+        init: null,
+        ref: null,
       });
     }
   }
@@ -206,6 +293,8 @@ export function serviceMarks(input: Input, res: Result): ServiceMark[] {
           file: "",
           line: 0,
           static: false,
+          init: null,
+          ref: null,
           seen:
             code +
             " for " +
@@ -241,7 +330,10 @@ function stopMayComeFromService(text: string, isStatic: boolean): boolean {
  * can come from the missing Service and adds the note to them. It touches a
  * suite that ran and nothing else.
  */
-export function markServicesNotStarted(input: Input, res: Result): string[] {
+export function markServicesNotStarted(
+  input: Input,
+  res: Result,
+): ServiceNeed[] {
   const suite = input.suite();
   if (res.status !== StatusCompleted || suite === null) {
     return [];
@@ -250,9 +342,9 @@ export function markServicesNotStarted(input: Input, res: Result): string[] {
   if (marks.length === 0) {
     return [];
   }
-  const names = marks.map((m) => m.service);
+  const needs = marks.map(needOf);
   const note =
-    serviceNote(suite.origin, names, "failure") + " It is not a Gate.";
+    serviceNote(suite.origin, needs, "failure") + " It is not a Gate.";
   const isStatic = marks.some((m) => m.static);
   for (const f of res.findings ?? []) {
     const demote =
@@ -264,7 +356,7 @@ export function markServicesNotStarted(input: Input, res: Result): string[] {
     f.gate = false;
     f.confidence = ConfidenceSuspected;
     f.message += " " + note;
-    f.limitations.push(serviceNotStarted);
+    f.limitations.push(...reasonCodesOf(needs));
   }
   for (const m of marks) {
     (res.limitations ??= []).push(
@@ -277,7 +369,12 @@ export function markServicesNotStarted(input: Input, res: Result): string[] {
       ),
     );
   }
-  return names;
+  return needs;
+}
+
+/** needOf is what the mark says the suite may need. */
+function needOf(m: ServiceMark): ServiceNeed {
+  return m.init ?? m.service;
 }
 
 /**
@@ -292,6 +389,9 @@ export function serviceLimitation(
   where: string,
   effect: string,
 ): Limitation {
+  if (m.init !== null) {
+    return initServiceLimitation(input, checkID, m, m.init, effect);
+  }
   let path = input.manifestPath();
   let how: string;
   if (m.static) {
@@ -309,6 +409,44 @@ export function serviceLimitation(
 }
 
 /**
+ * initServiceLimitation is the Limitation of a suite that may use a Service
+ * the Init service prepares: it names the Init service, its command and the
+ * Service, and says how the suite came to be marked. It points at the compose
+ * file that names the Init service.
+ */
+function initServiceLimitation(
+  input: Input,
+  checkID: string,
+  m: ServiceMark,
+  init: InitService,
+  effect: string,
+): Limitation {
+  const prepares = init.prepares.map(shownService).join(", ");
+  const command =
+    init.command === ""
+      ? "(which has no command of its own)"
+      : `(command ${quote(init.command)})`;
+  const criterion = init.criteria[0];
+  const own =
+    criterion === undefined
+      ? ""
+      : `: its image is the project's own because ${initCriterionText(criterion)}`;
+  let how: string;
+  if (m.ref !== null && m.ref.file !== "") {
+    const refers = m.ref.services.map(shownService).join(", ");
+    how = `The file ${quote(m.ref.file)} refers to ${refers} in line ${String(m.ref.line)}. That is a heuristic over env files and Test code, and it may be wrong.`;
+  } else {
+    how = `No package of the project refers to ${prepares} by host name, so every suite may use it.`;
+  }
+  return {
+    reason_code: initServiceNotStarted,
+    message: `The suite ${quote(input.suite()?.origin ?? "")} may use the Service ${prepares}, which the Init service ${shownService(init.name)} ${command} prepares, and the Run did not start ${shownService(init.name)}${own}. ${how} ${effect}`,
+    check_id: checkID,
+    path: init.file,
+  };
+}
+
+/**
  * servicesOfRuns is what the suite may need of the Services the Run did not
  * start, by the marks of the runs a Check made or read itself
  * (runtime.unhandled-rejections, tests.flaky): the static marks always, and
@@ -322,23 +460,27 @@ export function servicesOfRuns(
   checkID: string,
   first: Result,
   own: readonly Result[],
-): [string[], Limitation[]] {
+): [ServiceNeed[], Limitation[]] {
   const effect = `The Findings of ${checkID} from the suite carry a note and are suspected.`;
-  const names: string[] = [];
+  const needs: ServiceNeed[] = [];
+  const keys = new Set<string>();
+  const firstKeys = new Set((first.mayNeed ?? []).map(needKey));
   const limits: Limitation[] = [];
   for (const [i, r] of [first, ...own].entries()) {
     const where = i > 0 ? " in a run " + checkID + " made" : "";
     for (const m of serviceMarks(input, r)) {
-      if (names.includes(m.service)) {
+      const need = needOf(m);
+      if (keys.has(needKey(need))) {
         continue;
       }
-      names.push(m.service);
-      if (!(first.mayNeed ?? []).includes(m.service)) {
+      keys.add(needKey(need));
+      needs.push(need);
+      if (!firstKeys.has(needKey(need))) {
         limits.push(serviceLimitation(input, checkID, m, where, effect));
       }
     }
   }
-  return [names, limits];
+  return [needs, limits];
 }
 
 /**
@@ -348,10 +490,24 @@ export function servicesOfRuns(
  */
 export function serviceNote(
   suite: string,
-  services: readonly string[],
+  needs: readonly ServiceNeed[],
   what: string,
 ): string {
-  return `The suite ${quote(suite)} may need the compose Service ${services.map(shownService).join(", ")}, which the Run did not start, so this ${what} may come from that and not from the project.`;
+  const parts: string[] = [];
+  const plain = needs.filter((n) => typeof n === "string");
+  if (plain.length > 0) {
+    parts.push(
+      `the compose Service ${plain.map(shownService).join(", ")}, which the Run did not start`,
+    );
+  }
+  for (const n of needs) {
+    if (typeof n !== "string") {
+      parts.push(
+        `the Service${n.prepares.length > 1 ? "s" : ""} ${n.prepares.map(shownService).join(", ")}, which the Init service ${shownService(n.name)} prepares, and the Run did not start ${shownService(n.name)}`,
+      );
+    }
+  }
+  return `The suite ${quote(suite)} may need ${parts.join("; and ")}, so this ${what} may come from that and not from the project.`;
 }
 
 /**
@@ -364,15 +520,15 @@ export function serviceNote(
 export function noteServicesNotStarted(
   f: Finding,
   suite: string,
-  services: readonly string[],
+  needs: readonly ServiceNeed[],
 ): void {
-  if (services.length === 0) {
+  if (needs.length === 0) {
     return;
   }
   const what = f.severity === SeverityNote ? "note" : "warning";
-  f.message += " " + serviceNote(suite, services, what);
+  f.message += " " + serviceNote(suite, needs, what);
   f.confidence = ConfidenceSuspected;
-  f.limitations.push(serviceNotStarted);
+  f.limitations.push(...reasonCodesOf(needs));
 }
 
 /**
@@ -382,25 +538,45 @@ export function noteServicesNotStarted(
  */
 export function serviceNotStartedStatus(
   res: Result,
-  bySuite: ReadonlyMap<string, readonly string[]>,
+  bySuite: ReadonlyMap<string, readonly ServiceNeed[]>,
   order: readonly string[],
 ): void {
   if (bySuite.size === 0 || res.status !== StatusCompleted) {
     return;
   }
   const parts: string[] = [];
+  const all: ServiceNeed[] = [];
   for (const suite of order) {
-    const names = bySuite.get(suite) ?? [];
-    if (names.length > 0) {
-      parts.push(
-        `${quote(suite)} (Service ${names.map(shownService).join(", ")})`,
-      );
+    const needs = bySuite.get(suite) ?? [];
+    if (needs.length === 0) {
+      continue;
     }
+    all.push(...needs);
+    const what: string[] = [];
+    const plain = needs.filter((n) => typeof n === "string");
+    if (plain.length > 0) {
+      what.push("Service " + plain.map(shownService).join(", "));
+    }
+    for (const n of needs) {
+      if (typeof n !== "string") {
+        what.push("Init service " + shownService(n.name));
+      }
+    }
+    parts.push(`${quote(suite)} (${what.join("; ")})`);
   }
+  const codes = reasonCodesOf(all);
+  const mayNeed =
+    codes.length === 2
+      ? "a compose Service the Run did not start or a Service that an Init service prepares"
+      : codes[0] === initServiceNotStarted
+        ? "a Service that an Init service prepares, which the Run did not start"
+        : "a compose Service the Run did not start";
   res.status = StatusPartial;
-  res.reasonCode = serviceNotStarted;
+  res.reasonCode = codes.includes(serviceNotStarted)
+    ? serviceNotStarted
+    : initServiceNotStarted;
   res.reason =
     "tests of " +
     parts.join(", ") +
-    " may need a compose Service the Run did not start, so their failures are not Gates and the Pass rate is not measured";
+    ` may need ${mayNeed}, so their failures are not Gates and the Pass rate is not measured`;
 }

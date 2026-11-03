@@ -1,6 +1,6 @@
 {
   "format": "js-prueffactory.report",
-  "schema_version": "0.4.0",
+  "schema_version": "0.5.0",
   "producer": {
     "name": "js-prueffactory",
     "version": "test",
@@ -1543,6 +1543,7 @@
       "gate": false,
       "in_test_data": false,
       "in_test_code": false,
+      "in_documentation": false,
       "title": "mocha/no-pending-tests hit 1",
       "message": "mocha/no-pending-tests hit 1",
       "locations": [

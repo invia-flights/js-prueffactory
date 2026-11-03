@@ -9,7 +9,11 @@
 import assert from "node:assert/strict";
 import { type TestContext, test } from "node:test";
 
-import type { ComposeService } from "../discovery/discovery.ts";
+import {
+  type ComposeService,
+  discover,
+  type InitService,
+} from "../discovery/discovery.ts";
 import {
   ConfidenceConfirmed,
   ConfidenceSuspected,
@@ -21,7 +25,8 @@ import {
   StatusPartial,
 } from "../resultset/types.ts";
 import { newFinding } from "../resultset/zero.ts";
-import type { Input, Result } from "./input.ts";
+import { writeTree } from "./checks.testutil.ts";
+import { Input, type Result } from "./input.ts";
 import { runtimeUnhandledRejectionsID } from "./runtime_unhandled_rejections.ts";
 import { runtimeWarningsID } from "./runtime_warnings.ts";
 import {
@@ -720,4 +725,337 @@ test("a marked suite makes only tests.existing partial and not runtime.warnings"
       `runtime.warnings talks about the Pass rate: ${l.message}`,
     );
   }
+});
+
+// --- Init services ---
+//
+// A compose service the Run does not start that prepares a Service the Run
+// does start (here migrate, which creates the schema in postgres) marks the
+// suites that may use that Service, as a Service the Run did not start does:
+// no Gates for their failed tests and hooks, a note, a Limitation with the
+// reason code init_service_not_started, tests.existing partial.
+
+const initServiceCode = "init_service_not_started";
+
+const migrateCompose = `services:
+  postgres:
+    image: postgres:17-alpine
+  migrate:
+    build: .
+    command: npm run migrate
+    depends_on:
+      - postgres
+`;
+
+/** initInput is a package with the compose file above and the given files. */
+function initInput(
+  t: TestContext,
+  files: Record<string, string>,
+  compose = migrateCompose,
+): Input {
+  const input = suiteInput(t, { ...files, "docker-compose.yml": compose });
+  input.shared = new Shared();
+  return input;
+}
+
+const failedMissingTable = `{"ev":"result","id":2,"outcome":"failed","duration":5,"err":{"name":"error","message":"relation \\"schema_migrations\\" does not exist","stack":"error: relation \\"schema_migrations\\" does not exist\\n    at Context.<anonymous> (/work/test/add.test.js:9:12)"}}`;
+
+const migrateInit: InitService = {
+  name: "migrate",
+  file: "docker-compose.yml",
+  command: "npm run migrate",
+  prepares: ["postgres"],
+  criteria: ["build_section"],
+  package: "",
+};
+
+const initPartOfNote =
+  "the Service postgres, which the Init service migrate prepares, and the Run did not start migrate";
+const initNoteOfMigrate = "may need " + initPartOfNote;
+
+test("a failure in a suite that refers to the Service an Init service prepares is no Gate", async (t) => {
+  const input = initInput(t, {
+    "test/add.test.js": "x",
+    "test/.test.env": "PORT=1\nDB=postgres://postgres@postgres:5432/db\n",
+  });
+  stubSuite(
+    t,
+    suiteRunOf(
+      input,
+      foundAdd,
+      foundSub,
+      passedAdd,
+      failedMissingTable,
+      endOfSuite,
+    ),
+  );
+
+  const res = await runTestsExisting(input);
+
+  assert.equal(res.findings?.length, 1);
+  const f = res.findings[0];
+  assert.equal(f?.gate, false);
+  assert.equal(f.confidence, ConfidenceSuspected);
+  assert.ok(f.message.includes(initNoteOfMigrate), f.message);
+  assert.ok(f.message.includes("not from the project"), f.message);
+  assert.deepEqual(f.limitations, [initServiceCode]);
+  assert.equal(res.status, StatusPartial);
+  assert.equal(res.reasonCode, initServiceCode);
+  assert.ok(res.reason?.includes("Init service migrate"), res.reason);
+  assert.deepEqual(limitationsOfCode(res, serviceNotStarted), []);
+  const got = limitationsOfCode(res, initServiceCode);
+  assert.equal(got.length, 1);
+  const l = got[0];
+  assert.equal(l?.check_id, "tests.existing");
+  assert.equal(l.path, "docker-compose.yml");
+  for (const want of [
+    "`scripts.test`",
+    "Init service migrate",
+    "`npm run migrate`",
+    "postgres",
+    "the service has a build section",
+    "`test/.test.env`",
+    "line 2",
+    "heuristic",
+    "not Gates",
+  ]) {
+    assert.ok(l.message.includes(want), `${l.message} lacks ${want}`);
+  }
+});
+
+test("a suite that may use the prepared Service is marked even when all its tests pass", async (t) => {
+  const input = initInput(t, {
+    "test/add.test.js": "x",
+    "test/.test.env": "DB=postgres://postgres:5432/db\n",
+  });
+  stubSuite(t, suiteRunOf(input, foundAdd, passedAdd, endOfSuite));
+
+  const res = await runTestsExisting(input);
+
+  assert.equal(res.status, StatusPartial);
+  assert.equal(res.reasonCode, initServiceCode);
+  assert.equal(limitationsOfCode(res, initServiceCode).length, 1);
+});
+
+test("a failed hook of a suite that may use the prepared Service is no Gate either", async (t) => {
+  const input = initInput(t, {
+    "test/add.test.js": "x",
+    "test/.test.env": "DB=postgres://postgres:5432/db\n",
+  });
+  const hook = `{"ev":"hook_fail","title":"\\"after each\\" hook in \\"add\\"","hookType":"after each","scope":"add","scopePath":["add"],"file":"/work/test/add.test.js","err":{"name":"Error","message":"relation \\"users\\" does not exist","stack":"Error"}}`;
+  stubSuite(t, suiteRunOf(input, foundAdd, hook, endOfSuite));
+
+  const res = await runTestsExisting(input);
+
+  assert.equal(res.findings?.length, 1);
+  assert.equal(res.findings[0]?.gate, false);
+  assert.equal(res.findings[0].confidence, ConfidenceSuspected);
+});
+
+test("without any reference to the prepared Service every suite is marked, with a Limitation each", async (t) => {
+  const input = twoSuiteInput(t);
+  input.project.initServices = [migrateInit];
+  const pkg = input.context.package;
+  assert.ok(pkg);
+  pkg.initServiceRefs = [
+    { initService: "migrate", services: ["postgres"], file: "", line: 0 },
+  ];
+  stubSuites(t, (i) => suiteRunOf(i, foundAdd, foundSub, failedMissingTable));
+
+  const res = await runTestsExisting(input);
+
+  const got = limitationsOfCode(res, initServiceCode);
+  assert.equal(got.length, 2);
+  assert.ok(got[0]?.message.includes("`test:unit`"));
+  assert.ok(got[1]?.message.includes("`test:api`"));
+  for (const l of got) {
+    assert.ok(
+      l.message.includes("No package of the project refers to postgres"),
+      l.message,
+    );
+  }
+  for (const f of res.findings ?? []) {
+    assert.equal(f.gate, false, f.title);
+  }
+  assert.equal(res.status, StatusPartial);
+});
+
+test("only the package that names the prepared Service is marked", async (t) => {
+  const root = writeTree(t, {
+    "package.json": `{"scripts":{"test":"mocha"}}`,
+    "docker-compose.yml": migrateCompose,
+    "api/package.json": `{"scripts":{"test":"mocha"}}`,
+    "api/test/add.test.js": "x",
+    "api/.env.test": "DB=postgres://postgres:5432/db\n",
+    "web/package.json": `{"scripts":{"test":"mocha"}}`,
+    "web/test/add.test.js": "x",
+  });
+  const proj = discover(root);
+  const inputOf = (path: string): Input => {
+    const context = proj.contexts.find((c) => c.path === path);
+    assert.ok(context, path);
+    const input = new Input({
+      project: proj,
+      context,
+      originalPath: "/orig",
+      snapshotDir: root,
+    });
+    input.shared = new Shared();
+    return input;
+  };
+  stubSuites(t, (i) =>
+    suiteRunOf(
+      i,
+      foundAdd,
+      foundSub,
+      passedAdd,
+      failedMissingTable,
+      endOfSuite,
+    ),
+  );
+
+  const api = await runTestsExisting(inputOf("api"));
+  const web = await runTestsExisting(inputOf("web"));
+
+  assert.equal(api.findings?.[0]?.gate, false);
+  assert.equal(api.status, StatusPartial);
+  assert.equal(limitationsOfCode(api, initServiceCode).length, 1);
+  assert.equal(
+    web.findings?.[0]?.gate,
+    true,
+    "the other package keeps its Gate",
+  );
+  assert.equal(web.status, StatusCompleted);
+  assert.deepEqual(limitationsOfCode(web, initServiceCode), []);
+});
+
+test("a one-off service that depends on no Service the Run starts marks nothing", async (t) => {
+  const input = initInput(
+    t,
+    {
+      "test/add.test.js": "x",
+      "test/.test.env": "DB=postgres://postgres:5432/db\n",
+    },
+    `services:
+  postgres:
+    image: postgres:17-alpine
+  migrate:
+    build: .
+    command: npm run migrate
+`,
+  );
+  stubSuite(
+    t,
+    suiteRunOf(
+      input,
+      foundAdd,
+      foundSub,
+      passedAdd,
+      failedMissingTable,
+      endOfSuite,
+    ),
+  );
+
+  const res = await runTestsExisting(input);
+
+  assert.equal(res.findings?.[0]?.gate, true);
+  assert.equal(res.findings[0].confidence, ConfidenceConfirmed);
+  assert.equal(res.status, StatusCompleted);
+  assert.deepEqual(limitationsOfCode(res, initServiceCode), []);
+});
+
+test("an Init service and a Service that is not started mark the same suite twice, each with its reason code", async (t) => {
+  const input = initInput(
+    t,
+    {
+      "test/add.test.js": "x",
+      "test/.test.env":
+        "DB=postgres://postgres:5432/db\nS3=http://minio:9000\n",
+    },
+    migrateCompose + "  minio:\n    image: quay.io/minio/minio:latest\n",
+  );
+  stubSuite(
+    t,
+    suiteRunOf(input, foundAdd, foundSub, passedAdd, failedOther, endOfSuite),
+  );
+
+  const res = await runTestsExisting(input);
+
+  const f = res.findings?.[0];
+  assert.equal(f?.gate, false);
+  assert.deepEqual(f.limitations, [serviceNotStarted, initServiceCode]);
+  assert.ok(f.message.includes("compose Service minio"), f.message);
+  assert.ok(f.message.includes(initPartOfNote), f.message);
+  assert.equal(limitationsOfCode(res, serviceNotStarted).length, 1);
+  assert.equal(limitationsOfCode(res, initServiceCode).length, 1);
+  assert.equal(res.status, StatusPartial);
+  assert.equal(res.reasonCode, serviceNotStarted);
+});
+
+test("the note of a Finding that reads a suite that may use a prepared Service names the Init service", () => {
+  const f = newFinding({
+    severity: SeverityWarning,
+    message: "m.",
+    limitations: [],
+  });
+  const init = { ...migrateInit, prepares: ["postgres", "redis"] };
+  noteServicesNotStarted(f, "scripts.test", [init]);
+  assert.equal(
+    f.message,
+    "m. The suite `scripts.test` may need the Services postgres, redis, which the Init service migrate prepares, and the Run did not start migrate, so this warning may come from that and not from the project.",
+  );
+  assert.equal(f.confidence, ConfidenceSuspected);
+  assert.deepEqual(f.limitations, [initServiceCode]);
+});
+
+test("open resources of a suite that may use a prepared Service carry the note", async (t) => {
+  const input = initInput(t, {
+    "test/add.test.js": "x",
+    "test/.test.env": "DB=postgres://postgres:5432/db\n",
+  });
+  stubSuite(t, openSocketRun(input, foundAdd, passedAdd));
+
+  await runTestsExisting(input);
+  const res = await runCheck(runtimeWarningsID, input);
+
+  assert.equal(res.findings?.length, 1, JSON.stringify(res.findings));
+  const f = res.findings[0];
+  assert.ok(f);
+  assert.ok(f.message.includes(initNoteOfMigrate), f.message);
+  assert.equal(f.confidence, ConfidenceSuspected);
+  assert.deepEqual(f.limitations, [initServiceCode]);
+  assert.equal(f.gate, false);
+  assert.equal(res.status, StatusCompleted, "only tests.existing is partial");
+  assert.equal(res.reasonCode, undefined);
+});
+
+test("flaky tests of a suite that may use a prepared Service carry the note", async (t) => {
+  const input = initInput(t, {
+    "test/add.test.js": "x",
+    "src/index.js": "x",
+    "test/.test.env": "DB=postgres://postgres:5432/db\n",
+  });
+  threeRuns(
+    t,
+    okReadableRun,
+    (i) => readableRun(i, foundAdd, foundSub, failedAdd, passedSub, endOfSuite),
+    okReadableRun,
+  );
+
+  const first = await runTestsExisting(input);
+  const res = await runCheck(testsFlakyID, input);
+
+  const fs = flakyFindings(res);
+  assert.equal(fs.length, 1, JSON.stringify(res.findings));
+  const f = fs[0];
+  assert.ok(f);
+  assert.ok(f.message.includes(initNoteOfMigrate), f.message);
+  assert.equal(f.confidence, ConfidenceSuspected);
+  assert.deepEqual(f.limitations, [initServiceCode]);
+  assert.equal(limitationsOfCode(first, initServiceCode).length, 1);
+  assert.deepEqual(
+    limitationsOfCode(res, initServiceCode),
+    [],
+    "tests.flaky repeats no Limitation of tests.existing",
+  );
 });

@@ -23,7 +23,7 @@ import { prerequisitesRun } from "./prerequisites.ts";
 import { redactSet } from "./redaction.ts";
 import { registryDataDate } from "./registrydate.ts";
 import { reportServices } from "./services.ts";
-import { markTestCode, probedTestFilesOf } from "./testcode.ts";
+import { markFileClasses, probedTestFilesOf } from "./testcode.ts";
 import { recordContextTools } from "./tools.ts";
 
 let build: Producer | undefined;
@@ -166,7 +166,7 @@ export function assemble(
       s.inventory.moved_test_files.push(...inv.moved_test_files);
     }
   }
-  markTestCode(proj, probedTestFilesOf(r, proj), s.findings);
+  markFileClasses(proj, probedTestFilesOf(r, proj), s.findings);
   const [services, serviceLimits] = reportServices(r.results, proj);
   s.services = services;
   s.limitations.push(...serviceLimits);
