@@ -37,7 +37,7 @@ test("other extensions, and names that only look like prose, stay Source code", 
     Dockerfile: Source,
     LICENSE: Source,
     "notes.md.bak": Source,
-    "md": Source,
+    md: Source,
     "src/readme.mdx.js": Source,
     "src/txt/app.js": Source,
   };

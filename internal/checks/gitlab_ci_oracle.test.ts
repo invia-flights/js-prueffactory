@@ -5,7 +5,8 @@
 // Findings are compared as JSON, with every field: rule, location, Gate,
 // severity, message, Evidence text and fingerprint. The Go build knew
 // Gates for this Check; under execution-v2 there are none, so the recorded
-// Gate flags are read as false (see withoutGates).
+// Gate flags are read as false (see withoutGates). It knew no in_documentation
+// either: the engine sets it, so the Check's own Findings carry false.
 import assert from "node:assert/strict";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -108,15 +109,17 @@ function normalise(v: unknown): unknown {
   return v;
 }
 
-// withoutGates is the one change execution-v2 made to what the Go build
-// recorded: the Check fires no Gate any more. Every error stays an error and
-// every note a note; only the Gate flag moves, so the rest of each record is
-// still compared as recorded.
+// withoutGates is what execution-v2 and the report schema 0.5.0 changed in
+// what the Go build recorded: the Check fires no Gate any more, and every
+// Finding has the flag in_documentation, which only the engine sets. Every
+// error stays an error and every note a note; only these two flags move, so
+// the rest of each record is still compared as recorded.
 function withoutGates(findings: unknown): unknown {
   if (!Array.isArray(findings)) return findings;
   return (findings as Record<string, unknown>[]).map((f) => ({
     ...f,
     gate: false,
+    in_documentation: false,
   }));
 }
 

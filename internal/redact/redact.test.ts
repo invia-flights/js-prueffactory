@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 
 import { marshal } from "../gocompat/json.ts";
+import { asGoReport } from "../resultset/goreport.testutil.ts";
 import { hostile } from "../resultset/resultsettest/golden.testutil.ts";
 import {
   type Reproduction,
@@ -479,7 +480,8 @@ describe("the hostile golden set, redacted", () => {
   test("report.json and the count", () => {
     const { s, count } = redacted();
     assert.equal(count, goOracle.hostile.count);
-    assert.equal(reportJSON(s), goOracle.hostile.report);
+    // The Go build wrote the schema 0.4.0, which has no in_documentation.
+    assert.equal(asGoReport(reportJSON(s)), goOracle.hostile.report);
   });
 
   test("artifact bytes and redacted flags", () => {

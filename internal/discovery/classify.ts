@@ -3,11 +3,7 @@ import { sortStrings, toLower, trim } from "../gocompat/strings.ts";
 
 // FileClass is the File class of a project file.
 export type FileClass =
-  | "source"
-  | "test_code"
-  | "test_data"
-  | "build_output"
-  | "documentation";
+  "source" | "test_code" | "test_data" | "build_output" | "documentation";
 
 export const Source: FileClass = "source";
 export const TestCode: FileClass = "test_code";
