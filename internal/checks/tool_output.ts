@@ -332,7 +332,8 @@ export class ToolOutputs {
 
   /**
    * reject records a call as unreadable for a reason the adapter found
-   * itself, such as an exit code that contradicts an empty answer.
+   * itself, such as an exit code that contradicts an empty answer. extra are
+   * files the call wrote besides its streams, kept with them.
    */
   reject(
     tool: string,
@@ -340,15 +341,19 @@ export class ToolOutputs {
     c: RawCall,
     summary: string,
     where = "",
+    extra: readonly RawFile[] = [],
   ): void {
     this.#unreadable.push({
       tool,
       summary,
       where,
-      files: false,
+      files: extra.length > 0,
       artifacts:
         this.#unreadable.length < maxKeptCalls
-          ? rawOutputArtifacts(this.#check, this.#context, call, c)
+          ? [
+              ...rawOutputArtifacts(this.#check, this.#context, call, c),
+              ...rawFileArtifacts(this.#check, this.#context, call, extra),
+            ]
           : [],
     });
   }

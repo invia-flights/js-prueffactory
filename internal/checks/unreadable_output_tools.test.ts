@@ -11,6 +11,7 @@ import { test } from "node:test";
 
 import {
   assertUnreadable,
+  rawOf,
   run,
   runInPackage,
 } from "./unreadable_output.testutil.ts";
@@ -896,6 +897,133 @@ test("syntax.parse: a document that is read is still read, and a helper that exi
   }));
   assert.equal(broken.findings?.length, 1);
   assert.equal(broken.findings[0]?.gate, true, "a real failure is a Gate");
+});
+
+// --- the test reporters' event files (tests.existing) ---
+
+const mochaPkg = {
+  "package.json": '{"name":"x","version":"1.0.0","scripts":{"test":"mocha"}}',
+  "test/a.test.js": "it('adds', () => {});\n",
+};
+const evFound =
+  '{"ev":"found","id":1,"file":"/work/test/a.test.js","title":"adds","fullTitle":"adds","suitePath":[]}';
+const evFound2 =
+  '{"ev":"found","id":2,"file":"/work/test/a.test.js","title":"subtracts","fullTitle":"subtracts","suitePath":[]}';
+const evPassed = '{"ev":"result","id":1,"outcome":"passed","duration":3}';
+
+/** mochaRun runs tests.existing with a stood-in Mocha that wrote the event file. */
+function mochaRun(
+  t: Parameters<typeof run>[0],
+  events: string | null,
+  runner: { exitCode?: number; stdout?: string; stderr?: string } = {},
+) {
+  return runInPackage(t, "tests.existing", mochaPkg, (spec) => {
+    const name = spec.name ?? "";
+    if (name.startsWith("mochaprobe")) {
+      return { stdout: '{"version":"11.0.0","bin":"bin/mocha.js"}' };
+    }
+    if (name.startsWith("tests-")) {
+      return runner;
+    }
+    if (name.startsWith("events-")) {
+      return events === null ? { exitCode: 1 } : { stdout: events };
+    }
+    return {};
+  });
+}
+
+test("tests.existing: a truncated last line of the event file keeps the results read so far", async (t) => {
+  const res = await mochaRun(
+    t,
+    [evFound, evFound2, evPassed, '{"ev":"result","id":2,"outc'].join("\n"),
+  );
+  assert.notEqual(res.reasonCode, "tool_output_unreadable");
+  // Today's behaviour: what was read stays, the test that never reported is
+  // never_run, and the run that did not end is the Finding it always was.
+  assert.deepEqual(
+    (res.testCases ?? []).map((c) => c.testCase.outcome),
+    ["passed", "never_run"],
+  );
+  assert.ok(
+    (res.findings ?? []).some((f) => f.rule_id === "test-run-aborted"),
+    (res.findings ?? []).map((f) => f.rule_id).join(","),
+  );
+});
+
+const eventsWithoutLines: Record<string, string | null> = {
+  "an empty file": "",
+  "no file": null,
+  "a file of plain text": "node: bad option: --test-reporter-destination\n",
+  "a file whose only line is cut off": '{"ev":"found","id":1,"fi',
+};
+
+for (const [what, events] of Object.entries(eventsWithoutLines)) {
+  test(`tests.existing: ${what} where the runner exited cleanly is a tool problem with the raw output kept`, async (t) => {
+    const res = await mochaRun(t, events, {
+      stdout: "Usage: mocha [spec..]",
+      stderr: "runner stderr",
+    });
+    assert.deepEqual(
+      [res.status, res.reasonCode],
+      ["tool_error", "tool_output_unreadable"],
+      res.reason ?? "",
+    );
+    assert.deepEqual(
+      (res.findings ?? []).filter((f) => f.gate),
+      [],
+    );
+    assert.deepEqual(res.findings ?? [], []);
+    assert.deepEqual(res.testCases ?? [], []);
+    const base = "artifacts/tests.existing/C-0002/reporter";
+    assert.equal(rawOf(res, `${base}.stdout.txt`), "Usage: mocha [spec..]");
+    assert.equal(rawOf(res, `${base}.stderr.txt`), "runner stderr");
+    const kept = rawOf(res, `${base}.events.jsonl`);
+    assert.equal(kept, events === "" || events === null ? undefined : events);
+    for (const a of res.artifacts ?? []) {
+      if (a.path.startsWith(base)) {
+        assert.ok((res.reason ?? "").includes(a.path), a.path);
+      }
+    }
+  });
+}
+
+test("tests.existing: the node:test reporter's event file is read the same way", async (t) => {
+  const res = await runInPackage(
+    t,
+    "tests.existing",
+    {
+      "package.json":
+        '{"name":"x","version":"1.0.0","scripts":{"test":"node --test"}}',
+      "test/a.test.js": "require('node:test')('adds', () => {});\n",
+    },
+    (spec) => {
+      const name = spec.name ?? "";
+      if (name.startsWith("tests-")) {
+        return { stdout: "TAP version 13" };
+      }
+      return name.startsWith("events-") ? { stdout: "TAP version 13\n" } : {};
+    },
+  );
+  assertUnreadable(res, {
+    status: "tool_error",
+    check: "tests.existing",
+    context: "C-0002",
+    call: "reporter",
+    files: { "events.jsonl": "TAP version 13\n" },
+    stdout: "TAP version 13",
+  });
+});
+
+test("tests.existing: a runner that exits with an error before any event is still the project's failure", async (t) => {
+  const res = await mochaRun(t, "", {
+    exitCode: 1,
+    stderr: "Error: Cannot find module './missing'",
+  });
+  assert.notEqual(res.reasonCode, "tool_output_unreadable");
+  assert.ok(
+    (res.findings ?? []).some((f) => f.rule_id === "test-file-load-failed"),
+    "the Finding of a test file that does not load",
+  );
 });
 
 // (more adapters below)

@@ -143,15 +143,20 @@ export function assertUnreadable(res: Result, expected: Expected): void {
   );
   const base = `artifacts/${expected.check}/${expected.context ?? "C-0001"}/${expected.call}`;
   const paths: string[] = [];
-  if (expected.files === undefined) {
+  // A call that wrote files has them; a call with streams keeps both, unless
+  // the case names files only.
+  if (
+    expected.files === undefined ||
+    expected.stdout !== undefined ||
+    expected.stderr !== undefined
+  ) {
     paths.push(`${base}.stdout.txt`, `${base}.stderr.txt`);
     assert.equal(rawOf(res, `${base}.stdout.txt`), expected.stdout ?? "");
     assert.equal(rawOf(res, `${base}.stderr.txt`), expected.stderr ?? "");
-  } else {
-    for (const [name, content] of Object.entries(expected.files)) {
-      paths.push(`${base}.${name}`);
-      assert.equal(rawOf(res, `${base}.${name}`), content, name);
-    }
+  }
+  for (const [name, content] of Object.entries(expected.files ?? {})) {
+    paths.push(`${base}.${name}`);
+    assert.equal(rawOf(res, `${base}.${name}`), content, name);
   }
   for (const a of res.artifacts ?? []) {
     if (paths.includes(a.path)) {
