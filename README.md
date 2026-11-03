@@ -376,6 +376,10 @@ A Check execution has independent fields, so a crashed tool never reads as a fai
 | Finding severity | `error`, `warning`, `note`. Whether a Finding is a Gate is the separate boolean `gate`. |
 | Confidence | `confirmed` for test failures and parse errors, `likely` for lint results, `suspected` for secrets and heuristics |
 
+An execution that does not end `completed` carries a `reason_code` and a `reason`. One code is worth knowing when you triage a Report:
+
+- **`tool_output_unreadable`**: the tool ran, but what it printed did not have the shape it documents, for example a changed JSON format, truncated output or plain text. The Check ends `tool_error`, or `partial` when the tool's output could be read for other files. A reading failure is a problem of the tool or of this build, never of your project, so it produces no Finding and no Gate. The reason names two artifacts, `artifacts/<check>/<context>/<call>.stdout.txt` and `.stderr.txt`, with the raw output of that call. They are redacted like every file and cut to 1 MiB each; a cut file ends with a line that says how many bytes the tool wrote, and its `truncated` field in `report.json` is true. For a Check that runs its tool many times, only the first three affected calls keep their output. Redocly, Ajv, hadolint, ShellCheck, Helm, kubeconform, actionlint, zizmor and `docker compose config` follow this rule; a tool counts as blaming your project only when it says so in its own documented way, such as a compose message about the set.
+
 ### Completeness
 
 - **Scope completeness.** How many selected applicable Checks completed.
