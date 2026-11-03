@@ -75,7 +75,7 @@ test("--fast is recorded and named as the reason of the Checks it left out", asy
     budgetSource: "fast_default",
   });
   assert.equal(report.selection.fast, true);
-  assert.equal(report.schema_version, "0.4.0");
+  assert.equal(report.schema_version, "0.5.0");
   assert.deepEqual(report.profiles, {
     ...(report.profiles as object),
     catalog_version: "milestone-2",

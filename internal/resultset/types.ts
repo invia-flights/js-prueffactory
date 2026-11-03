@@ -22,7 +22,7 @@ import {
 /** FormatID is the report format identifier. */
 export const FormatID = "js-prueffactory.report";
 /** SchemaVersion is the version of the report contract. */
-export const SchemaVersion = "0.4.0";
+export const SchemaVersion = "0.5.0";
 
 /**
  * ReasonDeselectedByFast is the reason code of a Check that --fast left out of
@@ -519,6 +519,12 @@ export interface Finding {
    * and the engine never clears it.
    */
   in_test_code: boolean;
+  /**
+   * in_documentation marks a Finding whose primary location is Documentation:
+   * a prose file or a non-code file below a folder named docs or doc. The
+   * engine sets it with in_test_code, for every Check, and never clears it.
+   */
+  in_documentation: boolean;
   title: string;
   message: string;
   locations: Location[];
@@ -1058,6 +1064,7 @@ export const FindingShape = object<Finding>([
   ["gate", bool],
   ["in_test_data", bool],
   ["in_test_code", bool],
+  ["in_documentation", bool],
   ["title", string],
   ["message", string],
   ["locations", array(LocationShape)],

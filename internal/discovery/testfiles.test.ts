@@ -6,6 +6,7 @@ import { test } from "node:test";
 import { fileOf, project, tempDir, writeFiles } from "./discovery.testutil.ts";
 import {
   discover,
+  Documentation,
   type FileClass,
   type Project,
   RunnerMocha,
@@ -158,7 +159,7 @@ test("files the runner loads are Test code", () => {
   assertClasses(proj, {
     "checks/api/a.js": TestCode,
     "checks/api/deep/b.js": Source,
-    "checks/api/readme.md": Source,
+    "checks/api/readme.md": Documentation, // prose is never loaded by a runner
     "checks/unit/x/c.js": TestCode,
     "checks/unit/d.js": TestCode,
     "setup/globals.js": TestCode,
@@ -253,7 +254,7 @@ test("recursive directories and braces are followed", () => {
   assertClasses(proj, {
     "e2e/a.js": TestCode,
     "e2e/deep/b.mjs": TestCode,
-    "e2e/deep/c.txt": Source,
+    "e2e/deep/c.txt": Documentation,
     "unit/x/y.mjs": TestCode,
     "unit/z.js": TestCode,
     "unit/z.cjs": Source,

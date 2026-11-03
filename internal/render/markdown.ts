@@ -483,7 +483,7 @@ export class Md {
       this.line(`- Suite: ${code(f.suite)}`);
     }
     this.line(
-      `- Severity: ${f.severity}, confidence: ${f.confidence}${f.in_test_data ? ", in Test data" : ""}${f.in_test_code ? ", in Test code" : ""}`,
+      `- Severity: ${f.severity}, confidence: ${f.confidence}${f.in_test_data ? ", in Test data" : ""}${f.in_test_code ? ", in Test code" : ""}${f.in_documentation ? ", in Documentation" : ""}`,
     );
     for (const l of f.locations) {
       this.line(
@@ -579,6 +579,9 @@ export class Md {
           }
           if (f.in_test_code) {
             where.push("in Test code");
+          }
+          if (f.in_documentation) {
+            where.push("in Documentation");
           }
           const note = where.length > 0 ? ` (${where.join(", ")})` : "";
           this.line(

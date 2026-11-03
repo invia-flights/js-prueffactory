@@ -1,10 +1,15 @@
 // artifacts.structured parses every .json, .yaml and .yml file of the project
 // on the host-side Snapshot copy (Go: artifacts_structured.go). It is native
-// and starts no container. A file that does not parse is a Gate, or a note in
+// and starts no container. A file that does not parse is a Gate, an error
+// without a Gate in Documentation (its errors there stay errors), or a note in
 // Test data. Build output and the templates/ folders of Helm charts are
 // skipped and listed.
 import type { File, Project } from "../discovery/discovery.ts";
-import { BuildOutput, TestData } from "../discovery/discovery.ts";
+import {
+  BuildOutput,
+  Documentation,
+  TestData,
+} from "../discovery/discovery.ts";
 import { stripJSONC } from "../discovery/jsonc.ts";
 import { base, dir, ext, match } from "../gocompat/path.ts";
 import { compareBytes, sortStrings } from "../gocompat/strings.ts";
@@ -128,6 +133,7 @@ const kindWord: Readonly<Record<string, string>> = {
 
 function structuredFinding(input: Input, f: File, perr: ParseError): Finding {
   const inTestData = f.class === TestData;
+  const inDocumentation = f.class === Documentation;
   const word = kindWord[perr.rule] ?? "";
   const finding = newFinding({
     check_id: structuredID,
@@ -155,6 +161,9 @@ function structuredFinding(input: Input, f: File, perr: ParseError): Finding {
     finding.severity = SeverityNote;
     finding.gate = false;
     finding.message = `The file is not valid ${word}. Test data may be invalid on purpose, so this is only a note.`;
+  } else if (inDocumentation) {
+    finding.gate = false;
+    finding.message = `The file is not valid ${word}. It lies in Documentation, which the service does not load, so this is an error without a Gate.`;
   }
   return finding;
 }

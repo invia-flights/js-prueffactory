@@ -20,6 +20,7 @@ import type { Input, Result } from "./input.ts";
 import { runTestSuite } from "./runtime_warnings.ts";
 import {
   markServicesNotStarted,
+  type ServiceNeed,
   serviceNotStartedStatus,
 } from "./service_not_started.ts";
 import { sharedCoverage, withCoverageLocation } from "./tests_coverage.ts";
@@ -78,7 +79,7 @@ export async function runSuites(
   const run = await withCoverageLocation(signal, input);
   const parts: Result[] = [];
   const names: string[] = [];
-  const marked = new Map<string, string[]>();
+  const marked = new Map<string, ServiceNeed[]>();
   for (let i = 0; i < n; i++) {
     const bound = run.forSuite(i);
     const part = await runTestSuite(signal, bound);
