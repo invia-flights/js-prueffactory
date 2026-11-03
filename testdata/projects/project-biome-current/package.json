@@ -1,0 +1,10 @@
+{
+  "name": "project-biome-current",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: the newest Biome 2.x (2.6.4 when this project was made) with an error-level diagnostic in Source code, the same rule in Test code and a warning. Biome 2.4 and later print another JSON shape than 2.1; project-biome keeps 2.1.2.",
+  "main": "src/index.js",
+  "devDependencies": {
+    "@biomejs/biome": "2.6.4"
+  }
+}

@@ -4,15 +4,13 @@
 // option or a glob. Both run from the package's own node_modules, so the
 // version is the one the lockfile locked.
 import type { ContainerResult } from "../docker/driver.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 import { join } from "../gocompat/path.ts";
 import { marshalAny } from "../gocompat/marshal_any.ts";
 import { toLower, trimSpace } from "../gocompat/strings.ts";
-import { goString } from "../gocompat/utf8.ts";
-import { newFingerprint } from "../resultset/fingerprint.ts";
+import { goString, trimSpaceBytes } from "../gocompat/utf8.ts";
 import {
-  ConfidenceConfirmed,
   type Finding,
-  KindDefect,
   type Limitation,
   SeverityError,
   StatusCompleted,
@@ -20,21 +18,24 @@ import {
   StatusToolError,
   StatusUnsupported,
 } from "../resultset/types.ts";
-import { newArtifact, newFinding, newLimitation } from "../resultset/zero.ts";
+import { newArtifact, newLimitation } from "../resultset/zero.ts";
 import { eslintMaxFindings } from "./lint_correctness.ts";
-import { tail } from "./cut_text.ts";
+import { shorten, tail } from "./cut_text.ts";
 import { failedToRun } from "./helper_result.ts";
-import { type Input, type Result, untrusted } from "./input.ts";
+import type { Input, Result } from "./input.ts";
 import {
+  biomeConfigDiagnostic,
+  biomeConfigFile,
   biomeFindings,
   lintExistingID,
+  lintProjectError,
   projectESLintFindings,
-  projectFile,
 } from "./lint_existing_parse.ts";
 import { type Linters, lintersOf, runsESLint } from "./lint_existing.ts";
 import { workMount, workPath } from "./package_install.ts";
 import { cutTitle } from "./repo_findings.ts";
 import { shownPath, shownWord } from "./shown_text.ts";
+import { ToolOutputs, UnreadableOutput } from "./tool_output.ts";
 
 interface LintTool {
   name: string;
@@ -160,12 +161,16 @@ export async function runLintExisting(
   }
   const l = lintersOf(input.snapshotDir, pkg);
 
+  // A linter whose output cannot be read is a tool problem, not a finding
+  // about the project: outputs collects those calls and turns them into the
+  // status of the execution at the end.
+  const outputs = new ToolOutputs(lintExistingID, input.context.id);
   const outcomes: LintOutcome[] = [];
   if (runsESLint(l)) {
-    outcomes.push(await runESLint(signal, input, l));
+    outcomes.push(await runESLint(signal, input, l, outputs));
   }
   if (l.biome) {
-    outcomes.push(await runBiome(signal, input));
+    outcomes.push(await runBiome(signal, input, outputs));
   }
 
   const limitations: Limitation[] = [];
@@ -254,6 +259,7 @@ export async function runLintExisting(
     res.reasonCode = "linter_could_not_run";
     res.reason = failed.reason ?? "";
   }
+  outputs.apply(res);
   return res;
 }
 
@@ -371,46 +377,13 @@ function notInstalled(input: Input, t: LintTool): Finding[] {
   ];
 }
 
-/**
- * lintProjectError is the Gate Finding of a linter that cannot lint because
- * of something in the project's files. file is relative to the package
- * folder.
- */
-function lintProjectError(
-  input: Input,
-  tool: string,
-  rule: string,
-  title: string,
-  message: string,
-  evidence: string,
-  file: string,
-): Finding {
-  const rel = projectFile(input, file);
-  const detail = cutTitle(evidence);
-  return newFinding({
-    check_id: lintExistingID,
-    context_id: input.context.id,
-    rule_id: rule,
-    fingerprint: newFingerprint(lintExistingID, rule, rel, detail),
-    kind: KindDefect,
-    severity: SeverityError,
-    confidence: ConfidenceConfirmed,
-    gate: true,
-    title,
-    message,
-    locations: [input.location("primary", rel, 0, 0)],
-    evidence: [untrusted("tool_output", tail(evidence, 4000), tool)],
-    reproduction: input.reproduction(lintExistingID),
-    limitations: [],
-  });
-}
-
 // --- ESLint ---
 
 async function runESLint(
   signal: AbortSignal,
   input: Input,
   l: Linters,
+  outputs: ToolOutputs,
 ): Promise<LintOutcome> {
   const t = eslintTool;
   const v = await installedVersion(signal, input, t);
@@ -438,16 +411,10 @@ async function runESLint(
   const stderr = goString(c.stderr);
 
   if (!c.oomKilled && c.exitCode <= 1) {
-    try {
-      out.findings = projectESLintFindings(input, c.stdout);
-    } catch {
-      out.failed = brokenRun(
-        t.name,
-        "the lint run (its output is no JSON report)",
-        c,
-        cmd,
-      );
-    }
+    out.findings =
+      outputs.read("eslint", "lint-eslint", c, () =>
+        projectESLintFindings(input, c.stdout),
+      ) ?? [];
     return out;
   }
   if (!c.oomKilled && c.exitCode === 2) {
@@ -497,14 +464,31 @@ function firstLine(s: string): string {
 
 // --- Biome ---
 
-/** biomeOrNull is biomeFindings with Go's `perr != nil` as null. */
-function biomeOrNull(input: Input, stdout: Uint8Array): Finding[] | null {
+/**
+ * readBiomeReport reads what a run of Biome printed on stdout. It never
+ * throws: output that is no report comes back as the UnreadableOutput that
+ * says why, for the caller to decide what it means.
+ */
+function readBiomeReport(
+  input: Input,
+  c: ContainerResult,
+): Finding[] | UnreadableOutput {
   try {
-    return biomeFindings(input, stdout);
-  } catch {
-    return null;
+    return biomeFindings(input, c.stdout);
+  } catch (err) {
+    return err instanceof UnreadableOutput
+      ? err
+      : new UnreadableOutput(
+          errorMessage(err),
+          "it is not the report Biome documents",
+          { cause: err },
+        );
   }
 }
+
+/** printedNoReport says that a run left stdout empty: Biome never got as far as linting. */
+const printedNoReport = (c: ContainerResult): boolean =>
+  trimSpaceBytes(c.stdout).length === 0;
 
 /**
  * vcsProblem recognises the Biome errors that the missing .git folder causes:
@@ -517,9 +501,16 @@ function vcsProblem(stderr: string): boolean {
   );
 }
 
+/**
+ * runBiome runs Biome and reads its JSON report. What it says about the
+ * project is only what Biome says in its own words: its diagnostics, and its
+ * own diagnostic that the configuration is wrong when it prints no report. A
+ * run whose output cannot be read is recorded in outputs as a tool problem.
+ */
 async function runBiome(
   signal: AbortSignal,
   input: Input,
+  outputs: ToolOutputs,
 ): Promise<LintOutcome> {
   const t = biomeTool;
   const v = await installedVersion(signal, input, t);
@@ -545,20 +536,22 @@ async function runBiome(
     override: "",
   };
   const out = outcome({ record });
-
-  // A Biome that reports its diagnostics prints a JSON document. Without one,
-  // the run did not get as far as linting: a configuration problem.
-  const findings = biomeOrNull(input, c.stdout);
-  if (findings !== null && !c.oomKilled && c.exitCode <= 1) {
-    out.findings = findings;
-    return out;
-  }
   if (c.oomKilled || c.exitCode > 1) {
     out.failed = brokenRun(t.name, "the lint run", c, cmd);
     return out;
   }
 
-  if (vcsProblem(goString(c.stderr))) {
+  let call = "lint-biome";
+  let report = readBiomeReport(input, c);
+  let retried = false;
+  // Biome that printed no report did not get as far as linting. When it says
+  // that the VCS integration failed, the missing .git folder of the Snapshot
+  // is the likely cause: it runs once more without the integration.
+  if (
+    report instanceof UnreadableOutput &&
+    printedNoReport(c) &&
+    vcsProblem(goString(c.stderr))
+  ) {
     const retryCmd = [
       "node",
       t.bin,
@@ -567,49 +560,71 @@ async function runBiome(
       "--reporter=json",
       ".",
     ];
-    let r: ContainerResult;
     try {
-      r = await runLintContainer(signal, input, "lint-biome-novcs", retryCmd);
+      c = await runLintContainer(signal, input, "lint-biome-novcs", retryCmd);
     } catch (err) {
       return outcome({ failed: failedToRun({ status: StatusToolError }, err) });
     }
-    const retried = biomeOrNull(input, r.stdout);
-    if (retried !== null && !r.oomKilled && r.exitCode <= 1) {
-      record.command = retryCmd;
-      record.exit_code = r.exitCode;
-      record.override =
-        "VCS integration was switched off with " +
-        biomeNoVCS +
-        ", because the configuration failed without the .git folder, which the Snapshot does not contain";
-      out.findings = retried;
-      out.limitations.push(
-        newLimitation({
-          reason_code: "biome_vcs_disabled",
-          check_id: lintExistingID,
-          message:
-            "Biome's configuration failed without the project's .git folder, so the adapter ran it once more with " +
-            biomeNoVCS +
-            ". Diagnostics that depend on the VCS integration, such as files the VCS ignores, may differ from the project's own run.",
-        }),
-      );
+    record.command = retryCmd;
+    record.exit_code = c.exitCode;
+    if (c.oomKilled || c.exitCode > 1) {
+      out.failed = brokenRun(t.name, "the lint run", c, retryCmd);
       return out;
     }
-    c = r;
-    record.command = retryCmd;
-    record.exit_code = r.exitCode;
+    call = "lint-biome-novcs";
+    retried = true;
+    report = readBiomeReport(input, c);
   }
 
-  out.findings = [
-    lintProjectError(
-      input,
-      t.name,
-      "biome-config-error",
-      "Biome failed with the project's configuration",
-      `Biome ${shownWord(version, "version")} exited with ${String(c.exitCode)} before it could lint: ${firstBiomeError(goString(c.stderr))}`,
-      goString(c.stderr),
-      biomeConfigFile(input),
-    ),
-  ];
+  if (
+    report instanceof UnreadableOutput &&
+    c.exitCode === 1 &&
+    printedNoReport(c) &&
+    biomeConfigDiagnostic(goString(c.stderr))
+  ) {
+    // Biome says in its own words that it cannot use the configuration; the
+    // project's own lint would fail in the same way.
+    out.findings = [
+      lintProjectError(
+        input,
+        t.name,
+        "biome-config-error",
+        "Biome failed with the project's configuration",
+        `Biome ${shownWord(version, "version")} exited with ${String(c.exitCode)} before it could lint: ${firstBiomeError(goString(c.stderr))}`,
+        // The diagnostic is at the start; a long list of known keys follows.
+        shorten(trimSpace(goString(c.stderr)), 3900),
+        biomeConfigFile(input),
+      ),
+    ];
+    return out;
+  }
+
+  const found = outputs.read(t.name, call, c, () => {
+    if (report instanceof UnreadableOutput) {
+      throw report;
+    }
+    return report;
+  });
+  if (found === undefined) {
+    return out;
+  }
+  out.findings = found;
+  if (retried) {
+    record.override =
+      "VCS integration was switched off with " +
+      biomeNoVCS +
+      ", because the configuration failed without the .git folder, which the Snapshot does not contain";
+    out.limitations.push(
+      newLimitation({
+        reason_code: "biome_vcs_disabled",
+        check_id: lintExistingID,
+        message:
+          "Biome's configuration failed without the project's .git folder, so the adapter ran it once more with " +
+          biomeNoVCS +
+          ". Diagnostics that depend on the VCS integration, such as files the VCS ignores, may differ from the project's own run.",
+      }),
+    );
+  }
   return out;
 }
 
@@ -622,17 +637,4 @@ function firstBiomeError(stderr: string): string {
     }
   }
   return firstLine(stderr);
-}
-
-/**
- * biomeConfigFile is the package-relative path of Biome's configuration, or
- * package.json when the package has none.
- */
-function biomeConfigFile(input: Input): string {
-  for (const f of input.pkg().files) {
-    if (f.packageRel === "biome.json" || f.packageRel === "biome.jsonc") {
-      return f.packageRel;
-    }
-  }
-  return "package.json";
 }

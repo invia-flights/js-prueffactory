@@ -62,7 +62,8 @@ The rules for tests and the commands are in [AGENTS.md](../../AGENTS.md).
 | `placeholder-env-values` | A placeholder (`empty`) under a secret-sounding `.env` name stays readable in a test title and its re-run command, a real-looking secret is redacted |
 | `project-eslint` | The project's ESLint config: an error in Source code is a Gate, a warning is not, a disabled hit stays silent |
 | `project-eslint-test-code` | `project-eslint` plus an error-level hit in Test code: an error without a Gate, counted by the Project linter part, while the error in Source code stays the one Gate (a copy, because `project-eslint` is recorded in the Go oracles) |
-| `project-biome` | The project's Biome config, including a VCS setting that needs a retry |
+| `project-biome` | The project's Biome 2.1.2 config, including a VCS setting that needs a retry (Biome 2.1 writes a location with a path object and a byte span) |
+| `project-biome-current` | The newest Biome 2.x (2.6.4 when the project was made; Biome 2.4 and later write a location with a plain path and start and end positions): an error in Source code is a Gate at its line and column, the same rule in Test code is an error without a Gate, a warning is not, and no `biome-config-error`. Docker tests vary it: without the Source code error the Run exits 0, and a configuration that Biome itself rejects is the Gate `biome-config-error` with Biome's own diagnostic as Evidence |
 | `eslint-legacy` | A legacy `.eslintrc` with ESLint 10 is a project error |
 | `eslint-no-config` | ESLint as a dependency without config makes `lint.existing` not applicable |
 | `unparsable-syntax` | Flow and JSX files that ESLint cannot parse next to files it can, in Source code and Test code: `lint.correctness`, `deps.engines` and `tests.smells` are `partial` with `files_not_parsed`, the hit in the parseable file stays, and the three Benchmark parts are unknown |

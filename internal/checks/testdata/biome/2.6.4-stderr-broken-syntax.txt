@@ -1,0 +1,66 @@
+/p/biome.json:1:70 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property but instead found '}'.
+  
+  > 1 │ { "files": { "includes": ["**/*.js"] }, "linter": { "enabled": true, }, "bogusKey": 1
+      │                                                                      ^
+    2 │ 
+  
+  i Expected a property here.
+  
+  > 1 │ { "files": { "includes": ["**/*.js"] }, "linter": { "enabled": true, }, "bogusKey": 1
+      │                                                                      ^
+    2 │ 
+  
+
+/p/biome.json:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    1 │ { "files": { "includes": ["**/*.js"] }, "linter": { "enabled": true, }, "bogusKey": 1
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ { "files": { "includes": ["**/*.js"] }, "linter": { "enabled": true, }, "bogusKey": 1
+  > 2 │ 
+      │ 
+  
+
+/p/biome.json:1:73 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `bogusKey`.
+  
+  > 1 │ { "files": { "includes": ["**/*.js"] }, "linter": { "enabled": true, }, "bogusKey": 1
+      │                                                                         ^^^^^^^^^^
+    2 │ 
+  
+  i Known keys:
+  
+  - $schema
+  - root
+  - extends
+  - vcs
+  - files
+  - formatter
+  - linter
+  - tailwind
+  - javascript
+  - json
+  - css
+  - markdown
+  - yaml
+  - graphql
+  - grit
+  - html
+  - overrides
+  - plugins
+  - assist
+  
+
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+

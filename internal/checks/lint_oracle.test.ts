@@ -335,11 +335,34 @@ test("Biome's byte offsets give Go's lines and columns", () => {
   });
 });
 
+// Answers that Go recorded and that the trustworthy-gates spec changed on
+// purpose (ticket 06): output that is not the documented report of a linter is
+// a tool problem and never a Finding about the project, and Biome's report is
+// read in the shape of every 2.x version. The recorded files are not edited;
+// these cases assert the new answer instead.
+//   parsing "biome null": Go read `null` as a clean project.
+//   existing "eslint not json": Go ended with the reason code linter_failed.
+//   existing "biome config problem without a marker": Go made the Gate
+//     biome-config-error of any stderr without a report.
+//   existing "biome 2.5 style output": Go's guess of a newer shape, which the
+//     real Biome 2.4 and later do not write, made the same Gate.
+const unreadableSinceGo = new Set([
+  "biome null",
+  "eslint not json",
+  "biome config problem without a marker",
+  "biome 2.5 style output",
+]);
+
 describe("the project linters' output is read as Go reads it", () => {
   cases.parsing.forEach((c, i) => {
     test(c.name, (t) => {
       const input = inputOf(t, undefined, c.files, c.pkg);
-      const want = oracle.parsing?.[i] as Record<string, unknown>;
+      const want = {
+        ...(oracle.parsing?.[i] as Record<string, unknown>),
+      };
+      if (unreadableSinceGo.has(c.name)) {
+        want.error = true;
+      }
       let findings: Finding[] = [];
       let error: Error | undefined;
       try {
@@ -508,6 +531,14 @@ describe("lint.existing runs the project's linters as Go does", () => {
       );
 
       assert.ok(res);
+      if (unreadableSinceGo.has(c.name)) {
+        assert.deepEqual(
+          [res.status, res.reasonCode, res.findings ?? []],
+          ["tool_error", "tool_output_unreadable", []],
+          res.reason ?? "",
+        );
+        return;
+      }
       const got = resultOf(res);
       got.commands = commands.length === 0 ? null : commands;
       same(got, oracle.existing?.[i], c.name);
