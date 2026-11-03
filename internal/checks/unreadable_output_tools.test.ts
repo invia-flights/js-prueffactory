@@ -9,6 +9,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { validate } from "../resultset/validate.ts";
+import { newSet } from "../resultset/zero.ts";
 import {
   assertUnreadable,
   rawOf,
@@ -974,18 +976,92 @@ for (const [what, events] of Object.entries(eventsWithoutLines)) {
     );
     assert.deepEqual(res.findings ?? [], []);
     assert.deepEqual(res.testCases ?? [], []);
-    const base = "artifacts/tests.existing/C-0002/reporter";
-    assert.equal(rawOf(res, `${base}.stdout.txt`), "Usage: mocha [spec..]");
-    assert.equal(rawOf(res, `${base}.stderr.txt`), "runner stderr");
+    // The runner's streams are in the command log; the event file is stored
+    // beside it when it has content. The reason names both.
+    const base = "artifacts/tests.existing/C-0002/test-output";
+    const log = rawOf(res, `${base}.log`) ?? "";
+    assert.ok(log.includes("Usage: mocha [spec..]"), log);
+    assert.ok(log.includes("runner stderr"), log);
     const kept = rawOf(res, `${base}.events.jsonl`);
     assert.equal(kept, events === "" || events === null ? undefined : events);
+    assert.equal(
+      (res.artifacts ?? []).length,
+      kept === undefined ? 1 : 2,
+      "no second copy of the streams",
+    );
     for (const a of res.artifacts ?? []) {
-      if (a.path.startsWith(base)) {
-        assert.ok((res.reason ?? "").includes(a.path), a.path);
-      }
+      assert.ok((res.reason ?? "").includes(a.path), a.path);
     }
   });
 }
+
+const twoSuitePkg = {
+  "package.json": JSON.stringify({
+    name: "x",
+    version: "1.0.0",
+    scripts: {
+      test: "npm run test:unit && npm run test:api",
+      "test:unit": "mocha test/unit",
+      "test:api": "mocha test/api",
+    },
+  }),
+  "test/unit/a.test.js": "it('adds', () => {});\n",
+  "test/api/b.test.js": "it('lists', () => {});\n",
+};
+
+test("tests.existing: every suite of a package whose reporter wrote nothing keeps artifacts of its own, so the Report stays valid", async (t) => {
+  const res = await runInPackage(t, "tests.existing", twoSuitePkg, (spec) => {
+    const name = spec.name ?? "";
+    if (name.startsWith("mochaprobe")) {
+      return { stdout: '{"version":"11.0.0","bin":"bin/mocha.js"}' };
+    }
+    if (name.startsWith("tests-")) {
+      return { stdout: `output of ${name}`, stderr: `stderr of ${name}` };
+    }
+    return {};
+  });
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["tool_error", "tool_output_unreadable"],
+    res.reason ?? "",
+  );
+  const set = newSet();
+  set.artifacts = (res.artifacts ?? []).map((a, i) => ({
+    ...a,
+    id: `A-${String(i + 1).padStart(4, "0")}`,
+  }));
+  assert.deepEqual(
+    validate(set).filter((p) => p.includes("share the path")),
+    [],
+    (res.artifacts ?? []).map((a) => a.path).join("\n"),
+  );
+  const logs = (res.artifacts ?? []).filter((a) => a.path.endsWith(".log"));
+  assert.equal(logs.length, 2, "one command log per suite");
+});
+
+test("tests.existing: the command log already holds the runner's streams, so the unreadable reporter adds only the event file and names the log", async (t) => {
+  const res = await runInPackage(t, "tests.existing", mochaPkg, (spec) => {
+    const name = spec.name ?? "";
+    if (name.startsWith("mochaprobe")) {
+      return { stdout: '{"version":"11.0.0","bin":"bin/mocha.js"}' };
+    }
+    if (name.startsWith("tests-")) {
+      return { stdout: "Usage: mocha [spec..]", stderr: "runner stderr" };
+    }
+    return name.startsWith("events-") ? { stdout: "not an event\n" } : {};
+  });
+  const paths = (res.artifacts ?? []).map((a) => a.path);
+  assert.deepEqual(paths, [
+    "artifacts/tests.existing/C-0002/test-output.log",
+    "artifacts/tests.existing/C-0002/test-output.events.jsonl",
+  ]);
+  const log = rawOf(res, paths[0] ?? "") ?? "";
+  assert.ok(log.includes("Usage: mocha [spec..]"), log);
+  assert.ok(log.includes("runner stderr"), log);
+  for (const p of paths) {
+    assert.ok((res.reason ?? "").includes(p), `the reason names ${p}`);
+  }
+});
 
 test("tests.existing: the node:test reporter's event file is read the same way", async (t) => {
   const res = await runInPackage(
@@ -1004,14 +1080,19 @@ test("tests.existing: the node:test reporter's event file is read the same way",
       return name.startsWith("events-") ? { stdout: "TAP version 13\n" } : {};
     },
   );
-  assertUnreadable(res, {
-    status: "tool_error",
-    check: "tests.existing",
-    context: "C-0002",
-    call: "reporter",
-    files: { "events.jsonl": "TAP version 13\n" },
-    stdout: "TAP version 13",
-  });
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["tool_error", "tool_output_unreadable"],
+    res.reason ?? "",
+  );
+  assert.deepEqual(res.findings ?? [], []);
+  const base = "artifacts/tests.existing/C-0002/test-output";
+  assert.deepEqual(
+    (res.artifacts ?? []).map((a) => a.path),
+    [`${base}.log`, `${base}.events.jsonl`],
+  );
+  assert.ok((rawOf(res, `${base}.log`) ?? "").includes("TAP version 13"));
+  assert.equal(rawOf(res, `${base}.events.jsonl`), "TAP version 13\n");
 });
 
 test("tests.existing: a runner that exits with an error before any event is still the project's failure", async (t) => {
