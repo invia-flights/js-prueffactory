@@ -27,11 +27,7 @@ import {
   readEvents,
   testsExistingID,
 } from "./tests_existing.ts";
-import {
-  testArtifactCheck,
-  testLogPath,
-  testLogStem,
-} from "./tests_repeat.ts";
+import { testArtifactCheck, testLogPath, testLogStem } from "./tests_repeat.ts";
 import { ToolOutputs } from "./tool_output.ts";
 
 /** SuiteLaunch is what differs between runners when the suite's container is started. */
@@ -215,10 +211,7 @@ export function finishSuite(
     // content. The files are named by the run (the command log's name), so
     // the suites of a package and the repeat runs of other Checks never
     // write the same path.
-    const outputs = new ToolOutputs(
-      testArtifactCheck(input),
-      input.context.id,
-    );
+    const outputs = new ToolOutputs(testArtifactCheck(input), input.context.id);
     outputs.rejectLogged(
       "the test reporter",
       testLogStem(input),

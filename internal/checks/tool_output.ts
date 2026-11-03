@@ -402,12 +402,7 @@ export class ToolOutputs {
    * redaction covers it: why completes "The raw output of the tool is not
    * kept, because ...".
    */
-  rejectWithheld(
-    tool: string,
-    summary: string,
-    why: string,
-    where = "",
-  ): void {
+  rejectWithheld(tool: string, summary: string, why: string, where = ""): void {
     this.#unreadable.push({
       tool,
       summary,
