@@ -2,10 +2,13 @@
 import type {
   ListedCheck,
   ListedContext,
+  ListedInitService,
+  ListedService,
   ListedSuite,
   Listing,
 } from "../checks/listing.ts";
 import { ListingShape } from "../checks/listing.ts";
+import { initCriterionText } from "../discovery/init_services.ts";
 import { marshal } from "../gocompat/json.ts";
 import { sortStrings } from "../gocompat/strings.ts";
 import { cell, cellCode, code, joinCode, reasonCell, yesNo } from "./escape.ts";
@@ -46,7 +49,40 @@ export function listChecksMarkdown(l: Listing): Uint8Array {
   }
   b += listedContexts(l.contexts);
   b += listedSuites(l.contexts);
+  b += listedServices(l.services);
   return Buffer.from(b, "utf8");
+}
+
+// listedServices is the table of the compose services, or "" when the project
+// has none. Names, files and commands come from the project, so they are
+// escaped.
+function listedServices(services: readonly ListedService[]): string {
+  if (services.length === 0) {
+    return "";
+  }
+  let b = "\nCompose services:\n\n";
+  b += "| Service | File | Family | Status | Note |\n";
+  b += "|---|---|---|---|---|\n";
+  for (const s of services) {
+    const family = s.family === "" ? "-" : cell(s.family);
+    const status = s.started ? "started" : "not started";
+    let note = s.reason === "" ? "-" : reasonCell(s.reason);
+    if (s.init_service !== null) {
+      // The reason it is not started says the same as the criteria.
+      note = initServiceNote(s.init_service);
+    }
+    b += `| ${cellCode(s.name)} | ${cellCode(s.file)} | ${family} | ${status} | ${note} |\n`;
+  }
+  return b;
+}
+
+// initServiceNote says what an Init service runs and prepares, and why its
+// image counts as the project's own.
+function initServiceNote(i: ListedInitService): string {
+  const command = i.command === "" ? "no command" : cellCode(i.command);
+  const prepares = i.prepares.map(cellCode).join(", ");
+  const because = i.criteria.map(initCriterionText).join(" and ");
+  return `Init service: runs ${command} and prepares ${prepares}. Its image is the project's own: ${because}.`;
 }
 
 // listedContexts is the table of Contexts with their Node runtime. Paths,

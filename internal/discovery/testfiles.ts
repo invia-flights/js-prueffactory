@@ -124,6 +124,24 @@ export function readScripts(root: string, dir: string): Map<string, string> {
   return scripts;
 }
 
+const mainSchema: json.Schema = {
+  kind: "struct",
+  type: 'struct { Main string "json:\\"main\\"" }',
+  fields: [{ name: "main", schema: { kind: "string" } }],
+};
+
+// readMain reads the `main` field of the package's manifest. A manifest that
+// is missing, not JSON or without a string `main` has none ("").
+export function readMain(root: string, dir: string): string {
+  const data = readManifest(root, dir);
+  if (data === null) return "";
+  try {
+    return (json.unmarshal(data, mainSchema) as { main: string }).main;
+  } catch {
+    return "";
+  }
+}
+
 const rawMap: json.Schema = {
   kind: "map",
   type: "map[string]json.RawMessage",
