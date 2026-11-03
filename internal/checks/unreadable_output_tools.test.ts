@@ -845,4 +845,57 @@ test("deps.outdated: an answer that is read is still read, and a helper that exi
   );
 });
 
+// --- node --check (syntax.parse; its failures are Gates) ---
+
+const syntaxGood =
+  '{"node_version":"v24.0.0","checked":1,"failures":[],"errors":[]}';
+const syntaxBad: Record<string, string> = {
+  "a changed JSON shape": '{"results":[{"file":"index.js","ok":false}]}',
+  "failures with other keys":
+    '{"node_version":"v24.0.0","checked":1,"failures":[{"file":"index.js","error":"x"}],"errors":[]}',
+  "failures of another type":
+    '{"node_version":"v24.0.0","checked":1,"failures":"index.js","errors":[]}',
+  "truncated output": syntaxGood.slice(0, 40),
+  "plain text": "node: bad option: --check",
+};
+
+for (const [what, out] of Object.entries(syntaxBad)) {
+  test(`syntax.parse: ${what} from the helper is a tool problem with the raw output kept, never a Gate`, async (t) => {
+    const res = await runInPackage(t, "syntax.parse", pkg, () => ({
+      stdout: out,
+      stderr: "helper stderr",
+    }));
+    assertUnreadable(res, {
+      status: "tool_error",
+      check: "syntax.parse",
+      context: "C-0002",
+      call: "syntax",
+      stdout: out,
+      stderr: "helper stderr",
+    });
+    assert.deepEqual(res.findings ?? [], []);
+  });
+}
+
+test("syntax.parse: a document that is read is still read, and a helper that exits with an error stays a helper failure", async (t) => {
+  const ok = await runInPackage(t, "syntax.parse", pkg, () => ({
+    stdout: syntaxGood,
+  }));
+  assert.equal(ok.status, "completed", ok.reason ?? "");
+  const failed = await runInPackage(t, "syntax.parse", pkg, () => ({
+    exitCode: 1,
+    stderr: "boom",
+  }));
+  assert.deepEqual(
+    [failed.status, failed.reasonCode],
+    ["tool_error", "helper_failed"],
+  );
+  const broken = await runInPackage(t, "syntax.parse", pkg, () => ({
+    stdout:
+      '{"node_version":"v24.0.0","checked":1,"failures":[{"path":"index.js","line":1,"column":1,"rule":"syntax-error","message":"Unexpected token","output":"SyntaxError"}],"errors":[]}',
+  }));
+  assert.equal(broken.findings?.length, 1);
+  assert.equal(broken.findings[0]?.gate, true, "a real failure is a Gate");
+});
+
 // (more adapters below)

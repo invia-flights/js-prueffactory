@@ -30,6 +30,12 @@ import { type Check, register } from "./check.ts";
 import { failedToRun, helperFailed } from "./helper_result.ts";
 import { type Input, type Result, untrusted } from "./input.ts";
 import { shownPath } from "./shown_text.ts";
+import {
+  requireShape,
+  shape,
+  UnreadableOutput,
+  unreadableResult,
+} from "./tool_output.ts";
 
 export const syntaxParseID = "syntax.parse";
 
@@ -120,6 +126,25 @@ const failureType =
   'struct { Path string "json:\\"path\\""; Line int "json:\\"line\\""; Column int "json:\\"column\\""; Rule string "json:\\"rule\\""; Message string "json:\\"message\\""; Output string "json:\\"output\\"" }';
 const errorType =
   'struct { Path string "json:\\"path\\""; Message string "json:\\"message\\"" }';
+
+/** syntaxOutputShape is the document js/syntax-parse.js documents. */
+const syntaxOutputShape = shape.object({
+  node_version: shape.string,
+  checked: shape.number,
+  failures: shape.array(
+    shape.object({
+      path: shape.string,
+      line: shape.number,
+      column: shape.number,
+      rule: shape.string,
+      message: shape.string,
+      output: shape.string,
+    }),
+  ),
+  errors: shape.array(
+    shape.object({ path: shape.string, message: shape.string }),
+  ),
+});
 
 const syntaxOutputSchema: Schema = {
   kind: "struct",
@@ -251,14 +276,28 @@ async function runSyntaxParse(
   const exit = container.exitCode;
   res.tool = { name: "node --check", version: null, exit_code: exit };
 
+  if (exit !== 0) {
+    return helperFailed(res, "syntax", container, 400);
+  }
+  // A helper that exits cleanly but prints something else than its document
+  // says nothing about the files, and its failures are Gates: a tool
+  // problem, with the raw output kept, never a failure of a file.
   let out: SyntaxOutput;
   try {
-    if (exit !== 0) {
-      throw new Error("exit");
-    }
+    requireShape("the syntax helper", container.stdout, syntaxOutputShape);
     out = unmarshal(container.stdout, syntaxOutputSchema) as SyntaxOutput;
-  } catch {
-    return helperFailed(res, "syntax", container, 400);
+  } catch (err) {
+    return unreadableResult(
+      res,
+      syntaxParseID,
+      input.context.id,
+      "node --check",
+      "syntax",
+      container,
+      err instanceof UnreadableOutput
+        ? err.summary
+        : "it is not the document the helper writes",
+    );
   }
   res.tool.version = out.node_version;
 
