@@ -1,0 +1,13 @@
+swagger: "2.0"
+info:
+  title: Legacy fragment
+  version: "1.0.0"
+# Swagger 2.0 requires paths as well, so this file is a fragment too.
+definitions:
+  Item:
+    type: object
+    properties:
+      owner:
+        # Warning (no-unresolved-refs): the specification does not say that a
+        # reference must resolve, and the definition does not exist.
+        $ref: "#/definitions/Missing"

@@ -137,8 +137,12 @@ test("api.lint reports only what the OpenAPI text requires as an error, and the 
   const summary = found
     .map((f) => [f.rule_id, f.severity, f.gate, f.locations[0]?.path])
     .sort();
+  // The templates of the project are fragments (the next test): the missing
+  // paths are no error, and their other problems are warnings.
   assert.deepEqual(summary, [
+    ["no-unresolved-refs", "warning", false, "legacy.yaml"],
     ["nullable-type-sibling", "warning", false, "openapi.yaml"],
+    ["nullable-type-sibling", "warning", false, "template.yaml"],
     ["path-not-include-query", "warning", false, "openapi.yaml"],
     ["path-parameters-defined", "error", false, "openapi.yaml"],
   ]);
@@ -150,6 +154,66 @@ test("api.lint reports only what the OpenAPI text requires as an error, and the 
   // The OpenAPI part counts the error and leaves the warnings out.
   const part = benchmarkPart(s, "openapi");
   assert.deepEqual([part.state, part.raw_value], ["measured", 1]);
+  assertNothingLeft(r);
+});
+
+test("api.lint lints a 3.0 template and a Swagger 2.0 file without paths as fragments", async (t) => {
+  // openapi-beyond-spec has template.yaml (OpenAPI 3.0.3, `paths` null) and
+  // legacy.yaml (Swagger 2.0, no `paths`), which both versions require. They
+  // are linted as copies with an empty `paths` map, so they get no error for
+  // it and keep their other problems at their own lines. empty-paths.yaml
+  // (an empty map) and modern.yaml (OpenAPI 3.1 without `paths`) are linted
+  // as they are.
+  const original = copyProject(t, "openapi-beyond-spec");
+
+  const r = await realRun(t, ["benchmark", original, "--only", "api.lint"]);
+
+  assert.equal(r.code, 0, r.stderr);
+  const s = parseReport(r);
+  const e = executionIn(s, "api.lint");
+  assert.deepEqual(
+    [e.status, e.reason_code],
+    ["completed", null],
+    `${e.reason_code ?? ""} ${e.reason ?? ""}`,
+  );
+
+  const fragments = s.limitations
+    .filter((l) => l.reason_code === "openapi_fragment")
+    .map((l) => [l.path, l.check_id])
+    .sort();
+  assert.deepEqual(fragments, [
+    ["legacy.yaml", "api.lint"],
+    ["template.yaml", "api.lint"],
+  ]);
+  for (const l of s.limitations) {
+    if (l.reason_code === "openapi_fragment") {
+      assert.match(l.message, /paths/);
+      assert.match(l.message, /not checked/);
+    }
+  }
+
+  // No file gets an error about `paths`, and the others are not fragments.
+  const byFile = new Map<string, string[]>();
+  for (const f of findingsIn(s, "api.lint")) {
+    const path = f.locations[0]?.path ?? "";
+    const at = `${String(f.rule_id)} ${f.severity} ${String(f.locations[0]?.start?.line)}`;
+    byFile.set(path, [...(byFile.get(path) ?? []), at]);
+  }
+  assert.equal(byFile.get("empty-paths.yaml"), undefined);
+  assert.equal(byFile.get("modern.yaml"), undefined);
+  assert.deepEqual(byFile.get("template.yaml"), [
+    "nullable-type-sibling warning 19",
+  ]);
+  assert.deepEqual(byFile.get("legacy.yaml"), [
+    "no-unresolved-refs warning 13",
+  ]);
+  for (const f of findingsIn(s, "api.lint")) {
+    assert.doesNotMatch(f.message, /`paths`/, f.message);
+  }
+
+  // The Original stays as it was; the copies live in a Docker volume of the
+  // Run that goes away with it.
+  assert.equal(r.report.source.original_unchanged, true);
   assertNothingLeft(r);
 });
 

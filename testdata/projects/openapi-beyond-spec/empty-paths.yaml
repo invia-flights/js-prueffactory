@@ -1,0 +1,6 @@
+openapi: 3.0.3
+info:
+  title: Empty paths
+  version: "1.0.0"
+# An empty paths map is valid in OpenAPI 3.0, so this file is not a fragment.
+paths: {}
