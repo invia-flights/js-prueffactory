@@ -706,6 +706,12 @@ export interface Artifact {
    * and size from it. It never appears in report.json.
    */
   content: Uint8Array | null;
+  /**
+   * maxBytes asks finalize to cut the content to at most that many bytes,
+   * after redaction, and to mark the artifact truncated. Only a Check that
+   * saves a tool's raw output sets it. It never appears in report.json.
+   */
+  maxBytes?: number;
 }
 
 /** ReportCompleteness says whether the Report holds everything it should. */

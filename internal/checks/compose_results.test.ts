@@ -17,6 +17,7 @@ import { composeSetFindings } from "./compose_results.ts";
 import { composeSets } from "./compose_sets.ts";
 import { Input } from "./input.ts";
 import { composeIncludeLimitation } from "./repository_compose.ts";
+import { UnreadableOutput } from "./tool_output.ts";
 
 function composeInput(): Input {
   return new Input({
@@ -108,15 +109,26 @@ test("warnings of compose other than variables are not Findings", () => {
   );
 });
 
-test("a failure without any message is still an error", () => {
-  const found = composeSetFindings(
-    composeInput(),
-    { files: ["compose.yaml"] },
-    1,
+test("a failure without any message says nothing about the set", () => {
+  // Compose blames a set with a message about it; an exit code alone, and the
+  // Docker CLI's own complaint, are a tool problem (see unreadable_output.test.ts).
+  for (const stderr of [
     "",
-  );
-  assert.equal(found.length, 1);
-  assert.equal(found[0]?.gate, false);
+    'level=warning msg="The \\"A\\" variable is not set. Defaulting to a blank string."\n',
+    "docker: unknown command: docker compose\n",
+  ]) {
+    assert.throws(
+      () =>
+        composeSetFindings(
+          composeInput(),
+          { files: ["compose.yaml"] },
+          1,
+          stderr,
+        ),
+      UnreadableOutput,
+      stderr,
+    );
+  }
 });
 
 test("set and variable names from the project stay out of trusted text unless they look like names", () => {

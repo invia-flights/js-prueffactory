@@ -46,6 +46,13 @@ import {
 import { type Input, type Result, untrusted } from "./input.ts";
 import { inNodeModules, readRegular } from "./repo_targets.ts";
 import { shownPath, shownURL, shownWord } from "./shown_text.ts";
+import {
+  requireShape,
+  shape,
+  ToolOutputs,
+  UnreadableOutput,
+} from "./tool_output.ts";
+import { errorMessage } from "../gocompat/errors.ts";
 
 export const schemaCompileID = "schema.compile";
 
@@ -380,12 +387,50 @@ const outputSchema: Schema = {
   ],
 };
 
-/** parseOutput decodes the helper's answer; it throws for anything else. */
-function parseOutput(stdout: Uint8Array): SchemaCompileOutput {
-  const out = unmarshal(stdout, outputSchema) as {
-    version: string;
-    schemas: GoSlice | null;
-  };
+/** schemaProblemShape is a problem of the helper's answer: null, or a kind and a message. */
+const schemaProblemShape = shape.nullable(
+  shape.object({ kind: shape.string, message: shape.string }),
+);
+
+/** helperOutputShape is the answer the schema-compile helper documents. */
+const helperOutputShape = shape.object({
+  version: shape.string,
+  schemas: shape.array(
+    shape.object({
+      path: shape.string,
+      draft: shape.string,
+      lax: schemaProblemShape,
+      strict: schemaProblemShape,
+      remote: shape.array(shape.string),
+    }),
+  ),
+});
+
+/**
+ * parseOutput decodes the helper's answer, which has to answer for every
+ * schema file it was given; it throws UnreadableOutput for anything else.
+ */
+function parseOutput(
+  stdout: Uint8Array,
+  expected: number,
+): SchemaCompileOutput {
+  let out: { version: string; schemas: GoSlice | null };
+  try {
+    out = unmarshal(stdout, outputSchema) as typeof out;
+  } catch (err) {
+    throw new UnreadableOutput(
+      `the Ajv helper printed no JSON: ${errorMessage(err)}`,
+      "it is not valid JSON of the expected kind",
+      { cause: err },
+    );
+  }
+  requireShape("the Ajv helper", stdout, helperOutputShape);
+  if ((out.schemas?.items().length ?? 0) !== expected) {
+    throw new UnreadableOutput(
+      "the Ajv helper answered for another number of schemas than it was given",
+      "it does not answer for every schema file it was given",
+    );
+  }
   const schemas = (out.schemas?.items() ?? []) as (Omit<
     SchemaCompileResult,
     "remote"
@@ -518,14 +563,18 @@ async function runSchemaCompile(
   const exit = container.exitCode;
   res.tool = { name: "ajv", version: null, exit_code: exit };
 
-  let out: SchemaCompileOutput;
-  try {
-    if (exit !== 0) {
-      throw new Error("exit");
-    }
-    out = parseOutput(container.stdout);
-  } catch {
+  if (exit !== 0) {
     return helperFailed(res, "Ajv", container, 800);
+  }
+  // A helper that exits cleanly but prints something else than its answer is
+  // a tool problem: nothing is said about the schema files.
+  const outputs = new ToolOutputs(schemaCompileID, input.context.id);
+  const out = outputs.read("ajv", "schema-compile", container, () =>
+    parseOutput(container.stdout, targets.length),
+  );
+  if (out === undefined) {
+    outputs.apply(res);
+    return res;
   }
   const interpreted = interpretSchemaCompileTargets(input, out, targets, over);
   interpreted.command = res.command;

@@ -46,7 +46,7 @@ import {
   toolInfo,
   toolRef,
 } from "./repo_tools.ts";
-import { errorMessage } from "../gocompat/errors.ts";
+import { ToolOutputs, UnreadableOutput } from "./tool_output.ts";
 
 export { githubActionsID };
 
@@ -126,10 +126,12 @@ async function runGithubActions(
     "{{json .}}",
   ];
   res.command = recordedCommand(["actionlint", ...lintBase], paths);
+  const outputs = new ToolOutputs(githubActionsID, input.context.id);
   const ok = await runChunks(
     signal,
     input,
     res,
+    outputs,
     Actionlint,
     paths,
     (n, chunk) =>
@@ -147,8 +149,16 @@ async function runGithubActions(
           content: actionlintConfig,
         },
       ),
-    (_chunk, stdout) => {
-      found.push(...actionlintFindings(input, stdout));
+    (_chunk, c) => {
+      // Nothing at all is how actionlint says that no workflow has an error,
+      // and then its exit code is 0. Exit code 1 says that it found errors.
+      if (c.exitCode !== 0 && trimSpace(goString(c.stdout)) === "") {
+        throw new UnreadableOutput(
+          "actionlint exited with an error code and printed nothing",
+          "it reports errors but prints none",
+        );
+      }
+      found.push(...actionlintFindings(input, c.stdout));
     },
   );
   res.findings = found;
@@ -158,7 +168,7 @@ async function runGithubActions(
   // The Execution's tool is actionlint, whose results are the errors.
   const lintTool = res.tool ?? null;
 
-  if (!(await runZizmor(signal, input, res, found, paths))) {
+  if (!(await runZizmor(signal, input, res, outputs, found, paths))) {
     return res;
   }
   res.tool = lintTool;
@@ -176,6 +186,7 @@ async function runGithubActions(
     })
     .map(({ f }) => f);
   res.status = StatusCompleted;
+  outputs.apply(res);
   return res;
 }
 
@@ -199,6 +210,7 @@ async function runZizmor(
   signal: AbortSignal,
   input: Input,
   res: Result,
+  outputs: ToolOutputs,
   found: Finding[],
   paths: readonly string[],
 ): Promise<boolean> {
@@ -249,15 +261,9 @@ async function runZizmor(
       res.reason = `zizmor exited with ${String(c.exitCode)}: ${tail(stderr, 400)}`;
       return false;
     }
-    try {
+    outputs.read("zizmor", `zizmor-${String(n + 1)}`, c, () => {
       found.push(...zizmorFindings(input, c.stdout));
-    } catch (err) {
-      res.tool = toolInfo(Zizmor, c.exitCode);
-      res.status = StatusToolError;
-      res.reasonCode = "tool_output_unreadable";
-      res.reason = `${errorMessage(err)}: ${tail(stderr, 400)}`;
-      return false;
-    }
+    });
   }
   return true;
 }

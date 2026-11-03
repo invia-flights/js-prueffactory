@@ -22,6 +22,7 @@ import {
   snapshotToolContainer,
   toolRef,
 } from "./repo_tools.ts";
+import { ToolOutputs } from "./tool_output.ts";
 
 export const shellID = "repository.shell";
 
@@ -67,6 +68,7 @@ async function runShell(signal: AbortSignal, input: Input): Promise<Result> {
   }
   const dialects = sortStrings([...byDialect.keys()]);
 
+  const outputs = new ToolOutputs(shellID, input.context.id);
   for (const [i, dialect] of dialects.entries()) {
     const base = ["--norc", "-f", "json1", "-s", dialect];
     const paths = byDialect.get(dialect) ?? [];
@@ -77,6 +79,7 @@ async function runShell(signal: AbortSignal, input: Input): Promise<Result> {
       signal,
       input,
       res,
+      outputs,
       ShellCheck,
       paths,
       (n, chunk) =>
@@ -88,8 +91,8 @@ async function runShell(signal: AbortSignal, input: Input): Promise<Result> {
           "",
           undefined,
         ),
-      (_chunk, stdout) => {
-        findings.push(...shellcheckFindings(input, stdout));
+      (_chunk, c) => {
+        findings.push(...shellcheckFindings(input, c.stdout));
       },
     );
     if (!ok) {
@@ -97,5 +100,6 @@ async function runShell(signal: AbortSignal, input: Input): Promise<Result> {
     }
   }
   res.status = StatusCompleted;
+  outputs.apply(res);
   return res;
 }

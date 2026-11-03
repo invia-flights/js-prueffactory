@@ -31,6 +31,11 @@ function service(fields: Partial<ComposeService>): ComposeService {
     env: null,
     unresolved: [],
     versionDiffers: false,
+    definedIn: "",
+    build: false,
+    command: null,
+    entrypoint: null,
+    dependsOn: [],
     ...fields,
   };
 }

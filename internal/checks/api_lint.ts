@@ -43,7 +43,7 @@ import {
 } from "./repo_tools.ts";
 import { selected } from "./selection.ts";
 import { shownPath } from "./shown_text.ts";
-import { errorMessage } from "../gocompat/errors.ts";
+import { ToolOutputs } from "./tool_output.ts";
 
 export const apiLintID = "api.lint";
 const reasonNotParseable = "file_not_parseable";
@@ -137,7 +137,10 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
   ];
 
   const broken = unparseableTargets(input, targets);
-  const unreadable: string[] = [];
+  // failed lists the files whose Redocly run exited with a code above 1;
+  // outputs holds the runs whose output could not be read.
+  const failed: string[] = [];
+  const outputs = new ToolOutputs(apiLintID, input.context.id);
   let worst = 0;
   let remoteRefs = 0;
   for (const [i, target] of targets.entries()) {
@@ -195,24 +198,33 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
     worst = Math.max(worst, c.exitCode);
     res.tool = toolInfo(Redocly, worst);
 
-    let found: Finding[];
-    try {
-      if (c.exitCode > 1) {
-        throw new Error(
-          `redocly exited with ${String(c.exitCode)}: ${tail(goString(c.stderr), 200)}`,
-        );
-      }
-      try {
-        found = redoclyFindings(input, target, c.stdout, c.stderr);
-      } catch (err) {
-        if (!(err instanceof RedoclyNoJSON) || perr === undefined) {
-          throw err;
+    if (c.exitCode > 1) {
+      failed.push(
+        `${shownPath(target.path)}: redocly exited with ${String(c.exitCode)}: ${tail(goString(c.stderr), 200)}`,
+      );
+      continue;
+    }
+    // Output that is not Redocly's report is a tool problem. The one thing
+    // that blames the file is a file that the native parser of
+    // artifacts.structured rejects too and that is not reported there.
+    const found = outputs.read(
+      "redocly",
+      `redocly-${String(i + 1)}`,
+      c,
+      () => {
+        try {
+          return redoclyFindings(input, target, c.stdout, c.stderr);
+        } catch (err) {
+          if (!(err instanceof RedoclyNoJSON) || perr === undefined) {
+            throw err;
+          }
+          // Without artifacts.structured nothing else says the file is broken.
+          return [unparseableFinding(input, target, perr, err.output)];
         }
-        // Without artifacts.structured nothing else says the file is broken.
-        found = [unparseableFinding(input, target, perr, err.output)];
-      }
-    } catch (err) {
-      unreadable.push(`${shownPath(target.path)}: ${errorMessage(err)}`);
+      },
+      shownPath(target.path),
+    );
+    if (found === undefined) {
       continue;
     }
     findings.push(...found);
@@ -229,15 +241,15 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
     }
   }
 
-  if (unreadable.length === targets.length && unreadable.length > 0) {
+  if (failed.length === targets.length && failed.length > 0) {
     res.status = StatusToolError;
     res.reasonCode = "tool_failed";
     res.reason =
-      "Redocly CLI failed on every file, for example " + (unreadable[0] ?? "");
-  } else if (unreadable.length > 0) {
+      "Redocly CLI failed on every file, for example " + (failed[0] ?? "");
+  } else if (failed.length > 0) {
     res.status = StatusPartial;
     res.reasonCode = "check_could_not_run_on_some_files";
-    res.reason = `Redocly CLI failed on ${String(unreadable.length)} of ${String(targets.length)} files, for example ${unreadable[0] ?? ""}`;
+    res.reason = `Redocly CLI failed on ${String(failed.length)} of ${String(targets.length)} files, for example ${failed[0] ?? ""}`;
   } else if (remoteRefs > 0) {
     res.status = StatusPartial;
     res.reasonCode = "remote_ref_not_fetched";
@@ -245,5 +257,6 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
   } else {
     res.status = StatusCompleted;
   }
+  outputs.apply(res);
   return res;
 }

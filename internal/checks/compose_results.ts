@@ -18,6 +18,7 @@ import { cutTitle } from "./repo_findings.ts";
 import { snapshotMount, snapshotPath } from "./repo_tools.ts";
 import { composeID } from "./repository_compose.ts";
 import { shownEnvName, shownPath } from "./shown_text.ts";
+import { UnreadableOutput } from "./tool_output.ts";
 
 const ruleComposeInvalid = "compose.invalid";
 const ruleComposeVariableMissing = "compose.variable-missing";
@@ -30,6 +31,10 @@ const composeUnset = /The \\?"([^"\\]+)\\?" variable is not set/;
 // composeRequired matches the error of a `${NAME:?message}` entry. Go's \S
 // is anything but tab, newline, form feed, carriage return and space.
 const composeRequired = /required variable ([^\t\n\f\r ]+) is missing a value/;
+// cliProblem matches the Docker CLI's own complaints: a command it does not
+// know ("docker: unknown command: docker compose"), a flag it does not know
+// and its usage text. Compose never starts a message about a set with them.
+const cliProblem = /^(?:docker: |unknown (?:shorthand )?flag|Usage:)/;
 
 /**
  * composeSetLabel names a set in trusted text: its files, each only when it
@@ -74,9 +79,24 @@ export function composeSetFindings(
     }
   }
 
+  // Compose says that a set is invalid with an exit code and a message about
+  // the set. An exit code without any message, or the Docker CLI's own
+  // complaint about its command line, says nothing about the set.
+  if (exitCode !== 0 && errLines.length === 0 && !stoppedAtVariable) {
+    throw new UnreadableOutput(
+      "docker compose exited with an error code and printed no message",
+      "it exits with an error but prints no message about the compose set",
+    );
+  }
+  if (exitCode !== 0 && errLines.some((l) => cliProblem.test(l))) {
+    throw new UnreadableOutput(
+      "docker compose printed a complaint of the Docker CLI",
+      "it prints a complaint of the Docker CLI instead of a message about the compose set",
+    );
+  }
   const out: Finding[] = [];
   if (exitCode !== 0 && (errLines.length > 0 || !stoppedAtVariable)) {
-    out.push(composeInvalid(input, set, errLines, exitCode));
+    out.push(composeInvalid(input, set, errLines));
   }
   for (const name of sortStrings([...variables.keys()])) {
     out.push(
@@ -103,15 +123,8 @@ function composeText(lines: readonly string[]): string {
 function composeInvalid(
   input: Input,
   set: ComposeSet,
-  errLines: string[],
-  exitCode: number,
+  lines: string[],
 ): Finding {
-  const lines =
-    errLines.length > 0
-      ? errLines
-      : [
-          `docker compose config exited with ${String(exitCode)} and printed no message`,
-        ];
   const text = composeText(lines);
   // The file compose names, when it names one of the set's.
   const joined = lines.join("\n");

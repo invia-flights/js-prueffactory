@@ -1,0 +1,13 @@
+{
+  "name": "init-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Made-up project for js-prueffactory tests: its compose file has a Postgres Service and an init service, migrate, that creates the table its test reads. The Run does not start migrate.",
+  "scripts": {
+    "migrate": "node scripts/migrate.js",
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "^10.8.2"
+  }
+}

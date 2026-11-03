@@ -58,6 +58,7 @@ import {
   shownDependencies,
 } from "./repository_helm.ts";
 import { shownPath } from "./shown_text.ts";
+import { ToolOutputs } from "./tool_output.ts";
 
 export { kubernetesID } from "./kubernetes_results.ts";
 
@@ -205,6 +206,7 @@ async function runKubernetes(
   limitations.push(...tooLargeLimitation(kubernetesID, tooLarge));
 
   const analysis = newKubeAnalysis();
+  const outputs = new ToolOutputs(kubernetesID, input.context.id);
   if (inputs.length > 0) {
     res.command = recordedCommand(
       kubeconformBase(),
@@ -214,6 +216,7 @@ async function runKubernetes(
       signal,
       input,
       res,
+      outputs,
       Kubeconform,
       inputs,
       (n, chunk) => {
@@ -246,8 +249,8 @@ async function runKubernetes(
           ],
         };
       },
-      (chunk, stdout) => {
-        analysis.add(new Map(chunk.map((i) => [i.file, i.source])), stdout);
+      (chunk, c) => {
+        analysis.add(new Map(chunk.map((i) => [i.file, i.source])), c.stdout);
       },
     );
     if (!ok) {
@@ -262,6 +265,7 @@ async function runKubernetes(
   res.findings = findings;
   limitations.push(...analysis.limitations());
   res.status = StatusCompleted;
+  outputs.apply(res);
   return res;
 }
 

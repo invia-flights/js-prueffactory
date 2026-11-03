@@ -24,7 +24,6 @@ import { Input } from "./input.ts";
 import {
   helmCharts,
   helmLintCommand,
-  helmLintFailure,
   helmLintFindings,
   helmRenderFailure,
   helmTemplateCommand,
@@ -208,14 +207,6 @@ test("a lint message line keeps carriage returns and line separators inside it",
       ["warning", "Chart.yaml", "no space after the level"],
     ],
   );
-});
-
-test("a failed helm lint without any message is still an error", (t) => {
-  const input = repoInput(t, { "Chart.yaml": v2Chart });
-  const got = helmLintFailure(input, ".", "Error: something unexpected\n");
-  assert.equal(got.severity, SeverityError);
-  assert.equal(got.gate, false);
-  assert.equal(got.locations[0]?.path, "Chart.yaml");
 });
 
 test("a chart that fails to render is an error without a Gate", (t) => {

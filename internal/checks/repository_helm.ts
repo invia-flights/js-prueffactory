@@ -51,6 +51,7 @@ import {
   snapshotToolContainer,
   toolInfo,
 } from "./repo_tools.ts";
+import { ToolOutputs, UnreadableOutput } from "./tool_output.ts";
 
 export const helmID = "repository.helm";
 
@@ -324,6 +325,7 @@ async function runHelm(signal: AbortSignal, input: Input): Promise<Result> {
   let blocked = 0;
   let n = 0;
   let worst = rendered.worst;
+  const outputs = new ToolOutputs(helmID, input.context.id);
   // lint starts one Helm container for `helm lint` and returns it, or
   // undefined once the Check is over.
   const lint = async (cmd: string[]): Promise<ContainerResult | undefined> => {
@@ -380,18 +382,54 @@ async function runHelm(signal: AbortSignal, input: Input): Promise<Result> {
     if (c === undefined) {
       return res;
     }
-    const out = goString(c.stdout);
-    const found = helmLintFindings(input, chart.dir, out);
-    if (c.exitCode !== 0 && found.length === 0) {
-      found.push(helmLintFailure(input, chart.dir, goString(c.stderr) + out));
+    // `helm lint` says what it found in [INFO], [WARNING] and [ERROR]
+    // messages. An exit code that says it failed, without one of them, is not
+    // something to blame the chart for.
+    const found = outputs.read(
+      "helm",
+      `helm-${String(n)}`,
+      c,
+      () => {
+        const f = helmLintFindings(input, chart.dir, goString(c.stdout));
+        if (c.exitCode !== 0 && f.length === 0) {
+          throw new UnreadableOutput(
+            "helm lint failed and printed none of its messages",
+            "helm lint exits with an error but prints none of the messages it documents",
+          );
+        }
+        return f;
+      },
+      shownPath(chart.dir),
+    );
+    if (found !== undefined) {
+      findings.push(...found);
     }
-    findings.push(...found);
 
     for (const values of ["", ...chart.values]) {
       const r = lookupRender(rendered, chart.dir, values);
-      if (r !== undefined && r.exitCode !== 0) {
-        findings.push(helmRenderFailure(input, chart.dir, values, r.stderr));
+      if (r === undefined) {
+        continue;
       }
+      // `helm template` says that a chart does not render with an exit code
+      // and an "Error:" message. Without a message there is nothing to show.
+      outputs.read(
+        "helm",
+        `helm-render-${String(rendered.renders.indexOf(r) + 1)}`,
+        { stdout: r.stdout, stderr: Buffer.from(r.stderr) },
+        () => {
+          if (r.exitCode === 0) {
+            return;
+          }
+          if (trimSpace(r.stderr) === "") {
+            throw new UnreadableOutput(
+              "helm template failed without any message",
+              "helm template exits with an error but prints no message",
+            );
+          }
+          findings.push(helmRenderFailure(input, chart.dir, values, r.stderr));
+        },
+        shownPath(chart.dir),
+      );
     }
   }
 
@@ -406,6 +444,7 @@ async function runHelm(signal: AbortSignal, input: Input): Promise<Result> {
   } else {
     res.status = StatusCompleted;
   }
+  outputs.apply(res);
   return res;
 }
 
@@ -465,29 +504,6 @@ export function helmLintFindings(
     });
     return f;
   });
-}
-
-/**
- * helmLintFailure is the Finding for a failed `helm lint` that printed no
- * message, such as a chart that cannot be loaded at all.
- */
-export function helmLintFailure(
-  input: Input,
-  d: string,
-  output: string,
-): Finding {
-  const text = trimSpace(output);
-  const f = repoFinding(input, helmID, {
-    tool: "helm",
-    rule: "helm.lint",
-    level: "error",
-    path: chartFileOrChartYaml(input, d, ""),
-    line: 0,
-    column: 0,
-    message: "helm lint failed: " + tail(text, 300),
-    raw: text,
-  });
-  return f;
 }
 
 /**

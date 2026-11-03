@@ -22,6 +22,7 @@ import { cutList } from "./cut_text.ts";
 import { type Input, untrusted } from "./input.ts";
 import { cutTitle, outputHead } from "./repo_findings.ts";
 import { looksLikeWord, shownPath, shownWord } from "./shown_text.ts";
+import { requireShape, shape, UnreadableOutput } from "./tool_output.ts";
 
 export const kubernetesID = "repository.kubernetes";
 
@@ -125,6 +126,36 @@ const kubeDocSchema: Schema = {
   ],
 };
 
+/**
+ * kubeconformShape is the document kubeconform documents for `-output json`:
+ * one record per resource, with one of its five statuses.
+ */
+const kubeconformShape = shape.object({
+  resources: shape.array(
+    shape.object(
+      {
+        filename: shape.string,
+        status: shape.oneOf(
+          "statusValid",
+          "statusInvalid",
+          "statusError",
+          "statusSkipped",
+          "statusEmpty",
+        ),
+      },
+      {
+        kind: shape.string,
+        name: shape.string,
+        version: shape.string,
+        msg: shape.string,
+        validationErrors: shape.nullable(
+          shape.array(shape.object({ path: shape.string, msg: shape.string })),
+        ),
+      },
+    ),
+  ),
+});
+
 /** KubeAnalysis collects what kubeconform said about every file it was given. */
 export class KubeAnalysis {
   readonly #invalid = new Map<string, KubeInvalid>();
@@ -145,14 +176,25 @@ export class KubeAnalysis {
       };
       resources = (doc.resources?.items() ?? []) as KubeRecord[];
     } catch {
-      throw new Error(
+      throw new UnreadableOutput(
         `kubeconform printed no JSON, it said: ${outputHead(goString(stdout))}`,
+        "it is not valid JSON of the expected kind",
       );
+    }
+    requireShape("kubeconform", stdout, kubeconformShape);
+    // Nothing is added before every record is known to be readable.
+    for (const r of resources) {
+      if (!sources.has(r.filename)) {
+        throw new UnreadableOutput(
+          "kubeconform reported on a file it was not given",
+          "it reports on a file it was not given",
+        );
+      }
     }
     for (const r of resources) {
       const src = sources.get(r.filename);
       if (src === undefined) {
-        throw new Error("kubeconform reported on a file it was not given");
+        continue;
       }
       switch (r.status) {
         case "statusInvalid":

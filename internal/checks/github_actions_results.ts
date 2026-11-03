@@ -28,6 +28,7 @@ import { type Input, untrusted } from "./input.ts";
 import { cutTitle, rawJSON } from "./repo_findings.ts";
 import { snapshotMount } from "./repo_tools.ts";
 import { shownPath } from "./shown_text.ts";
+import { requireShape, shape, UnreadableOutput } from "./tool_output.ts";
 import { errorMessage } from "../gocompat/errors.ts";
 
 export const githubActionsID = "repository.github-actions";
@@ -94,6 +95,25 @@ const actionlintSchema: Schema = {
 };
 
 /**
+ * actionlintShape is the array actionlint documents for `-format
+ * '{{json .}}'`, or null when the template has nothing to print.
+ */
+const actionlintShape = shape.nullable(
+  shape.array(
+    shape.object(
+      {
+        message: shape.string,
+        filepath: shape.string,
+        line: shape.number,
+        column: shape.number,
+        kind: shape.string,
+      },
+      { snippet: shape.nullable(shape.string) },
+    ),
+  ),
+);
+
+/**
  * actionlintFindings reads actionlint's `-format '{{json .}}'` output, an
  * array of errors, or nothing at all for clean workflows. Problems that its
  * embedded ShellCheck and pyflakes found are warnings, every other problem is
@@ -111,10 +131,13 @@ export function actionlintFindings(
     const decoded = unmarshal(stdout, actionlintSchema) as GoSlice | null;
     results = (decoded?.items() ?? []) as ActionlintResult[];
   } catch (err) {
-    throw new Error(`actionlint printed no JSON: ${errorMessage(err)}`, {
-      cause: err,
-    });
+    throw new UnreadableOutput(
+      `actionlint printed no JSON: ${errorMessage(err)}`,
+      "it is not valid JSON of the expected kind",
+      { cause: err },
+    );
   }
+  requireShape("actionlint", stdout, actionlintShape);
   return results.map((r) => {
     const kind = ghaVocabulary(r.kind);
     const path = ghaPath(r.filepath);
@@ -307,6 +330,37 @@ const zizmorSchema: Schema = {
   },
 };
 
+/** zizmorShape is the array zizmor documents for `--format json`. */
+const zizmorShape = shape.array(
+  shape.object({
+    ident: shape.string,
+    desc: shape.string,
+    determinations: shape.object({
+      confidence: shape.string,
+      severity: shape.string,
+    }),
+    locations: shape.array(
+      shape.object({
+        symbolic: shape.object({
+          key: shape.object({}),
+          annotation: shape.string,
+          kind: shape.string,
+        }),
+        concrete: shape.object({
+          location: shape.object({
+            start_point: shape.object({
+              row: shape.number,
+              column: shape.number,
+            }),
+          }),
+          feature: shape.string,
+        }),
+      }),
+    ),
+    ignored: shape.boolean,
+  }),
+);
+
 /** maxFeatureBytes bounds the workflow text one location adds to the Evidence. */
 const maxFeatureBytes = 500;
 
@@ -322,10 +376,13 @@ export function zizmorFindings(input: Input, stdout: Uint8Array): Finding[] {
     const decoded = unmarshal(stdout, zizmorSchema) as GoSlice | null;
     results = (decoded?.items() ?? []) as ZizmorResult[];
   } catch (err) {
-    throw new Error(`zizmor printed no JSON: ${errorMessage(err)}`, {
-      cause: err,
-    });
+    throw new UnreadableOutput(
+      `zizmor printed no JSON: ${errorMessage(err)}`,
+      "it is not valid JSON of the expected kind",
+      { cause: err },
+    );
   }
+  requireShape("zizmor", stdout, zizmorShape);
   const out: Finding[] = [];
   for (const r of results) {
     if (r.ignored) {
