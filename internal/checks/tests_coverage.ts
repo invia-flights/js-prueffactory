@@ -34,6 +34,7 @@ import {
   wrapWithC8,
 } from "./tests_coverage_config.ts";
 import {
+  type Coverage,
   coverageKinds,
   interpretCoverage,
   noteFailures,
@@ -521,23 +522,34 @@ export function coverageResult(input: Input, suite: Result): Result {
   }
   // A summary that is not the JSON c8 documents says nothing about the
   // package: a tool problem, with the files c8 wrote kept as they are.
+  let measured: Coverage | null = null;
   let unreadable = "";
   try {
     requireShape("c8", cov.summary, coverageSummaryShape);
+    measured = interpretCoverage(
+      cov.summary,
+      cov.perFile,
+      workPath(pkg),
+      pkg.path,
+    );
+    if (measured.err !== "") {
+      // The summary has the total c8 documents but not the entries of its
+      // files; the fixed words say which part, the files themselves are kept.
+      throw new UnreadableOutput(
+        measured.err,
+        measured.err.endsWith("has no total")
+          ? "its JSON summary has no total"
+          : "the entries of its files do not have the counts c8 documents",
+      );
+    }
   } catch (err) {
+    measured = null;
     unreadable =
       err instanceof UnreadableOutput
         ? err.summary
         : "it is not the JSON summary that c8 documents";
   }
-  const measured =
-    unreadable === ""
-      ? interpretCoverage(cov.summary, cov.perFile, workPath(pkg), pkg.path)
-      : null;
-  if (measured !== null && measured.err !== "") {
-    unreadable = "it is not the JSON summary that c8 documents";
-  }
-  if (unreadable !== "" || measured === null) {
+  if (measured === null) {
     const files: RawFile[] = [
       { name: "coverage-summary.json", content: cov.summary },
     ];

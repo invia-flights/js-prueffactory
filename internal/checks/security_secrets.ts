@@ -162,10 +162,14 @@ async function runSecrets(signal: AbortSignal, input: Input): Promise<Result> {
   }
 
   // A report that is not the JSON gitleaks documents says nothing about the
-  // files: a tool problem, with the raw output kept. gitleaks documents the
-  // exit code 2 as "leaks were found", so an empty report with it is no clean
-  // scan. gitleaks redacts the secrets in its report (--redact), so the raw
-  // output holds none; redaction still runs over the artifact.
+  // files: a tool problem. gitleaks documents the exit code 2 as "leaks were
+  // found", so an empty report with it is no clean scan. Unlike every other
+  // tool, its raw output is not kept: --redact only holds for the report
+  // gitleaks documents, and a report that failed to parse is exactly the case
+  // where it may not have held (a renamed field, an option that was ignored).
+  // The values to redact come from reading the report, so nothing known to
+  // redaction covers this output, and the secrets it may hold are the ones
+  // this Report must not show.
   let found: [Finding[], (string | Uint8Array)[]];
   try {
     if (
@@ -192,6 +196,8 @@ async function runSecrets(signal: AbortSignal, input: Input): Promise<Result> {
       err instanceof UnreadableOutput
         ? err.summary
         : "it is not the JSON report that gitleaks documents",
+      "",
+      "it may hold the secrets this scan looks for",
     );
   }
   [res.findings, res.redact] = found;

@@ -441,6 +441,38 @@ for (const [what, out] of Object.entries(c8Bad)) {
   });
 }
 
+test("tests.coverage: a good total with entries of files that have no counts says so in the reason", (t) => {
+  const out =
+    '{"total":{"lines":{"total":1,"covered":1},"functions":{"total":1,"covered":1},"branches":{"total":1,"covered":1}},"/work/pkg/src/index.js":"covered"}';
+  const input = suiteInput(t, { "src/index.js": "x" });
+  const res = coverageResult(input, {
+    status: "completed",
+    coverage: {
+      unavailable: "",
+      unavailableCode: "",
+      summary: Buffer.from(out),
+      perFile: null,
+    },
+  });
+  assertUnreadable(res, {
+    status: "tool_error",
+    check: "tests.coverage",
+    context: input.context.id,
+    call: "c8",
+    files: { "coverage-summary.json": out },
+  });
+  assert.ok(
+    (res.reason ?? "").includes("the entries of its files"),
+    res.reason ?? "",
+  );
+  for (const m of res.metrics ?? []) {
+    assert.ok(
+      (m.reason ?? "").includes("the entries of its files"),
+      m.reason ?? "",
+    );
+  }
+});
+
 test("tests.coverage: a summary that is read is still read", (t) => {
   const res = coverageResult(suiteInput(t, { "src/index.js": "x" }), {
     status: "completed",
@@ -474,32 +506,44 @@ const secretsRun = (
     snapshotTar: () => Promise.resolve(),
   });
 
+// Made up. A report of a changed shape, or one that ignored --redact, may hold
+// the value gitleaks flagged, and redaction cannot know it: the scan that
+// finds the values is the one that failed. So its raw output is not kept.
+const madeUpSecret = "sk_prod_4f9aQ7xT2mWz8LkB5nRc1VdJ";
+
+/** assertNoRawOutput checks that nothing of the tool's output is in the Report. */
+function assertNoRawOutput(res: Awaited<ReturnType<typeof secretsRun>>): void {
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["tool_error", "tool_output_unreadable"],
+    res.reason ?? "",
+  );
+  assert.deepEqual(res.artifacts ?? [], [], "no raw output is kept");
+  assert.deepEqual(res.findings ?? [], []);
+  assert.deepEqual(res.redact ?? [], []);
+  assert.ok(
+    (res.reason ?? "").includes(
+      "The raw output of gitleaks is not kept, because it may hold the secrets this scan looks for.",
+    ),
+    res.reason ?? "",
+  );
+  assert.ok(!JSON.stringify(res).includes(madeUpSecret), "the value leaks");
+}
+
 for (const [what, out] of Object.entries(gitleaksBad)) {
-  test(`security.secrets: ${what} from gitleaks is a tool problem with the raw output kept`, async (t) => {
+  test(`security.secrets: ${what} from gitleaks is a tool problem and its raw output is not kept`, async (t) => {
     const res = await secretsRun(t, () => ({
       exitCode: 2,
-      stdout: out,
-      stderr: "gitleaks stderr",
+      stdout: out.replace("a.js", `a.js","Secret":"${madeUpSecret}`),
+      stderr: `gitleaks stderr ${madeUpSecret}`,
     }));
-    assertUnreadable(res, {
-      status: "tool_error",
-      check: "security.secrets",
-      call: "gitleaks",
-      stdout: out,
-      stderr: "gitleaks stderr",
-    });
-    assert.deepEqual(res.findings ?? [], []);
+    assertNoRawOutput(res);
   });
 }
 
 test("security.secrets: an exit code that says leaks were found with an empty report is a tool problem", async (t) => {
   const res = await secretsRun(t, () => ({ exitCode: 2 }));
-  assertUnreadable(res, {
-    status: "tool_error",
-    check: "security.secrets",
-    call: "gitleaks",
-    stdout: "",
-  });
+  assertNoRawOutput(res);
 });
 
 test("security.secrets: a report that is read is still read, and another exit code stays a tool failure", async (t) => {
@@ -593,6 +637,27 @@ test("security.dependencies: exit 1 for vulnerabilities with a report that names
     call: "osv",
     stdout: osvGood,
   });
+  assert.ok(
+    (res.reason ?? "").includes(
+      "it exited with its code for found vulnerabilities but its report names none",
+    ),
+    res.reason ?? "",
+  );
+});
+
+test("security.dependencies: a report of another type says it is not the JSON report osv-scanner documents", async (t) => {
+  const res = await runInPackage(
+    t,
+    "security.dependencies",
+    osvPkg,
+    () => ({ stdout: '{"results":"none"}' }),
+    osvAdvisories,
+  );
+  assert.equal(res.reasonCode, "tool_output_unreadable", res.reason ?? "");
+  assert.ok(
+    !(res.reason ?? "").includes("found vulnerabilities"),
+    res.reason ?? "",
+  );
 });
 
 test("security.dependencies: a report that is read is still read, and a crash stays a tool failure", async (t) => {
