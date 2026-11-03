@@ -60,7 +60,7 @@ export const testsSmells: Check = {
         ],
       };
     }
-    const r = await eslintRunOf(signal, input);
+    const r = await eslintRunOf(signal, input, testsSmellsID);
     if ("failed" in r) {
       return r.failed;
     }

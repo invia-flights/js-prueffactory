@@ -55,7 +55,16 @@ import {
   knipSecondRunConfig,
 } from "./quality_unused_knip_config.ts";
 import { correctKnip } from "./quality_unused_mocha.ts";
-import type { KnipIssue, KnipItem } from "./quality_unused_report.ts";
+import {
+  type KnipIssue,
+  type KnipItem,
+  knipReportShape,
+} from "./quality_unused_report.ts";
+import {
+  requireShape,
+  UnreadableOutput,
+  unreadableResult,
+} from "./tool_output.ts";
 
 export const unusedID = "quality.unused";
 
@@ -267,6 +276,7 @@ async function runKnip(signal: AbortSignal, input: Input): Promise<Result> {
     return res;
   }
   let stdout: Uint8Array = c.stdout;
+  let stderr: Uint8Array = c.stderr;
   let command = res.command ?? [];
   const second: Limitation[] = [];
   // Files that Mocha loads are invisible to Knip. Run it again with them as
@@ -289,6 +299,7 @@ async function runKnip(signal: AbortSignal, input: Input): Promise<Result> {
     }
     if (c2?.exitCode === 0) {
       stdout = c2.stdout;
+      stderr = c2.stderr;
       command = again;
     } else {
       // The first report, corrected as far as it goes, is still true.
@@ -302,7 +313,7 @@ async function runKnip(signal: AbortSignal, input: Input): Promise<Result> {
       );
     }
   }
-  const out = interpretKnip(input, stdout);
+  const out = interpretKnip(input, stdout, stderr);
   out.command = command;
   out.limitations = [...(out.limitations ?? []), ...second];
   return out;
@@ -392,18 +403,32 @@ const knipBinary: KnipKind = {
  * and Build output are not code the project means to use, so nothing is
  * reported for them.
  */
-export function interpretKnip(input: Input, stdout: Uint8Array): Result {
+export function interpretKnip(
+  input: Input,
+  stdout: Uint8Array,
+  stderr: Uint8Array = new Uint8Array(),
+): Result {
   const res: Result = { status: StatusCompleted };
   toolRun(res, "knip");
   let issues: KnipIssue[];
   let loadedFiles: string[];
   try {
+    requireShape("Knip", stdout, knipReportShape);
     ({ issues, loaded: loadedFiles } = correctKnip(input, stdout));
-  } catch {
-    res.status = StatusToolError;
-    res.reasonCode = "knip_output_unreadable";
-    res.reason = "Knip wrote no JSON report: " + tail(goString(stdout), 400);
-    return res;
+  } catch (err) {
+    // Output that is not the report says nothing about the project: a tool
+    // problem, with the raw output kept.
+    return unreadableResult(
+      res,
+      unusedID,
+      input.context.id,
+      "Knip",
+      "knip",
+      { stdout, stderr },
+      err instanceof UnreadableOutput
+        ? err.summary
+        : "it is not the JSON report that Knip documents",
+    );
   }
   // A file that Mocha loads is used. With a generated config that made them
   // entry files, Knip does not report them; with the project's own config it

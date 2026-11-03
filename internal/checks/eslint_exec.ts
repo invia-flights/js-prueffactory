@@ -28,6 +28,13 @@ import {
 import type { Input, Result } from "./input.ts";
 import { selected } from "./selection.ts";
 import { newShared } from "./shared.ts";
+import {
+  type RawCall,
+  requireShape,
+  shape,
+  UnreadableOutput,
+  unreadableResult,
+} from "./tool_output.ts";
 import { errorMessage } from "../gocompat/errors.ts";
 
 // --- the registry of rule groups ---
@@ -209,6 +216,44 @@ const outputSchema = structOf("checks.eslintOutput", [
   ["dropped_messages", int],
 ]);
 
+/** helperOutputShape is the document js/eslint-run.js documents. */
+const helperOutputShape = shape.object({
+  version: shape.string,
+  exit_code: shape.number,
+  command: shape.array(shape.string),
+  config: shape.nullable(shape.object({})),
+  groups: shape.mapOf(shape.array(shape.string)),
+  results: shape.array(
+    shape.object({
+      path: shape.string,
+      messages: shape.array(
+        shape.object({
+          rule_id: shape.string,
+          message: shape.string,
+          line: shape.number,
+          column: shape.number,
+          end_line: shape.number,
+          end_column: shape.number,
+          fatal: shape.boolean,
+        }),
+      ),
+    }),
+  ),
+  dropped_messages: shape.number,
+  measures: shape.array(
+    shape.object({
+      path: shape.string,
+      kind: shape.string,
+      line: shape.number,
+      column: shape.number,
+      value: shape.number,
+      name: shape.string,
+    }),
+  ),
+  measures_dropped: shape.number,
+  measures_unreadable: shape.number,
+});
+
 const items = (v: unknown): unknown[] => (v as GoSlice | null)?.items() ?? [];
 const strings = (v: unknown): string[] => items(v) as string[];
 
@@ -285,18 +330,33 @@ export function eslintImages(c: Context): string[] {
   return app === Applicable ? [eslintImage()] : [];
 }
 
+/**
+ * ESLintUnreadable says that the helper exited cleanly but printed an answer
+ * that cannot be read: the fixed summary and the raw output. Each Check that
+ * reads the run keeps the raw output as artifacts of its own execution.
+ */
+export interface ESLintUnreadable {
+  summary: string;
+  raw: RawCall;
+}
+
 /** ESLintOutcome is what the shared step keeps: the run, or why there is none. */
 interface ESLintOutcome {
   run: ESLintRun | null;
   failed: Result | null;
+  unreadable: ESLintUnreadable | null;
 }
 
-/** ESLintContainer is the step that starts the container. Tests replace it. */
+/**
+ * ESLintContainer is the step that starts the container. Tests replace it.
+ * The third value is set when the answer of the helper could not be read;
+ * the Result is then the one for a Check that keeps no artifacts.
+ */
 export type ESLintContainer = (
   signal: AbortSignal,
   input: Input,
   groups: ESLintGroup[],
-) => Promise<[ESLintRun | null, Result | null]>;
+) => Promise<[ESLintRun | null, Result | null, ESLintUnreadable?]>;
 
 let runESLintContainer: ESLintContainer = defaultRunESLintContainer;
 
@@ -313,28 +373,44 @@ export function useESLintContainer(fn: ESLintContainer): () => void {
  * eslintRunOf returns the combined run of the Context, performing it if no
  * other Check has (Go: Input.eslintRun). Every Check that reads the run gets
  * the same one, with the groups of all selected Checks switched on. When there
- * is no run, the second value is the Result the Check ends with.
+ * is no run, the second value is the Result the Check ends with. checkID is
+ * the Check that asks: when the helper's answer could not be read, the raw
+ * output becomes artifacts of that Check's execution.
  */
 export async function eslintRunOf(
   signal: AbortSignal,
   input: Input,
+  checkID: string,
 ): Promise<{ run: ESLintRun } | { failed: Result }> {
   const shared = input.shared ?? newShared();
   const o = await shared.do<ESLintOutcome>(
     signal,
     "eslint/" + input.context.id,
     async (s) => {
-      const [run, failed] = await runESLintContainer(
+      const [run, failed, unreadable] = await runESLintContainer(
         s,
         input,
         eslintGroupsOn(input),
       );
       // A run cut short by this Check's own limit or by cancellation says
       // nothing about the next Check, which has its own limit.
-      return [{ run, failed }, !s.aborted];
+      return [{ run, failed, unreadable: unreadable ?? null }, !s.aborted];
     },
   );
   if (o.failed !== null) {
+    if (o.unreadable !== null) {
+      return {
+        failed: unreadableResult(
+          { ...o.failed },
+          checkID,
+          input.context.id,
+          "ESLint",
+          "eslint",
+          o.unreadable.raw,
+          o.unreadable.summary,
+        ),
+      };
+    }
     return { failed: { ...o.failed } };
   }
   if (o.run === null) {
@@ -347,7 +423,7 @@ async function defaultRunESLintContainer(
   signal: AbortSignal,
   input: Input,
   groups: ESLintGroup[],
-): Promise<[ESLintRun | null, Result | null]> {
+): Promise<[ESLintRun | null, Result | null, ESLintUnreadable?]> {
   if (input.toolsetVolume === "") {
     return [null, toolsetUnavailable(input, "ESLint")];
   }
@@ -393,13 +469,7 @@ async function defaultRunESLintContainer(
   } catch (err) {
     return [null, failedToRun({ status: StatusToolError }, err)];
   }
-  let out: ESLintOutput;
-  try {
-    if (container.exitCode !== 0) {
-      throw new Error("exit");
-    }
-    out = decodeESLintOutput(container.stdout);
-  } catch {
+  if (container.exitCode !== 0) {
     return [
       null,
       helperFailed(
@@ -408,6 +478,28 @@ async function defaultRunESLintContainer(
         container,
         800,
       ),
+    ];
+  }
+  // A helper that exits cleanly but prints something else than its document
+  // is a tool problem: nothing is said about the project's files.
+  let out: ESLintOutput;
+  try {
+    requireShape("the ESLint helper", container.stdout, helperOutputShape);
+    out = decodeESLintOutput(container.stdout);
+  } catch (err) {
+    const summary =
+      err instanceof UnreadableOutput
+        ? err.summary
+        : "it is not the document the helper writes";
+    return [
+      null,
+      {
+        status: StatusToolError,
+        command: helper,
+        reasonCode: "tool_output_unreadable",
+        reason: `The output of ESLint could not be read: ${summary}.`,
+      },
+      { summary, raw: container },
     ];
   }
   return [
