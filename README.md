@@ -162,6 +162,8 @@ The first Ctrl-C or SIGTERM removes the Run's containers, networks and volumes, 
 
 When several apply, 3 wins over 1, 1 over 2, and 2 over 0. The Benchmark Verdict never changes the exit code. Codes 1 and 2 differ so that a CI job can let incomplete Runs pass and still fail on Gates.
 
+Exit code 1 means that something the service runs is broken. The Gate column of the [Check table](#what-gets-checked) says which Findings can fail a Run. A Run whose only errors are in API descriptions, JSON Schema files, pipeline and deployment files, or in lint rules for Test code exits with 0, or with 2 when a Check did not complete.
+
 ## What projects are supported
 
 js-prueffactory targets Node.js backend services that use npm and Mocha or `node:test`. Anything else is detected and reported as `unsupported` with a reason, and the Run exits with 2. Nothing is skipped silently.
@@ -235,15 +237,15 @@ Run `list-checks` for the Catalog and what applies to a project. The Gate column
 | `sbom.generate` | A CycloneDX SBOM of the locked dependencies, as an artifact | `npm sbom` | no |
 | `syntax.parse` | `.js`, `.cjs` and `.mjs` files that don't parse on the package's Node version | `node --check` | yes |
 | `artifacts.structured` | JSON and YAML files that don't parse | native | yes |
-| `schema.compile` | JSON Schema files that don't compile | Ajv | yes |
-| `api.lint` | Invalid OpenAPI and Swagger files | Redocly CLI | structural errors |
-| `repository.dockerfile` | Dockerfile problems | hadolint | error level |
-| `repository.shell` | Shell script problems | ShellCheck | error level |
-| `repository.helm` | Helm charts that fail to lint or render | Helm | chart doesn't render |
-| `repository.gitlab-ci` | `.gitlab-ci.yml` and local includes against GitLab's schema, broken job and stage references | native | yes |
-| `repository.kubernetes` | Invalid resources in plain manifests and rendered Helm charts | kubeconform | invalid resource |
-| `repository.compose` | Compose files that `docker compose config` rejects | Docker CLI | invalid file set |
-| `repository.github-actions` | Problems in `.github/workflows/` | actionlint, zizmor | actionlint errors |
+| `schema.compile` | JSON Schema files that don't compile | Ajv | no |
+| `api.lint` | Invalid OpenAPI and Swagger files | Redocly CLI | no |
+| `repository.dockerfile` | Dockerfile problems | hadolint | no |
+| `repository.shell` | Shell script problems | ShellCheck | no |
+| `repository.helm` | Helm charts that fail to lint or render | Helm | no |
+| `repository.gitlab-ci` | `.gitlab-ci.yml` and local includes against GitLab's schema, broken job and stage references | native | no |
+| `repository.kubernetes` | Invalid resources in plain manifests and rendered Helm charts | kubeconform | no |
+| `repository.compose` | Compose files that `docker compose config` rejects | Docker CLI | no |
+| `repository.github-actions` | Problems in `.github/workflows/` | actionlint, zizmor | no |
 | `schema.drift` | Committed files that differ from what the project's generator scripts produce | `node` | no |
 | `security.secrets` | Leaked credentials in any file | gitleaks | no |
 | `security.dependencies` | Known vulnerabilities of the locked versions | osv-scanner | no |
@@ -256,7 +258,7 @@ Run `list-checks` for the Catalog and what applies to a project. The Gate column
 | `tests.flaky` | Tests whose outcome changes over two more runs of every Suite | Mocha, `node --test` | no |
 | `runtime.warnings` | Deprecations, Node warnings and resources left open after the tests | Node flags | no |
 | `runtime.unhandled-rejections` | Tests that fail only with `--unhandled-rejections=strict` | Node flag | no |
-| `lint.existing` | The project's own ESLint or Biome config, at its locked version | the project's linter | the project's error level |
+| `lint.existing` | The project's own ESLint or Biome config, at its locked version | the project's linter | the project's error level in Source code, a configuration the linter cannot load, a linter missing after the install |
 | `lint.correctness` | ESLint core rules of type `problem`, with inline disable comments ignored | ESLint | no |
 | `lint.typed` | Floating and misused promises, `await` on non-promises | typescript-eslint | no |
 | `quality.suppressions` | Comments that silence a tool, such as `eslint-disable` or `@ts-ignore` | native | no |
@@ -267,6 +269,8 @@ Run `list-checks` for the Catalog and what applies to a project. The Gate column
 | `quality.clones` | Duplicated code | jscpd | no |
 | `quality.metrics` | Complexity and length per function in Source code | ESLint, eslint-plugin-sonarjs | no |
 | `quality.size` | Lines per File class, the largest files | native | no |
+
+A Gate means that the service itself is broken: it does not install, its Source code does not parse, its own tests fail, a focused test hides the others, or the error rules of its own linter are broken in Source code. Under the Execution profile `execution-v2`, which every Report names in `profiles.execution_profile`, errors in files the service does not run (API descriptions, JSON Schema files, Dockerfiles, shell scripts, Helm charts, Kubernetes, compose, GitLab CI and GitHub Actions files) and lint errors in Test code, Test data and Build output keep their severity `error` and keep lowering the Benchmark scores, but they are not Gates.
 
 Secret and vulnerability Findings have severity `error` but are never Gates. Packages from a registry other than the public npm registry are reported as not covered by advisory data, never as clean.
 
@@ -385,7 +389,7 @@ A Check execution has independent fields, so a crashed tool never reads as a fai
 
 ## The Benchmark score
 
-`benchmark` adds a score from 0 to 100. The profile is `benchmark-v1-uncalibrated`. Its weights and constants are expert guesses that nobody has calibrated against real data, and the Report says so. Treat the single number as an overview. The area and part scores are the real result, and the Report shows every raw value, constant and contribution.
+`benchmark` adds a score from 0 to 100. The profile is `benchmark-v2-uncalibrated`. It moved from v1 together with the Gate rules of `execution-v2`, so scores of both are never comparable and the Benchmark fingerprint differs. Its weights and constants are expert guesses that nobody has calibrated against real data, and the Report says so. Treat the single number as an overview. The area and part scores are the real result, and the Report shows every raw value, constant and contribution.
 
 | Area | Weight | Parts |
 |---|---|---|

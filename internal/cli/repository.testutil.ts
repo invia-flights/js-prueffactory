@@ -95,6 +95,24 @@ export function gatesByPath(
   return out;
 }
 
+/**
+ * errorsByPath are the error Findings of a Check by the path of their primary
+ * location, whether they are Gates or not. The Checks of the repository files
+ * fire no Gates under execution-v2, so their errors are read with this.
+ */
+export function errorsByPath(
+  s: FullReport,
+  check: string,
+): Map<string, ReportFinding> {
+  const out = new Map<string, ReportFinding>();
+  for (const f of findingsOf(s, check)) {
+    if (f.severity === "error") {
+      out.set(f.locations[0]?.path ?? "", f);
+    }
+  }
+  return out;
+}
+
 /** limitationsOf are the Limitations of a Check. */
 export function limitationsOf(
   s: FullReport,

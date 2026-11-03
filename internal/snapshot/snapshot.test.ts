@@ -336,14 +336,25 @@ function build(t: TestContext, spec: SpecEntry[]): string {
 
 describe("the Snapshot matches the Go build", () => {
   const repo = new URL("../../", import.meta.url);
-  const projects = readdirSync(new URL("testdata/projects/", repo), {
+  // The test projects that were added after the Go freeze have no recorded
+  // Snapshot. A change that adds a test project names it here, one per line.
+  const addedAfterTheGoFreeze = new Set([
+    "testdata/projects/project-eslint-test-code",
+  ]);
+  const allProjects = readdirSync(new URL("testdata/projects/", repo), {
     withFileTypes: true,
   })
     .filter((e) => e.isDirectory())
     .map((e) => "testdata/projects/" + e.name);
+  const projects = allProjects.filter((p) => !addedAfterTheGoFreeze.has(p));
   test("every test project is in the fixture", () => {
     const names = recorded.snapshots.filter((r) => !r.spec).map((r) => r.name);
     assert.deepEqual(names.sort(compareBytes), projects.sort(compareBytes));
+  });
+  test("every project added after the Go freeze exists", () => {
+    for (const p of addedAfterTheGoFreeze) {
+      assert.ok(allProjects.includes(p), `${p} is not a test project`);
+    }
   });
 
   for (const want of recorded.snapshots) {

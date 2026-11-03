@@ -8,6 +8,7 @@ import { test } from "node:test";
 
 import {
   byPath,
+  errorsIn,
   executionIn,
   findingsIn,
   gatesIn,
@@ -15,7 +16,7 @@ import {
 } from "./parse.testutil.ts";
 import { assertNothingLeft, copyProject, realRun } from "./realrun.testutil.ts";
 
-test("a broken local ref in a draft-04 schema is a Gate and valid schemas compile", async (t) => {
+test("a broken local ref in a draft-04 schema is an error without a Gate and valid schemas compile", async (t) => {
   const original = copyProject(t, "repository-files");
 
   const r = await realRun(t, ["test", original, "--only", "schema.compile"]);
@@ -24,16 +25,17 @@ test("a broken local ref in a draft-04 schema is a Gate and valid schemas compil
   const e = executionIn(s, "schema.compile");
   assert.deepEqual(
     [e.status, e.outcome, e.context_id, e.gate],
-    ["completed", "failed", "C-0001", 1],
+    ["completed", "observations_only", "C-0001", 0],
     r.stderr,
   );
   assert.ok(e.tool?.version, JSON.stringify(e.tool));
 
   // Only the draft-04 schema with the broken local $ref.
-  const gates = gatesIn(s, "schema.compile");
-  assert.deepEqual([...gates.keys()], ["schemas/legacy.schema.json"]);
-  const f = gates.get("schemas/legacy.schema.json");
-  assert.equal(f?.rule_id, "unresolved-ref");
+  const errors = errorsIn(s, "schema.compile");
+  assert.deepEqual([...errors.keys()], ["schemas/legacy.schema.json"]);
+  const f = errors.get("schemas/legacy.schema.json");
+  assert.ok(f);
+  assert.deepEqual([f.rule_id, f.gate], ["unresolved-ref", false]);
   assert.ok(f.message.includes("draft-04"), f.message);
   for (const g of findingsIn(s, "schema.compile")) {
     const p = g.locations[0]?.path ?? "";
@@ -104,7 +106,8 @@ test("schemas resolve relative references, remote ones are not fetched and Test 
   const bad = found.get("test/fixtures/bad.schema.json");
   assert.deepEqual([bad?.gate, bad?.severity], [false, "note"]);
   // Only the draft-04 schema.
-  assert.equal(gatesIn(s, "schema.compile").size, 1);
+  assert.equal(errorsIn(s, "schema.compile").size, 1);
+  assert.equal(gatesIn(s, "schema.compile").size, 0);
   assert.ok(
     s.limitations.some(
       (l) =>
