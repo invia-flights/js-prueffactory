@@ -517,6 +517,54 @@ test("Services of several suites are merged with the worst status", () => {
   assert.match(limits[0]?.message ?? "", /postgres:12/);
 });
 
+test("an Init service is listed as not started, with the Service it prepares and its command", () => {
+  const proj = new Project("/demo");
+  proj.services = [
+    compose({
+      name: "postgres",
+      family: "postgres",
+      declared: "postgres:17-alpine",
+    }),
+    compose({
+      name: "migrate",
+      build: true,
+      notStarted: {
+        code: "build_section",
+        reason: "the service has a build section",
+      },
+    }),
+    compose({
+      name: "other",
+      build: true,
+      notStarted: {
+        code: "build_section",
+        reason: "the service has a build section",
+      },
+    }),
+  ];
+  proj.initServices = [
+    {
+      name: "migrate",
+      file: "docker-compose.yml",
+      command: "npm run migrate",
+      prepares: ["postgres"],
+      criteria: ["build_section"],
+      package: "",
+    },
+  ];
+
+  const [services] = reportServices([], proj);
+
+  const migrate = services.find((s) => s.compose_service === "migrate");
+  assert.equal(migrate?.status, ServiceNotStarted);
+  assert.equal(
+    migrate.reason,
+    "the service has a build section; it is an Init service that prepares postgres (command npm run migrate), so the Suites that may use postgres are marked init_service_not_started and their failed tests and hooks are not Gates",
+  );
+  const other = services.find((s) => s.compose_service === "other");
+  assert.equal(other?.reason, "the service has a build section");
+});
+
 // --- registry data date (Go: registry_date_test.go) ---
 
 test("the Run records the oldest registry fetch as its registry data date", async (t) => {

@@ -71,17 +71,27 @@ export function readServiceRefs(root: string, proj: Project): void {
 // the prepared Service, found with the search of readServiceRefs, or, when no
 // package does, every package. It needs Project.initServices.
 export function readInitServiceRefs(root: string, proj: Project): void {
+  if (proj.initServices.length === 0) return;
+  // One search per package over the Services of all Init services; the
+  // references of one Init service are the ones to its own Services, in the
+  // order the search found them.
+  const names = sortStrings([
+    ...new Set(proj.initServices.flatMap((i) => i.prepares)),
+  ]);
+  const refs = proj.packages.map((pkg) => serviceRefsOf(root, pkg, names));
   for (const init of proj.initServices) {
-    const names = sortStrings([...init.prepares]);
-    const refs = proj.packages.map((pkg) => serviceRefsOf(root, pkg, names));
-    const named = refs.some((r) => r.length > 0);
+    const prepares = sortStrings([...init.prepares]);
+    const found = refs.map((r) =>
+      r.filter((x) => prepares.includes(x.service)),
+    );
+    const named = found.some((r) => r.length > 0);
     proj.packages.forEach((pkg, i) => {
-      const found = refs[i] ?? [];
-      if (named && found.length === 0) return;
-      const [first] = found;
+      const own = found[i] ?? [];
+      if (named && own.length === 0) return;
+      const [first] = own;
       pkg.initServiceRefs.push({
         initService: init.name,
-        services: named ? found.map((r) => r.service) : names,
+        services: named ? sortStrings(own.map((r) => r.service)) : prepares,
         file: first?.file ?? "",
         line: first?.line ?? 0,
       });
