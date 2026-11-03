@@ -3,7 +3,9 @@
 // Findings, Limitations and Context tool as the Go build recorded in
 // testdata/gitlab-ci-oracle.json (generator gitlab-ci-oracle.go.txt). The
 // Findings are compared as JSON, with every field: rule, location, Gate,
-// severity, message, Evidence text and fingerprint.
+// severity, message, Evidence text and fingerprint. The Go build knew
+// Gates for this Check; under execution-v2 there are none, so the recorded
+// Gate flags are read as false (see withoutGates).
 import assert from "node:assert/strict";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -106,6 +108,18 @@ function normalise(v: unknown): unknown {
   return v;
 }
 
+// withoutGates is the one change execution-v2 made to what the Go build
+// recorded: the Check fires no Gate any more. Every error stays an error and
+// every note a note; only the Gate flag moves, so the rest of each record is
+// still compared as recorded.
+function withoutGates(findings: unknown): unknown {
+  if (!Array.isArray(findings)) return findings;
+  return (findings as Record<string, unknown>[]).map((f) => ({
+    ...f,
+    gate: false,
+  }));
+}
+
 // generated holds the cases whose files the oracle leaves out, built as the
 // generator builds them (zzBombs in gitlab-ci-oracle.go.txt).
 function generated(name: string): string | undefined {
@@ -192,7 +206,7 @@ describe("repository.gitlab-ci reports what the Go build reports", () => {
       ): unknown => JSON.parse(marshal(v, array(shape)));
       assert.deepEqual(
         json(res.findings ?? [], FindingShape),
-        normalise(nullToEmpty(c.findings)),
+        withoutGates(normalise(nullToEmpty(c.findings))),
       );
       assert.deepEqual(
         json(res.limitations ?? [], LimitationShape),

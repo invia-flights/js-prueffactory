@@ -17,12 +17,17 @@ import {
 } from "../resultset/types.ts";
 import { newContext, newMetric } from "../resultset/zero.ts";
 import { advisory } from "./benchmark.testutil.ts";
-import { compute } from "./score.ts";
+import { v0 } from "./profile.ts";
+import { computeWith } from "./score.ts";
 
 // go-oracle.json holds json.Marshal of the Go build's benchmark.Compute for
 // each scenario below (generator: testdata/go-oracle.go.txt, whose
 // oracleScenarios must build the same sets). The whole section is compared
 // byte for byte: every score, range, n_eff, side indicator and fingerprint.
+// The Go build knew only the first Benchmark profile, so the scenarios run
+// under a profile of that ID. The profile of this build has another ID, and
+// the constants are the same.
+const goProfile = { ...v0, id: "benchmark-v1-uncalibrated" };
 const oracle = JSON.parse(
   readFileSync(new URL("testdata/go-oracle.json", import.meta.url), "utf8"),
 ) as { sections: Record<string, string> };
@@ -288,7 +293,10 @@ describe("the Benchmark section equals the Go build's byte for byte", () => {
       build(p);
       const s = p.done();
       // json.Marshal: compact, with HTML escaping.
-      assert.equal(marshal(compute(s), BenchmarkShape), oracle.sections[name]);
+      assert.equal(
+        marshal(computeWith(s, goProfile), BenchmarkShape),
+        oracle.sections[name],
+      );
     });
   }
 });

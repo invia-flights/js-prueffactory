@@ -59,7 +59,7 @@ function sources(entries: Record<string, KubeSource>): Map<string, KubeSource> {
   return new Map(Object.entries(entries));
 }
 
-test("an invalid plain resource is a Gate Finding with its file, kind and name", () => {
+test("an invalid plain resource is an error Finding without a Gate with its file, kind and name", () => {
   const a = newKubeAnalysis();
   a.add(
     sources({ "/snapshot/k8s/deploy.yaml": src({ path: "k8s/deploy.yaml" }) }),
@@ -86,7 +86,7 @@ test("an invalid plain resource is a Gate Finding with its file, kind and name",
   assert.equal(found.length, 1);
   const f = found[0];
   assert.ok(f);
-  assert.equal(f.gate, true);
+  assert.equal(f.gate, false);
   assert.equal(f.rule_id, "kubernetes.invalid");
   assert.equal(f.severity, SeverityError);
   assert.equal(f.locations[0]?.path, "k8s/deploy.yaml");

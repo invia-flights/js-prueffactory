@@ -38,9 +38,11 @@ import {
 /**
  * ProfileID is the Benchmark profile of milestone 2. Its v0 parts and
  * constants are those of milestone 1; the new parts are added by the Check
- * tickets.
+ * tickets. The ID moved from v1 to v2 with the Gate rules of execution-v2
+ * (the Gates of a Run are part of the profile) and the stricter reading of
+ * what api.lint calls an error, so that scores of both are never compared.
  */
-export const ProfileID = "benchmark-v1-uncalibrated";
+export const ProfileID = "benchmark-v2-uncalibrated";
 
 // Area IDs.
 export const areaTests = "tests";

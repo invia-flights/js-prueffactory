@@ -119,8 +119,8 @@ export interface GitlabFindingSpec {
   path: string;
   line?: number;
   column?: number;
-  /** gate makes an error Gate, otherwise a note. */
-  gate: boolean;
+  /** error makes the Finding an error (never a Gate), otherwise a note. */
+  error: boolean;
   inTestData?: boolean;
   title: string;
   message: string;
@@ -145,7 +145,6 @@ export function gitlabFinding(input: Input, s: GitlabFindingSpec): Finding {
     kind: KindDefect,
     severity: SeverityError,
     confidence: ConfidenceConfirmed,
-    gate: s.gate,
     in_test_data: s.inTestData ?? false,
     title: s.title,
     message: s.message,
@@ -157,7 +156,7 @@ export function gitlabFinding(input: Input, s: GitlabFindingSpec): Finding {
       s.evidenceSource ?? "GitLab CI JSON Schema " + gitlabCISchemaVersion;
     f.evidence = [untrusted("tool_output", s.evidence, source)];
   }
-  if (!s.gate) {
+  if (!s.error) {
     f.kind = KindHint;
     f.severity = SeverityNote;
     f.confidence = ConfidenceSuspected;
@@ -184,7 +183,7 @@ export function schemaFindings(
       gitlabFinding(input, {
         rule: ruleGitlabSchema,
         path: rel,
-        gate: false,
+        error: false,
         title: "GitLab CI schema could not be applied",
         message: errorMessage(err),
       }),
@@ -208,7 +207,7 @@ export function schemaFindings(
       path: rel,
       line: pos.line,
       column: pos.column,
-      gate: !ref && !inTestData,
+      error: !ref && !inTestData,
       inTestData,
       title: "GitLab CI file does not match the schema",
       message: msg,

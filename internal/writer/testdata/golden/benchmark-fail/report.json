@@ -41,7 +41,7 @@
   "profiles": {
     "catalog_version": "1",
     "execution_profile": "execution-v0",
-    "benchmark_profile": "benchmark-v1-uncalibrated",
+    "benchmark_profile": "benchmark-v2-uncalibrated",
     "toolset_version": "abc"
   },
   "selection": {
@@ -167,7 +167,7 @@
   },
   "benchmark": {
     "status": "computed",
-    "profile_id": "benchmark-v1-uncalibrated",
+    "profile_id": "benchmark-v2-uncalibrated",
     "score": 40,
     "range": {
       "low": 40,
@@ -829,9 +829,9 @@
       }
     ],
     "fingerprint": {
-      "hash": "469be09e3925",
+      "hash": "0a511154caf3",
       "fields": {
-        "profile_id": "benchmark-v1-uncalibrated",
+        "profile_id": "benchmark-v2-uncalibrated",
         "catalog_version": "1",
         "toolset_version": "abc",
         "image_digests": [

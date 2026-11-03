@@ -9,11 +9,14 @@ import {
   type Project,
   scoredProject,
 } from "../resultset/resultsettest/scored.testutil.ts";
+import { ExitGate, ExitOK, exitCode } from "../resultset/exitcode.ts";
 import {
   PartMeasured,
   type Set,
   SeverityError,
   SeverityNote,
+  VerdictFail,
+  VerdictPass,
 } from "../resultset/types.ts";
 import { part, score } from "./benchmark.testutil.ts";
 
@@ -290,5 +293,66 @@ describe("the Benchmark parts keep their raw values when Gates move", () => {
       ["package.manifest", "tests.smells"],
     );
     assert.deepEqual(everyPart(withoutGates), everyPart(withGates));
+  });
+});
+
+/**
+ * onlyErrorsOfFilesThatDoNotGate builds a result set whose only Findings are
+ * errors in the files that fire no Gate under execution-v2: API descriptions,
+ * JSON Schema files, Dockerfiles, shell scripts, Helm charts, GitLab CI,
+ * Kubernetes, compose and GitHub Actions files, and the project's own lint in
+ * Test code. gate says whether they are Gates, as they were under
+ * execution-v1.
+ */
+function onlyErrorsOfFilesThatDoNotGate(gate: boolean): Project {
+  const p = scoredProject();
+  for (const c of affectedChecks) {
+    p.applicable(c);
+  }
+  p.applicable("repository.github-actions");
+  const error = severity(SeverityError);
+  const add = (check: string, rule: string, ...mods: FindingMod[]): void => {
+    p.add(check, rule, gate, ...mods, error);
+  };
+  add("api.lint", "no-unresolved-refs", atPath("api/a.yaml"));
+  add("api.lint", "struct", atPath("api/b.yaml"));
+  add("schema.compile", "compile", atPath("schemas/a.json"));
+  add("repository.helm", "helm.template", helmChart("deploy/a"));
+  add("repository.gitlab-ci", "gitlab-ci.schema", atPath("ci/a.yml"));
+  add("repository.kubernetes", "kubernetes.invalid", atPath("k8s/a.yaml"));
+  add("repository.compose", "compose.invalid", atPath("compose.yaml"));
+  add("repository.dockerfile", "DL3006", atPath("Dockerfile"));
+  add("repository.shell", "SC1091", atPath("scripts/run.sh"));
+  add("repository.github-actions", "actionlint", atPath(".github/ci.yml"));
+  add("lint.existing", "semi", atPath("test/a.test.js"), inTestCode);
+  return p;
+}
+
+describe("a Run whose only errors are in files that fire no Gate", () => {
+  test("passes with exit code 0 and the part values the Gates gave", () => {
+    const before = score(onlyErrorsOfFilesThatDoNotGate(true));
+    const s = score(onlyErrorsOfFilesThatDoNotGate(false));
+
+    // The same Findings were Gates under execution-v1.
+    assert.equal(before.benchmark.verdict, VerdictFail);
+    assert.equal(exitCode(before), ExitGate);
+
+    assert.equal(s.findings.length, 11);
+    assert.ok(s.findings.every((f) => f.severity === SeverityError && !f.gate));
+    assert.equal(s.benchmark.verdict, VerdictPass);
+    assert.equal(exitCode(s), ExitOK);
+    assert.deepEqual(everyPart(s), everyPart(before));
+    for (const id of [
+      "openapi",
+      "json_schema",
+      "helm",
+      "gitlab_ci",
+      "kubernetes",
+      "compose",
+      "dockerfile_shell",
+      "project_linter",
+    ]) {
+      assert.ok((reading(s, id).raw_value ?? 0) > 0, `part ${id} counts it`);
+    }
   });
 });

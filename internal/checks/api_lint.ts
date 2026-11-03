@@ -1,6 +1,6 @@
 // api.lint runs Redocly CLI with the structural `spec` ruleset on every
 // OpenAPI or Swagger file outside node_modules and Test data (Go:
-// api_lint.go). Errors are Gates. A file with a remote $ref is partial,
+// api_lint.go). Errors are never Gates. A file with a remote $ref is partial,
 // because the Execution phase has no network.
 import { readFileSync } from "node:fs";
 

@@ -2,9 +2,9 @@
 // with actionlint and audits them with zizmor, both offline, each in its
 // official image with the Snapshot read-only (Go: repository_github_actions.go).
 //
-// What actionlint finds is a Gate, except the problems of its embedded
+// What actionlint finds is an error, except the problems of its embedded
 // ShellCheck and pyflakes, which are warnings. What zizmor finds is a
-// warning or a note, by its severity, and never a Gate.
+// warning or a note, by its severity. No Finding of this Check is a Gate.
 //
 // Neither tool reads the project's own configuration: a workflow author must
 // not be able to switch off the rules that audit the workflow. actionlint
@@ -155,7 +155,7 @@ async function runGithubActions(
   if (!ok) {
     return res;
   }
-  // The Execution's tool is actionlint, whose results can be Gates.
+  // The Execution's tool is actionlint, whose results are the errors.
   const lintTool = res.tool ?? null;
 
   if (!(await runZizmor(signal, input, res, found, paths))) {

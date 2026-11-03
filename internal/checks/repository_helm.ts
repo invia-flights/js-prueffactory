@@ -1,8 +1,8 @@
 // repository.helm lints and renders every Helm chart outside node_modules and
 // Test data (Go: repository_helm.go): `helm lint --strict`, then `helm
 // template` once with the default values and once per extra values file of
-// the chart folder. A chart that does not render is a Gate. Lint errors are
-// errors without a Gate, lint warnings are warnings. A chart whose
+// the chart folder. A chart that does not render and a lint error are errors,
+// never Gates; lint warnings are warnings. A chart whose
 // dependencies are not vendored under charts/ is blocked, because Helm would
 // have to download them.
 //
@@ -422,8 +422,8 @@ const lintLevels: Readonly<Record<string, string>> = {
 
 /**
  * helmLintFindings reads the plain text of `helm lint`. Every INFO, WARNING
- * and ERROR message is a Finding, and none is a Gate: a lint error alone does
- * not say that the chart cannot be deployed, the render does.
+ * and ERROR message is a Finding, and none is a Gate. A lint error alone does
+ * not say that the chart cannot be deployed; the render does.
  */
 export function helmLintFindings(
   input: Input,
@@ -463,7 +463,6 @@ export function helmLintFindings(
       message: trimSpace(text),
       raw: m.text,
     });
-    f.gate = false;
     return f;
   });
 }
@@ -488,12 +487,11 @@ export function helmLintFailure(
     message: "helm lint failed: " + tail(text, 300),
     raw: text,
   });
-  f.gate = false;
   return f;
 }
 
 /**
- * helmRenderFailure is the Gate for a chart that does not render, with its
+ * helmRenderFailure is the error for a chart that does not render, with its
  * default values or with one values file.
  */
 export function helmRenderFailure(

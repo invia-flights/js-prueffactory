@@ -3,8 +3,8 @@
 // repository_kubernetes.go): every resource each Helm chart renders, with
 // each values file (the rendering is shared with repository.helm), and every
 // plain manifest of the project. A resource that kubeconform reports as
-// invalid is a Gate. Kinds without a schema, such as custom resources, are
-// not validated and are named in one Limitation.
+// invalid is an error, never a Gate. Kinds without a schema, such as custom
+// resources, are not validated and are named in one Limitation.
 //
 // kubeconform runs in its official image with the Snapshot read-only and no
 // network. The schemas come from a cache volume that the Preparation phase

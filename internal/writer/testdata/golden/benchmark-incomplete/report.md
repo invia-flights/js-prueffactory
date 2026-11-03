@@ -14,7 +14,7 @@
 
 ## Benchmark
 
-**Score: none** (uncalibrated, profile `benchmark-v1-uncalibrated`). Verdict: **incomplete**.
+**Score: none** (uncalibrated, profile `benchmark-v2-uncalibrated`). Verdict: **incomplete**.
 
 There is no single score: a part of Tests, Validity or Security is unknown, or the fully measured areas hold less than 80% of the weight of the areas that exist.
 
@@ -95,9 +95,9 @@ These are shown next to the score and never change it.
 
 ### Benchmark fingerprint
 
-Fingerprint: `469be09e3925`
+Fingerprint: `0a511154caf3`
 
-- Profile: `benchmark-v1-uncalibrated`
+- Profile: `benchmark-v2-uncalibrated`
 - Catalog version: `1`
 - Toolset version: `abc`
 - Image digests: `sha256:abababababababababababababababababababababababababababababababab`

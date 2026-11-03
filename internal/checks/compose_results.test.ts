@@ -74,7 +74,7 @@ test("a required variable error is a warning naming the variable", () => {
   assert.ok(f.message.includes("not validated"));
 });
 
-test("any other error is a Gate with compose's message as untrusted Evidence", () => {
+test("any other error is an error without a Gate with compose's message as untrusted Evidence", () => {
   const stderr =
     "validating /snapshot/compose.override.yaml: services.web.prots false schema\n";
   const found = composeSetFindings(
@@ -86,7 +86,7 @@ test("any other error is a Gate with compose's message as untrusted Evidence", (
   assert.equal(found.length, 1);
   const [f] = found;
   assert.ok(f);
-  assert.equal(f.gate, true);
+  assert.equal(f.gate, false);
   assert.equal(f.severity, SeverityError);
   assert.equal(ruleOf(f), "compose.invalid");
   assert.equal(f.locations[0]?.path, "compose.override.yaml");
@@ -108,7 +108,7 @@ test("warnings of compose other than variables are not Findings", () => {
   );
 });
 
-test("a failure without any message is still a Gate", () => {
+test("a failure without any message is still an error", () => {
   const found = composeSetFindings(
     composeInput(),
     { files: ["compose.yaml"] },
@@ -116,7 +116,7 @@ test("a failure without any message is still a Gate", () => {
     "",
   );
   assert.equal(found.length, 1);
-  assert.equal(found[0]?.gate, true);
+  assert.equal(found[0]?.gate, false);
 });
 
 test("set and variable names from the project stay out of trusted text unless they look like names", () => {

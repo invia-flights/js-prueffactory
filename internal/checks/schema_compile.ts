@@ -1,7 +1,7 @@
 // schema.compile compiles every JSON Schema of the project with Ajv 8 from the
 // toolset volume (Go: schema_compile.go): once without strict mode, where a
-// failure is a Gate, and once with it, where a failure is a warning. Test
-// data only gets notes. The Check reads the schema files on the host and
+// failure is an error without a Gate, and once with it, where a failure is a
+// warning. Test data only gets notes. The Check reads the schema files on the host and
 // hands them to the helper parsed, so the helper never opens a project path
 // and nothing is fetched. Ajv, ajv-draft-04 and ajv-formats run in the
 // container, so the host needs no draft-04 support of its own.
@@ -622,7 +622,7 @@ function interpretSchemaCompileTargets(
 
 /**
  * schemaFinding builds the Finding for one problem of one schema. A failure
- * without strict mode is a Gate and a strict-only problem a warning, both
+ * without strict mode is an error (never a Gate) and a strict-only problem a warning, both
  * only a note in Test data.
  */
 function schemaFinding(
@@ -652,12 +652,10 @@ function schemaFinding(
     f.message = `${shownPath(s.path)} (${shownWord(s.draft, "draft")}) does not compile with Ajv: ${p.message}`;
     f.severity = SeverityError;
     f.confidence = ConfidenceConfirmed;
-    f.gate = true;
   }
   if (testData) {
     f.severity = SeverityNote;
     f.kind = KindHint;
-    f.gate = false;
   }
   return f;
 }

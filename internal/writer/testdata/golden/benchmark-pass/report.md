@@ -14,7 +14,7 @@
 
 ## Benchmark
 
-**Score: 80.6 of 100** (uncalibrated, profile `benchmark-v1-uncalibrated`). Verdict: **pass**.
+**Score: 80.6 of 100** (uncalibrated, profile `benchmark-v2-uncalibrated`). Verdict: **pass**.
 
 The single score is only an overview. The score of each area and of each part below is the detailed result.
 
@@ -93,9 +93,9 @@ These are shown next to the score and never change it.
 
 ### Benchmark fingerprint
 
-Fingerprint: `469be09e3925`
+Fingerprint: `0a511154caf3`
 
-- Profile: `benchmark-v1-uncalibrated`
+- Profile: `benchmark-v2-uncalibrated`
 - Catalog version: `1`
 - Toolset version: `abc`
 - Image digests: `sha256:abababababababababababababababababababababababababababababababab`

@@ -34,7 +34,8 @@ export const githubActionsID = "repository.github-actions";
 
 // actionlintShellcheck and actionlintPyflakes are the kinds of the problems
 // that actionlint's embedded ShellCheck and pyflakes report in `run:`
-// scripts. They are warnings, every other actionlint kind is a Gate.
+// scripts. They are warnings, every other actionlint kind is an error. None is
+// a Gate.
 const actionlintShellcheck = "shellcheck";
 const actionlintPyflakes = "pyflakes";
 
@@ -95,8 +96,8 @@ const actionlintSchema: Schema = {
 /**
  * actionlintFindings reads actionlint's `-format '{{json .}}'` output, an
  * array of errors, or nothing at all for clean workflows. Problems that its
- * embedded ShellCheck and pyflakes found are warnings, every other error is
- * a Gate. It throws for output that is not that JSON.
+ * embedded ShellCheck and pyflakes found are warnings, every other problem is
+ * an error, and none is a Gate. It throws for output that is not that JSON.
  */
 export function actionlintFindings(
   input: Input,
@@ -118,7 +119,8 @@ export function actionlintFindings(
     const kind = ghaVocabulary(r.kind);
     const path = ghaPath(r.filepath);
     const rule = "actionlint." + kind;
-    const gate = kind !== actionlintShellcheck && kind !== actionlintPyflakes;
+    const isError =
+      kind !== actionlintShellcheck && kind !== actionlintPyflakes;
     const line = Number(r.line);
     const f = newFinding({
       check_id: githubActionsID,
@@ -146,10 +148,9 @@ export function actionlintFindings(
       ],
       reproduction: input.reproduction(githubActionsID),
     });
-    if (gate) {
+    if (isError) {
       f.severity = SeverityError;
       f.confidence = ConfidenceConfirmed;
-      f.gate = true;
       f.message = `actionlint reports a ${kind} problem in ${shownPath(path)}, line ${String(line)}: the workflow is broken or would not do what it says. What it said is in the Evidence.`;
     } else {
       f.message = `The ${kind} that actionlint runs on the scripts of ${shownPath(path)} reports an issue at line ${String(line)}. What it said is in the Evidence.`;

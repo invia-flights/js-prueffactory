@@ -1,7 +1,10 @@
 // This file turns the JSON output of hadolint, ShellCheck and Redocly CLI into
 // Findings (Go: repo_findings.go). Error-level
-// results are Gates, warnings are warnings, and the rest (info and style
-// results) are notes.
+// results are errors, warnings are warnings, and the rest (info and style
+// results) are notes. An error is a Gate only when the Check that reports it
+// says so (ToolProblem.gate): under execution-v2 the files that hadolint,
+// ShellCheck and Redocly examine do not run in the service, so none of their
+// errors is.
 import { quoteJSONString } from "../gocompat/json.ts";
 import { goString, trimSpaceBytes } from "../gocompat/utf8.ts";
 import { fields, trimSpace } from "../gocompat/strings.ts";
@@ -48,9 +51,18 @@ export interface ToolProblem {
   message: string;
   /** raw is what the tool printed, as Evidence. */
   raw: string;
+  /**
+   * gate makes an error-level result a Gate. It is false unless the Check
+   * says otherwise and has no effect on a result below error level.
+   */
+  gate?: boolean;
 }
 
-/** repoFinding builds the Finding for one tool result. */
+/**
+ * repoFinding builds the Finding for one tool result. An error-level result
+ * is a confirmed error; it is a Gate only when the Check asks for it, because
+ * the Check knows whether the file it is about can fail the Run.
+ */
 export function repoFinding(
   input: Input,
   checkID: string,
@@ -75,7 +87,7 @@ export function repoFinding(
     case "error":
       f.severity = SeverityError;
       f.confidence = ConfidenceConfirmed;
-      f.gate = true;
+      f.gate = p.gate === true;
       break;
     case "warning":
     case "warn":
@@ -321,8 +333,9 @@ export class RedoclyNoJSON extends Error {
 }
 
 /**
- * unparseableFinding is the Gate for an OpenAPI file that is not valid YAML
- * or JSON, reported when artifacts.structured is not there to report it.
+ * unparseableFinding is the error for an OpenAPI file that is not valid YAML
+ * or JSON, reported when artifacts.structured is not there to report it. It
+ * is no Gate; artifacts.structured's Finding for the same file is.
  */
 export function unparseableFinding(
   input: Input,

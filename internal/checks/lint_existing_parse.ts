@@ -1,6 +1,10 @@
 // This file turns the output of the project's own linters into Findings (Go:
-// lint_existing_parse.go). An error-level diagnostic is a Gate and a warning
-// is a warning. repoFinding applies that rule to the level it is given.
+// lint_existing_parse.go). An error-level diagnostic is an error and a warning
+// is a warning; repoFinding applies that rule to the level it is given. Under
+// execution-v2 an error is a Gate only in Source code: the project's own
+// rules for its tests, fixtures and generated files do not say that the
+// service is broken.
+import { classify, type FileClass, Source } from "../discovery/discovery.ts";
 import { quoteJSONString } from "../gocompat/json.ts";
 import { join } from "../gocompat/path.ts";
 import { decodeRune } from "../gocompat/utf8.ts";
@@ -86,6 +90,7 @@ export function projectESLintFindings(
   }
   const pkg = input.pkg();
   const prefix = workPath(pkg) + "/";
+  const isSource = sourceFiles(input);
   const out: Finding[] = [];
   for (const f of files) {
     if (!f.filePath.startsWith(prefix)) {
@@ -100,12 +105,13 @@ export function projectESLintFindings(
         rule = "parse-error";
       }
       const level = m.severity >= 2n ? "error" : "warning";
+      const path = projectFile(input, rel);
       out.push(
         repoFinding(input, lintExistingID, {
           tool: "eslint",
           rule,
           level,
-          path: projectFile(input, rel),
+          path,
           line: Number(m.line),
           column: Number(m.column),
           message: m.message,
@@ -114,6 +120,7 @@ export function projectESLintFindings(
             `{"column":${m.column.toString()},"file":${quoteJSONString(rel, true)},` +
             `"line":${m.line.toString()},"message":${quoteJSONString(m.message, true)},` +
             `"rule":${quoteJSONString(rule, true)},"severity":${m.severity.toString()}}`,
+          gate: isSource(path),
         }),
       );
     }
@@ -186,6 +193,7 @@ export function biomeFindings(input: Input, stdout: Uint8Array): Finding[] {
       cause: err,
     });
   }
+  const isSource = sourceFiles(input);
   const out: Finding[] = [];
   for (const d of diagnostics) {
     let path = projectFile(input, "package.json");
@@ -219,10 +227,27 @@ export function biomeFindings(input: Input, stdout: Uint8Array): Finding[] {
           `{"category":${quoteJSONString(d.category, true)},` +
           `"description":${quoteJSONString(d.description, true)},${file}` +
           `"severity":${quoteJSONString(d.severity, true)}${span}}`,
+        gate: isSource(path),
       }),
     );
   }
   return out;
+}
+
+/**
+ * sourceFiles returns the test of the Gate rule of lint.existing: an error of
+ * the project's own linter is a Gate when the File class of its file is
+ * Source code. The class is the one the Input's project holds, which includes
+ * the files the test runners load (the Check waits for the test file probe);
+ * a path in no file list is classified by its folder names, as the engine
+ * does when it sets in_test_code.
+ */
+function sourceFiles(input: Input): (path: string) => boolean {
+  const classes = new Map<string, FileClass>();
+  for (const f of input.project.files) {
+    classes.set(f.path, f.class);
+  }
+  return (path) => (classes.get(path) ?? classify(path)) === Source;
 }
 
 /** biomeLevel maps Biome's severities onto the levels repoFinding knows. */

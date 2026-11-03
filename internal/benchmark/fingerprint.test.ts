@@ -13,6 +13,8 @@ import {
   ServiceStarted,
 } from "../resultset/types.ts";
 import { fingerprintOf } from "./benchmark.testutil.ts";
+import { fingerprint } from "./fingerprint.ts";
+import { ProfileID } from "./profile.ts";
 
 function ctx(p: Project, i: number): Context {
   const c = p.set.contexts[i];
@@ -44,7 +46,7 @@ test("the fingerprint holds everything that shapes a score", () => {
   p.set.profiles.toolset_version = "toolset-abc";
   const f = fingerprintOf(p).fields;
 
-  assert.equal(f.profile_id, "benchmark-v1-uncalibrated");
+  assert.equal(f.profile_id, "benchmark-v2-uncalibrated");
   assert.equal(f.catalog_version, "milestone-1");
   assert.equal(f.toolset_version, "toolset-abc");
   // The Node image, the tool image and the Service image.
@@ -123,6 +125,18 @@ describe("the short hash changes with every field and only with them", () => {
       assert.notEqual(fingerprintOf(p).hash, base.hash);
     });
   }
+});
+
+// The Gate rules and the OpenAPI part moved under execution-v2, so a score
+// from before is never compared with one from now by mistake.
+test("the Benchmark profile ID is part of the fingerprint: v1 and v2 differ", () => {
+  const s = scoredProject().done();
+  const now = fingerprint(s, ProfileID);
+  const before = fingerprint(s, "benchmark-v1-uncalibrated");
+  assert.equal(now.fields.profile_id, "benchmark-v2-uncalibrated");
+  assert.equal(before.fields.profile_id, "benchmark-v1-uncalibrated");
+  assert.notEqual(now.hash, before.hash);
+  assert.equal(fingerprintOf(scoredProject()).hash, now.hash);
 });
 
 // Go: TestAContextWithoutASupportedNodeVersionAddsNoRuntime.
