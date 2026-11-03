@@ -231,3 +231,96 @@ test("unreadableResult makes the unreadable Result and keeps what the Check alre
   );
   assert.equal(res.findings, undefined);
 });
+
+test("a call the adapter understood without read counts as answered, so the Check is partial and not a tool error", () => {
+  const outputs = new ToolOutputs("lint.existing", "C-0002");
+  outputs.answered();
+  outputs.read("biome", "lint-biome", call, () => {
+    throw unreadable();
+  });
+  const res: Result = { status: "completed" };
+  outputs.apply(res);
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["partial", "tool_output_unreadable"],
+  );
+  assert.match(res.reason ?? "", /1 of 2 tool calls are affected/);
+});
+
+test("the reason code the execution already had stays visible in the reason when unreadable output makes it partial", () => {
+  const outputs = new ToolOutputs("api.lint", "C-0001");
+  outputs.read("redocly", "redocly-1", call, () => 1);
+  outputs.read("redocly", "redocly-2", call, () => {
+    throw unreadable();
+  });
+  const res: Result = {
+    status: "partial",
+    reasonCode: "remote_ref_not_fetched",
+    reason: "1 file(s) have a remote $ref that cannot be fetched offline",
+  };
+  outputs.apply(res);
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["partial", "tool_output_unreadable"],
+  );
+  assert.ok(
+    (res.reason ?? "").includes(
+      "Also (remote_ref_not_fetched): 1 file(s) have a remote $ref",
+    ),
+    res.reason ?? "",
+  );
+});
+
+test("a call whose streams an artifact of the execution already holds is named, not stored twice", () => {
+  const outputs = new ToolOutputs("tests.existing", "C-0002");
+  outputs.rejectLogged(
+    "the test reporter",
+    "test-output",
+    "artifacts/tests.existing/C-0002/test-output.log",
+    "its event file holds no event line",
+    "",
+    [{ name: "events.jsonl", content: bytes("plain text\n") }],
+  );
+  const res: Result = { status: "completed" };
+  outputs.apply(res);
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["tool_error", "tool_output_unreadable"],
+  );
+  assert.deepEqual(
+    (res.artifacts ?? []).map((a) => a.path),
+    ["artifacts/tests.existing/C-0002/test-output.events.jsonl"],
+  );
+  for (const p of [
+    "artifacts/tests.existing/C-0002/test-output.log",
+    "artifacts/tests.existing/C-0002/test-output.events.jsonl",
+  ]) {
+    assert.ok((res.reason ?? "").includes(p), `${p}: ${res.reason ?? ""}`);
+  }
+});
+
+test("a tool whose raw output may hold secrets keeps none of it, and the reason says so", () => {
+  const res = unreadableResult(
+    { status: "completed", command: ["gitleaks"] },
+    "security.secrets",
+    "C-0001",
+    "gitleaks",
+    "gitleaks",
+    { stdout: bytes("sk_prod_made_up_value"), stderr: bytes("") },
+    "it is not the JSON report that gitleaks documents",
+    "",
+    "it may hold the secrets the scan looks for",
+  );
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["tool_error", "tool_output_unreadable"],
+  );
+  assert.deepEqual(res.artifacts ?? [], []);
+  assert.ok(
+    (res.reason ?? "").includes(
+      "The raw output of gitleaks is not kept, because it may hold the secrets the scan looks for.",
+    ),
+    res.reason ?? "",
+  );
+  assert.ok(!(res.reason ?? "").includes("sk_prod_made_up_value"));
+});

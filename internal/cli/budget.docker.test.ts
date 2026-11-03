@@ -3,6 +3,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { SchemaVersion } from "../resultset/types.ts";
 import { assertNothingLeft, copyProject, realRun } from "./realrun.testutil.ts";
 import { whole } from "./whole.testutil.ts";
 
@@ -29,7 +30,7 @@ test("a --fast Run of clean-mocha records fast and the fast default Budget", asy
       s.profiles.catalog_version,
       s.profiles.execution_profile,
     ],
-    ["0.4.0", "milestone-2", "execution-v2"],
+    [SchemaVersion, "milestone-2", "execution-v2"],
   );
   // Every Check marked for --fast is still planned, so nothing is left out.
   assert.deepEqual(s.selection.deselected_checks, []);

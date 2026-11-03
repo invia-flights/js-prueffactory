@@ -53,7 +53,13 @@ import {
   untilAborted,
 } from "./tests_flaky.testutil.ts";
 import { wantsCoverage } from "./tests_coverage.ts";
-import { forRepeat, testLogPath, useRepeatRunTimeout } from "./tests_repeat.ts";
+import {
+  forRepeat,
+  testArtifactCheck,
+  testLogPath,
+  testLogStem,
+  useRepeatRunTimeout,
+} from "./tests_repeat.ts";
 
 const okRun = (input: Parameters<typeof suiteRunWith>[0]) =>
   suiteRunWith(input, passedAdd, passedSub);
@@ -580,6 +586,23 @@ test("the command log of a repeat run belongs to the Check that ran it", (t) => 
   assert.equal(
     testLogPath(rep),
     `artifacts/tests.flaky/${input.context.id}/test-output-run3.log`,
+  );
+});
+
+test("the other files of a run, such as the reporter's event file, are named like its command log and belong to the same Check", (t) => {
+  const input = twoSuiteInput(t).forSuite(1);
+  assert.deepEqual(
+    [testArtifactCheck(input), testLogStem(input)],
+    ["tests.existing", "test-output-2-test-api"],
+  );
+  const rep = forRepeat(input, {
+    checkID: testsFlakyID,
+    number: 4,
+    nodeOptions: "",
+  });
+  assert.deepEqual(
+    [testArtifactCheck(rep), testLogStem(rep)],
+    ["tests.flaky", "test-output-2-test-api-run4"],
   );
 });
 

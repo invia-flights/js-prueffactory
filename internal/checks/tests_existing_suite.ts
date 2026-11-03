@@ -27,7 +27,7 @@ import {
   readEvents,
   testsExistingID,
 } from "./tests_existing.ts";
-import { testLogPath } from "./tests_repeat.ts";
+import { testArtifactCheck, testLogPath, testLogStem } from "./tests_repeat.ts";
 import { ToolOutputs } from "./tool_output.ts";
 
 /** SuiteLaunch is what differs between runners when the suite's container is started. */
@@ -190,8 +190,9 @@ export function finishSuite(
   c: ContainerResult,
   end: SuiteEnd,
 ): void {
+  const logPath = testLogPath(input);
   (res.artifacts ??= []).push(
-    commandLogArtifact(testLogPath(input), res.command ?? [], c),
+    commandLogArtifact(logPath, res.command ?? [], c),
   );
   res.status = StatusCompleted;
   if (ev.ended) {
@@ -205,12 +206,16 @@ export function finishSuite(
     // The runner exited cleanly and the reporter's file holds no event line,
     // not even a started one: the output of the reporter cannot be read, and
     // that says nothing about the project's tests. A tool problem, with the
-    // raw output kept: the runner's streams and the file, when it has content.
-    const outputs = new ToolOutputs(testsExistingID, input.context.id);
-    outputs.reject(
+    // raw output kept: the runner's streams are in the command log added
+    // above, so only the event file is stored besides it, when it has
+    // content. The files are named by the run (the command log's name), so
+    // the suites of a package and the repeat runs of other Checks never
+    // write the same path.
+    const outputs = new ToolOutputs(testArtifactCheck(input), input.context.id);
+    outputs.rejectLogged(
       "the test reporter",
-      "reporter",
-      c,
+      testLogStem(input),
+      logPath,
       "its event file holds no event line",
       "",
       ev.raw.length > 0 ? [{ name: "events.jsonl", content: ev.raw }] : [],

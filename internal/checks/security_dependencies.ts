@@ -277,9 +277,8 @@ async function runDependencies(
       "osv-scanner",
       "osv",
       c,
-      verdict.fail.reason.startsWith("osv-scanner reported vulnerabilities")
-        ? "it exited with its code for found vulnerabilities but its report names none"
-        : "it is not the JSON report that osv-scanner documents",
+      verdict.unreadable ??
+        "it is not the JSON report that osv-scanner documents",
     );
   }
   if (verdict.fail !== null) {
@@ -390,6 +389,12 @@ export interface ScanVerdict {
   /** fail is set when the scan says nothing about the lockfile. */
   fail: ScanFailure | null;
   /**
+   * unreadable is, for a fail with the code report_unreadable, the fixed
+   * sentence that says what about the report could not be read. The Check
+   * shows it, so it never depends on the wording of fail.reason.
+   */
+  unreadable?: string;
+  /**
    * partial is set, with the explanation, when the scan saw fewer packages
    * than the lockfile lists: what it did not see is not clean.
    */
@@ -440,6 +445,7 @@ export function judgeScan(
           "the osv-scanner report could not be read: " +
           unmarshalText(err, "osvReport"),
       },
+      unreadable: "it is not the JSON report that osv-scanner documents",
       partial: "",
     };
   }
@@ -453,6 +459,8 @@ export function judgeScan(
         reason:
           "osv-scanner reported vulnerabilities, but the report names none",
       },
+      unreadable:
+        "it exited with its code for found vulnerabilities but its report names none",
       partial: "",
     };
   }

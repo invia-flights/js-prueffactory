@@ -20,6 +20,14 @@
 //   res.status = StatusCompleted;
 //   outputs.apply(res); // tool_error, or partial when some call was read
 //
+// A call that gave an answer the adapter understood without `read` (a
+// documented error message that blames the project) is recorded with
+// outputs.answered(), so that unreadable output of another call makes the
+// Check partial and not a tool error. A call whose streams the execution
+// already keeps in a log is recorded with rejectLogged, which stores only the
+// files besides it; a tool whose raw output may hold what redaction removes
+// (gitleaks) is recorded with rejectWithheld and keeps none.
+//
 // A reader that also wants to reject JSON with another shape than the
 // documented one calls requireShape after it decoded the output. The raw
 // stdout and stderr of an unreadable call become two artifacts of the
@@ -279,6 +287,17 @@ interface Unreadable {
   summary: string;
   where: string;
   artifacts: Artifact[];
+  /**
+   * logged are paths of artifacts of the execution that already hold the
+   * call's streams: the reason names them, and the streams are not stored a
+   * second time.
+   */
+  logged: string[];
+  /**
+   * withheld is why the call's raw output is not kept at all, or "" when it
+   * is kept. A tool whose output may hold the secrets it looks for says so.
+   */
+  withheld: string;
   /** files is true for a call whose raw output is files the tool wrote. */
   files: boolean;
 }
@@ -347,6 +366,8 @@ export class ToolOutputs {
       tool,
       summary,
       where,
+      logged: [],
+      withheld: "",
       files: extra.length > 0,
       artifacts:
         this.#unreadable.length < maxKeptCalls
@@ -373,10 +394,69 @@ export class ToolOutputs {
       tool,
       summary,
       where,
+      logged: [],
+      withheld: "",
       files: true,
       artifacts:
         this.#unreadable.length < maxKeptCalls
           ? rawFileArtifacts(this.#check, this.#context, call, files)
+          : [],
+    });
+  }
+
+  /**
+   * rejectWithheld is reject for a tool whose raw output must not be kept,
+   * because it may hold what redaction exists to remove and nothing known to
+   * redaction covers it: why completes "The raw output of the tool is not
+   * kept, because ...".
+   */
+  rejectWithheld(tool: string, summary: string, why: string, where = ""): void {
+    this.#unreadable.push({
+      tool,
+      summary,
+      where,
+      logged: [],
+      withheld: why,
+      files: false,
+      artifacts: [],
+    });
+  }
+
+  /**
+   * answered records a call that gave an answer the adapter understood
+   * without read, such as a documented error message that blames the
+   * project. It counts like a call that was read: the Check is partial, not
+   * a tool error, when another call of it is unreadable.
+   */
+  answered(): void {
+    this.#read++;
+  }
+
+  /**
+   * rejectLogged is reject for a call whose stdout and stderr the execution
+   * already keeps in an artifact of its own, such as a command log at
+   * logPath: the streams are not stored a second time, the reason names that
+   * artifact, and extra are the files the call wrote besides its streams.
+   * The caller adds the artifact at logPath to the execution itself.
+   */
+  rejectLogged(
+    tool: string,
+    call: string,
+    logPath: string,
+    summary: string,
+    where = "",
+    extra: readonly RawFile[] = [],
+  ): void {
+    this.#unreadable.push({
+      tool,
+      summary,
+      where,
+      logged: [logPath],
+      withheld: "",
+      files: true,
+      artifacts:
+        this.#unreadable.length < maxKeptCalls
+          ? rawFileArtifacts(this.#check, this.#context, call, extra)
           : [],
     });
   }
@@ -414,19 +494,36 @@ export class ToolOutputs {
       total > 1
         ? `; ${String(this.#unreadable.length)} of ${String(total)} tool calls are affected.`
         : ".";
-    const keptCalls = this.#unreadable.filter(
-      (u) => u.artifacts.length > 0,
-    ).length;
-    const which =
-      keptCalls === 1
-        ? "that call are"
-        : `the first ${String(keptCalls)} such calls are`;
-    const raw = this.#unreadable.some((u) => u.files)
-      ? "raw output"
-      : "raw stdout and stderr";
-    reason += ` The ${raw} of ${which} in ${artifacts.map((a) => quote(a.path)).join(", ")}. No Finding was made from them.`;
+    const kept = this.#unreadable.filter(
+      (u) => u.artifacts.length > 0 || u.logged.length > 0,
+    );
+    if (kept.length > 0) {
+      const which =
+        kept.length === 1
+          ? "that call are"
+          : `the first ${String(kept.length)} such calls are`;
+      const raw = this.#unreadable.some((u) => u.files)
+        ? "raw output"
+        : "raw stdout and stderr";
+      const paths = kept.flatMap((u) => [
+        ...u.logged,
+        ...u.artifacts.map((a) => a.path),
+      ]);
+      reason += ` The ${raw} of ${which} in ${paths.map((p) => quote(p)).join(", ")}.`;
+    }
+    for (const u of this.#unreadable) {
+      if (u.withheld !== "") {
+        reason += ` The raw output of ${u.tool} is not kept, because ${u.withheld}.`;
+      }
+    }
+    reason += " No Finding was made from them.";
     if (res.status === StatusPartial && (res.reason ?? "") !== "") {
-      reason += " Also: " + (res.reason ?? "");
+      // One reason code fits an execution; the one it had stays readable here.
+      const code =
+        res.reasonCode !== undefined && res.reasonCode !== ""
+          ? ` (${res.reasonCode})`
+          : "";
+      reason += ` Also${code}: ${res.reason ?? ""}`;
     }
     res.status = this.#read > 0 ? StatusPartial : StatusToolError;
     res.reasonCode = "tool_output_unreadable";
@@ -440,7 +537,8 @@ export class ToolOutputs {
  * code tool_output_unreadable and the call's raw output as artifacts. Whatever
  * res already holds, such as the command and the tool, is kept; its Findings
  * are the adapter's to leave out. call names the call, as ToolOutputs.reject
- * wants it.
+ * wants it. A non-empty withheld keeps the raw output out of the Report, as
+ * ToolOutputs.rejectWithheld does, for a tool whose output may hold secrets.
  */
 export function unreadableResult(
   res: Result,
@@ -451,9 +549,14 @@ export function unreadableResult(
   c: RawCall,
   summary: string,
   where = "",
+  withheld = "",
 ): Result {
   const outputs = new ToolOutputs(checkID, contextID);
-  outputs.reject(tool, call, c, summary, where);
+  if (withheld === "") {
+    outputs.reject(tool, call, c, summary, where);
+  } else {
+    outputs.rejectWithheld(tool, summary, withheld, where);
+  }
   const out: Result = { ...res, status: StatusCompleted };
   delete out.reasonCode;
   delete out.reason;

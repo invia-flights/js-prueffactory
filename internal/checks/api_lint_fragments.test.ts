@@ -35,6 +35,32 @@ function textOf(spec: ContainerSpec, path: string): string | undefined {
   return f === undefined ? undefined : Buffer.from(f.content).toString();
 }
 
+test("a file that is not valid YAML is not linted, and the Limitation does not claim a Gate that artifacts.structured does not have for a file in Documentation", async (t) => {
+  const specs: ContainerSpec[] = [];
+  const res = await run(
+    t,
+    "api.lint",
+    { "docs/openapi.yaml": "openapi: 3.0.3\ninfo: [\n  title: x\n" },
+    (spec) => {
+      specs.push(spec);
+      return {};
+    },
+  );
+  assert.deepEqual([res.status, res.reasonCode ?? ""], ["completed", ""]);
+  assert.equal(
+    specs.filter((s) => lintOf(s) !== undefined).length,
+    0,
+    "the broken file is not linted",
+  );
+  const l = (res.limitations ?? []).find(
+    (x) => x.reason_code === "file_not_parseable",
+  );
+  assert.ok(l, JSON.stringify(res.limitations));
+  assert.equal(l.path, "docs/openapi.yaml");
+  assert.ok(l.message.includes("artifacts.structured"), l.message);
+  assert.ok(!/gate/i.test(l.message), l.message);
+});
+
 test("a file without paths is linted as a copy with an empty paths map and the Limitation openapi_fragment names it", async (t) => {
   const specs: ContainerSpec[] = [];
   const res = await run(
@@ -62,16 +88,24 @@ test("a file without paths is linted as a copy with an empty paths map and the L
   const lints = specs.filter((s) => lintOf(s) !== undefined);
   assert.equal(lints.length, 4);
 
-  // Redocly is given the copy of the two fragments, in a copy of the Snapshot
-  // where the relative references of the file still resolve; the other two
-  // run on the Snapshot itself.
+  // Redocly is given the copy of the two fragments, in a tree of links to the
+  // Snapshot where the relative references of the file still resolve; the
+  // other two run on the Snapshot itself.
   const byFile = new Map(lints.map((s) => [lintOf(s), s]));
   const mounts = (s: ContainerSpec | undefined) =>
     (s?.mounts ?? []).map((m) => [m.volume, m.readOnly === true]);
   for (const name of ["template.yaml", "legacy.yaml"]) {
     const s = byFile.get(name);
     assert.equal(s?.workDir, "/fragments/api", name);
-    assert.notDeepEqual(mounts(s), [["jspf-run-snapshot", true]], name);
+    // The links point into the Snapshot, so it is mounted as well.
+    assert.deepEqual(
+      mounts(s),
+      [
+        ["jspf-run-snapshot", true],
+        ["api-fragments", false],
+      ],
+      name,
+    );
   }
   const specOf = (name: string): ContainerSpec => {
     const s = byFile.get(name);
@@ -92,10 +126,12 @@ test("a file without paths is linted as a copy with an empty paths map and the L
     assert.deepEqual(mounts(s), [["jspf-run-snapshot", true]], name);
   }
 
-  // The copy of the Snapshot is made once, with nothing but a copy command.
+  // The tree of the fragments is made once, with nothing but cp -s: every
+  // file of the Snapshot becomes a link, so no file content is copied however
+  // large the Snapshot is.
   const copies = specs.filter((s) => lintOf(s) === undefined);
   assert.equal(copies.length, 1);
-  assert.deepEqual(copies[0]?.cmd, ["-a", "/snapshot/.", "/fragments/"]);
+  assert.deepEqual(copies[0]?.cmd, ["-as", "/snapshot/.", "/fragments/"]);
 
   // The Findings carry the original path and the line Redocly names.
   const found = (res.findings ?? [])
@@ -122,7 +158,7 @@ test("a file without paths is linted as a copy with an empty paths map and the L
   }
 });
 
-test("without a fragment no copy of the Snapshot is made and there is no Limitation", async (t) => {
+test("without a fragment no links to the Snapshot are made and there is no Limitation", async (t) => {
   const specs: ContainerSpec[] = [];
   const res = await run(
     t,

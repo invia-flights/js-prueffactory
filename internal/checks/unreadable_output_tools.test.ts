@@ -9,6 +9,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { validate } from "../resultset/validate.ts";
+import { newSet } from "../resultset/zero.ts";
 import {
   assertUnreadable,
   rawOf,
@@ -439,6 +441,38 @@ for (const [what, out] of Object.entries(c8Bad)) {
   });
 }
 
+test("tests.coverage: a good total with entries of files that have no counts says so in the reason", (t) => {
+  const out =
+    '{"total":{"lines":{"total":1,"covered":1},"functions":{"total":1,"covered":1},"branches":{"total":1,"covered":1}},"/work/pkg/src/index.js":"covered"}';
+  const input = suiteInput(t, { "src/index.js": "x" });
+  const res = coverageResult(input, {
+    status: "completed",
+    coverage: {
+      unavailable: "",
+      unavailableCode: "",
+      summary: Buffer.from(out),
+      perFile: null,
+    },
+  });
+  assertUnreadable(res, {
+    status: "tool_error",
+    check: "tests.coverage",
+    context: input.context.id,
+    call: "c8",
+    files: { "coverage-summary.json": out },
+  });
+  assert.ok(
+    (res.reason ?? "").includes("the entries of its files"),
+    res.reason ?? "",
+  );
+  for (const m of res.metrics ?? []) {
+    assert.ok(
+      (m.reason ?? "").includes("the entries of its files"),
+      m.reason ?? "",
+    );
+  }
+});
+
 test("tests.coverage: a summary that is read is still read", (t) => {
   const res = coverageResult(suiteInput(t, { "src/index.js": "x" }), {
     status: "completed",
@@ -472,32 +506,44 @@ const secretsRun = (
     snapshotTar: () => Promise.resolve(),
   });
 
+// Made up. A report of a changed shape, or one that ignored --redact, may hold
+// the value gitleaks flagged, and redaction cannot know it: the scan that
+// finds the values is the one that failed. So its raw output is not kept.
+const madeUpSecret = "sk_prod_4f9aQ7xT2mWz8LkB5nRc1VdJ";
+
+/** assertNoRawOutput checks that nothing of the tool's output is in the Report. */
+function assertNoRawOutput(res: Awaited<ReturnType<typeof secretsRun>>): void {
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["tool_error", "tool_output_unreadable"],
+    res.reason ?? "",
+  );
+  assert.deepEqual(res.artifacts ?? [], [], "no raw output is kept");
+  assert.deepEqual(res.findings ?? [], []);
+  assert.deepEqual(res.redact ?? [], []);
+  assert.ok(
+    (res.reason ?? "").includes(
+      "The raw output of gitleaks is not kept, because it may hold the secrets this scan looks for.",
+    ),
+    res.reason ?? "",
+  );
+  assert.ok(!JSON.stringify(res).includes(madeUpSecret), "the value leaks");
+}
+
 for (const [what, out] of Object.entries(gitleaksBad)) {
-  test(`security.secrets: ${what} from gitleaks is a tool problem with the raw output kept`, async (t) => {
+  test(`security.secrets: ${what} from gitleaks is a tool problem and its raw output is not kept`, async (t) => {
     const res = await secretsRun(t, () => ({
       exitCode: 2,
-      stdout: out,
-      stderr: "gitleaks stderr",
+      stdout: out.replace("a.js", `a.js","Secret":"${madeUpSecret}`),
+      stderr: `gitleaks stderr ${madeUpSecret}`,
     }));
-    assertUnreadable(res, {
-      status: "tool_error",
-      check: "security.secrets",
-      call: "gitleaks",
-      stdout: out,
-      stderr: "gitleaks stderr",
-    });
-    assert.deepEqual(res.findings ?? [], []);
+    assertNoRawOutput(res);
   });
 }
 
 test("security.secrets: an exit code that says leaks were found with an empty report is a tool problem", async (t) => {
   const res = await secretsRun(t, () => ({ exitCode: 2 }));
-  assertUnreadable(res, {
-    status: "tool_error",
-    check: "security.secrets",
-    call: "gitleaks",
-    stdout: "",
-  });
+  assertNoRawOutput(res);
 });
 
 test("security.secrets: a report that is read is still read, and another exit code stays a tool failure", async (t) => {
@@ -591,6 +637,27 @@ test("security.dependencies: exit 1 for vulnerabilities with a report that names
     call: "osv",
     stdout: osvGood,
   });
+  assert.ok(
+    (res.reason ?? "").includes(
+      "it exited with its code for found vulnerabilities but its report names none",
+    ),
+    res.reason ?? "",
+  );
+});
+
+test("security.dependencies: a report of another type says it is not the JSON report osv-scanner documents", async (t) => {
+  const res = await runInPackage(
+    t,
+    "security.dependencies",
+    osvPkg,
+    () => ({ stdout: '{"results":"none"}' }),
+    osvAdvisories,
+  );
+  assert.equal(res.reasonCode, "tool_output_unreadable", res.reason ?? "");
+  assert.ok(
+    !(res.reason ?? "").includes("found vulnerabilities"),
+    res.reason ?? "",
+  );
 });
 
 test("security.dependencies: a report that is read is still read, and a crash stays a tool failure", async (t) => {
@@ -974,18 +1041,92 @@ for (const [what, events] of Object.entries(eventsWithoutLines)) {
     );
     assert.deepEqual(res.findings ?? [], []);
     assert.deepEqual(res.testCases ?? [], []);
-    const base = "artifacts/tests.existing/C-0002/reporter";
-    assert.equal(rawOf(res, `${base}.stdout.txt`), "Usage: mocha [spec..]");
-    assert.equal(rawOf(res, `${base}.stderr.txt`), "runner stderr");
+    // The runner's streams are in the command log; the event file is stored
+    // beside it when it has content. The reason names both.
+    const base = "artifacts/tests.existing/C-0002/test-output";
+    const log = rawOf(res, `${base}.log`) ?? "";
+    assert.ok(log.includes("Usage: mocha [spec..]"), log);
+    assert.ok(log.includes("runner stderr"), log);
     const kept = rawOf(res, `${base}.events.jsonl`);
     assert.equal(kept, events === "" || events === null ? undefined : events);
+    assert.equal(
+      (res.artifacts ?? []).length,
+      kept === undefined ? 1 : 2,
+      "no second copy of the streams",
+    );
     for (const a of res.artifacts ?? []) {
-      if (a.path.startsWith(base)) {
-        assert.ok((res.reason ?? "").includes(a.path), a.path);
-      }
+      assert.ok((res.reason ?? "").includes(a.path), a.path);
     }
   });
 }
+
+const twoSuitePkg = {
+  "package.json": JSON.stringify({
+    name: "x",
+    version: "1.0.0",
+    scripts: {
+      test: "npm run test:unit && npm run test:api",
+      "test:unit": "mocha test/unit",
+      "test:api": "mocha test/api",
+    },
+  }),
+  "test/unit/a.test.js": "it('adds', () => {});\n",
+  "test/api/b.test.js": "it('lists', () => {});\n",
+};
+
+test("tests.existing: every suite of a package whose reporter wrote nothing keeps artifacts of its own, so the Report stays valid", async (t) => {
+  const res = await runInPackage(t, "tests.existing", twoSuitePkg, (spec) => {
+    const name = spec.name ?? "";
+    if (name.startsWith("mochaprobe")) {
+      return { stdout: '{"version":"11.0.0","bin":"bin/mocha.js"}' };
+    }
+    if (name.startsWith("tests-")) {
+      return { stdout: `output of ${name}`, stderr: `stderr of ${name}` };
+    }
+    return {};
+  });
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["tool_error", "tool_output_unreadable"],
+    res.reason ?? "",
+  );
+  const set = newSet();
+  set.artifacts = (res.artifacts ?? []).map((a, i) => ({
+    ...a,
+    id: `A-${String(i + 1).padStart(4, "0")}`,
+  }));
+  assert.deepEqual(
+    validate(set).filter((p) => p.includes("share the path")),
+    [],
+    (res.artifacts ?? []).map((a) => a.path).join("\n"),
+  );
+  const logs = (res.artifacts ?? []).filter((a) => a.path.endsWith(".log"));
+  assert.equal(logs.length, 2, "one command log per suite");
+});
+
+test("tests.existing: the command log already holds the runner's streams, so the unreadable reporter adds only the event file and names the log", async (t) => {
+  const res = await runInPackage(t, "tests.existing", mochaPkg, (spec) => {
+    const name = spec.name ?? "";
+    if (name.startsWith("mochaprobe")) {
+      return { stdout: '{"version":"11.0.0","bin":"bin/mocha.js"}' };
+    }
+    if (name.startsWith("tests-")) {
+      return { stdout: "Usage: mocha [spec..]", stderr: "runner stderr" };
+    }
+    return name.startsWith("events-") ? { stdout: "not an event\n" } : {};
+  });
+  const paths = (res.artifacts ?? []).map((a) => a.path);
+  assert.deepEqual(paths, [
+    "artifacts/tests.existing/C-0002/test-output.log",
+    "artifacts/tests.existing/C-0002/test-output.events.jsonl",
+  ]);
+  const log = rawOf(res, paths[0] ?? "") ?? "";
+  assert.ok(log.includes("Usage: mocha [spec..]"), log);
+  assert.ok(log.includes("runner stderr"), log);
+  for (const p of paths) {
+    assert.ok((res.reason ?? "").includes(p), `the reason names ${p}`);
+  }
+});
 
 test("tests.existing: the node:test reporter's event file is read the same way", async (t) => {
   const res = await runInPackage(
@@ -1004,14 +1145,19 @@ test("tests.existing: the node:test reporter's event file is read the same way",
       return name.startsWith("events-") ? { stdout: "TAP version 13\n" } : {};
     },
   );
-  assertUnreadable(res, {
-    status: "tool_error",
-    check: "tests.existing",
-    context: "C-0002",
-    call: "reporter",
-    files: { "events.jsonl": "TAP version 13\n" },
-    stdout: "TAP version 13",
-  });
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["tool_error", "tool_output_unreadable"],
+    res.reason ?? "",
+  );
+  assert.deepEqual(res.findings ?? [], []);
+  const base = "artifacts/tests.existing/C-0002/test-output";
+  assert.deepEqual(
+    (res.artifacts ?? []).map((a) => a.path),
+    [`${base}.log`, `${base}.events.jsonl`],
+  );
+  assert.ok((rawOf(res, `${base}.log`) ?? "").includes("TAP version 13"));
+  assert.equal(rawOf(res, `${base}.events.jsonl`), "TAP version 13\n");
 });
 
 test("tests.existing: a runner that exits with an error before any event is still the project's failure", async (t) => {

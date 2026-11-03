@@ -34,6 +34,7 @@ import {
   wrapWithC8,
 } from "./tests_coverage_config.ts";
 import {
+  type Coverage,
   coverageKinds,
   interpretCoverage,
   noteFailures,
@@ -437,6 +438,35 @@ const coverageSummaryShape = shape.object({
   }),
 });
 
+/**
+ * readCoverage reads what c8 wrote. When it cannot, it returns the fixed
+ * sentence that says what about the files could not be read, never text of
+ * the files: the shape of the summary is checked first, and a summary with
+ * the total c8 documents but entries of files that have no counts is told
+ * apart from one that has no total.
+ */
+function readCoverage(
+  summary: Uint8Array,
+  perFile: Uint8Array | null,
+  workDir: string,
+  pkgPath: string,
+): Coverage | string {
+  try {
+    requireShape("c8", summary, coverageSummaryShape);
+  } catch (err) {
+    return err instanceof UnreadableOutput
+      ? err.summary
+      : "it is not the JSON summary that c8 documents";
+  }
+  const measured = interpretCoverage(summary, perFile, workDir, pkgPath);
+  if (measured.err === "") {
+    return measured;
+  }
+  return measured.err.endsWith("has no total")
+    ? "its JSON summary has no total"
+    : "the entries of its files do not have the counts c8 documents";
+}
+
 /** coverageResult is the result of tests.coverage, from the suite's one run. */
 export function coverageResult(input: Input, suite: Result): Result {
   const res: Result = { status: StatusCompleted };
@@ -521,23 +551,13 @@ export function coverageResult(input: Input, suite: Result): Result {
   }
   // A summary that is not the JSON c8 documents says nothing about the
   // package: a tool problem, with the files c8 wrote kept as they are.
-  let unreadable = "";
-  try {
-    requireShape("c8", cov.summary, coverageSummaryShape);
-  } catch (err) {
-    unreadable =
-      err instanceof UnreadableOutput
-        ? err.summary
-        : "it is not the JSON summary that c8 documents";
-  }
-  const measured =
-    unreadable === ""
-      ? interpretCoverage(cov.summary, cov.perFile, workPath(pkg), pkg.path)
-      : null;
-  if (measured !== null && measured.err !== "") {
-    unreadable = "it is not the JSON summary that c8 documents";
-  }
-  if (unreadable !== "" || measured === null) {
+  const measured = readCoverage(
+    cov.summary,
+    cov.perFile,
+    workPath(pkg),
+    pkg.path,
+  );
+  if (typeof measured === "string") {
     const files: RawFile[] = [
       { name: "coverage-summary.json", content: cov.summary },
     ];
@@ -545,10 +565,10 @@ export function coverageResult(input: Input, suite: Result): Result {
       files.push({ name: "coverage-final.json", content: cov.perFile });
     }
     const outputs = new ToolOutputs(testsCoverageID, input.context.id);
-    outputs.rejectFiles("c8", "c8", files, unreadable);
+    outputs.rejectFiles("c8", "c8", files, measured);
     outputs.apply(res);
     res.metrics = unmeasuredCoverage(
-      `c8's JSON summary is not readable: ${unreadable}`,
+      `c8's JSON summary is not readable: ${measured}`,
     );
     return res;
   }

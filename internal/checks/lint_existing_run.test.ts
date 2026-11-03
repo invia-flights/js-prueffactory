@@ -230,6 +230,57 @@ test("ESLint errors are Gates and warnings are warnings in the project's own rul
   );
 });
 
+test("ESLint JSON of another shape is an error and never a clean project", (t) => {
+  for (const out of [
+    '[{"file":"a.js","diagnostics":[{"line":1}]}]',
+    '[{"filePath":"/work/packages/inner/a.js"}]',
+    '[{"filePath":"/work/packages/inner/a.js","messages":null}]',
+    '[{"filePath":"/work/packages/inner/a.js","messages":[{"text":"x"}]}]',
+    '[{"filePath":"/work/packages/inner/a.js","messages":[{"message":"x","severity":"error"}]}]',
+    '[{"filePath":7,"messages":[]}]',
+    "[1]",
+    "[null]",
+  ]) {
+    assert.throws(
+      () => projectESLintFindings(lintInput(t), Buffer.from(out)),
+      /ESLint printed/,
+      `${out} says nothing about the code`,
+    );
+  }
+  // What ESLint documents is still read.
+  assert.deepEqual(
+    projectESLintFindings(
+      lintInput(t),
+      Buffer.from('[{"filePath":"/work/packages/inner/a.js","messages":[]}]'),
+    ),
+    [],
+  );
+});
+
+test("ESLint that prints JSON of another shape ends the Check as a tool problem, not as a clean lint", async (t) => {
+  const input = lintTree(t, {
+    "package.json": eslint9,
+    "eslint.config.js": "module.exports = [];\n",
+  });
+  withFakeLinters(t, (cmd) =>
+    isVersionQuery(cmd)
+      ? ok("9.39.0\n")
+      : cr({
+          exitCode: 0,
+          stdout: Buffer.from('[{"file":"a.js","diagnostics":[{"line":1}]}]'),
+        }),
+  );
+
+  const res = await lint(input);
+
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["tool_error", "tool_output_unreadable"],
+    res.reason ?? "",
+  );
+  assert.deepEqual(res.findings ?? [], []);
+});
+
 test("ESLint output that is not a JSON array is an error", (t) => {
   for (const out of ["", "Oops! Something went wrong!", '{"results":[]}']) {
     assert.throws(
@@ -633,6 +684,43 @@ test("a project with both linters gets both", async (t) => {
   assert.equal(tools.get("eslint"), 1);
   assert.equal(tools.get("biome"), 3);
   assert.ok(res.command?.includes("&&"), "the commands are joined");
+});
+
+test("a linter's own documented error is an answer: when the other linter's output is unreadable the result is partial, not a tool error", async (t) => {
+  const input = lintTree(t, {
+    "package.json":
+      '{"devDependencies":{"eslint":"^9","@biomejs/biome":"2.1.2"}}',
+    "eslint.config.js": "module.exports = [];\n",
+  });
+  withFakeLinters(t, (cmd) => {
+    if (isVersionQuery(cmd) && (cmd[2] ?? "").includes("eslint")) {
+      return ok("9.39.0\n");
+    }
+    if (isVersionQuery(cmd)) {
+      return ok("2.1.2\n");
+    }
+    if (cmd.join(" ").includes("eslint.js")) {
+      // ESLint's own code for a configuration it cannot load.
+      return cr({
+        exitCode: 2,
+        stderr: Buffer.from("Error: Cannot find module 'eslint-plugin-x'"),
+      });
+    }
+    return cr({ exitCode: 0, stdout: Buffer.from("not Biome's report") });
+  });
+
+  const res = await lint(input);
+
+  assert.deepEqual(
+    [res.status, res.reasonCode],
+    ["partial", "tool_output_unreadable"],
+    res.reason ?? "",
+  );
+  assert.deepEqual(
+    (res.findings ?? []).map((f) => [f.rule_id, f.gate]),
+    [["eslint-failed", true]],
+    "ESLint's own answer stays a Gate; Biome's unreadable output adds nothing",
+  );
 });
 
 test("when one of two linters cannot run the other one's findings are kept and the result is partial", async (t) => {

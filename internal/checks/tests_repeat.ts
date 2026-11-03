@@ -90,18 +90,30 @@ export function forRepeat(input: Input, r: RepeatRun): Input {
  * it and names the run: test-output-run3.log.
  */
 export function testLogPath(input: Input): string {
-  if (input.repeat === null) {
-    return join(
-      "artifacts",
-      testsExistingID,
-      input.context.id,
-      testLogName(input),
-    );
-  }
-  const name =
-    testLogName(input).replace(/\.log$/, "") +
-    `-run${String(input.repeat.number)}.log`;
-  return join("artifacts", input.repeat.checkID, input.context.id, name);
+  return join(
+    "artifacts",
+    testArtifactCheck(input),
+    input.context.id,
+    testLogStem(input) + ".log",
+  );
+}
+
+/** testArtifactCheck is the Check whose artifacts the suite run's files are. */
+export function testArtifactCheck(input: Input): string {
+  return input.repeat === null ? testsExistingID : input.repeat.checkID;
+}
+
+/**
+ * testLogStem is the name of the suite run's command log without its
+ * extension: test-output, test-output-2-test-api, test-output-run3. Every
+ * other file of the same run, such as the reporter's event file, starts with
+ * it, so that no two runs of a package write the same path.
+ */
+export function testLogStem(input: Input): string {
+  const stem = testLogName(input).replace(/\.log$/, "");
+  return input.repeat === null
+    ? stem
+    : `${stem}-run${String(input.repeat.number)}`;
 }
 
 /** RepeatEnd says how a repeat run ended, from the point of view of the Check. */

@@ -63,8 +63,8 @@ const reasonNotParseable = "file_not_parseable";
 const reasonFragment = "openapi_fragment";
 
 /**
- * fragmentMount is where the copy of the Snapshot that holds the fragments is
- * mounted in a tool container.
+ * fragmentMount is where the tree of links to the Snapshot that holds the
+ * fragments is mounted in a tool container.
  */
 const fragmentMount = "/fragments";
 
@@ -157,30 +157,32 @@ function workDirIn(mount: string, dir: string): string {
 }
 
 /**
- * SnapshotCopy is the volume that holds a copy of the Snapshot for the
- * fragments, or why the copy could not be made. The Snapshot is mounted
+ * SnapshotLinks is the volume that holds, for every file of the Snapshot, a
+ * link to it, or why the links could not be made. The Snapshot is mounted
  * read-only, and the Working copy is shared with the tests, which must never
- * see a changed description file, so neither takes the copy of a file.
+ * see a changed description file, so neither takes the copy of a file: the
+ * copy of a fragment replaces its link in this volume. Links instead of
+ * copies keep the cost independent of how many bytes the Snapshot holds.
  */
-type SnapshotCopy = { volume: string } | { failure: string };
+type SnapshotLinks = { volume: string } | { failure: string };
 
-async function copySnapshot(
+async function linkSnapshot(
   signal: AbortSignal,
   input: Input,
   docker: Driver,
-): Promise<SnapshotCopy> {
+): Promise<SnapshotLinks> {
   const volume = await docker.createVolume(signal, "api-fragments");
   const base = snapshotToolContainer(
     input,
     "redocly-fragments",
     Redocly,
-    ["-a", "/snapshot/.", fragmentMount + "/"],
+    ["-as", "/snapshot/.", fragmentMount + "/"],
     "/",
     undefined,
   );
   const spec: ContainerSpec = {
     ...base,
-    // The image starts Redocly; the copy is plain cp, and needs no network.
+    // The image starts Redocly; this is plain cp -s, and needs no network.
     entrypoint: "cp",
     network: NetworkNone,
     mounts: [...(base.mounts ?? []), { volume, path: fragmentMount }],
@@ -188,7 +190,7 @@ async function copySnapshot(
   const c = await docker.runContainer(signal, spec);
   if (c.exitCode !== 0) {
     return {
-      failure: `copying the Snapshot for the fragments failed with exit code ${String(c.exitCode)}: ${tail(goString(c.stderr), 200)}`,
+      failure: `linking the Snapshot for the fragments failed with exit code ${String(c.exitCode)}: ${tail(goString(c.stderr), 200)}`,
     };
   }
   return { volume };
@@ -222,7 +224,7 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
   const outputs = new ToolOutputs(apiLintID, input.context.id);
   let worst = 0;
   let remoteRefs = 0;
-  let snapshotCopy: SnapshotCopy | undefined;
+  let snapshotLinks: SnapshotLinks | undefined;
   for (const [i, target] of targets.entries()) {
     const perr = broken.get(target.path);
     if (perr !== undefined && structuredReports(input, target.path)) {
@@ -230,7 +232,7 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
       limitations.push({
         reason_code: reasonNotParseable,
         message:
-          "the file is not valid YAML or JSON, so it was not linted; artifacts.structured reports it as a Gate",
+          "the file is not valid YAML or JSON, so it was not linted; artifacts.structured reports the file",
         check_id: apiLintID,
         path: target.path,
       });
@@ -271,13 +273,14 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
     );
     const copy = fragmentOf(input, target.path);
     if (copy !== null) {
-      // A fragment is linted as a copy in a copy of the Snapshot, made once
-      // when the first fragment needs it. The copy replaces the file there,
-      // so that its relative references still resolve.
-      let volume: SnapshotCopy;
+      // A fragment is linted as a copy in a tree of links to the Snapshot,
+      // made once when the first fragment needs it. The copy replaces the
+      // file's link there, so that its relative references still resolve to
+      // the files of the project.
+      let volume: SnapshotLinks;
       try {
-        snapshotCopy ??= await copySnapshot(signal, input, docker);
-        volume = snapshotCopy;
+        snapshotLinks ??= await linkSnapshot(signal, input, docker);
+        volume = snapshotLinks;
       } catch (err) {
         return failedToRun(res, err);
       }
@@ -300,7 +303,11 @@ async function runAPILint(signal: AbortSignal, input: Input): Promise<Result> {
             content: copy,
           },
         ),
-        mounts: [{ volume: volume.volume, path: fragmentMount }],
+        // The links lead into the Snapshot, so it is mounted as well.
+        mounts: [
+          ...(spec.mounts ?? []),
+          { volume: volume.volume, path: fragmentMount },
+        ],
       };
     }
     let c: ContainerResult;
