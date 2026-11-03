@@ -3,11 +3,17 @@ import { join as joinPath } from "node:path";
 
 import { formatFloatV } from "../gocompat/fmt.ts";
 import { GoError, pathError } from "../gocompat/os.ts";
-import { compareBytes, sortStrings, trim } from "../gocompat/strings.ts";
+import {
+  compareBytes,
+  sortStrings,
+  trim,
+  trimSpace,
+} from "../gocompat/strings.ts";
 import { type ServiceFamily, serviceFamilyOf } from "../toolset/services.ts";
 import * as yaml from "../yamlv3/yaml.ts";
 import { interpolate, readDotEnv } from "./compose_env.ts";
 import { cut } from "./nodetestargs.ts";
+import { splitSteps } from "./testchain.ts";
 import { errorMessage } from "../gocompat/errors.ts";
 
 // ComposeService is one service of the project's compose files: either a
@@ -47,6 +53,28 @@ export interface ComposeService {
   // versionDiffers is true when the compose file asks for another version
   // than the pinned one.
   versionDiffers: boolean;
+  // definedIn is the first compose file that names the service, relative to
+  // the project root. Unlike file it is set for a service without an image.
+  definedIn: string;
+  // build is true when the service has a `build` section.
+  build: boolean;
+  // command and entrypoint are the service's `command` and `entrypoint`, or
+  // null when the compose files name none. A later file replaces them.
+  command: ComposeCommand | null;
+  entrypoint: ComposeCommand | null;
+  // dependsOn names the services this one waits for (`depends_on`, in list
+  // or map form, merged over the files), sorted.
+  dependsOn: string[];
+}
+
+// ComposeCommand is a `command` or `entrypoint` of a compose service. text is
+// how it reads: the words of the list form joined by a space, or the string
+// form as written. words are the arguments the container is started with,
+// or null when the string form needs a shell (an operator, a substitution)
+// or a list item is no scalar, so that nothing is known about the arguments.
+export interface ComposeCommand {
+  text: string;
+  words: string[] | null;
 }
 
 // startable says whether the Run starts the service, unresolved variables
@@ -77,7 +105,7 @@ const serviceName = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,62}$/;
 const envName = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 const serviceType =
-  'struct { Image string "yaml:\\"image\\""; Build interface {} "yaml:\\"build\\""; Environment interface {} "yaml:\\"environment\\"" }';
+  'struct { Image string "yaml:\\"image\\""; Build interface {} "yaml:\\"build\\""; Environment interface {} "yaml:\\"environment\\""; Command interface {} "yaml:\\"command\\""; Entrypoint interface {} "yaml:\\"entrypoint\\""; DependsOn interface {} "yaml:\\"depends_on\\"" }';
 
 // composeSchema is the Go type the compose files are decoded into.
 const composeSchema: yaml.Schema = {
@@ -100,6 +128,9 @@ const composeSchema: yaml.Schema = {
               { name: "image", schema: { kind: "string" } },
               { name: "build", schema: { kind: "any" } },
               { name: "environment", schema: { kind: "any" } },
+              { name: "command", schema: { kind: "any" } },
+              { name: "entrypoint", schema: { kind: "any" } },
+              { name: "depends_on", schema: { kind: "any" } },
             ],
           },
         },
@@ -116,6 +147,9 @@ interface RawDef {
   image: string;
   build: unknown;
   environment: unknown;
+  command: unknown;
+  entrypoint: unknown;
+  depends_on: unknown;
 }
 
 // readCompose reads the compose files in the project root, merges them the
@@ -171,7 +205,16 @@ export function readCompose(
     for (const [svc, def] of doc.services ?? []) {
       let m = merged.get(svc);
       if (!m) {
-        m = { image: "", file: "", build: false, env: new Map() };
+        m = {
+          image: "",
+          file: "",
+          definedIn: name,
+          build: false,
+          command: null,
+          entrypoint: null,
+          dependsOn: new Set(),
+          env: new Map(),
+        };
         merged.set(svc, m);
       }
       if (def === null) continue;
@@ -180,6 +223,9 @@ export function readCompose(
         m.file = name;
       }
       if (def.build !== null) m.build = true;
+      m.command = composeCommand(def.command) ?? m.command;
+      m.entrypoint = composeCommand(def.entrypoint) ?? m.entrypoint;
+      for (const d of dependencyNames(def.depends_on)) m.dependsOn.add(d);
       mergeEnvironment(m.env, def.environment);
     }
   }
@@ -224,8 +270,49 @@ interface EnvValue {
 interface RawService {
   image: string;
   file: string;
+  definedIn: string;
   build: boolean;
+  command: ComposeCommand | null;
+  entrypoint: ComposeCommand | null;
+  dependsOn: Set<string>;
   env: Map<string, EnvValue>;
+}
+
+// composeCommand reads a `command` or `entrypoint` section. It is null when
+// there is none, or when the section is neither a string nor a list.
+function composeCommand(section: unknown): ComposeCommand | null {
+  if (typeof section === "string") {
+    const text = trimSpace(section);
+    if (text === "") return null;
+    const { steps, problem } = splitSteps(text);
+    const words = problem === "" && steps.length === 1 ? steps[0]?.words : null;
+    return { text, words: words ?? null };
+  }
+  if (!Array.isArray(section) || section.length === 0) return null;
+  const words: string[] = [];
+  for (const item of section) {
+    if (typeof item === "string") {
+      words.push(item);
+    } else if (typeof item === "number" || typeof item === "boolean") {
+      words.push(scalarText(item));
+    } else {
+      return { text: "", words: null };
+    }
+  }
+  return { text: words.join(" "), words };
+}
+
+// dependencyNames lists the services a `depends_on` section names: the
+// strings of the list form or the keys of the map form, whose values hold
+// the condition.
+function dependencyNames(section: unknown): string[] {
+  if (Array.isArray(section)) {
+    return section.filter((x): x is string => typeof x === "string");
+  }
+  if (section instanceof Map && !(section instanceof yaml.AnyMap)) {
+    return [...(section as Map<string, unknown>).keys()];
+  }
+  return [];
 }
 
 // mergeEnvironment adds the entries of an `environment` section, in map or
@@ -296,6 +383,11 @@ function resolveService(
     env: null,
     unresolved: [],
     versionDiffers: false,
+    definedIn: m.definedIn,
+    build: m.build,
+    command: m.command,
+    entrypoint: m.entrypoint,
+    dependsOn: sortStrings([...m.dependsOn]),
   };
   const notStarted = (code: string, reason: string): ComposeService => {
     s.notStarted = { code, reason };

@@ -114,6 +114,11 @@ const minio: ComposeService = {
   env: null,
   unresolved: [],
   versionDiffers: false,
+  definedIn: "docker-compose.yml",
+  build: false,
+  command: null,
+  entrypoint: null,
+  dependsOn: [],
 };
 
 test("a failure in a suite that refers to a Service that is not started is no Gate", async (t) => {
