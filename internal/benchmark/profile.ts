@@ -12,6 +12,7 @@ import {
   SeverityWarning,
 } from "../resultset/types.ts";
 import {
+  isError,
   measureCompose,
   measureDampedHits,
   measureFiles,
@@ -163,9 +164,9 @@ export const parts: readonly PartDef[] = [
   def({ id: "structured_files", label: "Structured files", area: areaValidity, checks: [checkStructured], x50: 1, unit: "files",
     measure: measureFiles(notInTestData) }),
   def({ id: "openapi", label: "OpenAPI", area: areaValidity, checks: [checkAPILint], x50: 2, unit: "hits",
-    measure: measureDampedHits((f) => f.gate && !f.in_test_data) }),
+    measure: measureDampedHits((f) => isError(f) && !f.in_test_data) }),
   def({ id: "json_schema", label: "JSON Schema", area: areaValidity, checks: [checkSchema], x50: 2, unit: "schemas",
-    measure: measureFiles((f) => f.gate && !f.in_test_data) }),
+    measure: measureFiles((f) => isError(f) && !f.in_test_data) }),
   def({ id: "helm", label: "Helm", area: areaValidity, checks: [checkHelm], x50: 1, unit: "charts",
     measure: measureHelm }),
   def({ id: "gitlab_ci", label: "GitLab CI", area: areaValidity, checks: [checkGitlabCI], x50: 1, unit: "problems",
@@ -181,7 +182,7 @@ export const parts: readonly PartDef[] = [
   def({ id: "dependency_tree", label: "Dependency tree", area: areaValidity, checks: [checkDepsTree], x50: 3, unit: "hits",
     measure: measureDampedHits(null) }),
   def({ id: "dockerfile_shell", label: "Dockerfile and shell", area: areaValidity, checks: [checkDockerfile, checkShell], x50: 3, unit: "hits",
-    measure: measureDampedHits((f) => f.gate) }),
+    measure: measureDampedHits(isError) }),
 
   def({ id: "secrets", label: "Secrets", area: areaSecurity, checks: [checkSecrets], unit: "secrets",
     measure: measureSecrets }),
@@ -195,7 +196,7 @@ export const parts: readonly PartDef[] = [
   def({ id: "correctness_lint", label: "Correctness lint", area: areaCode, checks: [checkLintCorrect], x50: 10, unit: "hits",
     measure: measureDampedHits(null) }),
   def({ id: "project_linter", label: "Project linter", area: areaCode, checks: [checkLintExisting], x50: 5, unit: "hits",
-    measure: measureDampedHits((f) => f.gate) }),
+    measure: measureDampedHits(isError) }),
   def({ id: "node_compatibility", label: "Node compatibility", area: areaCode, checks: [checkEngines], x50: 3, unit: "hits",
     measure: measureDampedHits(null) }),
   def({ id: "suppressions", label: "Suppressions", area: areaCode, checks: [checkSuppression], x50: 20, unit: "comments",
