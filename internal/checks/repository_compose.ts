@@ -41,6 +41,7 @@ import {
   toolRef,
 } from "./repo_tools.ts";
 import { shownURL } from "./shown_text.ts";
+import { ToolOutputs } from "./tool_output.ts";
 
 export const composeID = "repository.compose";
 
@@ -95,6 +96,7 @@ async function runCompose(signal: AbortSignal, input: Input): Promise<Result> {
   const limitations = res.limitations ?? [];
 
   const sets = composeSets(input.project);
+  const outputs = new ToolOutputs(composeID, input.context.id);
   let notRun = 0;
   let worst = 0;
   for (const [n, set] of sets.entries()) {
@@ -135,18 +137,26 @@ async function runCompose(signal: AbortSignal, input: Input): Promise<Result> {
       res.reason = `docker compose exited with ${String(c.exitCode)}: ${tail(goString(c.stderr), 400)}`;
       return res;
     }
-    findings.push(
-      ...composeSetFindings(input, set, c.exitCode, goString(c.stderr)),
+    const found = outputs.read(
+      "docker compose",
+      `compose-${String(n + 1)}`,
+      c,
+      () => composeSetFindings(input, set, c.exitCode, goString(c.stderr)),
+      composeSetLabel(set),
     );
+    if (found !== undefined) {
+      findings.push(...found);
+    }
   }
 
   if (notRun > 0) {
     res.status = StatusPartial;
     res.reasonCode = reasonIncludeNotResolved;
     res.reason = `${String(notRun)} of ${String(sets.length)} compose sets have a remote include that cannot be resolved offline, so they were not validated`;
-    return res;
+  } else {
+    res.status = StatusCompleted;
   }
-  res.status = StatusCompleted;
+  outputs.apply(res);
   return res;
 }
 

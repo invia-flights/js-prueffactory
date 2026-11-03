@@ -22,6 +22,7 @@ import {
   snapshotToolContainer,
   toolRef,
 } from "./repo_tools.ts";
+import { ToolOutputs } from "./tool_output.ts";
 
 export const dockerfileID = "repository.dockerfile";
 
@@ -76,10 +77,12 @@ async function runDockerfile(
   const paths = dockerfileTargets(input.project).map(snapshotPath);
   res.command = recordedCommand(base, paths);
 
+  const outputs = new ToolOutputs(dockerfileID, input.context.id);
   const ok = await runChunks(
     signal,
     input,
     res,
+    outputs,
     Hadolint,
     paths,
     (n, chunk) =>
@@ -92,12 +95,13 @@ async function runDockerfile(
         undefined,
         { path: "/jspf/hadolint.yaml", mode: 0o644, content: hadolintConfig },
       ),
-    (_chunk, stdout) => {
-      findings.push(...hadolintFindings(input, stdout));
+    (_chunk, c) => {
+      findings.push(...hadolintFindings(input, c.stdout));
     },
   );
   if (ok) {
     res.status = StatusCompleted;
+    outputs.apply(res);
   }
   return res;
 }
