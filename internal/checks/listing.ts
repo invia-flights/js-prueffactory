@@ -1,6 +1,11 @@
 // The Listing: what `list-checks` shows. Its property names are the JSON
 // names of `list-checks --format json`, as the result set's are report.json's.
-import type { Project, TestSetup } from "../discovery/discovery.ts";
+import {
+  type InitCriterion,
+  type Project,
+  startable,
+  type TestSetup,
+} from "../discovery/discovery.ts";
 import {
   array,
   bool,
@@ -42,6 +47,36 @@ export interface Listing {
    * Node runtime discovery chose for it.
    */
   contexts: ListedContext[];
+  /**
+   * services lists the compose services of the project's compose files, by
+   * name, whether the Run starts them or not.
+   */
+  services: ListedService[];
+}
+
+/** ListedService is one compose service of the Listing. */
+export interface ListedService {
+  name: string;
+  /** file is the first compose file that names the service. */
+  file: string;
+  /** family is the test Service family, or "" for a service that is none. */
+  family: string;
+  /** started says whether the Run starts it for the Suites. */
+  started: boolean;
+  /** reason says why the Run does not start it, or "" when it does. */
+  reason: string;
+  /** init_service is set when the service is an Init service. */
+  init_service: ListedInitService | null;
+}
+
+/** ListedInitService says what an Init service runs and prepares. */
+export interface ListedInitService {
+  /** command is what the service runs, or "" when it names none. */
+  command: string;
+  /** prepares names the Services the Run starts that it depends on. */
+  prepares: string[];
+  /** criteria say why its image counts as the project's own. */
+  criteria: InitCriterion[];
 }
 
 /** ListedContext is one Context of the Listing. */
@@ -234,6 +269,28 @@ export const ListingShape: ObjectShape = object<Listing>([
       ]),
     ),
   ],
+  [
+    "services",
+    array(
+      object<ListedService>([
+        ["name", string],
+        ["file", string],
+        ["family", string],
+        ["started", bool],
+        ["reason", string],
+        [
+          "init_service",
+          nullable(
+            object<ListedInitService>([
+              ["command", string],
+              ["prepares", strings],
+              ["criteria", strings],
+            ]),
+          ),
+        ],
+      ]),
+    ),
+  ],
 ]);
 
 /**
@@ -254,6 +311,7 @@ export function list(
     fast: sel.fast,
     checks: [],
     contexts: [],
+    services: listedServices(proj),
   };
   for (const c of proj.contexts) {
     const lc: ListedContext = {
@@ -308,6 +366,28 @@ export function list(
     l.checks.push(row);
   }
   return l;
+}
+
+function listedServices(proj: Project): ListedService[] {
+  const init = new Map(proj.initServices.map((s) => [s.name, s]));
+  return proj.services.map((s) => {
+    const i = init.get(s.name);
+    return {
+      name: s.name,
+      file: s.definedIn,
+      family: s.family,
+      started: startable(s),
+      reason: s.notStarted?.reason ?? "",
+      init_service:
+        i === undefined
+          ? null
+          : {
+              command: i.command,
+              prepares: [...i.prepares],
+              criteria: [...i.criteria],
+            },
+    };
+  });
 }
 
 function listedTests(t: TestSetup): ListedTests {

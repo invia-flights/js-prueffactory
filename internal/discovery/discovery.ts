@@ -22,6 +22,7 @@ import {
 import { readDotEnv } from "./compose_env.ts";
 import type { GeneratorScript } from "./generators.ts";
 import { readInstallInfo } from "./install.ts";
+import { findInitServices, type InitService } from "./init_services.ts";
 import { movedTestFiles, type TestFile, withTestFiles } from "./loadedfiles.ts";
 import {
   type NodeChoice,
@@ -38,6 +39,7 @@ export * from "./buildstep.ts";
 export * from "./classify.ts";
 export * from "./compose.ts";
 export * from "./generators.ts";
+export * from "./init_services.ts";
 export * from "./jsonc.ts";
 export * from "./loadedfiles.ts";
 export * from "./nodetestargs.ts";
@@ -130,6 +132,9 @@ export class Project {
   files: File[] = [];
   // services are the services of the project's compose files, by name.
   services: ComposeService[] = [];
+  // initServices are the services among them that the Run does not start
+  // and that prepare a Service it does start, by name.
+  initServices: InitService[] = [];
   // dotEnv holds the variables of the project's .env file. They feed the
   // interpolation of compose files, and the Report redacts the secret ones.
   dotEnv = new Map<string, string>();
@@ -222,6 +227,7 @@ export function discover(root: string): Project {
   readNodeInfo(root, proj.packages);
   readTestInfo(root, proj);
   readServiceRefs(root, proj);
+  proj.initServices = findInitServices(root, proj);
   for (const pkg of proj.packages) {
     pkg.buildStepReason = buildStepReason(root, pkg, pkg.files);
     proj.contexts.push({
